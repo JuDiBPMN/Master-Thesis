@@ -1,0 +1,132 @@
+
+# This script is derived from the BPMN Modelling section (Section 5) of the provided "Testing Pipeline.ipynb" file. It uses the graphviz library to create a directed graph, defines node styles for different BPMN elements (Activities, Actors, Gateways, etc.), and draws edges based on identified relations.
+import json
+try:
+    from graphviz import Digraph  # type: ignore[import]
+except ImportError as e:
+    raise ImportError(
+        "The 'graphviz' Python package is required for BPMN visualization. "
+        "Install it with 'pip install graphviz' (and ensure the Graphviz system binaries are installed)."
+    ) from e
+
+try:
+    from IPython.display import Image, display  # type: ignore[import]
+except ImportError:
+    # Fallbacks so this module can be imported without IPython/Jupyter;
+    # visualization will simply not display inline in plain Python.
+    Image = None
+    def display(_obj):
+        pass
+
+def visualize_extracted_bpmn(json_data):
+    # initialize the Graph
+    dot = Digraph('BPMN Diagram', 
+                  graph_attr={
+                      'rankdir': 'LR',      # Left to Right
+                      'nodesep': '0.5', 
+                      'ranksep': '1.0',
+                      'fontname': 'Arial'
+                  })
+
+    # 2. Extract Tasks and Actors
+    tasks = json_data.get('tasks', [])
+    
+    unique_actors = list(set(task.get('actor', 'Unknown') for task in tasks))
+    actor_colors = ['lightblue', 'lightgrey', 'orange', 'lightgreen', 'pink']
+    color_map = {actor: actor_colors[i % len(actor_colors)] for i, actor in enumerate(unique_actors)}
+
+    # 3. Add Nodes (Tasks)
+    for task in tasks:
+        task_id = task['id']
+        task_name = task['name']
+        actor = task.get('actor', 'Unknown')
+        
+        # Format the label to show both Task and Actor
+        display_label = f"<<B>{task_name}</B><BR/><FONT POINT-SIZE='10'>{actor}</FONT>>"
+        
+        dot.node(
+            task_id, 
+            label=display_label, 
+            shape='box', 
+            style='rounded,filled', 
+            fillcolor=color_map.get(actor, 'white')
+        )
+
+    # 4. Add Edges (Sequence Flows)
+    flows = json_data.get('sequence_flows', [])
+    for flow in flows:
+        dot.edge(flow['from'], flow['to'], penwidth='1.5')
+
+    # 5. Render and Display
+    try:
+        png_data = dot.pipe(format='png')
+        display(Image(png_data))
+    except Exception as e:
+        print(f"Error rendering graph: {e}")
+        print("Ensure you have graphviz installed (pip install graphviz) and the system binary is in your PATH.")
+
+    return dot
+
+import json
+from graphviz import Digraph
+from IPython.display import Image, display
+
+def visualize_extracted_bpmn(json_data):
+    """
+    Transforms the new JSON architecture into a visual BPMN graph.
+    Works with 'tasks' (entities) and 'sequence_flows' (relations).
+    """
+    # 1. Initialize the Graph
+    dot = Digraph('BPMN Diagram', 
+                  graph_attr={
+                      'rankdir': 'LR',      # Left to Right
+                      'nodesep': '0.5', 
+                      'ranksep': '1.0',
+                      'fontname': 'Arial'
+                  })
+
+    # 2. Extract Tasks and Actors
+    # We'll use the Actor name to create 'Swimlanes' (optional) or just color coding
+    tasks = json_data.get('tasks', [])
+    
+    # Track actors to assign colors
+    unique_actors = list(set(task.get('actor', 'Unknown') for task in tasks))
+    actor_colors = ['lightblue', 'lightgrey', 'orange', 'lightgreen', 'pink']
+    color_map = {actor: actor_colors[i % len(actor_colors)] for i, actor in enumerate(unique_actors)}
+
+    # 3. Add Nodes (Tasks)
+    for task in tasks:
+        task_id = task['id']
+        task_name = task['name']
+        actor = task.get('actor', 'Unknown')
+        
+        # Format the label to show both Task and Actor
+        display_label = f"<<B>{task_name}</B><BR/><FONT POINT-SIZE='10'>{actor}</FONT>>"
+        
+        dot.node(
+            task_id, 
+            label=display_label, 
+            shape='box', 
+            style='rounded,filled', 
+            fillcolor=color_map.get(actor, 'white')
+        )
+
+    # 4. Add Edges (Sequence Flows)
+    flows = json_data.get('sequence_flows', [])
+    for flow in flows:
+        dot.edge(flow['from'], flow['to'], penwidth='1.5')
+
+    # 5. Render and Display
+    try:
+        png_data = dot.pipe(format='png')
+        display(Image(png_data))
+    except Exception as e:
+        print(f"Error rendering graph: {e}")
+        print("Ensure you have graphviz installed (pip install graphviz) and the system binary is in your PATH.")
+
+    return dot
+
+# --- Example of how to use it with your files ---
+# with open('case_1_model_extracted_bpmn.json', 'r') as f:
+data = json.load(open('/Users/julesnuytten/Desktop/Thesis/Master-Thesis/case_1_model_extracted_bpmn.json'))
+visualize_extracted_bpmn(data)    

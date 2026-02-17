@@ -1,3 +1,9 @@
+# Python virtual environments
 venv/
-.env/
-outputs/
+.venv/
+env/
+ENV/
+
+# Common build/cache folders
+__pycache__/
+*.py[cod]
