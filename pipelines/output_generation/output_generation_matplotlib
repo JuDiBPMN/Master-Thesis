@@ -95,6 +95,10 @@ def visualize_extracted_bpmn(json_data):
     plt.tight_layout()
     plt.show()
 
-# Execution part (Keep as-is)
-data = json.load(open('/Users/julesnuytten/Desktop/Thesis/Master-Thesis/case_2_model_extracted_bpmn.json'))
-visualize_extracted_bpmn(data)
+# Hier moet nog file path aangepast worden naar gecreëerde json files door andere pipelines
+# nu manuele file door running issues
+data1 = json.load(open('/Users/julesnuytten/Desktop/Thesis/Master-Thesis/temporary_json_outputs/case_1_model_extracted_bpmn.json'))
+visualize_extracted_bpmn(data1)
+
+data2 = json.load(open('/Users/julesnuytten/Desktop/Thesis/Master-Thesis/temporary_json_outputs/case_2_model_extracted_bpmn.json'))
+visualize_extracted_bpmn(data2)
