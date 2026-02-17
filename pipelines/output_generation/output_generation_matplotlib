@@ -1,6 +1,6 @@
 import json
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+import matplotlib.pyplot as plt  # pyright: ignore[reportMissingImports]
+import matplotlib.patches as patches  # pyright: ignore[reportMissingImports]
 from collections import defaultdict
 
 def visualize_extracted_bpmn(json_data):
@@ -91,4 +91,10 @@ def visualize_extracted_bpmn(json_data):
                         arrowprops=dict(arrowstyle="-|>", color='#333333', lw=1.5,
                         connectionstyle="angle,angleA=0,angleB=90,rad=0"), zorder=2)
 
-    ax.set_axis
+    ax.set_axis_off()
+    plt.tight_layout()
+    plt.show()
+
+# Execution part (Keep as-is)
+data = json.load(open('/Users/julesnuytten/Desktop/Thesis/Master-Thesis/case_2_model_extracted_bpmn.json'))
+visualize_extracted_bpmn(data)
