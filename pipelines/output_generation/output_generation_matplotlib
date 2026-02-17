@@ -1,87 +1,94 @@
 import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from collections import defaultdict
 
 def visualize_extracted_bpmn(json_data):
+    """
+    Renders a BPMN diagram using a fixed coordinate grid.
+    Ensures lanes are perfectly aligned, stacked, and formatted.
+    """
     tasks = json_data.get('tasks', [])
     flows = json_data.get('sequence_flows', [])
     
-    # 1. Group tasks by actor to determine lane requirements
-    actor_map = {}
+    # 1. Group tasks by actor
+    lanes_data = defaultdict(list)
     for task in tasks:
         actor = task.get('actor', 'Unknown')
-        if actor not in actor_map:
-            actor_map[actor] = []
-        actor_map[actor].append(task)
+        lanes_data[actor].append(task)
     
-    actors = list(actor_map.keys())
+    actors = list(lanes_data.keys())
     num_lanes = len(actors)
     
-    # Define grid constants
-    lane_height = 2
-    lane_width = 10
-    task_width = 1.8
-    task_height = 0.8
+    # Grid Constants for professional BPMN look
+    lane_h = 2.0
+    pool_w = 16.0  # Increased width for better spacing
+    header_w = 1.2  
+    task_w, task_h = 2.4, 0.9
     
-    fig, ax = plt.subplots(figsize=(12, num_lanes * 2))
-    ax.set_xlim(0, lane_width)
-    ax.set_ylim(0, num_lanes * lane_height)
+    fig, ax = plt.subplots(figsize=(14, num_lanes * 2.5))
+    ax.set_xlim(0, pool_w)
+    ax.set_ylim(0, num_lanes * lane_h)
     
-    # Dictionary to store task coordinates for drawing arrows later
-    coords = {}
+    task_coords = {}
 
-    # 2. Draw the Lanes (The Pool)
+    # 2. Draw the Lanes (Stacked Rows)
     for i, actor in enumerate(reversed(actors)):
-        y_bottom = i * lane_height
+        y_offset = i * lane_h
         
-        # Draw Lane Rectangle
-        lane_rect = patches.Rectangle((0, y_bottom), lane_width, lane_height, 
-                                     linewidth=1.5, edgecolor='black', facecolor='none')
+        # Draw the Lane Boundary (Strictly aligned at x=0)
+        lane_rect = patches.Rectangle((0, y_offset), pool_w, lane_h, 
+                                     linewidth=2, edgecolor='black', facecolor='none')
         ax.add_patch(lane_rect)
         
-        # Draw Lane Header (Actor Name)
-        ax.text(0.2, y_bottom + lane_height/2, actor.upper(), 
+        # Draw the Actor Header (Gray vertical bar on the left)
+        header_rect = patches.Rectangle((0, y_offset), header_w, lane_h, 
+                                       linewidth=2, edgecolor='black', facecolor='#E0E0E0')
+        ax.add_patch(header_rect)
+        
+        # Add Actor Name in the Header (Rotated)
+        ax.text(header_w/2, y_offset + lane_h/2, actor.upper(), 
                 weight='bold', rotation=90, va='center', ha='center', fontsize=10)
-        ax.axvline(x=0.5, ymin=y_bottom/(num_lanes*lane_height), 
-                   ymax=(y_bottom+lane_height)/(num_lanes*lane_height), color='black', lw=1.5)
 
-        # 3. Place Tasks in the correct lane
-        # Horizontal spacing based on task index across the whole process
+        # 3. Place Tasks inside this lane
         for task in tasks:
             if task.get('actor') == actor:
-                # Find the global index of the task to determine X position
-                task_index = tasks.index(task)
-                x_pos = 1.5 + (task_index * (lane_width - 2) / len(tasks))
-                y_pos = y_bottom + (lane_height / 2) - (task_height / 2)
+                global_idx = tasks.index(task)
+                # Spread tasks horizontally based on process order
+                x_center = header_w + 2.0 + (global_idx * (pool_w - header_w - 4) / max(1, len(tasks)-1))
                 
-                # Draw Task Box
-                task_rect = patches.Rectangle((x_pos, y_pos), task_width, task_height, 
-                                            linewidth=1, edgecolor='#1976D2', 
-                                            facecolor='#E3F2FD', rx=0.1)
-                ax.add_patch(task_rect)
+                # Draw Task Box (Using FancyBboxPatch for rounded corners compatibility)
+                x_left = x_center - (task_w / 2)
+                y_center = y_offset + (lane_h / 2)
                 
-                # Add Task Label
-                ax.text(x_pos + task_width/2, y_pos + task_height/2, task['name'].replace(' ', '\n'), 
-                        ha='center', va='center', fontsize=9, wrap=True)
+                # Using boxstyle instead of rx for broader compatibility
+                rect = patches.FancyBboxPatch(
+                    (x_left, y_center - task_h/2), task_w, task_h,
+                    boxstyle="round,pad=0.1",
+                    linewidth=1.5, edgecolor='#1976D2', 
+                    facecolor='#E3F2FD', zorder=3
+                )
+                ax.add_patch(rect)
                 
-                # Store center point for arrows
-                coords[task['id']] = (x_pos + task_width, y_pos + task_height/2, x_pos, y_pos + task_height/2)
+                # Task Text
+                ax.text(x_center, y_center, task['name'].replace(' ', '\n'), 
+                        ha='center', va='center', fontsize=9, zorder=4)
+                
+                # Store coordinates for arrows
+                task_coords[task['id']] = {
+                    'right': (x_left + task_w + 0.1, y_center),
+                    'left': (x_left - 0.1, y_center)
+                }
 
-    # 4. Draw Sequence Flows (Arrows)
+    # 4. Draw Sequence Flows (Orthogonal Elbows)
     for flow in flows:
-        start_task = coords.get(flow['from'])
-        end_task = coords.get(flow['to'])
+        start = task_coords.get(flow['from'])
+        end = task_coords.get(flow['to'])
         
-        if start_task and end_task:
-            # Draw arrow from right side of 'from' to left side of 'to'
-            ax.annotate("", xy=(end_task[2], end_task[3]), xytext=(start_task[0], start_task[1]),
-                        arrowprops=dict(arrowstyle="->", lw=1.5, color='#333333', 
-                        connectionstyle="angle,angleA=0,angleB=90,rad=0"))
+        if start and end:
+            # Square corners: angleA=0 (horizontal out), angleB=90 (vertical in)
+            ax.annotate("", xy=end['left'], xytext=start['right'],
+                        arrowprops=dict(arrowstyle="-|>", color='#333333', lw=1.5,
+                        connectionstyle="angle,angleA=0,angleB=90,rad=0"), zorder=2)
 
-    ax.set_axis_off()
-    plt.tight_layout()
-    plt.show()
-
-# Execution
-data = json.load(open('/Users/julesnuytten/Desktop/Thesis/Master-Thesis/case_2_model_extracted_bpmn.json'))
-visualize_extracted_bpmn(data)
+    ax.set_axis
