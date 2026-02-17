@@ -68,8 +68,8 @@ def visualize_extracted_bpmn(json_data):
     return dot
 
 import json
-from graphviz import Digraph
-from IPython.display import Image, display
+from graphviz import Digraph  # pyright: ignore[reportMissingImports]
+from IPython.display import Image, display  # pyright: ignore[reportMissingImports]
 
 def visualize_extracted_bpmn(json_data):
     """
