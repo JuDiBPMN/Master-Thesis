@@ -1,0 +1,135 @@
+import os
+import json
+from collections import defaultdict
+
+try:
+    from graphviz import Digraph  # type: ignore[import]
+except ImportError as e:
+    raise ImportError(
+        "The 'graphviz' Python package is required for BPMN visualization."
+    ) from e
+
+try:
+    from IPython.display import Image, display  # type: ignore[import]
+except ImportError:
+    Image = None
+    def display(_obj):
+        pass
+
+def visualize_extracted_bpmn(json_data, save_path):
+    """
+    Transforms JSON into a visual BPMN graph and saves it to save_path.
+    """
+    # Remove extension from save_path if it's there, as graphviz adds it
+    base_path = os.path.splitext(save_path)[0]
+
+    dot = Digraph('BPMN Diagram', 
+                  graph_attr={
+                      'rankdir': 'LR',      
+                      'nodesep': '0.3', 
+                      'ranksep': '1.0',
+                      'compound': 'true',   
+                      'fontname': 'Arial',
+                      'splines': 'ortho',   
+                      'pack': 'true',       
+                      'packmode': 'node',
+                  })
+
+    tasks = json_data.get('tasks', [])
+    flows = json_data.get('sequence_flows', [])
+    
+    lanes = defaultdict(list)
+    for task in tasks:
+        actor = task.get('actor', 'Unknown')
+        lanes[actor].append(task)
+
+    lane_first_nodes = []
+
+    # 3. Create Subgraphs (Lanes)
+    for i, (actor, actor_tasks) in enumerate(lanes.items()):
+        with dot.subgraph(name=f'cluster_{i}') as c:
+            c.attr(label=f" {actor.upper()} ", 
+                   labeljust='l',      
+                   labelloc='t',       
+                   style='solid',      
+                   color='#666666',    
+                   fontname='Arial-Bold',
+                   fontsize='12')
+            
+            for j, task in enumerate(actor_tasks):
+                c.node(
+                    task['id'], 
+                    label=f"<<B>{task['name']}</B>>", 
+                    shape='box', 
+                    style='rounded,filled', 
+                    fillcolor='#E3F2FD', 
+                    color='#1976D2'
+                )
+                if j == 0:
+                    lane_first_nodes.append(task['id'])
+
+    # 4. Vertical Anchor Logic
+    for i in range(len(lane_first_nodes) - 1):
+        dot.edge(lane_first_nodes[i], lane_first_nodes[i+1], style='invis', weight='10')
+
+    # 5. Add Actual Sequence Flows
+    for flow in flows:
+        dot.edge(flow['from'], flow['to'], penwidth='1.5', color='#333333')
+
+    # 6. Render and Save
+    try:
+        # cleanup=True removes the temporary .gv file, keeping only the .png
+        dot.render(filename=base_path, format='png', cleanup=True)
+        print(f"Successfully saved BPMN diagram to: {save_path}")
+        
+        # Also display in interactive window if available
+        if Image:
+            display(Image(filename=save_path))
+            
+    except Exception as e:
+        print(f"Error rendering/saving graph: {e}")
+
+    return dot
+
+if __name__ == "__main__":
+    # ---------------------------------------------------------
+    # CONFIGURATION: Case and Pipeline names
+    case_name = "case_3" 
+    pipeline_name = "direct_extraction_pipeline"
+    # ---------------------------------------------------------
+
+    # 1. Path Discovery
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+    
+    # 2. Source (from extraction pipeline outputs)
+    JSON_SOURCE_DIR = os.path.join(PROJECT_ROOT, "pipelines", pipeline_name, "outputs")
+    
+    # 3. Target (output_generation/outputs)
+    # output_generation is one level up from this script's directory
+    GRAPH_OUTPUT_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "outputs")
+    os.makedirs(GRAPH_OUTPUT_DIR, exist_ok=True)
+
+    # 4. Final Paths
+    input_json_path = os.path.join(JSON_SOURCE_DIR, f"{case_name}_model_extracted_bpmn.json")
+    out_graph_file = os.path.join(GRAPH_OUTPUT_DIR, f"{case_name}_bpmn_graphviz.png")
+
+    print(f"--- BPMN Visualizer Started ---")
+    print(f"Project Root: {PROJECT_ROOT}")
+    print(f"Fetching JSON: {input_json_path}")
+    print(f"Saving Graph:  {out_graph_file}")
+    print(f"-------------------------------")
+
+    try:
+        if not os.path.exists(input_json_path):
+            raise FileNotFoundError
+            
+        with open(input_json_path, 'r', encoding='utf-8') as f:
+            case_data = json.load(f)
+            
+        print(f"JSON loaded for {case_name}. Generating BPMN diagram...")
+        
+        visualize_extracted_bpmn(case_data, out_graph_file)
+
+    except FileNotFoundError:
+        print(f"Error: Could not find JSON at {input_json_path}")

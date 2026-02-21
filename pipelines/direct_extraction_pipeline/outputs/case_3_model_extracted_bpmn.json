@@ -1,0 +1,56 @@
+{
+  "tasks": [
+    {
+      "id": "SD-01",
+      "name": "Register Claim",
+      "actor": "Service Desk Clerk"
+    },
+    {
+      "id": "SD-02",
+      "name": "Check Warranty",
+      "actor": "Service Desk Clerk"
+    },
+    {
+      "id": "TE-01",
+      "name": "Perform Technical Check",
+      "actor": "Technician"
+    },
+    {
+      "id": "SE-01",
+      "name": "Perform Software Update",
+      "actor": "System Admin"
+    },
+    {
+      "id": "TE-02",
+      "name": "Repair Hardware",
+      "actor": "Technician"
+    },
+    {
+      "id": "SD-03",
+      "name": "Final Test",
+      "actor": "Technician"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "SD-01",
+      "to": "SD-02"
+    },
+    {
+      "from": "SD-02",
+      "to": "TE-01"
+    },
+    {
+      "from": "TE-01",
+      "to": "SE-01"
+    },
+    {
+      "from": "SE-01",
+      "to": "TE-02"
+    },
+    {
+      "from": "TE-02",
+      "to": "SD-03"
+    }
+  ]
+}

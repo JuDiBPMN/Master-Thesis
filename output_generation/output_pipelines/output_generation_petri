@@ -1,0 +1,107 @@
+import os
+import sys
+import json
+import pm4py
+from pm4py.objects.petri_net.obj import PetriNet, Marking
+from pm4py.objects.petri_net.utils import petri_utils
+from pm4py.visualization.petri_net import visualizer as pn_visualizer
+from pm4py.algo.analysis.workflow_net import algorithm as wf_net_logic
+
+def generate_petri_net(data, save_path):
+    # 'data' is now the dictionary already loaded from JSON
+    net = PetriNet("Petri_Net")
+    transitions = {}
+
+    # 1. Transitions (T)
+    for node_list, is_task in [(data.get('tasks', []), True), (data.get('gateways', []), False)]:
+        for node in node_list:
+            label = node.get('name') if is_task else None
+            t = PetriNet.Transition(node['id'], label)
+            net.transitions.add(t)
+            transitions[node['id']] = t
+
+    # 2. Places (P) and Arcs (F)
+    for i, flow in enumerate(data.get('sequence_flows', [])):
+        p = PetriNet.Place(f"p_{i}")
+        net.places.add(p)
+        src, tgt = flow['from'], flow['to']
+        if src in transitions and tgt in transitions:
+            petri_utils.add_arc_from_to(transitions[src], p, net)
+            petri_utils.add_arc_from_to(p, transitions[tgt], net)
+
+    # 3. Marking (Initial and Final)
+    im, fm = Marking(), Marking()
+    all_targets = {f['to'] for f in data['sequence_flows']}
+    all_sources = {f['from'] for f in data['sequence_flows']}
+
+    for node_id, trans in transitions.items():
+        if node_id not in all_targets:
+            start_p = PetriNet.Place("source")
+            net.places.add(start_p)
+            petri_utils.add_arc_from_to(start_p, trans, net)
+            im[start_p] = 1
+        if node_id not in all_sources:
+            sink_p = PetriNet.Place("sink")
+            net.places.add(sink_p)
+            petri_utils.add_arc_from_to(trans, sink_p, net)
+            fm[sink_p] = 1
+
+    # Soundness check
+    is_wf_net = wf_net_logic.apply(net)
+    print(f"Mathematical Verification: Is this a valid Workflow Net? {is_wf_net}")
+
+    # 4. Rendering & Saving
+    parameters = {
+        "format": "png",
+        "debug": False
+    }
+    
+    gviz = pn_visualizer.apply(net, im, fm, parameters=parameters)
+    
+    # SAVE the file to the path we constructed
+    pn_visualizer.save(gviz, save_path)
+    print(f"💾 Success! Petri Net saved to: {save_path}")
+    
+    # Optional: Still show it in the interactive window
+    # pn_visualizer.view(gviz)
+
+if __name__ == "__main__":
+    # ---------------------------------------------------------
+    # CONFIGURATION
+    case_name = "case_3" 
+    pipeline_name = "direct_extraction_pipeline"
+    # ---------------------------------------------------------
+
+    # 1. Path Discovery
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+    
+    # 2. Source (from pipelines folder)
+    JSON_SOURCE_DIR = os.path.join(PROJECT_ROOT, "pipelines", pipeline_name, "outputs")
+    
+    # 3. Target (output_generation/outputs)
+    # Since SCRIPT_DIR is .../output_generation/output_pipelines
+    # dirname(SCRIPT_DIR) is .../output_generation/
+    GRAPH_OUTPUT_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "outputs")
+    os.makedirs(GRAPH_OUTPUT_DIR, exist_ok=True)
+
+    # 4. Final Paths
+    input_json_path = os.path.join(JSON_SOURCE_DIR, f"{case_name}_model_extracted_bpmn.json")
+    out_graph_file = os.path.join(GRAPH_OUTPUT_DIR, f"{case_name}_petri.png")
+
+    print(f"--- Visualizer Started ---")
+    
+    try:
+        if not os.path.exists(input_json_path):
+            raise FileNotFoundError
+            
+        with open(input_json_path, 'r', encoding='utf-8') as f:
+            case_data = json.load(f)
+            
+        print(f"JSON loaded for {case_name}. Generating Petri Net...")
+        
+        # Pass the loaded data AND the destination path
+        generate_petri_net(case_data, out_graph_file)
+
+    except FileNotFoundError:
+        print(f"Error: Could not find JSON at {input_json_path}")

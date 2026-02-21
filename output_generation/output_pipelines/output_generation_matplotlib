@@ -1,17 +1,17 @@
+import os
+import sys
 import json
-import matplotlib.pyplot as plt  # pyright: ignore[reportMissingImports]
-import matplotlib.patches as patches  # pyright: ignore[reportMissingImports]
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from collections import defaultdict
 
-def visualize_extracted_bpmn(json_data):
+def visualize_extracted_bpmn(json_data, save_path):
     """
-    Renders a BPMN diagram using a fixed coordinate grid.
-    Ensures lanes are perfectly aligned, stacked, and formatted.
+    Renders a BPMN diagram using Matplotlib and saves it to save_path.
     """
     tasks = json_data.get('tasks', [])
     flows = json_data.get('sequence_flows', [])
     
-    # 1. Group tasks by actor
     lanes_data = defaultdict(list)
     for task in tasks:
         actor = task.get('actor', 'Unknown')
@@ -20,9 +20,9 @@ def visualize_extracted_bpmn(json_data):
     actors = list(lanes_data.keys())
     num_lanes = len(actors)
     
-    # Grid Constants for professional BPMN look
+    # Grid Constants
     lane_h = 2.0
-    pool_w = 16.0  # Increased width for better spacing
+    pool_w = 16.0
     header_w = 1.2  
     task_w, task_h = 2.4, 0.9
     
@@ -32,36 +32,29 @@ def visualize_extracted_bpmn(json_data):
     
     task_coords = {}
 
-    # 2. Draw the Lanes (Stacked Rows)
+    # 2. Draw the Lanes
     for i, actor in enumerate(reversed(actors)):
         y_offset = i * lane_h
-        
-        # Draw the Lane Boundary (Strictly aligned at x=0)
         lane_rect = patches.Rectangle((0, y_offset), pool_w, lane_h, 
                                      linewidth=2, edgecolor='black', facecolor='none')
         ax.add_patch(lane_rect)
         
-        # Draw the Actor Header (Gray vertical bar on the left)
         header_rect = patches.Rectangle((0, y_offset), header_w, lane_h, 
                                        linewidth=2, edgecolor='black', facecolor='#E0E0E0')
         ax.add_patch(header_rect)
         
-        # Add Actor Name in the Header (Rotated)
         ax.text(header_w/2, y_offset + lane_h/2, actor.upper(), 
                 weight='bold', rotation=90, va='center', ha='center', fontsize=10)
 
-        # 3. Place Tasks inside this lane
+        # 3. Place Tasks
         for task in tasks:
             if task.get('actor') == actor:
                 global_idx = tasks.index(task)
-                # Spread tasks horizontally based on process order
                 x_center = header_w + 2.0 + (global_idx * (pool_w - header_w - 4) / max(1, len(tasks)-1))
                 
-                # Draw Task Box (Using FancyBboxPatch for rounded corners compatibility)
                 x_left = x_center - (task_w / 2)
                 y_center = y_offset + (lane_h / 2)
                 
-                # Using boxstyle instead of rx for broader compatibility
                 rect = patches.FancyBboxPatch(
                     (x_left, y_center - task_h/2), task_w, task_h,
                     boxstyle="round,pad=0.1",
@@ -70,35 +63,74 @@ def visualize_extracted_bpmn(json_data):
                 )
                 ax.add_patch(rect)
                 
-                # Task Text
                 ax.text(x_center, y_center, task['name'].replace(' ', '\n'), 
                         ha='center', va='center', fontsize=9, zorder=4)
                 
-                # Store coordinates for arrows
                 task_coords[task['id']] = {
                     'right': (x_left + task_w + 0.1, y_center),
                     'left': (x_left - 0.1, y_center)
                 }
 
-    # 4. Draw Sequence Flows (Orthogonal Elbows)
+    # 4. Draw Sequence Flows
     for flow in flows:
         start = task_coords.get(flow['from'])
         end = task_coords.get(flow['to'])
         
         if start and end:
-            # Square corners: angleA=0 (horizontal out), angleB=90 (vertical in)
             ax.annotate("", xy=end['left'], xytext=start['right'],
                         arrowprops=dict(arrowstyle="-|>", color='#333333', lw=1.5,
                         connectionstyle="angle,angleA=0,angleB=90,rad=0"), zorder=2)
 
     ax.set_axis_off()
     plt.tight_layout()
-    plt.show()
+    
+    # 5. Save the plot
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    print(f"💾 Successfully saved Matplotlib BPMN to: {save_path}")
+    
+    # Optional: Display in Interactive Window
+    # plt.show() 
+    
+    # Close the figure to free memory
+    plt.close(fig)
 
-# Hier moet nog file path aangepast worden naar gecreëerde json files door andere pipelines
-# nu manuele file door running issues
-data1 = json.load(open('/Users/julesnuytten/Desktop/Thesis/Master-Thesis/temporary_json_outputs/case_1_model_extracted_bpmn.json'))
-visualize_extracted_bpmn(data1)
+if __name__ == "__main__":
+    # ---------------------------------------------------------
+    # CONFIGURATION: Fill in the case and pipeline name
+    case_name = "case_3" 
+    pipeline_name = "direct_extraction_pipeline"
+    # ---------------------------------------------------------
 
-data2 = json.load(open('/Users/julesnuytten/Desktop/Thesis/Master-Thesis/temporary_json_outputs/case_2_model_extracted_bpmn.json'))
-visualize_extracted_bpmn(data2)
+    # 1. Path Discovery
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    # Go up two levels to get to Master-Thesis/
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+    
+    # 2. Dynamic Source Path (Looking for JSON)
+    JSON_SOURCE_DIR = os.path.join(
+        PROJECT_ROOT, "pipelines", pipeline_name, "outputs"
+    )
+    
+    # 3. Dynamic Target Path (output_generation/outputs)
+    # Get to output_generation/ by going up one level from SCRIPT_DIR
+    GRAPH_OUTPUT_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "outputs")
+    os.makedirs(GRAPH_OUTPUT_DIR, exist_ok=True)
+
+    # 4. Final Paths
+    input_json_path = os.path.join(JSON_SOURCE_DIR, f"{case_name}_model_extracted_bpmn.json")
+    out_graph_file = os.path.join(GRAPH_OUTPUT_DIR, f"{case_name}_bpmn_matplotlib.png")
+
+    print(f"--- Matplotlib Visualizer Started ---")
+    
+    try:
+        if not os.path.exists(input_json_path):
+            raise FileNotFoundError
+
+        with open(input_json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        print(f"JSON loaded for {case_name}. Plotting diagram...")
+        visualize_extracted_bpmn(data, out_graph_file)
+
+    except FileNotFoundError:
+        print(f"Error: JSON not found at {input_json_path}")
