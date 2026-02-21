@@ -204,16 +204,54 @@ Provide concrete names for all tasks and actors based on the process description
 
     return json_result
 
+import os
+import sys
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python pipeline1.py <document_name>")
-        sys.exit(1)
-    document_name = sys.argv[1]
-    with open(f"../../cases/{document_name}.txt", "r", encoding="utf-8") as f:
-        process = f.read()
-    out_file = f"./outputs/{document_name}_model_extracted_bpmn.json"
-    bpmn_json = extract_bpmn(process, output_file=out_file, retries=2)
-    if bpmn_json is not None:
-        print(json.dumps(bpmn_json, indent=2))
-    else:
-        print("Model extraction returned no result (model may be unavailable or parsing failed).")
+    # ---------------------------------------------------------
+    # CONFIGURATION: Hier gewoon case namen invullen 
+    case_name = "case_2" 
+    # ---------------------------------------------------------
+
+    # 1. Path Discovery (Stays Partner-Proof & Subfolder-Aware)
+    # Finds the 'Master-Thesis' root by hopping up two levels
+    # Dit is best omdat we zo dezelfde pathnames verkrijgen 
+    # (de vorige code gaf andere pathnames (door andere pc))
+
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+    
+    CASES_DIR = os.path.join(PROJECT_ROOT, "cases")
+    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "outputs")
+    
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    # 2. Construct dynamic paths
+    input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
+    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_model_extracted_bpmn.json")
+
+    print(f"--- Interactive Run Started ---")
+    print(f"Project Root: {PROJECT_ROOT}")
+    print(f"Reading from: {input_path}")
+    print(f"Saving to:    {out_file}")
+    print(f"-------------------------------")
+    
+    try:
+        if not os.path.exists(input_path):
+            raise FileNotFoundError
+
+        with open(input_path, "r", encoding="utf-8") as f:
+            process_text = f.read()
+        
+        # 3. Run extraction
+        print(f"🤖 LLM is analyzing '{case_name}'...")
+        bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=2)
+        
+        if bpmn_json:
+            print(f"Success! View the output in the sidebar under: outputs/{case_name}_model_extracted_bpmn.json")
+        else:
+            print("Model extraction failed. Check the logs above.")
+            
+    except FileNotFoundError:
+        print(f"Error: The file '{case_name}.txt' was not found in {CASES_DIR}")
+        print(f"Check if you have a file named '{case_name}.txt' in that folder.")

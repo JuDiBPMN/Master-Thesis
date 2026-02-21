@@ -1,0 +1,47 @@
+{
+  "tasks": [
+    {
+      "id": "IDEA_RECORDING",
+      "name": "Record basic idea for a project",
+      "actor": "EMPLOYEE"
+    },
+    {
+      "id": "IDEA_SUBMISSION",
+      "name": "Submit request for approval",
+      "actor": "EMPLOYEE"
+    },
+    {
+      "id": "PROJECT_APPROVAL",
+      "name": "Obtain approval for project",
+      "actor": "MANAGER"
+    },
+    {
+      "id": "PROJECT_PLANNING",
+      "name": "Create project plan",
+      "actor": "MANAGER"
+    },
+    {
+      "id": "PROJECT_LAUNCH",
+      "name": "Start project",
+      "actor": "MANAGER"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "IDEA_RECORDING",
+      "to": "IDEA_SUBMISSION"
+    },
+    {
+      "from": "IDEA_SUBMISSION",
+      "to": "PROJECT_APPROVAL"
+    },
+    {
+      "from": "PROJECT_APPROVAL",
+      "to": "PROJECT_PLANNING"
+    },
+    {
+      "from": "PROJECT_PLANNING",
+      "to": "PROJECT_LAUNCH"
+    }
+  ]
+}
