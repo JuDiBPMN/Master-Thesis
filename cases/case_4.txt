@@ -1,0 +1,12 @@
+a) Upon receipt of an invoice, signatures/approvals to perform the payment has to be collected.
+b) First, the invoice has to be sent to approval (1st stage). When the 1st approver gets this message
+request, he evaluates the request, then documents/submits his decision and the task (Approval
+(1st stage) is fulfilled at this stage.
+c) Returning back to the process itself, after sending the approval (1st stage), the invoice can be
+approved or rejected. If it is approved, it has to be send to approval (2nd stage), whereas if it is
+rejected the process ends at request rejected (1st stage).
+d) Upon receipt of the request, the 2nd approver evaluates the request, then documents/submits his
+final decision and the task (Approval 2nd stage) is fulfilled at this stage.
+e) Finally, after sending the approval (2nd stage), the invoice can be either approved or rejected. If it
+is approved the process ends at Signature/Approval obtained, whereas if it is denied the process
+ends at request rejected (2nd stage).

@@ -1,0 +1,27 @@
+The first step in handling the process purchase to pay “P2P” by the Purchasing department starts with the Requestor to determine and define the business requirements & needs in a specific company using SAP ECC System. Once a valid need is identified, he requests to issue a Purchase Requisition (PR) and then send it for approval. If the PR is approved, he issues a purchase requisition (PR). A risk may occur at this stage in that a PR could be incompletely issued (PR discrepancy). If, on the other hand, the request to issue a PR is not approved, then the business requirements & needs have to be determined and defined again.
+
+After issuing a PR, the requestor submits/sends the issued PR to the heads of departments for approval. Once the heads of departments get the approval request, they review the PR by evaluating the needs, verifying the available budget (taking into consideration the risk, that budget overdraft may occur here) and validating the purchase requisition form (taking also into consideration the risk, that data breach may occur). After reviewing the PR, the PR approvers have to document/submit the final decision to the requestor. They may either approve the PR request, decline the PR request or reject the incompleted PR and send it back to the requestor. The role of the heads of departments ends then by submitting their decisions.
+
+Returing back to the requestor, if the PR is approved, he will create a Purchase Order (PO) and then send/submit to the PO approvers for approval. If, on the other hand, the PR was not approved by the head of departments, then the business requirements & needs have to be determined again.
+
+Once the PO approvers get the approval request, they review the purchase order specifications and then document/submit the final decision to the requestor. They may either approve the purchase order or reject the purchase order. After submitting their final decision, the process ends at this level (PO Approvers level).
+
+Returning back again to the requestor, if the PO is approved, he has to dispatch the approved PO to the vendor. If, on the other hand, the PO was not approved, then business requirements & needs have to be determined from the beginning again.
+
+Once the vendor receives the review request, he has to evaluate the PO and document decision to the requestor. He may either approve the PO, negotiate the PO or reject the PO. If the PO was rejected, then the process ends at this step for the vendor. If, on the other hand, the vendor approved or negotiated the PO, he has to deliver the agreed goods/services to the requestor and send the invoice for delivery.
+
+Returning back to the requestor, if the vendor didn’t approved the dispatched PO, then the requestor has to search for a new vendor.
+
+If, on the other hand, the dispatched PO was approved, then the requestor will receive the agreed goods/services.
+
+In the next step, if the requestor received goods, he has to issue a Goods Receipt (GR). If he received a service, then he has to issue a Service Entry Sheet (SES).
+
+After confirming the receipt of the agreed goods/services, the requestor will receive the invoice from the vendor. At common risk in this step, is that an invoice discrepancy may occur. A control for this risk, is to perform the three way match (comparing Invoice, PO and GR/SES).
+
+In the next step, either the invoice is correct or it is wrong. If the invoice is wrong, then it has to be returned to the vendor for correction. Once the vendor receives the wrong invoice he has to correct it and send it back to the requestor and afterwards, the process ends at this stage for the vendor.
+
+In the next step, the requestor will receive the corrected invoice from the vendor.
+
+After checking the invoice and correcting it if it was wrong, the requestor may now post the invoice in SAP and send it to the Accounts Payable (AP) team.
+
+Once the AP team receive the invoice, the AP Processor has to decide on the payment method. In this step, he may either decide on payment in full or in installments. After deciding on the payment method, he has to perform the payment to the vendor and the purchase to pay process is successfully completed.

@@ -1,0 +1,34 @@
+{
+  "tasks": [
+    {
+      "id": "RISK_ASSESSMENT",
+      "name": "Risk Assessment",
+      "actor": "RISK_ASSESSOR"
+    },
+    {
+      "id": "ADVANCED_RISK_ASSESSMENT",
+      "name": "Advanced Risk Assessment",
+      "actor": "RISK_ASSESSOR"
+    },
+    {
+      "id": "NOTIFICATION",
+      "name": "Notify Customer",
+      "actor": "CUSTOMER"
+    },
+    {
+      "id": "DISCHARGE_ORGANIZATION",
+      "name": "Disbursement Organization",
+      "actor": "BANK"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "RISK_ASSESSMENT",
+      "to": "NOTIFICATION"
+    },
+    {
+      "from": "ADVANCED_RISK_ASSESSMENT",
+      "to": "NOTIFICATION"
+    }
+  ]
+}
