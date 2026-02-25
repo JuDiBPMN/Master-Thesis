@@ -518,12 +518,17 @@ def _call_model(model, prompt):
 
 
 def extract_bpmn_few_shot(process_description, case_name, output_file=None, retries=2):
-    # Warn if running on the few-shot example case itself
     if case_name == "case_6":
         print("WARNING: case_6 is the few-shot example. Results will be inflated — exclude from evaluation.")
 
-    example_process = FEW_SHOT_EXAMPLE["process_description"]
-    example_output  = json.dumps(FEW_SHOT_EXAMPLE["bpmn_json"], indent=2)
+    case_6_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "cases", "case_6.txt")
+    try:
+        with open(case_6_path, "r", encoding="utf-8") as f:
+            example_process = f.read()
+    except FileNotFoundError:
+        example_process = "[Example process description not found]"
+    
+    example_output  = json.dumps(FEW_SHOT_EXAMPLE, indent=2)
 
     prompt = f"""Extract a structured BPMN model from the process description below.
 

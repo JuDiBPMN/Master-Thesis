@@ -1,0 +1,48 @@
+{
+  "participants": [
+    {
+      "id": "Anouk",
+      "name": "Anouk",
+      "type": "pool"
+    },
+    {
+      "id": "Jan",
+      "name": "Jan",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "pick_sweaters",
+      "name": "Pick sweaters",
+      "type": "task",
+      "participant": "Anouk"
+    }
+  ],
+  "events": [
+    {
+      "id": "assemble_parcel",
+      "name": "Assemble parcel",
+      "type": "startEvent",
+      "participant": "Jan",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "delivery_within_rotterdam",
+      "name": "Delivery within Rotterdam",
+      "type": "parallelGateway",
+      "participant": "Anouk",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "pick_sweaters",
+      "to": "assemble_parcel",
+      "condition": "Anouk has picked the sweaters"
+    }
+  ],
+  "data": []
+}
