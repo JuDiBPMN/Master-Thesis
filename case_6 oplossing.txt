@@ -1,1 +1,158 @@
-Platforms that link restaurants, delivery couriers, and hungry people – such as Uber Eats or Deliveroo – have grown substantially in recent years. When a new order comes in at the platform, the platform forwards the order to the restaurant in question and the kitchen staff at the restaurant starts to prepare the food. While this is happening, the platform also reaches out to their courier networks. If the distance between restaurant and customer is less than 5 kilometers, a bike courier starts to ride to the restaurant. Otherwise a scooter courier drives to the restaurant. When the courier arrives at the restaurant and the meal has been prepared, the courier takes the meal to the customer, after which the order process is completed.
+{
+  "participants": [
+    { "id": "restaurant", "name": "Restaurant", "type": "pool" },
+    { "id": "platform", "name": "Platform", "type": "pool" },
+    {
+      "id": "courier_network",
+      "name": "Courier Network",
+      "type": "pool",
+      "lanes": [
+        { "id": "scooter_courier", "name": "Scooter Courier" },
+        { "id": "bike_courier", "name": "Bike Courier" }
+      ]
+    }
+  ],
+  "tasks": [
+    { "id": "prepare_food", "name": "Prepare Food", "type": "task", "participant": "restaurant" },
+
+    { "id": "forward_order", "name": "Forward Order to Restaurant", "type": "task", "participant": "platform" },
+    { "id": "reach_out_courier", "name": "Reach Out to Courier Network", "type": "task", "participant": "platform" },
+
+    {
+      "id": "scooter_ride_to_restaurant",
+      "name": "Ride to Restaurant",
+      "type": "task",
+      "participant": "courier_network",
+      "lane": "scooter_courier"
+    },
+    {
+      "id": "bike_ride_to_restaurant",
+      "name": "Ride to Restaurant",
+      "type": "task",
+      "participant": "courier_network",
+      "lane": "bike_courier"
+    },
+
+    {
+      "id": "scooter_take_meal",
+      "name": "Take Meal to Customer",
+      "type": "task",
+      "participant": "courier_network",
+      "lane": "scooter_courier"
+    },
+    {
+      "id": "bike_take_meal",
+      "name": "Take Meal to Customer",
+      "type": "task",
+      "participant": "courier_network",
+      "lane": "bike_courier"
+    }
+  ],
+  "events": [
+    {
+      "id": "order_received",
+      "name": "Order Received",
+      "type": "startEvent",
+      "participant": "platform",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "restaurant_order_received",
+      "name": "Order Received (Restaurant)",
+      "type": "startEvent",
+      "participant": "restaurant",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "courier_request_received",
+      "name": "Courier Request Received",
+      "type": "startEvent",
+      "participant": "courier_network",
+      "eventDefinition": "message"
+    },
+
+    {
+      "id": "food_prepared",
+      "name": "Food is Prepared",
+      "type": "intermediateCatchEvent",
+      "participant": "restaurant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "courier_arrived",
+      "name": "Courier has Arrived",
+      "type": "intermediateCatchEvent",
+      "participant": "restaurant",
+      "eventDefinition": "message"
+    },
+
+    {
+      "id": "pickup_ready_received",
+      "name": "Pickup Ready",
+      "type": "intermediateCatchEvent",
+      "participant": "courier_network",
+      "eventDefinition": "message"
+    },
+
+    {
+      "id": "delivery_confirmed",
+      "name": "Delivery Confirmed",
+      "type": "intermediateCatchEvent",
+      "participant": "platform",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "order_complete",
+      "name": "Order Complete",
+      "type": "endEvent",
+      "participant": "platform",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    { "id": "split_parallel", "name": "", "type": "parallelGateway", "participant": "platform", "gatewayDirection": "diverging" },
+
+    { "id": "distance_split_1", "name": "Distance < 5 km?", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "diverging" },
+    { "id": "courier_join_1", "name": "", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "converging" },
+
+    { "id": "join_parallel", "name": "", "type": "parallelGateway", "participant": "restaurant", "gatewayDirection": "converging" },
+
+    { "id": "distance_split_2", "name": "Distance < 5 km?", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "diverging" },
+    { "id": "courier_join_2", "name": "", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "converging" }
+  ],
+  "sequence_flows": [
+    { "from": "order_received", "to": "split_parallel" },
+    { "from": "split_parallel", "to": "forward_order" },
+    { "from": "split_parallel", "to": "reach_out_courier" },
+
+    { "from": "restaurant_order_received", "to": "prepare_food" },
+    { "from": "prepare_food", "to": "food_prepared" },
+    { "from": "food_prepared", "to": "join_parallel" },
+    { "from": "courier_arrived", "to": "join_parallel" },
+
+    { "from": "courier_request_received", "to": "distance_split_1" },
+    { "from": "distance_split_1", "to": "bike_ride_to_restaurant", "condition": "< 5 km" },
+    { "from": "distance_split_1", "to": "scooter_ride_to_restaurant", "condition": ">= 5 km" },
+    { "from": "bike_ride_to_restaurant", "to": "courier_join_1" },
+    { "from": "scooter_ride_to_restaurant", "to": "courier_join_1" },
+
+    { "from": "pickup_ready_received", "to": "distance_split_2" },
+    { "from": "distance_split_2", "to": "bike_take_meal", "condition": "< 5 km" },
+    { "from": "distance_split_2", "to": "scooter_take_meal", "condition": ">= 5 km" },
+    { "from": "bike_take_meal", "to": "courier_join_2" },
+    { "from": "scooter_take_meal", "to": "courier_join_2" },
+
+    { "from": "delivery_confirmed", "to": "order_complete" }
+  ],
+  "message_flows": [
+    { "from": "forward_order", "to": "restaurant_order_received", "name": "Order details" },
+    { "from": "reach_out_courier", "to": "courier_request_received", "name": "Courier request" },
+
+    { "from": "courier_join_1", "to": "courier_arrived", "name": "Courier arrived" },
+
+    { "from": "join_parallel", "to": "pickup_ready_received", "name": "Pickup ready" },
+
+    { "from": "courier_join_2", "to": "delivery_confirmed", "name": "Order delivered" }
+  ],
+  "data": []
+}

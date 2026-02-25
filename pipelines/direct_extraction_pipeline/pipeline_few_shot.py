@@ -52,7 +52,6 @@ BPMN_SCHEMA = {
         "required": ["id", "name", "type"]
       }
     },
-
     "tasks": {
       "description": "BPMN task/activity nodes. Do NOT put events or gateways here.",
       "type": "array",
@@ -77,7 +76,6 @@ BPMN_SCHEMA = {
         "required": ["id", "name", "type", "participant"]
       }
     },
-
     "events": {
       "description": "BPMN event nodes only (start, end, intermediate). Do NOT put tasks or gateways here. Use startEvent for the beginning of a process, endEvent for the end, intermediateCatchEvent for waiting points (e.g. 'food is prepared'), intermediateThrowEvent for sending signals.",
       "type": "array",
@@ -107,9 +105,8 @@ BPMN_SCHEMA = {
         "required": ["id", "name", "type", "participant", "eventDefinition"]
       }
     },
-
     "gateways": {
-      "description": "BPMN gateway nodes only (splits and joins). Do NOT put tasks or events here. Use exclusiveGateway (XOR) for either/or decisions, parallelGateway (AND) for concurrent splits/joins, inclusiveGateway (OR) for one-or-more branches, eventBasedGateway for routing based on which event occurs first.",
+      "description": "BPMN gateway nodes only (splits and joins). Do NOT put tasks or events here. Use exclusiveGateway (XOR) for either/or decisions, parallelGateway (AND) for concurrent splits/joins, inclusiveGateway (OR) for one-or-more branches.",
       "type": "array",
       "items": {
         "type": "object",
@@ -137,7 +134,6 @@ BPMN_SCHEMA = {
         "required": ["id", "name", "type", "participant", "gatewayDirection"]
       }
     },
-
     "sequence_flows": {
       "description": "Control-flow edges. Both 'from' and 'to' must be node ids within the same pool. Cross-pool communication must use message_flows instead.",
       "type": "array",
@@ -154,7 +150,7 @@ BPMN_SCHEMA = {
             "type": "string"
           },
           "condition": {
-            "description": "Condition label for flows leaving an exclusiveGateway or inclusiveGateway (e.g. '< 5 km', '>= 5 km').",
+            "description": "Condition label for flows leaving an exclusiveGateway or inclusiveGateway.",
             "type": "string"
           },
           "isDefault": {
@@ -162,40 +158,32 @@ BPMN_SCHEMA = {
             "type": "boolean"
           },
           "participant": {
-            "description": "Pool id that both 'from' and 'to' belong to. Helps verify the flow stays within one pool.",
+            "description": "Pool id that both 'from' and 'to' belong to.",
             "type": "string"
           }
         },
         "required": ["from", "to"]
       }
     },
-
     "message_flows": {
-      "description": "Communication edges between different pools. 'from' and 'to' can be participant ids or node ids, but must belong to different pools.",
+      "description": "Communication edges between different pools. 'from' and 'to' must belong to different pools.",
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
           "id": {"type": "string"},
-          "from": {
-            "description": "Id of the sending node or participant pool.",
-            "type": "string"
-          },
-          "to": {
-            "description": "Id of the receiving node or participant pool.",
-            "type": "string"
-          },
+          "from": {"type": "string"},
+          "to": {"type": "string"},
           "name": {
-            "description": "Human-readable label describing what is being communicated (e.g. 'Order details', 'Courier arrived').",
+            "description": "Label describing what is being communicated.",
             "type": "string"
           }
         },
         "required": ["from", "to", "name"]
       }
     },
-
     "data": {
-      "description": "Optional data objects referenced in conditions (e.g. distance_km used in gateway conditions).",
+      "description": "Optional data objects referenced in conditions.",
       "type": "array",
       "items": {
         "type": "object",
@@ -210,6 +198,168 @@ BPMN_SCHEMA = {
     }
   },
   "required": ["participants", "tasks", "events", "gateways", "sequence_flows"]
+}
+
+
+# --- Few-shot example (case_6) ---
+# This example is excluded when running on case_6 itself to avoid eval contamination.
+FEW_SHOT_EXAMPLE = {
+  "participants": [
+    { "id": "restaurant", "name": "Restaurant", "type": "pool" },
+    { "id": "platform", "name": "Platform", "type": "pool" },
+    {
+      "id": "courier_network",
+      "name": "Courier Network",
+      "type": "pool",
+      "lanes": [
+        { "id": "scooter_courier", "name": "Scooter Courier" },
+        { "id": "bike_courier", "name": "Bike Courier" }
+      ]
+    }
+  ],
+  "tasks": [
+    { "id": "prepare_food", "name": "Prepare Food", "type": "task", "participant": "restaurant" },
+
+    { "id": "forward_order", "name": "Forward Order to Restaurant", "type": "task", "participant": "platform" },
+    { "id": "reach_out_courier", "name": "Reach Out to Courier Network", "type": "task", "participant": "platform" },
+
+    {
+      "id": "scooter_ride_to_restaurant",
+      "name": "Ride to Restaurant",
+      "type": "task",
+      "participant": "courier_network",
+      "lane": "scooter_courier"
+    },
+    {
+      "id": "bike_ride_to_restaurant",
+      "name": "Ride to Restaurant",
+      "type": "task",
+      "participant": "courier_network",
+      "lane": "bike_courier"
+    },
+
+    {
+      "id": "scooter_take_meal",
+      "name": "Take Meal to Customer",
+      "type": "task",
+      "participant": "courier_network",
+      "lane": "scooter_courier"
+    },
+    {
+      "id": "bike_take_meal",
+      "name": "Take Meal to Customer",
+      "type": "task",
+      "participant": "courier_network",
+      "lane": "bike_courier"
+    }
+  ],
+  "events": [
+    {
+      "id": "order_received",
+      "name": "Order Received",
+      "type": "startEvent",
+      "participant": "platform",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "restaurant_order_received",
+      "name": "Order Received (Restaurant)",
+      "type": "startEvent",
+      "participant": "restaurant",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "courier_request_received",
+      "name": "Courier Request Received",
+      "type": "startEvent",
+      "participant": "courier_network",
+      "eventDefinition": "message"
+    },
+
+    {
+      "id": "food_prepared",
+      "name": "Food is Prepared",
+      "type": "intermediateCatchEvent",
+      "participant": "restaurant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "courier_arrived",
+      "name": "Courier has Arrived",
+      "type": "intermediateCatchEvent",
+      "participant": "restaurant",
+      "eventDefinition": "message"
+    },
+
+    {
+      "id": "pickup_ready_received",
+      "name": "Pickup Ready",
+      "type": "intermediateCatchEvent",
+      "participant": "courier_network",
+      "eventDefinition": "message"
+    },
+
+    {
+      "id": "delivery_confirmed",
+      "name": "Delivery Confirmed",
+      "type": "intermediateCatchEvent",
+      "participant": "platform",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "order_complete",
+      "name": "Order Complete",
+      "type": "endEvent",
+      "participant": "platform",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    { "id": "split_parallel", "name": "", "type": "parallelGateway", "participant": "platform", "gatewayDirection": "diverging" },
+
+    { "id": "distance_split_1", "name": "Distance < 5 km?", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "diverging" },
+    { "id": "courier_join_1", "name": "", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "converging" },
+
+    { "id": "join_parallel", "name": "", "type": "parallelGateway", "participant": "restaurant", "gatewayDirection": "converging" },
+
+    { "id": "distance_split_2", "name": "Distance < 5 km?", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "diverging" },
+    { "id": "courier_join_2", "name": "", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "converging" }
+  ],
+  "sequence_flows": [
+    { "from": "order_received", "to": "split_parallel" },
+    { "from": "split_parallel", "to": "forward_order" },
+    { "from": "split_parallel", "to": "reach_out_courier" },
+
+    { "from": "restaurant_order_received", "to": "prepare_food" },
+    { "from": "prepare_food", "to": "food_prepared" },
+    { "from": "food_prepared", "to": "join_parallel" },
+    { "from": "courier_arrived", "to": "join_parallel" },
+
+    { "from": "courier_request_received", "to": "distance_split_1" },
+    { "from": "distance_split_1", "to": "bike_ride_to_restaurant", "condition": "< 5 km" },
+    { "from": "distance_split_1", "to": "scooter_ride_to_restaurant", "condition": ">= 5 km" },
+    { "from": "bike_ride_to_restaurant", "to": "courier_join_1" },
+    { "from": "scooter_ride_to_restaurant", "to": "courier_join_1" },
+
+    { "from": "pickup_ready_received", "to": "distance_split_2" },
+    { "from": "distance_split_2", "to": "bike_take_meal", "condition": "< 5 km" },
+    { "from": "distance_split_2", "to": "scooter_take_meal", "condition": ">= 5 km" },
+    { "from": "bike_take_meal", "to": "courier_join_2" },
+    { "from": "scooter_take_meal", "to": "courier_join_2" },
+
+    { "from": "delivery_confirmed", "to": "order_complete" }
+  ],
+  "message_flows": [
+    { "from": "forward_order", "to": "restaurant_order_received", "name": "Order details" },
+    { "from": "reach_out_courier", "to": "courier_request_received", "name": "Courier request" },
+
+    { "from": "courier_join_1", "to": "courier_arrived", "name": "Courier arrived" },
+
+    { "from": "join_parallel", "to": "pickup_ready_received", "name": "Pickup ready" },
+
+    { "from": "courier_join_2", "to": "delivery_confirmed", "name": "Order delivered" }
+  ],
+  "data": []
 }
 
 
@@ -342,11 +492,20 @@ def is_valid_bpmn(obj):
     return True, None
 
 
-def _call_model(model, prompt, system_msg):
-    """Helper to call the model and return the raw result text."""
+SYSTEM_MSG = (
+    "You are a business process modeling expert. "
+    "Extract structured BPMN models from process descriptions. "
+    "Always output valid JSON matching the provided schema. "
+    "Never use a 'nodes' array — always use separate 'tasks', 'events', and 'gateways' arrays. "
+    "Every node must belong to a declared participant. "
+    "Sequence flows stay within pools; cross-pool communication uses message_flows."
+)
+
+
+def _call_model(model, prompt):
     result = model.create_chat_completion(
         messages=[
-            {"role": "system", "content": system_msg},
+            {"role": "system", "content": SYSTEM_MSG},
             {"role": "user",   "content": prompt}
         ],
         response_format={"type": "json_object", "schema": BPMN_SCHEMA},
@@ -358,38 +517,36 @@ def _call_model(model, prompt, system_msg):
     return str(result)
 
 
-SYSTEM_MSG = (
-    "You are a business process modeling expert. "
-    "Extract structured BPMN models from process descriptions. "
-    "Always output valid JSON matching the provided schema. "
-    "Never use a 'nodes' array — always use separate 'tasks', 'events', and 'gateways' arrays. "
-    "Every node must belong to a declared participant. "
-    "Sequence flows stay within pools; cross-pool communication uses message_flows."
-)
+def extract_bpmn_few_shot(process_description, case_name, output_file=None, retries=2):
+    # Warn if running on the few-shot example case itself
+    if case_name == "case_6":
+        print("WARNING: case_6 is the few-shot example. Results will be inflated — exclude from evaluation.")
 
+    example_process = FEW_SHOT_EXAMPLE["process_description"]
+    example_output  = json.dumps(FEW_SHOT_EXAMPLE["bpmn_json"], indent=2)
 
-def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=2):
-    if prompt_type == "zero-shot":
-        prompt = f"""Extract a structured BPMN model from the process description below.
+    prompt = f"""Extract a structured BPMN model from the process description below.
 
+Here is an example of a process description and its correct BPMN JSON output:
+
+--- EXAMPLE PROCESS ---
+{example_process}
+
+--- EXAMPLE OUTPUT ---
+{example_output}
+
+--- NOW EXTRACT ---
 Process description: {process_description}
 
-Output a JSON object with the following fields:
-
-- "participants": array of pools (organizations/systems involved). Each has "id", "name", and "type" (always "pool"). Add "lanes" only if distinct roles within a pool are mentioned.
-- "tasks": array of activities. Each has "id", "name", "type" (e.g. "userTask", "serviceTask", "task"), and "participant" (pool id).
-- "events": array of start/end/intermediate events. Each has "id", "name", "type" (e.g. "startEvent", "endEvent"), and "participant" (pool id).
-- "gateways": array of decision/branching points. Each has "id", "name", "type" (e.g. "exclusiveGateway", "parallelGateway"), and "participant" (pool id).
-- "sequence_flows": array of control-flow edges within a pool. Each has "from" and "to" (node ids).
-- "message_flows": (optional) array of cross-pool communications. Each has "from" and "to".
-
-Rules:
+Apply the same structure to the process description above. Rules:
 - Use concrete names from the description. Do not use placeholders like "...", "None", or empty strings.
 - Every task, event, and gateway must reference a valid participant id declared in participants.
 - sequence_flows must stay within a single pool. Cross-pool communication goes in message_flows.
 - Every process must have at least one startEvent and one endEvent.
 - Output exactly these top-level keys: participants, tasks, events, gateways, sequence_flows.
-- Do NOT use a 'nodes' array. Tasks, events, and gateways are always separate arrays."""
+- Do NOT use a 'nodes' array. Tasks, events, and gateways are always separate arrays.
+- Every gateway must have gatewayDirection of either "diverging" or "converging".
+- Every event must have an eventDefinition."""
 
     try:
         model = load_model()
@@ -398,7 +555,7 @@ Rules:
         return None
 
     print(f"Initial prompt:\n{prompt}\n")
-    result_text = _call_model(model, prompt, SYSTEM_MSG)
+    result_text = _call_model(model, prompt)
     print("Model output:\n", result_text)
 
     try:
@@ -425,11 +582,12 @@ Previous invalid output: {result_text}
 Re-extract the full BPMN model and fix the issue described above. Remember:
 - Output exactly these top-level keys: participants, tasks, events, gateways, sequence_flows.
 - Do NOT use a 'nodes' array. Tasks, events, and gateways are always separate arrays.
-- Every node must have a participant id that exactly matches an id declared in participants."""
+- Every node must have a participant id that exactly matches an id declared in participants.
+- Every gateway must have gatewayDirection of either "diverging" or "converging".
+- Every event must have an eventDefinition."""
 
         print(f"Retry prompt:\n{retry_prompt}\n")
-
-        result_text = _call_model(model, retry_prompt, SYSTEM_MSG)
+        result_text = _call_model(model, retry_prompt)
         print(f"Model output (retry {attempt}):\n", result_text)
 
         try:
@@ -440,7 +598,6 @@ Re-extract the full BPMN model and fix the issue described above. Remember:
 
         valid, reason = is_valid_bpmn(json_result)
 
-    # --- Save output ---
     if json_result is None:
         print("\nError: Failed to parse JSON from model output")
     elif not valid:
@@ -464,7 +621,7 @@ Re-extract the full BPMN model and fix the issue described above. Remember:
 
 
 if __name__ == "__main__":
-    case_name = "case_6"
+    case_name = "case_7"
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -473,13 +630,13 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_model_extracted_bpmn.json")
+    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_few_shot_bpmn.json")
 
-    print("--- Interactive Run Started ---")
-    print(f"Project Root: {PROJECT_ROOT}")
+    print("--- Few-Shot Pipeline Started ---")
+    print(f"Project Root is dit few shot?: {PROJECT_ROOT}")
     print(f"Reading from: {input_path}")
     print(f"Saving to:    {out_file}")
-    print("-------------------------------")
+    print("---------------------------------")
 
     try:
         if not os.path.exists(input_path):
@@ -488,11 +645,11 @@ if __name__ == "__main__":
         with open(input_path, "r", encoding="utf-8") as f:
             process_text = f.read()
 
-        print(f"🤖 LLM is analyzing '{case_name}'...")
-        bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=2)
+        print(f"🤖 LLM is analyzing '{case_name}' (few-shot)...")
+        bpmn_json = extract_bpmn_few_shot(process_text, case_name=case_name, output_file=out_file, retries=2)
 
         if bpmn_json:
-            print(f"Success! View the output in the sidebar under: outputs/{case_name}_model_extracted_bpmn.json")
+            print(f"Success! View the output in the sidebar under: outputs/{case_name}_few_shot_bpmn.json")
         else:
             print("Model extraction failed. Check the logs above.")
 

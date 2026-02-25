@@ -1,116 +1,44 @@
 {
   "participants": [
     {
-      "id": "P1",
-      "name": "Platform",
-      "type": "pool"
-    },
-    {
-      "id": "P2",
+      "id": "Restaurant",
       "name": "Restaurant",
       "type": "pool"
-    },
-    {
-      "id": "P3",
-      "name": "Courier Network",
-      "type": "pool",
-      "lanes": [
-        { "id": "L3A", "name": "Scooter Courier" },
-        { "id": "L3B", "name": "Bike Courier" }
-      ]
     }
   ],
-  "nodes": [
-    { "id": "E_start", "type": "startEvent", "name": "Order received", "participant": "P1" },
-
-    { "id": "G_and_split", "type": "parallelGateway", "name": "AND split", "participant": "P1" },
-    { "id": "T_forward", "type": "task", "name": "Forward order to restaurant", "participant": "P1" },
-    { "id": "T_reach", "type": "task", "name": "Reach out to courier network", "participant": "P1" },
-
-    { "id": "E_order_sent", "type": "intermediateThrowEvent", "eventDefinition": "message", "name": "Order sent to restaurant", "participant": "P1" },
-    { "id": "E_order_received_rest", "type": "intermediateCatchEvent", "eventDefinition": "message", "name": "Order received", "participant": "P2" },
-
-    { "id": "T_prepare", "type": "task", "name": "Prepare food", "participant": "P2" },
-    { "id": "E_food_prepared", "type": "intermediateThrowEvent", "eventDefinition": "signal", "name": "Food is prepared", "participant": "P2" },
-
-    { "id": "E_courier_request", "type": "intermediateThrowEvent", "eventDefinition": "message", "name": "Courier requested", "participant": "P1" },
-    { "id": "E_courier_request_net", "type": "intermediateCatchEvent", "eventDefinition": "message", "name": "Courier request received", "participant": "P3" },
-
-    { "id": "G_xor_to_rest", "type": "exclusiveGateway", "name": "Distance?", "participant": "P3" },
-    { "id": "T_ride_rest_bike", "type": "task", "name": "Ride to restaurant", "participant": "P3", "lane": "L3B" },
-    { "id": "T_ride_rest_scooter", "type": "task", "name": "Ride to restaurant", "participant": "P3", "lane": "L3A" },
-    { "id": "G_xor_merge_to_rest", "type": "exclusiveGateway", "name": "XOR merge", "participant": "P3" },
-
-    { "id": "E_arrived_throw", "type": "intermediateThrowEvent", "eventDefinition": "message", "name": "Courier has arrived", "participant": "P3" },
-    { "id": "E_arrived_catch", "type": "intermediateCatchEvent", "eventDefinition": "message", "name": "Courier has arrived", "participant": "P2" },
-
-    { "id": "G_and_join_ready", "type": "parallelGateway", "name": "AND join (food + courier)", "participant": "P2" },
-
-    { "id": "G_xor_to_customer", "type": "exclusiveGateway", "name": "Distance?", "participant": "P3" },
-    { "id": "T_deliver_bike", "type": "task", "name": "Take meal to customer", "participant": "P3", "lane": "L3B" },
-    { "id": "T_deliver_scooter", "type": "task", "name": "Take meal to customer", "participant": "P3", "lane": "L3A" },
-    { "id": "G_xor_merge_customer", "type": "exclusiveGateway", "name": "XOR merge", "participant": "P3" },
-
-    { "id": "E_complete_throw", "type": "intermediateThrowEvent", "eventDefinition": "message", "name": "Order complete", "participant": "P3" },
-    { "id": "E_complete_catch", "type": "intermediateCatchEvent", "eventDefinition": "message", "name": "Order complete", "participant": "P1" },
-    { "id": "E_end", "type": "endEvent", "name": "Order complete", "participant": "P1" }
+  "tasks": [
+    {
+      "id": "prepare_food",
+      "type": "userTask",
+      "participant": "Restaurant"
+    }
   ],
-  "sequenceFlows": [
-    { "from": "E_start", "to": "G_and_split" },
-
-    { "from": "G_and_split", "to": "T_forward" },
-    { "from": "G_and_split", "to": "T_reach" },
-
-    { "from": "T_forward", "to": "E_order_sent" },
-    { "from": "E_order_received_rest", "to": "T_prepare" },
-    { "from": "T_prepare", "to": "E_food_prepared" },
-
-    { "from": "T_reach", "to": "E_courier_request" },
-    { "from": "E_courier_request_net", "to": "G_xor_to_rest" },
-
+  "events": [
     {
-      "from": "G_xor_to_rest",
-      "to": "T_ride_rest_bike",
-      "condition": "distance_km < 5"
-    },
-    {
-      "from": "G_xor_to_rest",
-      "to": "T_ride_rest_scooter",
-      "condition": "distance_km >= 5"
-    },
-    { "from": "T_ride_rest_bike", "to": "G_xor_merge_to_rest" },
-    { "from": "T_ride_rest_scooter", "to": "G_xor_merge_to_rest" },
-
-    { "from": "G_xor_merge_to_rest", "to": "E_arrived_throw" },
-
-    { "from": "E_food_prepared", "to": "G_and_join_ready" },
-    { "from": "E_arrived_catch", "to": "G_and_join_ready" },
-
-    { "from": "G_and_join_ready", "to": "G_xor_to_customer" },
-
-    {
-      "from": "G_xor_to_customer",
-      "to": "T_deliver_bike",
-      "condition": "distance_km < 5"
-    },
-    {
-      "from": "G_xor_to_customer",
-      "to": "T_deliver_scooter",
-      "condition": "distance_km >= 5"
-    },
-    { "from": "T_deliver_bike", "to": "G_xor_merge_customer" },
-    { "from": "T_deliver_scooter", "to": "G_xor_merge_customer" },
-
-    { "from": "G_xor_merge_customer", "to": "E_complete_throw" },
-    { "from": "E_complete_catch", "to": "E_end" }
+      "id": "receive_order",
+      "type": "startEvent",
+      "participant": "Restaurant"
+    }
   ],
-  "messageFlows": [
-    { "from": "E_order_sent", "to": "E_order_received_rest" },
-    { "from": "E_courier_request", "to": "E_courier_request_net" },
-    { "from": "E_arrived_throw", "to": "E_arrived_catch" },
-    { "from": "E_complete_throw", "to": "E_complete_catch" }
+  "gateways": [
+    {
+      "id": "prepare_food_gateway",
+      "type": "exclusiveGateway",
+      "participant": "Restaurant"
+    }
   ],
-  "data": [
-    { "id": "distance_km", "type": "number", "description": "Distance between restaurant and customer in kilometers" }
-  ]
+  "sequence_flows": [
+    {
+      "from": "prepare_food",
+      "to": "deliver_food"
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "Restaurant",
+      "to": "Delivery",
+      "name": "Delivery"
+    }
+  ],
+  "data": []
 }
