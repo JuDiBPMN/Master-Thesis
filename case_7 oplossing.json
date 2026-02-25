@@ -1,0 +1,194 @@
+{
+  "participants": [
+    {
+      "id": "rotterdam_sweater_shop",
+      "name": "Rotterdam Sweater Shop",
+      "type": "pool",
+      "lanes": [
+        { "id": "jan", "name": "Jan" },
+        { "id": "anouk", "name": "Anouk" }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "pick_out_sweaters",
+      "name": "Pick out sweaters",
+      "type": "task",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "anouk"
+    },
+    {
+      "id": "collect_packaging_material",
+      "name": "Collect package material",
+      "type": "task",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "jan"
+    },
+    {
+      "id": "assemble_package",
+      "name": "Assemble package",
+      "type": "task",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "anouk"
+    },
+    {
+      "id": "email_invoice",
+      "name": "Email invoice",
+      "type": "task",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "anouk"
+    },
+
+    {
+      "id": "ride_bike_to_customer",
+      "name": "Ride bike to customer",
+      "type": "task",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "jan"
+    },
+    {
+      "id": "deliver_package",
+      "name": "Deliver package",
+      "type": "task",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "jan"
+    },
+
+    {
+      "id": "ride_bike_to_postnl_store",
+      "name": "Ride bike to PostNL store",
+      "type": "task",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "jan"
+    },
+    {
+      "id": "send_package_via_postnl",
+      "name": "Send package via PostNL",
+      "type": "task",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "jan"
+    },
+
+    {
+      "id": "ride_bike_to_dhl_store",
+      "name": "Ride bike to DHL store",
+      "type": "task",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "jan"
+    },
+    {
+      "id": "send_package_via_dhl",
+      "name": "Send package via DHL",
+      "type": "task",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "jan"
+    }
+  ],
+  "events": [
+    {
+      "id": "order_received",
+      "name": "Order received",
+      "type": "startEvent",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "anouk",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "package_complete",
+      "name": "Package complete",
+      "type": "intermediateCatchEvent",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "jan",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "order_completed",
+      "name": "Order completed",
+      "type": "endEvent",
+      "participant": "rotterdam_sweater_shop",
+      "lane": "anouk",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "pg_split_prepare",
+      "name": "",
+      "type": "parallelGateway",
+      "participant": "rotterdam_sweater_shop",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "pg_join_prepare",
+      "name": "",
+      "type": "parallelGateway",
+      "participant": "rotterdam_sweater_shop",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "pg_split_invoice_delivery",
+      "name": "",
+      "type": "parallelGateway",
+      "participant": "rotterdam_sweater_shop",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "xg_deliver_to",
+      "name": "Deliver to:",
+      "type": "exclusiveGateway",
+      "participant": "rotterdam_sweater_shop",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "xg_delivery_done_merge",
+      "name": "",
+      "type": "exclusiveGateway",
+      "participant": "rotterdam_sweater_shop",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "pg_join_finish",
+      "name": "",
+      "type": "parallelGateway",
+      "participant": "rotterdam_sweater_shop",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    { "from": "order_received", "to": "pg_split_prepare" },
+
+    { "from": "pg_split_prepare", "to": "pick_out_sweaters" },
+    { "from": "pg_split_prepare", "to": "collect_packaging_material" },
+
+    { "from": "pick_out_sweaters", "to": "pg_join_prepare" },
+    { "from": "collect_packaging_material", "to": "pg_join_prepare" },
+
+    { "from": "pg_join_prepare", "to": "assemble_package" },
+    { "from": "assemble_package", "to": "package_complete" },
+
+    { "from": "package_complete", "to": "pg_split_invoice_delivery" },
+
+    { "from": "pg_split_invoice_delivery", "to": "email_invoice" },
+    { "from": "pg_split_invoice_delivery", "to": "xg_deliver_to" },
+
+    { "from": "xg_deliver_to", "to": "ride_bike_to_customer", "condition": "Rotterdam" },
+    { "from": "ride_bike_to_customer", "to": "deliver_package" },
+    { "from": "deliver_package", "to": "xg_delivery_done_merge" },
+
+    { "from": "xg_deliver_to", "to": "ride_bike_to_postnl_store", "condition": "NL" },
+    { "from": "ride_bike_to_postnl_store", "to": "send_package_via_postnl" },
+    { "from": "send_package_via_postnl", "to": "xg_delivery_done_merge" },
+
+    { "from": "xg_deliver_to", "to": "ride_bike_to_dhl_store", "condition": "International" },
+    { "from": "ride_bike_to_dhl_store", "to": "send_package_via_dhl" },
+    { "from": "send_package_via_dhl", "to": "xg_delivery_done_merge" },
+
+    { "from": "email_invoice", "to": "pg_join_finish" },
+    { "from": "xg_delivery_done_merge", "to": "pg_join_finish" },
+
+    { "from": "pg_join_finish", "to": "order_completed" }
+  ],
+  "message_flows": [],
+  "data": []
+}
