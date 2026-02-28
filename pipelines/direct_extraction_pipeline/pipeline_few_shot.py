@@ -193,7 +193,7 @@ BPMN_SCHEMA = {
           "dataType": {"type": "string", "enum": ["string", "number", "boolean", "object"]},
           "description": {"type": "string"}
         },
-        "required": ["id", "name", "dataType"]
+        "required": ["id", "nameq", "dataType"]
       }
     }
   },
@@ -201,163 +201,174 @@ BPMN_SCHEMA = {
 }
 
 
-# --- Few-shot example (case_6) ---
-# This example is excluded when running on case_6 itself to avoid eval contamination.
+# --- Few-shot example (case_2) ---
+# This example is excluded when running on case_2 itself to avoid eval contamination.
 FEW_SHOT_EXAMPLE = {
   "participants": [
-    { "id": "restaurant", "name": "Restaurant", "type": "pool" },
-    { "id": "platform", "name": "Platform", "type": "pool" },
     {
-      "id": "courier_network",
-      "name": "Courier Network",
-      "type": "pool",
-      "lanes": [
-        { "id": "scooter_courier", "name": "Scooter Courier" },
-        { "id": "bike_courier", "name": "Bike Courier" }
-      ]
+      "id": "employee",
+      "name": "Employee",
+      "type": "pool"
+    },
+    {
+      "id": "manager",
+      "name": "Manager",
+      "type": "pool"
     }
   ],
   "tasks": [
-    { "id": "prepare_food", "name": "Prepare Food", "type": "task", "participant": "restaurant" },
-
-    { "id": "forward_order", "name": "Forward Order to Restaurant", "type": "task", "participant": "platform" },
-    { "id": "reach_out_courier", "name": "Reach Out to Courier Network", "type": "task", "participant": "platform" },
-
     {
-      "id": "scooter_ride_to_restaurant",
-      "name": "Ride to Restaurant",
+      "id": "record_idea",
+      "name": "Record Idea in Document",
       "type": "task",
-      "participant": "courier_network",
-      "lane": "scooter_courier"
+      "participant": "employee"
     },
     {
-      "id": "bike_ride_to_restaurant",
-      "name": "Ride to Restaurant",
+      "id": "submit_request",
+      "name": "Submit Request for Approval",
       "type": "task",
-      "participant": "courier_network",
-      "lane": "bike_courier"
-    },
-
-    {
-      "id": "scooter_take_meal",
-      "name": "Take Meal to Customer",
-      "type": "task",
-      "participant": "courier_network",
-      "lane": "scooter_courier"
+      "participant": "employee"
     },
     {
-      "id": "bike_take_meal",
-      "name": "Take Meal to Customer",
+      "id": "assess_request",
+      "name": "Assess Request for Approval",
       "type": "task",
-      "participant": "courier_network",
-      "lane": "bike_courier"
+      "participant": "manager"
+    },
+    {
+      "id": "initiate_project_plan",
+      "name": "Initiate Project Plan",
+      "type": "task",
+      "participant": "manager"
+    },
+    {
+      "id": "lay_out_timeline",
+      "name": "Lay Out Timeline",
+      "type": "task",
+      "participant": "manager"
+    },
+    {
+      "id": "set_up_budget",
+      "name": "Set Up Budget",
+      "type": "task",
+      "participant": "manager"
+    },
+    {
+      "id": "state_resources",
+      "name": "State Required Resources",
+      "type": "task",
+      "participant": "manager"
+    },
+    {
+      "id": "communicate_rejection",
+      "name": "Communicate Rejection",
+      "type": "task",
+      "participant": "manager"
     }
   ],
   "events": [
     {
-      "id": "order_received",
-      "name": "Order Received",
+      "id": "start_employee",
+      "name": "Start",
       "type": "startEvent",
-      "participant": "platform",
+      "participant": "employee",
       "eventDefinition": "none"
     },
     {
-      "id": "restaurant_order_received",
-      "name": "Order Received (Restaurant)",
-      "type": "startEvent",
-      "participant": "restaurant",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "courier_request_received",
-      "name": "Courier Request Received",
-      "type": "startEvent",
-      "participant": "courier_network",
-      "eventDefinition": "message"
-    },
-
-    {
-      "id": "food_prepared",
-      "name": "Food is Prepared",
-      "type": "intermediateCatchEvent",
-      "participant": "restaurant",
-      "eventDefinition": "none"
-    },
-    {
-      "id": "courier_arrived",
-      "name": "Courier has Arrived",
-      "type": "intermediateCatchEvent",
-      "participant": "restaurant",
-      "eventDefinition": "message"
-    },
-
-    {
-      "id": "pickup_ready_received",
-      "name": "Pickup Ready",
-      "type": "intermediateCatchEvent",
-      "participant": "courier_network",
-      "eventDefinition": "message"
-    },
-
-    {
-      "id": "delivery_confirmed",
-      "name": "Delivery Confirmed",
-      "type": "intermediateCatchEvent",
-      "participant": "platform",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "order_complete",
-      "name": "Order Complete",
+      "id": "end_employee_approved",
+      "name": "Project Started",
       "type": "endEvent",
-      "participant": "platform",
+      "participant": "employee",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_employee_rejected",
+      "name": "Rejection Received",
+      "type": "endEvent",
+      "participant": "employee",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_manager",
+      "name": "Request Received",
+      "type": "startEvent",
+      "participant": "manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_manager_approved",
+      "name": "Project Started",
+      "type": "endEvent",
+      "participant": "manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_manager_rejected",
+      "name": "Rejection Communicated",
+      "type": "endEvent",
+      "participant": "manager",
       "eventDefinition": "none"
     }
   ],
   "gateways": [
-    { "id": "split_parallel", "name": "", "type": "parallelGateway", "participant": "platform", "gatewayDirection": "diverging" },
-
-    { "id": "distance_split_1", "name": "Distance < 5 km?", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "diverging" },
-    { "id": "courier_join_1", "name": "", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "converging" },
-
-    { "id": "join_parallel", "name": "", "type": "parallelGateway", "participant": "restaurant", "gatewayDirection": "converging" },
-
-    { "id": "distance_split_2", "name": "Distance < 5 km?", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "diverging" },
-    { "id": "courier_join_2", "name": "", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "converging" }
+    {
+      "id": "gateway_approved_split",
+      "name": "Project Approved?",
+      "type": "exclusiveGateway",
+      "participant": "manager",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_planning_split",
+      "name": "Plan in Parallel",
+      "type": "parallelGateway",
+      "participant": "manager",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_planning_join",
+      "name": "Planning Complete",
+      "type": "parallelGateway",
+      "participant": "manager",
+      "gatewayDirection": "converging"
+    }
   ],
   "sequence_flows": [
-    { "from": "order_received", "to": "split_parallel" },
-    { "from": "split_parallel", "to": "forward_order" },
-    { "from": "split_parallel", "to": "reach_out_courier" },
-
-    { "from": "restaurant_order_received", "to": "prepare_food" },
-    { "from": "prepare_food", "to": "food_prepared" },
-    { "from": "food_prepared", "to": "join_parallel" },
-    { "from": "courier_arrived", "to": "join_parallel" },
-
-    { "from": "courier_request_received", "to": "distance_split_1" },
-    { "from": "distance_split_1", "to": "bike_ride_to_restaurant", "condition": "< 5 km" },
-    { "from": "distance_split_1", "to": "scooter_ride_to_restaurant", "condition": ">= 5 km" },
-    { "from": "bike_ride_to_restaurant", "to": "courier_join_1" },
-    { "from": "scooter_ride_to_restaurant", "to": "courier_join_1" },
-
-    { "from": "pickup_ready_received", "to": "distance_split_2" },
-    { "from": "distance_split_2", "to": "bike_take_meal", "condition": "< 5 km" },
-    { "from": "distance_split_2", "to": "scooter_take_meal", "condition": ">= 5 km" },
-    { "from": "bike_take_meal", "to": "courier_join_2" },
-    { "from": "scooter_take_meal", "to": "courier_join_2" },
-
-    { "from": "delivery_confirmed", "to": "order_complete" }
+    { "id": "sf1",  "from": "start_employee",        "to": "record_idea" },
+    { "id": "sf2",  "from": "record_idea",            "to": "submit_request" },
+    { "id": "sf3",  "from": "start_manager",          "to": "assess_request" },
+    { "id": "sf4",  "from": "assess_request",         "to": "gateway_approved_split" },
+    { "id": "sf5",  "from": "gateway_approved_split", "to": "initiate_project_plan", "condition": "Approved" },
+    { "id": "sf6",  "from": "gateway_approved_split", "to": "communicate_rejection", "condition": "Rejected" },
+    { "id": "sf7",  "from": "initiate_project_plan",  "to": "gateway_planning_split" },
+    { "id": "sf8",  "from": "gateway_planning_split", "to": "lay_out_timeline" },
+    { "id": "sf9",  "from": "gateway_planning_split", "to": "set_up_budget" },
+    { "id": "sf10", "from": "gateway_planning_split", "to": "state_resources" },
+    { "id": "sf11", "from": "lay_out_timeline",       "to": "gateway_planning_join" },
+    { "id": "sf12", "from": "set_up_budget",          "to": "gateway_planning_join" },
+    { "id": "sf13", "from": "state_resources",        "to": "gateway_planning_join" },
+    { "id": "sf14", "from": "gateway_planning_join",  "to": "end_manager_approved" },
+    { "id": "sf15", "from": "communicate_rejection",  "to": "end_manager_rejected" }
   ],
   "message_flows": [
-    { "from": "forward_order", "to": "restaurant_order_received", "name": "Order details" },
-    { "from": "reach_out_courier", "to": "courier_request_received", "name": "Courier request" },
-
-    { "from": "courier_join_1", "to": "courier_arrived", "name": "Courier arrived" },
-
-    { "from": "join_parallel", "to": "pickup_ready_received", "name": "Pickup ready" },
-
-    { "from": "courier_join_2", "to": "delivery_confirmed", "name": "Order delivered" }
+    {
+      "id": "mf1",
+      "from": "submit_request",
+      "to": "start_manager",
+      "name": "Approval Request"
+    },
+    {
+      "id": "mf2",
+      "from": "gateway_planning_join",
+      "to": "end_employee_approved",
+      "name": "Project Start Notification"
+    },
+    {
+      "id": "mf3",
+      "from": "communicate_rejection",
+      "to": "end_employee_rejected",
+      "name": "Rejection Notice"
+    }
   ],
   "data": []
 }
@@ -510,7 +521,7 @@ def _call_model(model, prompt):
         ],
         response_format={"type": "json_object", "schema": BPMN_SCHEMA},
         temperature=0.0,
-        max_tokens=4096
+        max_tokens=2048
     )
     if isinstance(result, dict) and "choices" in result:
         return result["choices"][0]["message"]["content"]
@@ -518,12 +529,12 @@ def _call_model(model, prompt):
 
 
 def extract_bpmn_few_shot(process_description, case_name, output_file=None, retries=2):
-    if case_name == "case_6":
-        print("WARNING: case_6 is the few-shot example. Results will be inflated — exclude from evaluation.")
+    if case_name == "case_2":
+        print("WARNING: case_2 is the few-shot example. Results will be inflated — exclude from evaluation.")
 
-    case_6_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "cases", "case_6.txt")
+    case_2_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "cases", "case_2.txt")
     try:
-        with open(case_6_path, "r", encoding="utf-8") as f:
+        with open(case_2_path, "r", encoding="utf-8") as f:
             example_process = f.read()
     except FileNotFoundError:
         example_process = "[Example process description not found]"
@@ -626,7 +637,7 @@ Re-extract the full BPMN model and fix the issue described above. Remember:
 
 
 if __name__ == "__main__":
-    case_name = "case_7"
+    case_name = "case_1"
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))

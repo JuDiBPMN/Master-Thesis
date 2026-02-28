@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="1.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="Participant_platform" name="Platform" processRef="Process_platform"/>
+    <bpmn:participant id="Participant_restaurant" name="Restaurant" processRef="Process_restaurant"/>
+    <bpmn:participant id="Participant_courier_network" name="Courier Network" processRef="Process_courier_network"/>
+    <bpmn:messageFlow id="reach_out_courier" name="Reach Out to Courier Network" sourceRef="split_parallel" targetRef="reach_out_courier"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_platform" name="Platform" isExecutable="false">
+    <bpmn:startEvent id="order_received" name="Order Received"/>
+    <bpmn:parallelGateway id="split_parallel" name="" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="Flow_0" sourceRef="order_received" targetRef="split_parallel"/>
+  </bpmn:process>
+  <bpmn:process id="Process_restaurant" name="Restaurant" isExecutable="false">
+    <bpmn:task id="prepare_food" name="Prepare Food"/>
+  </bpmn:process>
+  <bpmn:process id="Process_courier_network" name="Courier Network" isExecutable="false"/>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="Participant_platform_di" bpmnElement="Participant_platform" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="900" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_restaurant_di" bpmnElement="Participant_restaurant" isHorizontal="true">
+        <dc:Bounds x="10" y="220" width="900" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_courier_network_di" bpmnElement="Participant_courier_network" isHorizontal="true">
+        <dc:Bounds x="10" y="420" width="900" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="order_received_di" bpmnElement="order_received">
+        <dc:Bounds x="100" y="92" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_parallel_di" bpmnElement="split_parallel" isMarkerVisible="true">
+        <dc:Bounds x="260" y="85" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="prepare_food_di" bpmnElement="prepare_food">
+        <dc:Bounds x="100" y="270" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0_di" bpmnElement="Flow_0">
+        <di:waypoint x="136" y="110"/>
+        <di:waypoint x="260" y="110"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

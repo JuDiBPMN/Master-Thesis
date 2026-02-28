@@ -1,0 +1,442 @@
+import os
+import json
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
+from collections import defaultdict, deque
+
+# ── Namespace constants ────────────────────────────────────────────────────────
+BPMN   = "http://www.omg.org/spec/BPMN/20100524/MODEL"
+BPMNDI = "http://www.omg.org/spec/BPMN/20100524/DI"
+DC     = "http://www.omg.org/spec/DD/20100524/DC"
+DI     = "http://www.omg.org/spec/DD/20100524/DI"
+
+def tag(ns, local):
+    return f"{{{ns}}}{local}"
+
+NODE_SIZE = {
+    "startEvent":               (36, 36),
+    "endEvent":                 (36, 36),
+    "intermediateCatchEvent":   (36, 36),
+    "intermediateThrowEvent":   (36, 36),
+    "exclusiveGateway":         (50, 50),
+    "parallelGateway":          (50, 50),
+    "inclusiveGateway":         (50, 50),
+    "eventBasedGateway":        (50, 50),
+}
+DEFAULT_NODE_SIZE = (100, 80)
+
+POOL_HEIGHT   = 200
+POOL_WIDTH    = 900
+POOL_HEADER_W = 30
+H_GAP         = 160
+
+EVENT_DEFS = {
+    "message":     "messageEventDefinition",
+    "timer":       "timerEventDefinition",
+    "signal":      "signalEventDefinition",
+    "conditional": "conditionalEventDefinition",
+    "error":       "errorEventDefinition",
+    "escalation":  "escalationEventDefinition",
+    "link":        "linkEventDefinition",
+}
+
+# ── Validation ────────────────────────────────────────────────────────────────
+
+def validate(json_data):
+    """
+    Check the JSON for the most common LLM mistakes and print clear errors.
+    Returns True if valid, False if there are blocking errors.
+    """
+    errors   = []
+    warnings = []
+
+    declared_participant_ids = {p["id"] for p in json_data.get("participants", [])}
+    all_nodes   = _get_all_nodes(json_data)
+    declared_node_ids = {n["id"] for n in all_nodes}
+
+    # 1. Every node must reference a declared participant
+    for n in all_nodes:
+        pid = n.get("participant")
+        if not pid:
+            errors.append(f"  [NODE '{n['id']}'] missing 'participant' field.")
+        elif pid not in declared_participant_ids:
+            errors.append(
+                f"  [NODE '{n['id']}'] participant='{pid}' is not declared in "
+                f"'participants'. Declared: {sorted(declared_participant_ids)}"
+            )
+
+    # 2. Every flow endpoint must reference a declared node
+    node_to_pool = {n["id"]: n.get("participant") for n in all_nodes}
+
+    for f in json_data.get("sequence_flows", []):
+        for side in ("from", "to"):
+            nid = f.get(side)
+            if nid and nid not in declared_node_ids:
+                errors.append(
+                    f"  [SEQUENCE FLOW '{f.get('from')}'->'{ f.get('to')}'] "
+                    f"'{side}' node '{nid}' does not exist."
+                )
+
+    for mf in json_data.get("message_flows", []):
+        for side in ("from", "to"):
+            nid = mf.get(side)
+            if nid and nid not in declared_node_ids:
+                errors.append(
+                    f"  [MESSAGE FLOW '{mf.get('from')}'->'{ mf.get('to')}'] "
+                    f"'{side}' node '{nid}' does not exist."
+                )
+        # Also warn if a message flow accidentally connects nodes in the same pool
+        sp = node_to_pool.get(mf.get("from"))
+        tp = node_to_pool.get(mf.get("to"))
+        if sp and tp and sp == tp:
+            warnings.append(
+                f"  [MESSAGE FLOW '{mf.get('from')}'->'{ mf.get('to')}'] "
+                f"both nodes are in pool '{sp}' — should be a sequence flow."
+            )
+
+    # 3. Sequence flows that cross pools (will be auto-promoted, just inform)
+    for f in json_data.get("sequence_flows", []):
+        sp = node_to_pool.get(f.get("from"))
+        tp = node_to_pool.get(f.get("to"))
+        if sp and tp and sp != tp:
+            warnings.append(
+                f"  [SEQUENCE FLOW '{f.get('from')}'->'{ f.get('to')}'] "
+                f"crosses pools ('{sp}'->'{tp}') — will be converted to a message flow."
+            )
+
+    # 4. Every pool should have at least one startEvent
+    pool_has_start = defaultdict(bool)
+    for n in all_nodes:
+        if n.get("type") == "startEvent":
+            pool_has_start[n.get("participant")] = True
+    for pid in declared_participant_ids:
+        if not pool_has_start[pid]:
+            warnings.append(
+                f"  [POOL '{pid}'] has no startEvent — "
+                f"bpmn.io will import it but the diagram will be incomplete."
+            )
+
+    # 5. Every pool should have at least one endEvent
+    pool_has_end = defaultdict(bool)
+    for n in all_nodes:
+        if n.get("type") == "endEvent":
+            pool_has_end[n.get("participant")] = True
+    for pid in declared_participant_ids:
+        if not pool_has_end[pid]:
+            warnings.append(
+                f"  [POOL '{pid}'] has no endEvent — "
+                f"bpmn.io will import it but the diagram will be incomplete."
+            )
+
+    if warnings:
+        print("VALIDATION WARNINGS:")
+        for w in warnings:
+            print(w)
+    if errors:
+        print("VALIDATION ERRORS (must fix before XML will be valid):")
+        for e in errors:
+            print(e)
+        return False
+
+    if not warnings and not errors:
+        print("  Validation passed.")
+    return True
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _get_all_nodes(json_data):
+    nodes = []
+    for n in json_data.get("events",   []): nodes.append({**n, "_cat": "event"})
+    for n in json_data.get("tasks",    []): nodes.append({**n, "_cat": "task"})
+    for n in json_data.get("gateways", []): nodes.append({**n, "_cat": "gateway"})
+    return nodes
+
+def _build_participant_node_map(json_data):
+    mapping = {p["id"]: [] for p in json_data.get("participants", [])}
+    for n in _get_all_nodes(json_data):
+        pid = n.get("participant")
+        if pid in mapping:
+            mapping[pid].append(n)
+    return mapping
+
+def _detect_cross_pool(json_data):
+    node_to_pool = {n["id"]: n.get("participant") for n in _get_all_nodes(json_data)}
+    seq_flows, promoted = [], []
+    for f in json_data.get("sequence_flows", []):
+        sp = node_to_pool.get(f["from"])
+        tp = node_to_pool.get(f["to"])
+        if sp and tp and sp != tp:
+            promoted.append(f)
+        else:
+            seq_flows.append(f)
+    return seq_flows, promoted
+
+def _topological_order(node_ids, seq_flows):
+    id_set = set(node_ids)
+    flows  = [f for f in seq_flows
+              if f["from"] in id_set and f["to"] in id_set]
+
+    in_degree  = defaultdict(int)
+    successors = defaultdict(list)
+    for f in flows:
+        successors[f["from"]].append(f["to"])
+        in_degree[f["to"]] += 1
+
+    queue = deque(n for n in node_ids if in_degree[n] == 0)
+    order = []
+    while queue:
+        n = queue.popleft()
+        order.append(n)
+        for s in successors[n]:
+            in_degree[s] -= 1
+            if in_degree[s] == 0:
+                queue.append(s)
+
+    seen = set(order)
+    for n in node_ids:
+        if n not in seen:
+            order.append(n)
+    return order
+
+# ── Core builder ──────────────────────────────────────────────────────────────
+
+def create_bpmn_xml(json_data, output_path):
+
+    ET.register_namespace("bpmn",   BPMN)
+    ET.register_namespace("bpmndi", BPMNDI)
+    ET.register_namespace("dc",     DC)
+    ET.register_namespace("di",     DI)
+
+    participants = json_data.get("participants", [])
+    seq_flows, promoted = _detect_cross_pool(json_data)
+
+    message_flows = list(json_data.get("message_flows", [])) + [
+        {**f, "name": f.get("condition", "message"), "id": f"MsgFlow_promoted_{i}"}
+        for i, f in enumerate(promoted)
+    ]
+
+    has_collaboration = len(participants) > 1 or bool(message_flows)
+    collab_id = "Collaboration_1"
+
+    # ── Root ──────────────────────────────────────────────────────────────────
+    root = ET.Element(tag(BPMN, "definitions"), {
+        "id": "Definitions_1",
+        "targetNamespace": "http://bpmn.io/schema/bpmn",
+        "exporter": "BPMN Pipeline",
+        "exporterVersion": "1.0",
+    })
+
+    # ── Collaboration (participants + message flows, before any process) ───────
+    if has_collaboration:
+        collaboration = ET.SubElement(root, tag(BPMN, "collaboration"), id=collab_id)
+
+        for p in participants:
+            ET.SubElement(collaboration, tag(BPMN, "participant"), {
+                "id":         f"Participant_{p['id']}",
+                "name":       p["name"],
+                "processRef": f"Process_{p['id']}",
+            })
+
+        for i, mf in enumerate(message_flows):
+            ET.SubElement(collaboration, tag(BPMN, "messageFlow"), {
+                "id":        mf.get("id", f"MsgFlow_{i}"),
+                "name":      mf.get("name", ""),
+                "sourceRef": mf["from"],
+                "targetRef": mf["to"],
+            })
+
+    # ── One <process> per participant ─────────────────────────────────────────
+    participant_node_map = _build_participant_node_map(json_data)
+    process_map   = {}
+    node_type_map = {}
+
+    for p in participants:
+        proc_id   = f"Process_{p['id']}"
+        proc_elem = ET.SubElement(root, tag(BPMN, "process"), {
+            "id":           proc_id,
+            "name":         p["name"],
+            "isExecutable": "false",
+        })
+        process_map[p["id"]] = proc_elem
+
+        for n in participant_node_map.get(p["id"], []):
+            n_id, n_name, n_type = n["id"], n["name"], n["type"]
+            node_type_map[n_id] = n_type
+
+            elem = ET.SubElement(proc_elem, tag(BPMN, n_type), id=n_id, name=n_name)
+
+            if n["_cat"] == "event":
+                ev_def = n.get("eventDefinition", "none")
+                if ev_def and ev_def != "none":
+                    child = EVENT_DEFS.get(ev_def)
+                    if child:
+                        ET.SubElement(elem, tag(BPMN, child), id=f"{n_id}_def")
+
+            if n["_cat"] == "gateway":
+                elem.set("gatewayDirection", n.get("gatewayDirection", "diverging"))
+
+        pool_node_ids = {n["id"] for n in participant_node_map.get(p["id"], [])}
+        for i, flow in enumerate(seq_flows):
+            if flow["from"] not in pool_node_ids:
+                continue
+            attrs = {
+                "id":        flow.get("id", f"Flow_{i}"),
+                "sourceRef": flow["from"],
+                "targetRef": flow["to"],
+            }
+            if flow.get("condition"):
+                attrs["name"] = flow["condition"]
+            sf = ET.SubElement(proc_elem, tag(BPMN, "sequenceFlow"), attrs)
+            if flow.get("condition"):
+                cond = ET.SubElement(sf, tag(BPMN, "conditionExpression"))
+                cond.text = flow["condition"]
+
+    # ── Layout computation ─────────────────────────────────────────────────────
+    pool_layout = {}
+    node_layout = {}
+    current_pool_y = 20
+
+    for p in participants:
+        raw_nodes   = participant_node_map.get(p["id"], [])
+        raw_ids     = [n["id"] for n in raw_nodes]
+        id_to_node  = {n["id"]: n for n in raw_nodes}
+        ordered_ids = _topological_order(raw_ids, seq_flows)
+
+        pool_w = max(POOL_WIDTH,
+                     POOL_HEADER_W + 60 + len(ordered_ids) * H_GAP + 60)
+        pool_layout[p["id"]] = {
+            "x": 10, "y": current_pool_y, "w": pool_w, "h": POOL_HEIGHT,
+        }
+
+        node_x = POOL_HEADER_W + 60
+        for n_id in ordered_ids:
+            n    = id_to_node[n_id]
+            w, h = NODE_SIZE.get(n["type"], DEFAULT_NODE_SIZE)
+            ny   = current_pool_y + (POOL_HEIGHT - h) // 2
+            node_layout[n_id] = {"x": node_x, "y": ny, "w": w, "h": h}
+            node_x += H_GAP
+
+        current_pool_y += POOL_HEIGHT + 20
+
+    # ── BPMNDI ────────────────────────────────────────────────────────────────
+    bpmndi_elem = ET.SubElement(root, tag(BPMNDI, "BPMNDiagram"), id="BPMNDiagram_1")
+    plane_ref   = collab_id if has_collaboration else \
+                  (f"Process_{participants[0]['id']}" if participants else "Process_1")
+    plane = ET.SubElement(bpmndi_elem, tag(BPMNDI, "BPMNPlane"),
+                          id="BPMNPlane_1", bpmnElement=plane_ref)
+
+    for p in participants:
+        pl = pool_layout[p["id"]]
+        shape = ET.SubElement(plane, tag(BPMNDI, "BPMNShape"), {
+            "id":           f"Participant_{p['id']}_di",
+            "bpmnElement":  f"Participant_{p['id']}",
+            "isHorizontal": "true",
+        })
+        ET.SubElement(shape, tag(DC, "Bounds"),
+                      x=str(pl["x"]), y=str(pl["y"]),
+                      width=str(pl["w"]), height=str(pl["h"]))
+
+    for n_id, layout in node_layout.items():
+        n_type = node_type_map.get(n_id, "")
+        attrs  = {"id": f"{n_id}_di", "bpmnElement": n_id}
+        if "Gateway" in n_type:
+            attrs["isMarkerVisible"] = "true"
+        shape = ET.SubElement(plane, tag(BPMNDI, "BPMNShape"), attrs)
+        ET.SubElement(shape, tag(DC, "Bounds"),
+                      x=str(layout["x"]), y=str(layout["y"]),
+                      width=str(layout["w"]), height=str(layout["h"]))
+
+    for i, flow in enumerate(seq_flows):
+        src, tgt = flow["from"], flow["to"]
+        if src not in node_layout or tgt not in node_layout:
+            continue
+        s = node_layout[src]
+        t = node_layout[tgt]
+        edge = ET.SubElement(plane, tag(BPMNDI, "BPMNEdge"), {
+            "id":          f"{flow.get('id', f'Flow_{i}')}_di",
+            "bpmnElement": flow.get("id", f"Flow_{i}"),
+        })
+        ET.SubElement(edge, tag(DI, "waypoint"),
+                      x=str(s["x"] + s["w"]), y=str(s["y"] + s["h"] // 2))
+        ET.SubElement(edge, tag(DI, "waypoint"),
+                      x=str(t["x"]),           y=str(t["y"] + t["h"] // 2))
+
+    node_to_pool_id = {n["id"]: n.get("participant") for n in _get_all_nodes(json_data)}
+
+    for i, mf in enumerate(message_flows):
+        src, tgt = mf["from"], mf["to"]
+        if src not in node_layout or tgt not in node_layout:
+            continue
+        s  = node_layout[src]
+        t  = node_layout[tgt]
+        sp = node_to_pool_id.get(src)
+        tp = node_to_pool_id.get(tgt)
+
+        src_pool_y = pool_layout[sp]["y"] if sp in pool_layout else 0
+        tgt_pool_y = pool_layout[tp]["y"] if tp in pool_layout else 0
+
+        if src_pool_y < tgt_pool_y:
+            wx1, wy1 = s["x"] + s["w"] // 2, s["y"] + s["h"]
+            wx2, wy2 = t["x"] + t["w"] // 2, t["y"]
+        else:
+            wx1, wy1 = s["x"] + s["w"] // 2, s["y"]
+            wx2, wy2 = t["x"] + t["w"] // 2, t["y"] + t["h"]
+
+        edge = ET.SubElement(plane, tag(BPMNDI, "BPMNEdge"), {
+            "id":          f"{mf.get('id', f'MsgFlow_{i}')}_di",
+            "bpmnElement": mf.get("id", f"MsgFlow_{i}"),
+        })
+        ET.SubElement(edge, tag(DI, "waypoint"), x=str(wx1), y=str(wy1))
+        ET.SubElement(edge, tag(DI, "waypoint"), x=str(wx2), y=str(wy2))
+
+    # ── Serialise ─────────────────────────────────────────────────────────────
+    xml_bytes  = ET.tostring(root, encoding="utf-8", xml_declaration=False)
+    pretty_xml = minidom.parseString(xml_bytes).toprettyxml(indent="  ")
+    lines      = pretty_xml.splitlines()
+    final      = '<?xml version="1.0" encoding="UTF-8"?>\n' + \
+                 "\n".join(l for l in lines if not l.startswith("<?xml"))
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(final)
+    print(f"  Written -> {output_path}")
+
+
+# ── Entry point ───────────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    # --- CONFIGURATION ---
+    case_name          = "case_1"
+    pipeline_name      = "direct_extraction_pipeline"
+    prompting_strategy = "few_shot"
+    # ---------------------
+
+    SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
+    JSON_SOURCE_DIR = os.path.join(PROJECT_ROOT, "pipelines", pipeline_name, "outputs")
+    XML_OUTPUT_DIR  = os.path.join(SCRIPT_DIR, "outputs")
+    os.makedirs(XML_OUTPUT_DIR, exist_ok=True)
+
+    input_json_path = os.path.join(JSON_SOURCE_DIR,
+                                   f"{case_name}_{prompting_strategy}_bpmn.json")
+    output_xml_path = os.path.join(XML_OUTPUT_DIR,
+                                   f"{case_name}_{prompting_strategy}.bpmn")
+
+    print("--- BPMN XML Generator ---")
+
+    try:
+        if not os.path.exists(input_json_path):
+            raise FileNotFoundError(f"Input file not found: {input_json_path}")
+
+        with open(input_json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        print("Validating JSON...")
+        if not validate(data):
+            print("Fix the errors above in your JSON before generating XML.")
+        else:
+            create_bpmn_xml(data, output_xml_path)
+            print("Success - upload the .bpmn file to https://bpmn.io")
+
+    except Exception as e:
+        print(f"Error: {e}")

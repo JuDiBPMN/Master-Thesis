@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="1.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="Participant_Anouk" name="Anouk" processRef="Process_Anouk"/>
+    <bpmn:participant id="Participant_Jan" name="Jan" processRef="Process_Jan"/>
+    <bpmn:messageFlow id="MsgFlow_promoted_0" name="Anouk has picked the sweaters" sourceRef="pick_sweaters" targetRef="assemble_parcel"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Anouk" name="Anouk" isExecutable="false">
+    <bpmn:task id="pick_sweaters" name="Pick sweaters"/>
+    <bpmn:parallelGateway id="deliver_within_rotterdam" name="Deliver within Rotterdam" gatewayDirection="diverging"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Jan" name="Jan" isExecutable="false">
+    <bpmn:startEvent id="assemble_parcel" name="Assemble parcel"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="Participant_Anouk_di" bpmnElement="Participant_Anouk" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="900" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_Jan_di" bpmnElement="Participant_Jan" isHorizontal="true">
+        <dc:Bounds x="10" y="220" width="900" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="pick_sweaters_di" bpmnElement="pick_sweaters">
+        <dc:Bounds x="100" y="70" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="deliver_within_rotterdam_di" bpmnElement="deliver_within_rotterdam" isMarkerVisible="true">
+        <dc:Bounds x="260" y="85" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="assemble_parcel_di" bpmnElement="assemble_parcel">
+        <dc:Bounds x="100" y="292" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MsgFlow_promoted_0_di" bpmnElement="MsgFlow_promoted_0">
+        <di:waypoint x="150" y="150"/>
+        <di:waypoint x="118" y="292"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

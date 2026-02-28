@@ -1,0 +1,60 @@
+{
+  "participants": [
+    {
+      "id": "platform",
+      "name": "Platform",
+      "type": "pool"
+    },
+    {
+      "id": "restaurant",
+      "name": "Restaurant",
+      "type": "pool"
+    },
+    {
+      "id": "courier_network",
+      "name": "Courier Network",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "prepare_food",
+      "name": "Prepare Food",
+      "type": "task",
+      "participant": "restaurant"
+    }
+  ],
+  "events": [
+    {
+      "id": "order_received",
+      "name": "Order Received",
+      "type": "startEvent",
+      "participant": "platform",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_parallel",
+      "name": "",
+      "type": "parallelGateway",
+      "participant": "platform",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "order_received",
+      "to": "split_parallel"
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "split_parallel",
+      "to": "reach_out_courier",
+      "name": "Reach Out to Courier Network",
+      "id": "reach_out_courier"
+    }
+  ],
+  "data": []
+}

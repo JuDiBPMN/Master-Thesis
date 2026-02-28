@@ -18,108 +18,120 @@ except ImportError:
 
 def visualize_extracted_bpmn(json_data, save_path):
     """
-    Transforms JSON into a visual BPMN graph and saves it to save_path.
+    Upgraded Graphviz visualizer for the new BPMN JSON schema.
+    Handles Pools, Events, Gateways, and Tasks with standard BPMN shapes.
     """
-    # Remove extension from save_path if it's there, as graphviz adds it
     base_path = os.path.splitext(save_path)[0]
 
     dot = Digraph('BPMN Diagram', 
                   graph_attr={
-                      'rankdir': 'LR',      
-                      'nodesep': '0.3', 
+                      'rankdir': 'LR',      # Left to Right
+                      'nodesep': '0.5', 
                       'ranksep': '1.0',
                       'compound': 'true',   
                       'fontname': 'Arial',
-                      'splines': 'ortho',   
-                      'pack': 'true',       
-                      'packmode': 'node',
+                      'splines': 'ortho',   # Orthogonal (elbow) lines
                   })
 
+    # 1. Consolidate all nodes
     tasks = json_data.get('tasks', [])
+    events = json_data.get('events', [])
+    gateways = json_data.get('gateways', [])
     flows = json_data.get('sequence_flows', [])
-    
-    lanes = defaultdict(list)
-    for task in tasks:
-        actor = task.get('actor', 'Unknown')
-        lanes[actor].append(task)
+    participants = json_data.get('participants', [])
 
-    lane_first_nodes = []
+    # Map nodes to their participants
+    nodes_by_participant = defaultdict(list)
+    for node in (tasks + events + gateways):
+        nodes_by_participant[node.get('participant')].append(node)
 
-    # 3. Create Subgraphs (Lanes)
-    for i, (actor, actor_tasks) in enumerate(lanes.items()):
-        with dot.subgraph(name=f'cluster_{i}') as c:
-            c.attr(label=f" {actor.upper()} ", 
-                   labeljust='l',      
-                   labelloc='t',       
-                   style='solid',      
-                   color='#666666',    
-                   fontname='Arial-Bold',
-                   fontsize='12')
-            
-            for j, task in enumerate(actor_tasks):
-                c.node(
-                    task['id'], 
-                    label=f"<<B>{task['name']}</B>>", 
-                    shape='box', 
-                    style='rounded,filled', 
-                    fillcolor='#E3F2FD', 
-                    color='#1976D2'
-                )
-                if j == 0:
-                    lane_first_nodes.append(task['id'])
-
-    # 4. Vertical Anchor Logic
-    for i in range(len(lane_first_nodes) - 1):
-        dot.edge(lane_first_nodes[i], lane_first_nodes[i+1], style='invis', weight='10')
-
-    # 5. Add Actual Sequence Flows
-    for flow in flows:
-        dot.edge(flow['from'], flow['to'], penwidth='1.5', color='#333333')
-
-    # 6. Render and Save
-    try:
-        # cleanup=True removes the temporary .gv file, keeping only the .png
-        dot.render(filename=base_path, format='png', cleanup=True)
-        print(f"Successfully saved BPMN diagram to: {save_path}")
+    # 2. Create Pools (Subgraphs)
+    for i, part in enumerate(participants):
+        p_id = part['id']
+        p_name = part['name']
         
-        # Also display in interactive window if available
+        with dot.subgraph(name=f'cluster_{p_id}') as c:
+            c.attr(label=f" {p_name.upper()} ", 
+                   style='solid', color='#333333', fontname='Arial-Bold')
+            
+            # Add nodes for this participant
+            for node in nodes_by_participant[p_id]:
+                n_id = node['id']
+                n_name = node['name']
+                n_type = node.get('type', '')
+
+                # Styling based on BPMN Type
+                if 'Event' in n_type:
+                    # Circular Events
+                    penwidth = '3' if n_type == 'endEvent' else '1.5'
+                    c.node(n_id, label=n_name, shape='circle', 
+                           style='filled', fillcolor='#E8F5E9', color='#2E7D32', 
+                           penwidth=penwidth, fontsize='10')
+                
+                elif 'Gateway' in n_type:
+                    # Diamond Gateways
+                    marker = "+" if "parallel" in n_type.lower() else "×"
+                    # Graphviz diamonds are tricky with text; we put the marker inside 
+                    # and the gateway name as an external label (xlabel)
+                    c.node(n_id, label=marker, shape='diamond', 
+                           style='filled', fillcolor='#FFF9C4', color='#FBC02D',
+                           fontsize='14', xlabel=n_name)
+                
+                else:
+                    # Rectangular Tasks
+                    c.node(n_id, label=f"<<B>{n_name}</B>>", shape='box', 
+                           style='rounded,filled', fillcolor='#E3F2FD', color='#1976D2')
+
+    # 3. Add Sequence Flows
+    for flow in flows:
+        label = flow.get('condition', '')
+        dot.edge(flow['from'], flow['to'], label=label, 
+                 penwidth='1.5', color='#444444', fontcolor='#1976D2', fontsize='9')
+
+    # 4. Render and Save
+    try:
+        dot.render(filename=base_path, format='png', cleanup=True)
+        print(f"✅ Successfully saved BPMN diagram to: {save_path}")
         if Image:
             display(Image(filename=save_path))
-            
     except Exception as e:
-        print(f"Error rendering/saving graph: {e}")
+        print(f"❌ Error rendering graph: {e}")
 
     return dot
 
 if __name__ == "__main__":
     # ---------------------------------------------------------
-    # CONFIGURATION: Case and Pipeline names
-    case_name = "case_3" 
+    # CONFIGURATION
+    case_name = "case_7" 
     pipeline_name = "direct_extraction_pipeline"
+    prompting_strategy = "few_shot" # Options: "pipeline", "few_shot_pipeline"
     # ---------------------------------------------------------
 
     # 1. Path Discovery
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
     
-    # 2. Source (from extraction pipeline outputs)
-    JSON_SOURCE_DIR = os.path.join(PROJECT_ROOT, "pipelines", pipeline_name, "outputs")
+    # 2. Dynamic Source Path
+    # Structure: .../pipelines/direct_extraction_pipeline/few_shot_pipeline/outputs/
+    JSON_SOURCE_DIR = os.path.join(
+        PROJECT_ROOT, "pipelines", f"{pipeline_name}",  "outputs"
+    )
     
-    # 3. Target (output_generation/outputs)
-    # output_generation is one level up from this script's directory
+    # 3. Dynamic Target Path
+    # Structure: .../output_generation/outputs/
     GRAPH_OUTPUT_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "outputs")
     os.makedirs(GRAPH_OUTPUT_DIR, exist_ok=True)
 
-    # 4. Final Paths
-    input_json_path = os.path.join(JSON_SOURCE_DIR, f"{case_name}_model_extracted_bpmn.json")
-    out_graph_file = os.path.join(GRAPH_OUTPUT_DIR, f"{case_name}_bpmn_graphviz.png")
+    # 4. Construct Final Paths
+    input_json_path = os.path.join(JSON_SOURCE_DIR, f"{case_name}_{prompting_strategy}_bpmn.json")
+    
+    # We include the prompting_strategy in the filename to distinguish between different runs
+    out_graph_filename = f"{case_name}_{prompting_strategy}_bpmn_graphviz.png"
+    out_graph_file = os.path.join(GRAPH_OUTPUT_DIR, out_graph_filename)
 
-    print(f"--- BPMN Visualizer Started ---")
-    print(f"Project Root: {PROJECT_ROOT}")
-    print(f"Fetching JSON: {input_json_path}")
-    print(f"Saving Graph:  {out_graph_file}")
-    print(f"-------------------------------")
 
+    print(f"--- Graphviz Visualizer Started ---")
+    
     try:
         if not os.path.exists(input_json_path):
             raise FileNotFoundError
@@ -127,9 +139,7 @@ if __name__ == "__main__":
         with open(input_json_path, 'r', encoding='utf-8') as f:
             case_data = json.load(f)
             
-        print(f"JSON loaded for {case_name}. Generating BPMN diagram...")
-        
         visualize_extracted_bpmn(case_data, out_graph_file)
 
     except FileNotFoundError:
-        print(f"Error: Could not find JSON at {input_json_path}")
+        print(f"❌ Error: Could not find JSON at {input_json_path}")

@@ -68,7 +68,7 @@ def generate_petri_net(data, save_path):
 if __name__ == "__main__":
     # ---------------------------------------------------------
     # CONFIGURATION
-    case_name = "case_3" 
+    case_name = "case_6" 
     pipeline_name = "direct_extraction_pipeline"
     # ---------------------------------------------------------
 

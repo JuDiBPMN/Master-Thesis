@@ -30,8 +30,8 @@
   ],
   "gateways": [
     {
-      "id": "delivery_within_rotterdam",
-      "name": "Delivery within Rotterdam",
+      "id": "deliver_within_rotterdam",
+      "name": "Deliver within Rotterdam",
       "type": "parallelGateway",
       "participant": "Anouk",
       "gatewayDirection": "diverging"

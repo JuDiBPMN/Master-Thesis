@@ -1,126 +1,150 @@
 import os
-import sys
 import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from collections import defaultdict
 
 def visualize_extracted_bpmn(json_data, save_path):
-    """
-    Renders a BPMN diagram using Matplotlib and saves it to save_path.
-    """
+    # 1. Setup Data Structures
+    participants = json_data.get('participants', [])
     tasks = json_data.get('tasks', [])
+    events = json_data.get('events', [])
+    gateways = json_data.get('gateways', [])
     flows = json_data.get('sequence_flows', [])
     
-    lanes_data = defaultdict(list)
-    for task in tasks:
-        actor = task.get('actor', 'Unknown')
-        lanes_data[actor].append(task)
+    all_nodes = tasks + events + gateways
+    node_lookup = {n['id']: n for n in all_nodes}
     
-    actors = list(lanes_data.keys())
-    num_lanes = len(actors)
-    
-    # Grid Constants
-    lane_h = 2.0
-    pool_w = 16.0
-    header_w = 1.2  
-    task_w, task_h = 2.4, 0.9
-    
-    fig, ax = plt.subplots(figsize=(14, num_lanes * 2.5))
-    ax.set_xlim(0, pool_w)
-    ax.set_ylim(0, num_lanes * lane_h)
-    
-    task_coords = {}
-
-    # 2. Draw the Lanes
-    for i, actor in enumerate(reversed(actors)):
-        y_offset = i * lane_h
-        lane_rect = patches.Rectangle((0, y_offset), pool_w, lane_h, 
-                                     linewidth=2, edgecolor='black', facecolor='none')
-        ax.add_patch(lane_rect)
-        
-        header_rect = patches.Rectangle((0, y_offset), header_w, lane_h, 
-                                       linewidth=2, edgecolor='black', facecolor='#E0E0E0')
-        ax.add_patch(header_rect)
-        
-        ax.text(header_w/2, y_offset + lane_h/2, actor.upper(), 
-                weight='bold', rotation=90, va='center', ha='center', fontsize=10)
-
-        # 3. Place Tasks
-        for task in tasks:
-            if task.get('actor') == actor:
-                global_idx = tasks.index(task)
-                x_center = header_w + 2.0 + (global_idx * (pool_w - header_w - 4) / max(1, len(tasks)-1))
-                
-                x_left = x_center - (task_w / 2)
-                y_center = y_offset + (lane_h / 2)
-                
-                rect = patches.FancyBboxPatch(
-                    (x_left, y_center - task_h/2), task_w, task_h,
-                    boxstyle="round,pad=0.1",
-                    linewidth=1.5, edgecolor='#1976D2', 
-                    facecolor='#E3F2FD', zorder=3
-                )
-                ax.add_patch(rect)
-                
-                ax.text(x_center, y_center, task['name'].replace(' ', '\n'), 
-                        ha='center', va='center', fontsize=9, zorder=4)
-                
-                task_coords[task['id']] = {
-                    'right': (x_left + task_w + 0.1, y_center),
-                    'left': (x_left - 0.1, y_center)
-                }
-
-    # 4. Draw Sequence Flows
+    # 2. Assign horizontal 'Steps' to prevent clumping
+    # Simple logic: follow the sequence flows to determine columns
+    node_steps = {n['id']: 0 for n in all_nodes}
     for flow in flows:
-        start = task_coords.get(flow['from'])
-        end = task_coords.get(flow['to'])
+        src, tgt = flow['from'], flow['to']
+        if tgt in node_steps:
+            node_steps[tgt] = max(node_steps[tgt], node_steps.get(src, 0) + 1)
+
+    # 3. Layout Constants
+    lane_h = 3.5
+    pool_w = 18.0
+    header_w = 1.5
+    max_steps = max(node_steps.values()) if node_steps else 1
+    col_width = (pool_w - header_w - 3) / max(1, max_steps)
+    
+    fig, ax = plt.subplots(figsize=(14, len(participants) * 3))
+    ax.set_xlim(0, pool_w)
+    ax.set_ylim(0, len(participants) * lane_h)
+    
+    node_coords = {}
+    participant_map = {p['id']: i for i, p in enumerate(reversed(participants))}
+
+    # 4. Draw Pools and Nodes
+    for i, p in enumerate(reversed(participants)):
+        y_offset = i * lane_h
+        # Draw Lane
+        ax.add_patch(patches.Rectangle((0, y_offset), pool_w, lane_h, 
+                                     linewidth=1.5, edgecolor='black', facecolor='none'))
+        # Draw Header
+        ax.add_patch(patches.Rectangle((0, y_offset), header_w, lane_h, 
+                                       facecolor='#F0F0F0', edgecolor='black'))
+        ax.text(header_w/2, y_offset + lane_h/2, p['name'], rotation=90, 
+                va='center', ha='center', weight='bold')
+
+    # 5. Draw the Nodes
+    for node in all_nodes:
+        p_id = node.get('participant')
+        if p_id not in participant_map: continue
         
-        if start and end:
-            ax.annotate("", xy=end['left'], xytext=start['right'],
-                        arrowprops=dict(arrowstyle="-|>", color='#333333', lw=1.5,
-                        connectionstyle="angle,angleA=0,angleB=90,rad=0"), zorder=2)
+        y_center = (participant_map[p_id] * lane_h) + (lane_h / 2)
+        x_center = header_w + 1.5 + (node_steps[node['id']] * col_width)
+        
+        node_type = node.get('type', 'task')
+        color_map = {'task': '#E3F2FD', 'startEvent': '#E8F5E9', 'endEvent': '#FFEBEE', 'gateway': '#FFF9C4'}
+        
+        # Draw Shapes
+        if 'Event' in node_type:
+            circ = patches.Circle((x_center, y_center), 0.4, edgecolor='black', 
+                                  facecolor=color_map.get(node_type, '#E8F5E9'), zorder=3)
+            ax.add_patch(circ)
+            if 'end' in node_type.lower(): circ.set_linewidth(3)
+        elif 'Gateway' in node_type:
+            poly = patches.RegularPolygon((x_center, y_center), numVertices=4, radius=0.6, 
+                                          edgecolor='black', facecolor='#FFF9C4', zorder=3)
+            ax.add_patch(poly)
+            marker = '×' if 'exclusive' in node_type.lower() else '+'
+            ax.text(x_center, y_center, marker, ha='center', va='center', fontsize=12, weight='bold')
+        else: # Task
+            ax.add_patch(patches.FancyBboxPatch((x_center-1.1, y_center-0.5), 2.2, 1.0, 
+                        boxstyle="round,pad=0.1", edgecolor='#1976D2', facecolor='#E3F2FD', zorder=3))
+        
+        # Text Label (positioned below or inside)
+        label_y = y_center - 0.8 if 'Event' in node_type or 'Gateway' in node_type else y_center
+        ax.text(x_center, label_y, node['name'].replace(' ', '\n'), 
+                ha='center', va='center', fontsize=8, zorder=4)
+        
+        node_coords[node['id']] = (x_center, y_center)
+
+    # 6. Draw Sequence Flows (The "Elbow" routing)
+    for flow in flows:
+        start_id, end_id = flow['from'], flow['to']
+        if start_id in node_coords and end_id in node_coords:
+            start_x, start_y = node_coords[start_id]
+            end_x, end_y = node_coords[end_id]
+            
+            # Simple elbow logic: horizontal then vertical
+            mid_x = start_x + (end_x - start_x) * 0.5
+            
+            # Draw lines as a single path
+            ax.annotate("", xy=(end_x - 0.5, end_y), xytext=(start_x + 0.5, start_y),
+                        arrowprops=dict(arrowstyle="-|>", color='#333333', lw=1.2,
+                        connectionstyle=f"angle,angleA=0,angleB=90,rad=10"), zorder=2)
+            
+            if flow.get('condition'):
+                ax.text(mid_x, (start_y + end_y)/2 + 0.2, flow['condition'], 
+                        fontsize=7, color='blue', style='italic', ha='center')
 
     ax.set_axis_off()
     plt.tight_layout()
-    
-    # 5. Save the plot
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    print(f"💾 Successfully saved Matplotlib BPMN to: {save_path}")
-    
-    # Optional: Display in Interactive Window
-    # plt.show() 
-    
-    # Close the figure to free memory
-    plt.close(fig)
+    plt.savefig(save_path, dpi=300)
+    plt.close()
+    print(f"✅ Clean BPMN saved to {save_path}")
+
+# Main execution block follows your previous template...
 
 if __name__ == "__main__":
     # ---------------------------------------------------------
-    # CONFIGURATION: Fill in the case and pipeline name
-    case_name = "case_3" 
+    # CONFIGURATION
+    case_name = "case_7" 
     pipeline_name = "direct_extraction_pipeline"
+    prompting_strategy = "few_shot" # Options: "pipeline", "few_shot_pipeline"
     # ---------------------------------------------------------
 
     # 1. Path Discovery
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    # Go up two levels to get to Master-Thesis/
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
     
-    # 2. Dynamic Source Path (Looking for JSON)
+    # 2. Dynamic Source Path
+    # Structure: .../pipelines/direct_extraction_pipeline/few_shot_pipeline/outputs/
     JSON_SOURCE_DIR = os.path.join(
-        PROJECT_ROOT, "pipelines", pipeline_name, "outputs"
+        PROJECT_ROOT, "pipelines", f"{pipeline_name}",  "outputs"
     )
     
-    # 3. Dynamic Target Path (output_generation/outputs)
-    # Get to output_generation/ by going up one level from SCRIPT_DIR
+    # 3. Dynamic Target Path
+    # Structure: .../output_generation/outputs/
     GRAPH_OUTPUT_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "outputs")
     os.makedirs(GRAPH_OUTPUT_DIR, exist_ok=True)
 
-    # 4. Final Paths
-    input_json_path = os.path.join(JSON_SOURCE_DIR, f"{case_name}_model_extracted_bpmn.json")
-    out_graph_file = os.path.join(GRAPH_OUTPUT_DIR, f"{case_name}_bpmn_matplotlib.png")
+    # 4. Construct Final Paths
+    input_json_path = os.path.join(JSON_SOURCE_DIR, f"{case_name}_{prompting_strategy}_bpmn.json")
+    
+    # We include the prompting_strategy in the filename to distinguish between different runs
+    out_graph_filename = f"{case_name}_{prompting_strategy}_bpmn_matplotlib.png"
+    out_graph_file = os.path.join(GRAPH_OUTPUT_DIR, out_graph_filename)
 
-    print(f"--- Matplotlib Visualizer Started ---")
+    print(f"--- Multi-Strategy Visualizer ---")
+    print(f"Strategy: {prompting_strategy}")
+    print(f"Source:   {input_json_path}")
+    print(f"Target:   {out_graph_file}")
+    print(f"------------------------------------")
     
     try:
         if not os.path.exists(input_json_path):
@@ -129,8 +153,8 @@ if __name__ == "__main__":
         with open(input_json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             
-        print(f"JSON loaded for {case_name}. Plotting diagram...")
         visualize_extracted_bpmn(data, out_graph_file)
 
     except FileNotFoundError:
-        print(f"Error: JSON not found at {input_json_path}")
+        print(f"Error: File not found at {input_json_path}")
+        print(f"Double check that you ran the '{prompting_strategy}' script first!")

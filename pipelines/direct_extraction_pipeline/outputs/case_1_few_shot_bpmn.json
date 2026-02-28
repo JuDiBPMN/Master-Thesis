@@ -1,0 +1,115 @@
+{
+  "participants": [
+    {
+      "id": "customer",
+      "name": "Customer",
+      "type": "pool"
+    },
+    {
+      "id": "sales",
+      "name": "Sales Department",
+      "type": "pool"
+    },
+    {
+      "id": "logistics",
+      "name": "Logistics Department",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "check_availability",
+      "name": "Check Availability of Parts",
+      "type": "task",
+      "participant": "logistics"
+    },
+    {
+      "id": "reject_order",
+      "name": "Reject Order",
+      "type": "task",
+      "participant": "sales"
+    },
+    {
+      "id": "send_invoice",
+      "name": "Send Invoice",
+      "type": "task",
+      "participant": "sales"
+    },
+    {
+      "id": "ship_goods",
+      "name": "Ship Goods",
+      "type": "task",
+      "participant": "logistics"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_order",
+      "name": "Order Placed",
+      "type": "startEvent",
+      "participant": "customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_order",
+      "name": "Order Confirmed",
+      "type": "endEvent",
+      "participant": "sales",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ship_goods_confirmed",
+      "name": "Goods Shipped",
+      "type": "endEvent",
+      "participant": "logistics",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_sales",
+      "name": "Approve Order",
+      "type": "exclusiveGateway",
+      "participant": "sales",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_logistics",
+      "name": "Ship Goods",
+      "type": "parallelGateway",
+      "participant": "logistics",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "start_order",
+      "to": "check_availability",
+      "id": "flow1"
+    },
+    {
+      "from": "check_availability",
+      "to": "reject_order",
+      "id": "flow2"
+    },
+    {
+      "from": "reject_order",
+      "to": "send_invoice",
+      "id": "flow3"
+    },
+    {
+      "from": "send_invoice",
+      "to": "ship_goods",
+      "id": "flow4"
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "send_invoice",
+      "to": "gateway_sales",
+      "name": "Invoice Sent",
+      "id": "mf1"
+    }
+  ],
+  "data": []
+}

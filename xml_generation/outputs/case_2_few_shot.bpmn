@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="1.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="Participant_employee" name="Employee" processRef="Process_employee"/>
+    <bpmn:participant id="Participant_manager" name="Manager" processRef="Process_manager"/>
+    <bpmn:messageFlow id="mf1" name="Approval Request" sourceRef="submit_request" targetRef="start_manager"/>
+    <bpmn:messageFlow id="mf2" name="Project Start Notification" sourceRef="gateway_planning_join" targetRef="end_employee_approved"/>
+    <bpmn:messageFlow id="mf3" name="Rejection Notice" sourceRef="communicate_rejection" targetRef="end_employee_rejected"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_employee" name="Employee" isExecutable="false">
+    <bpmn:startEvent id="start_employee" name="Start"/>
+    <bpmn:endEvent id="end_employee_approved" name="Project Started"/>
+    <bpmn:endEvent id="end_employee_rejected" name="Rejection Received"/>
+    <bpmn:task id="record_idea" name="Record Idea in Document"/>
+    <bpmn:task id="submit_request" name="Submit Request for Approval"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_employee" targetRef="record_idea"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="record_idea" targetRef="submit_request"/>
+  </bpmn:process>
+  <bpmn:process id="Process_manager" name="Manager" isExecutable="false">
+    <bpmn:startEvent id="start_manager" name="Request Received">
+      <bpmn:messageEventDefinition id="start_manager_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_manager_approved" name="Project Started"/>
+    <bpmn:endEvent id="end_manager_rejected" name="Rejection Communicated"/>
+    <bpmn:task id="assess_request" name="Assess Request for Approval"/>
+    <bpmn:task id="initiate_project_plan" name="Initiate Project Plan"/>
+    <bpmn:task id="lay_out_timeline" name="Lay Out Timeline"/>
+    <bpmn:task id="set_up_budget" name="Set Up Budget"/>
+    <bpmn:task id="state_resources" name="State Required Resources"/>
+    <bpmn:task id="communicate_rejection" name="Communicate Rejection"/>
+    <bpmn:exclusiveGateway id="gateway_approved_split" name="Project Approved?" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gateway_planning_split" name="Plan in Parallel" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gateway_planning_join" name="Planning Complete" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="start_manager" targetRef="assess_request"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="assess_request" targetRef="gateway_approved_split"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="gateway_approved_split" targetRef="initiate_project_plan" name="Approved">
+      <bpmn:conditionExpression>Approved</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf6" sourceRef="gateway_approved_split" targetRef="communicate_rejection" name="Rejected">
+      <bpmn:conditionExpression>Rejected</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf7" sourceRef="initiate_project_plan" targetRef="gateway_planning_split"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="gateway_planning_split" targetRef="lay_out_timeline"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="gateway_planning_split" targetRef="set_up_budget"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="gateway_planning_split" targetRef="state_resources"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="lay_out_timeline" targetRef="gateway_planning_join"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="set_up_budget" targetRef="gateway_planning_join"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="state_resources" targetRef="gateway_planning_join"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="gateway_planning_join" targetRef="end_manager_approved"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="communicate_rejection" targetRef="end_manager_rejected"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="Participant_employee_di" bpmnElement="Participant_employee" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="950" height="200"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_manager_di" bpmnElement="Participant_manager" isHorizontal="true">
+        <dc:Bounds x="10" y="240" width="2070" height="200"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_employee_di" bpmnElement="start_employee">
+        <dc:Bounds x="90" y="102" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_employee_approved_di" bpmnElement="end_employee_approved">
+        <dc:Bounds x="250" y="102" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_employee_rejected_di" bpmnElement="end_employee_rejected">
+        <dc:Bounds x="410" y="102" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_idea_di" bpmnElement="record_idea">
+        <dc:Bounds x="570" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_request_di" bpmnElement="submit_request">
+        <dc:Bounds x="730" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_manager_di" bpmnElement="start_manager">
+        <dc:Bounds x="90" y="322" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="assess_request_di" bpmnElement="assess_request">
+        <dc:Bounds x="250" y="300" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_approved_split_di" bpmnElement="gateway_approved_split" isMarkerVisible="true">
+        <dc:Bounds x="410" y="315" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="initiate_project_plan_di" bpmnElement="initiate_project_plan">
+        <dc:Bounds x="570" y="300" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="communicate_rejection_di" bpmnElement="communicate_rejection">
+        <dc:Bounds x="730" y="300" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_planning_split_di" bpmnElement="gateway_planning_split" isMarkerVisible="true">
+        <dc:Bounds x="890" y="315" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_manager_rejected_di" bpmnElement="end_manager_rejected">
+        <dc:Bounds x="1050" y="322" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="lay_out_timeline_di" bpmnElement="lay_out_timeline">
+        <dc:Bounds x="1210" y="300" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="set_up_budget_di" bpmnElement="set_up_budget">
+        <dc:Bounds x="1370" y="300" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="state_resources_di" bpmnElement="state_resources">
+        <dc:Bounds x="1530" y="300" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_planning_join_di" bpmnElement="gateway_planning_join" isMarkerVisible="true">
+        <dc:Bounds x="1690" y="315" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_manager_approved_di" bpmnElement="end_manager_approved">
+        <dc:Bounds x="1850" y="322" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="126" y="120"/>
+        <di:waypoint x="570" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="670" y="120"/>
+        <di:waypoint x="730" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="126" y="340"/>
+        <di:waypoint x="250" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="350" y="340"/>
+        <di:waypoint x="410" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="460" y="340"/>
+        <di:waypoint x="570" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="460" y="340"/>
+        <di:waypoint x="730" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="670" y="340"/>
+        <di:waypoint x="890" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="940" y="340"/>
+        <di:waypoint x="1210" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="940" y="340"/>
+        <di:waypoint x="1370" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="940" y="340"/>
+        <di:waypoint x="1530" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="1310" y="340"/>
+        <di:waypoint x="1690" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="1470" y="340"/>
+        <di:waypoint x="1690" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="1630" y="340"/>
+        <di:waypoint x="1690" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="1740" y="340"/>
+        <di:waypoint x="1850" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="830" y="340"/>
+        <di:waypoint x="1050" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="780" y="160"/>
+        <di:waypoint x="108" y="322"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="1715" y="315"/>
+        <di:waypoint x="268" y="138"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
+        <di:waypoint x="780" y="300"/>
+        <di:waypoint x="428" y="138"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
