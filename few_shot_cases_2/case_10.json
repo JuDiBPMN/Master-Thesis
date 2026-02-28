@@ -1,0 +1,139 @@
+{
+    "participants": [
+      {
+        "id": "finance",
+        "name": "Finance Department",
+        "type": "pool",
+        "lanes": [
+          {
+            "id": "lane_clerk",
+            "name": "Clerk"
+          },
+          {
+            "id": "lane_finance_manager",
+            "name": "Finance Manager"
+          }
+        ]
+      },
+      {
+        "id": "supplier",
+        "name": "Supplier",
+        "type": "pool"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "verify_amount",
+        "name": "Verify Invoice Amount",
+        "type": "task",
+        "participant": "finance",
+        "lane": "lane_clerk"
+      },
+      {
+        "id": "check_purchase_order",
+        "name": "Check Purchase Order Match",
+        "type": "task",
+        "participant": "finance",
+        "lane": "lane_clerk"
+      },
+      {
+        "id": "book_invoice",
+        "name": "Book Invoice in Accounting System",
+        "type": "task",
+        "participant": "finance",
+        "lane": "lane_clerk"
+      },
+      {
+        "id": "pay_invoice",
+        "name": "Pay Invoice",
+        "type": "task",
+        "participant": "finance",
+        "lane": "lane_finance_manager"
+      },
+      {
+        "id": "notify_supplier",
+        "name": "Notify Supplier of Payment",
+        "type": "task",
+        "participant": "finance",
+        "lane": "lane_finance_manager"
+      },
+      {
+        "id": "receive_notification",
+        "name": "Receive Payment Notification",
+        "type": "task",
+        "participant": "supplier"
+      }
+    ],
+    "events": [
+      {
+        "id": "start_finance",
+        "name": "Invoice Received",
+        "type": "startEvent",
+        "participant": "finance",
+        "lane": "lane_clerk",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "end_finance",
+        "name": "Payment Sent",
+        "type": "endEvent",
+        "participant": "finance",
+        "lane": "lane_finance_manager",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "start_supplier",
+        "name": "Payment Notification Received",
+        "type": "startEvent",
+        "participant": "supplier",
+        "eventDefinition": "message"
+      },
+      {
+        "id": "end_supplier",
+        "name": "Payment Confirmed",
+        "type": "endEvent",
+        "participant": "supplier",
+        "eventDefinition": "none"
+      }
+    ],
+    "gateways": [
+      {
+        "id": "gateway_parallel_split",
+        "name": "Start Parallel Checks",
+        "type": "parallelGateway",
+        "participant": "finance",
+        "lane": "lane_clerk",
+        "gatewayDirection": "diverging"
+      },
+      {
+        "id": "gateway_parallel_join",
+        "name": "Both Checks Complete",
+        "type": "parallelGateway",
+        "participant": "finance",
+        "lane": "lane_clerk",
+        "gatewayDirection": "converging"
+      }
+    ],
+    "sequence_flows": [
+      { "id": "sf1", "from": "start_finance",          "to": "gateway_parallel_split" },
+      { "id": "sf2", "from": "gateway_parallel_split", "to": "verify_amount" },
+      { "id": "sf3", "from": "gateway_parallel_split", "to": "check_purchase_order" },
+      { "id": "sf4", "from": "verify_amount",          "to": "gateway_parallel_join" },
+      { "id": "sf5", "from": "check_purchase_order",   "to": "gateway_parallel_join" },
+      { "id": "sf6", "from": "gateway_parallel_join",  "to": "book_invoice" },
+      { "id": "sf7", "from": "book_invoice",           "to": "pay_invoice" },
+      { "id": "sf8", "from": "pay_invoice",            "to": "notify_supplier" },
+      { "id": "sf9", "from": "notify_supplier",        "to": "end_finance" },
+      { "id": "sf10","from": "start_supplier",         "to": "receive_notification" },
+      { "id": "sf11","from": "receive_notification",   "to": "end_supplier" }
+    ],
+    "message_flows": [
+      {
+        "id": "mf1",
+        "from": "notify_supplier",
+        "to": "start_supplier",
+        "name": "Payment Notification"
+      }
+    ],
+    "data": []
+  }

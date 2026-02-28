@@ -1,0 +1,176 @@
+{
+    "participants": [
+      {
+        "id": "patient",
+        "name": "Patient",
+        "type": "pool"
+      },
+      {
+        "id": "doctor",
+        "name": "Doctor",
+        "type": "pool"
+      },
+      {
+        "id": "lab",
+        "name": "Lab",
+        "type": "pool"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "schedule_appointment",
+        "name": "Schedule Appointment",
+        "type": "task",
+        "participant": "patient"
+      },
+      {
+        "id": "visit_doctor",
+        "name": "Visit Doctor",
+        "type": "task",
+        "participant": "patient"
+      },
+      {
+        "id": "receive_prescription",
+        "name": "Receive Treatment Prescription",
+        "type": "task",
+        "participant": "patient"
+      },
+      {
+        "id": "examine_patient",
+        "name": "Examine Patient",
+        "type": "task",
+        "participant": "doctor"
+      },
+      {
+        "id": "review_results",
+        "name": "Review Lab Results",
+        "type": "task",
+        "participant": "doctor"
+      },
+      {
+        "id": "prescribe_treatment",
+        "name": "Prescribe Treatment",
+        "type": "task",
+        "participant": "doctor"
+      },
+      {
+        "id": "process_request",
+        "name": "Process Test Request",
+        "type": "task",
+        "participant": "lab"
+      },
+      {
+        "id": "perform_tests",
+        "name": "Perform Tests",
+        "type": "task",
+        "participant": "lab"
+      }
+    ],
+    "events": [
+      {
+        "id": "start_patient",
+        "name": "Start",
+        "type": "startEvent",
+        "participant": "patient",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "end_patient",
+        "name": "Prescription Received",
+        "type": "endEvent",
+        "participant": "patient",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "start_doctor",
+        "name": "Patient Arrives",
+        "type": "startEvent",
+        "participant": "doctor",
+        "eventDefinition": "message"
+      },
+      {
+        "id": "end_doctor",
+        "name": "Treatment Prescribed",
+        "type": "endEvent",
+        "participant": "doctor",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "start_lab",
+        "name": "Test Request Received",
+        "type": "startEvent",
+        "participant": "lab",
+        "eventDefinition": "message"
+      },
+      {
+        "id": "end_lab",
+        "name": "Results Sent",
+        "type": "endEvent",
+        "participant": "lab",
+        "eventDefinition": "none"
+      }
+    ],
+    "gateways": [
+      {
+        "id": "gateway_tests_needed",
+        "name": "Lab Tests Needed?",
+        "type": "exclusiveGateway",
+        "participant": "doctor",
+        "gatewayDirection": "diverging"
+      },
+      {
+        "id": "gateway_tests_join",
+        "name": "After Tests Decision",
+        "type": "exclusiveGateway",
+        "participant": "doctor",
+        "gatewayDirection": "converging"
+      }
+    ],
+    "sequence_flows": [
+      { "id": "sf1",  "from": "start_patient",        "to": "schedule_appointment" },
+      { "id": "sf2",  "from": "schedule_appointment", "to": "visit_doctor" },
+      { "id": "sf3",  "from": "start_doctor",         "to": "examine_patient" },
+      { "id": "sf4",  "from": "examine_patient",      "to": "gateway_tests_needed" },
+      { "id": "sf5",  "from": "gateway_tests_needed", "to": "review_results",    "condition": "Tests Needed" },
+      { "id": "sf6",  "from": "gateway_tests_needed", "to": "gateway_tests_join","condition": "No Tests Needed" },
+      { "id": "sf7",  "from": "review_results",       "to": "gateway_tests_join" },
+      { "id": "sf8",  "from": "gateway_tests_join",   "to": "prescribe_treatment" },
+      { "id": "sf9",  "from": "prescribe_treatment",  "to": "end_doctor" },
+      { "id": "sf10", "from": "start_lab",            "to": "process_request" },
+      { "id": "sf11", "from": "process_request",      "to": "perform_tests" },
+      { "id": "sf12", "from": "perform_tests",        "to": "end_lab" }
+    ],
+    "message_flows": [
+      {
+        "id": "mf1",
+        "from": "visit_doctor",
+        "to": "start_doctor",
+        "name": "Patient Visit"
+      },
+      {
+        "id": "mf2",
+        "from": "gateway_tests_needed",
+        "to": "start_lab",
+        "name": "Test Request"
+      },
+      {
+        "id": "mf3",
+        "from": "perform_tests",
+        "to": "review_results",
+        "name": "Lab Results"
+      },
+      {
+        "id": "mf4",
+        "from": "prescribe_treatment",
+        "to": "receive_prescription",
+        "name": "Prescription"
+      },
+      {
+        "id": "mf5",
+        "from": "receive_prescription",
+        "to": "end_patient",
+        "name": "Prescription Received"
+      }
+    ],
+    "data": []
+  }

@@ -1,0 +1,169 @@
+{
+  "participants": [
+    {
+      "id": "employee",
+      "name": "Employee",
+      "type": "pool"
+    },
+    {
+      "id": "manager",
+      "name": "Manager",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "record_idea",
+      "name": "Record Idea in Document",
+      "type": "task",
+      "participant": "employee"
+    },
+    {
+      "id": "submit_request",
+      "name": "Submit Request for Approval",
+      "type": "task",
+      "participant": "employee"
+    },
+    {
+      "id": "assess_request",
+      "name": "Assess Request for Approval",
+      "type": "task",
+      "participant": "manager"
+    },
+    {
+      "id": "initiate_project_plan",
+      "name": "Initiate Project Plan",
+      "type": "task",
+      "participant": "manager"
+    },
+    {
+      "id": "lay_out_timeline",
+      "name": "Lay Out Timeline",
+      "type": "task",
+      "participant": "manager"
+    },
+    {
+      "id": "set_up_budget",
+      "name": "Set Up Budget",
+      "type": "task",
+      "participant": "manager"
+    },
+    {
+      "id": "state_resources",
+      "name": "State Required Resources",
+      "type": "task",
+      "participant": "manager"
+    },
+    {
+      "id": "communicate_rejection",
+      "name": "Communicate Rejection",
+      "type": "task",
+      "participant": "manager"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_employee",
+      "name": "Start",
+      "type": "startEvent",
+      "participant": "employee",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_employee_approved",
+      "name": "Project Started",
+      "type": "endEvent",
+      "participant": "employee",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_employee_rejected",
+      "name": "Rejection Received",
+      "type": "endEvent",
+      "participant": "employee",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_manager",
+      "name": "Request Received",
+      "type": "startEvent",
+      "participant": "manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_manager_approved",
+      "name": "Project Started",
+      "type": "endEvent",
+      "participant": "manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_manager_rejected",
+      "name": "Rejection Communicated",
+      "type": "endEvent",
+      "participant": "manager",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_approved_split",
+      "name": "Project Approved?",
+      "type": "exclusiveGateway",
+      "participant": "manager",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_planning_split",
+      "name": "Plan in Parallel",
+      "type": "parallelGateway",
+      "participant": "manager",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_planning_join",
+      "name": "Planning Complete",
+      "type": "parallelGateway",
+      "participant": "manager",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    { "id": "sf1",  "from": "start_employee",        "to": "record_idea" },
+    { "id": "sf2",  "from": "record_idea",            "to": "submit_request" },
+    { "id": "sf3",  "from": "start_manager",          "to": "assess_request" },
+    { "id": "sf4",  "from": "assess_request",         "to": "gateway_approved_split" },
+    { "id": "sf5",  "from": "gateway_approved_split", "to": "initiate_project_plan", "condition": "Approved" },
+    { "id": "sf6",  "from": "gateway_approved_split", "to": "communicate_rejection", "condition": "Rejected" },
+    { "id": "sf7",  "from": "initiate_project_plan",  "to": "gateway_planning_split" },
+    { "id": "sf8",  "from": "gateway_planning_split", "to": "lay_out_timeline" },
+    { "id": "sf9",  "from": "gateway_planning_split", "to": "set_up_budget" },
+    { "id": "sf10", "from": "gateway_planning_split", "to": "state_resources" },
+    { "id": "sf11", "from": "lay_out_timeline",       "to": "gateway_planning_join" },
+    { "id": "sf12", "from": "set_up_budget",          "to": "gateway_planning_join" },
+    { "id": "sf13", "from": "state_resources",        "to": "gateway_planning_join" },
+    { "id": "sf14", "from": "gateway_planning_join",  "to": "end_manager_approved" },
+    { "id": "sf15", "from": "communicate_rejection",  "to": "end_manager_rejected" }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "submit_request",
+      "to": "start_manager",
+      "name": "Approval Request"
+    },
+    {
+      "id": "mf2",
+      "from": "gateway_planning_join",
+      "to": "end_employee_approved",
+      "name": "Project Start Notification"
+    },
+    {
+      "id": "mf3",
+      "from": "communicate_rejection",
+      "to": "end_employee_rejected",
+      "name": "Rejection Notice"
+    }
+  ],
+  "data": []
+}

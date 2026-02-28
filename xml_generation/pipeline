@@ -25,9 +25,11 @@ NODE_SIZE = {
 }
 DEFAULT_NODE_SIZE = (100, 80)
 
-POOL_HEIGHT   = 200
+LANE_HEIGHT   = 160   # height of each individual lane
+POOL_HEIGHT   = 200   # fallback when no lanes
 POOL_WIDTH    = 900
-POOL_HEADER_W = 30
+POOL_HEADER_W = 30    # vertical label strip on left of pool
+LANE_HEADER_W = 30    # vertical label strip on left of each lane
 H_GAP         = 160
 
 EVENT_DEFS = {
@@ -43,18 +45,20 @@ EVENT_DEFS = {
 # ── Validation ────────────────────────────────────────────────────────────────
 
 def validate(json_data):
-    """
-    Check the JSON for the most common LLM mistakes and print clear errors.
-    Returns True if valid, False if there are blocking errors.
-    """
     errors   = []
     warnings = []
 
     declared_participant_ids = {p["id"] for p in json_data.get("participants", [])}
-    all_nodes   = _get_all_nodes(json_data)
+
+    # Build lane id -> participant id map for validation
+    declared_lane_ids = {}
+    for p in json_data.get("participants", []):
+        for lane in p.get("lanes", []):
+            declared_lane_ids[lane["id"]] = p["id"]
+
+    all_nodes         = _get_all_nodes(json_data)
     declared_node_ids = {n["id"] for n in all_nodes}
 
-    # 1. Every node must reference a declared participant
     for n in all_nodes:
         pid = n.get("participant")
         if not pid:
@@ -64,8 +68,20 @@ def validate(json_data):
                 f"  [NODE '{n['id']}'] participant='{pid}' is not declared in "
                 f"'participants'. Declared: {sorted(declared_participant_ids)}"
             )
+        # Validate lane reference if present
+        lane_id = n.get("lane")
+        if lane_id:
+            if lane_id not in declared_lane_ids:
+                errors.append(
+                    f"  [NODE '{n['id']}'] lane='{lane_id}' is not declared "
+                    f"in any participant's lanes."
+                )
+            elif declared_lane_ids[lane_id] != pid:
+                errors.append(
+                    f"  [NODE '{n['id']}'] lane='{lane_id}' belongs to a "
+                    f"different participant than '{pid}'."
+                )
 
-    # 2. Every flow endpoint must reference a declared node
     node_to_pool = {n["id"]: n.get("participant") for n in all_nodes}
 
     for f in json_data.get("sequence_flows", []):
@@ -85,7 +101,6 @@ def validate(json_data):
                     f"  [MESSAGE FLOW '{mf.get('from')}'->'{ mf.get('to')}'] "
                     f"'{side}' node '{nid}' does not exist."
                 )
-        # Also warn if a message flow accidentally connects nodes in the same pool
         sp = node_to_pool.get(mf.get("from"))
         tp = node_to_pool.get(mf.get("to"))
         if sp and tp and sp == tp:
@@ -94,7 +109,6 @@ def validate(json_data):
                 f"both nodes are in pool '{sp}' — should be a sequence flow."
             )
 
-    # 3. Sequence flows that cross pools (will be auto-promoted, just inform)
     for f in json_data.get("sequence_flows", []):
         sp = node_to_pool.get(f.get("from"))
         tp = node_to_pool.get(f.get("to"))
@@ -104,7 +118,6 @@ def validate(json_data):
                 f"crosses pools ('{sp}'->'{tp}') — will be converted to a message flow."
             )
 
-    # 4. Every pool should have at least one startEvent
     pool_has_start = defaultdict(bool)
     for n in all_nodes:
         if n.get("type") == "startEvent":
@@ -116,7 +129,6 @@ def validate(json_data):
                 f"bpmn.io will import it but the diagram will be incomplete."
             )
 
-    # 5. Every pool should have at least one endEvent
     pool_has_end = defaultdict(bool)
     for n in all_nodes:
         if n.get("type") == "endEvent":
@@ -226,7 +238,7 @@ def create_bpmn_xml(json_data, output_path):
         "exporterVersion": "1.0",
     })
 
-    # ── Collaboration (participants + message flows, before any process) ───────
+    # ── Collaboration ─────────────────────────────────────────────────────────
     if has_collaboration:
         collaboration = ET.SubElement(root, tag(BPMN, "collaboration"), id=collab_id)
 
@@ -259,6 +271,30 @@ def create_bpmn_xml(json_data, output_path):
         })
         process_map[p["id"]] = proc_elem
 
+        lanes = p.get("lanes", [])
+
+        # ── laneSet (only if lanes are declared) ──────────────────────────────
+        if lanes:
+            lane_set_elem = ET.SubElement(proc_elem, tag(BPMN, "laneSet"),
+                                          id=f"LaneSet_{p['id']}")
+            # Build a map of lane_id -> list of node ids in that lane
+            lane_node_map = defaultdict(list)
+            for n in participant_node_map.get(p["id"], []):
+                lid = n.get("lane")
+                if lid:
+                    lane_node_map[lid].append(n["id"])
+
+            for lane in lanes:
+                lane_elem = ET.SubElement(lane_set_elem, tag(BPMN, "lane"), {
+                    "id":   lane["id"],
+                    "name": lane["name"],
+                })
+                # flowNodeRef: tell BPMN which nodes live in this lane
+                for nid in lane_node_map.get(lane["id"], []):
+                    ref = ET.SubElement(lane_elem, tag(BPMN, "flowNodeRef"))
+                    ref.text = nid
+
+        # ── Nodes ─────────────────────────────────────────────────────────────
         for n in participant_node_map.get(p["id"], []):
             n_id, n_name, n_type = n["id"], n["name"], n["type"]
             node_type_map[n_id] = n_type
@@ -275,6 +311,7 @@ def create_bpmn_xml(json_data, output_path):
             if n["_cat"] == "gateway":
                 elem.set("gatewayDirection", n.get("gatewayDirection", "diverging"))
 
+        # ── Sequence flows ────────────────────────────────────────────────────
         pool_node_ids = {n["id"] for n in participant_node_map.get(p["id"], [])}
         for i, flow in enumerate(seq_flows):
             if flow["from"] not in pool_node_ids:
@@ -292,31 +329,91 @@ def create_bpmn_xml(json_data, output_path):
                 cond.text = flow["condition"]
 
     # ── Layout computation ─────────────────────────────────────────────────────
-    pool_layout = {}
-    node_layout = {}
+    # For pools with lanes: each lane gets its own horizontal band.
+    # node_layout stores absolute canvas coordinates for every node.
+    pool_layout  = {}   # pid  -> {x, y, w, h}
+    lane_layout  = {}   # lid  -> {x, y, w, h}
+    node_layout  = {}   # nid  -> {x, y, w, h}
     current_pool_y = 20
 
     for p in participants:
-        raw_nodes   = participant_node_map.get(p["id"], [])
-        raw_ids     = [n["id"] for n in raw_nodes]
-        id_to_node  = {n["id"]: n for n in raw_nodes}
-        ordered_ids = _topological_order(raw_ids, seq_flows)
+        lanes      = p.get("lanes", [])
+        all_nodes_in_pool = participant_node_map.get(p["id"], [])
+        id_to_node = {n["id"]: n for n in all_nodes_in_pool}
 
-        pool_w = max(POOL_WIDTH,
-                     POOL_HEADER_W + 60 + len(ordered_ids) * H_GAP + 60)
-        pool_layout[p["id"]] = {
-            "x": 10, "y": current_pool_y, "w": pool_w, "h": POOL_HEIGHT,
-        }
+        if lanes:
+            # Pool height = sum of lane heights
+            total_pool_h = len(lanes) * LANE_HEIGHT
+            pool_w = max(POOL_WIDTH,
+                         POOL_HEADER_W + LANE_HEADER_W + 60 +
+                         max((len([n for n in all_nodes_in_pool
+                                   if n.get("lane") == ln["id"]])
+                              for ln in lanes), default=1) * H_GAP + 60)
 
-        node_x = POOL_HEADER_W + 60
-        for n_id in ordered_ids:
-            n    = id_to_node[n_id]
-            w, h = NODE_SIZE.get(n["type"], DEFAULT_NODE_SIZE)
-            ny   = current_pool_y + (POOL_HEIGHT - h) // 2
-            node_layout[n_id] = {"x": node_x, "y": ny, "w": w, "h": h}
-            node_x += H_GAP
+            pool_layout[p["id"]] = {
+                "x": 10, "y": current_pool_y,
+                "w": pool_w, "h": total_pool_h,
+            }
 
-        current_pool_y += POOL_HEIGHT + 20
+            lane_y = current_pool_y
+            for lane in lanes:
+                lane_layout[lane["id"]] = {
+                    "x": 10 + POOL_HEADER_W,   # sits to the right of pool header
+                    "y": lane_y,
+                    "w": pool_w - POOL_HEADER_W,
+                    "h": LANE_HEIGHT,
+                }
+
+                # Nodes in this lane — topological order within lane
+                lane_node_ids = [n["id"] for n in all_nodes_in_pool
+                                 if n.get("lane") == lane["id"]]
+                ordered_ids   = _topological_order(lane_node_ids, seq_flows)
+
+                node_x = 10 + POOL_HEADER_W + LANE_HEADER_W + 40
+                for nid in ordered_ids:
+                    n    = id_to_node[nid]
+                    w, h = NODE_SIZE.get(n["type"], DEFAULT_NODE_SIZE)
+                    ny   = lane_y + (LANE_HEIGHT - h) // 2
+                    node_layout[nid] = {"x": node_x, "y": ny, "w": w, "h": h}
+                    node_x += H_GAP
+
+                # Nodes with no lane assignment fall through to here — place them too
+                lane_y += LANE_HEIGHT
+
+            # Any nodes without a lane: place them below all lanes
+            unlaned = [n for n in all_nodes_in_pool if not n.get("lane")]
+            if unlaned:
+                ordered_unlaned = _topological_order([n["id"] for n in unlaned], seq_flows)
+                node_x = 10 + POOL_HEADER_W + 60
+                for nid in ordered_unlaned:
+                    n    = id_to_node[nid]
+                    w, h = NODE_SIZE.get(n["type"], DEFAULT_NODE_SIZE)
+                    ny   = current_pool_y + (total_pool_h - h) // 2
+                    node_layout[nid] = {"x": node_x, "y": ny, "w": w, "h": h}
+                    node_x += H_GAP
+
+            current_pool_y += total_pool_h + 20
+
+        else:
+            # No lanes — original flat layout
+            raw_ids     = [n["id"] for n in all_nodes_in_pool]
+            ordered_ids = _topological_order(raw_ids, seq_flows)
+
+            pool_w = max(POOL_WIDTH,
+                         POOL_HEADER_W + 60 + len(ordered_ids) * H_GAP + 60)
+            pool_layout[p["id"]] = {
+                "x": 10, "y": current_pool_y, "w": pool_w, "h": POOL_HEIGHT,
+            }
+
+            node_x = POOL_HEADER_W + 60
+            for nid in ordered_ids:
+                n    = id_to_node[nid]
+                w, h = NODE_SIZE.get(n["type"], DEFAULT_NODE_SIZE)
+                ny   = current_pool_y + (POOL_HEIGHT - h) // 2
+                node_layout[nid] = {"x": node_x, "y": ny, "w": w, "h": h}
+                node_x += H_GAP
+
+            current_pool_y += POOL_HEIGHT + 20
 
     # ── BPMNDI ────────────────────────────────────────────────────────────────
     bpmndi_elem = ET.SubElement(root, tag(BPMNDI, "BPMNDiagram"), id="BPMNDiagram_1")
@@ -325,17 +422,33 @@ def create_bpmn_xml(json_data, output_path):
     plane = ET.SubElement(bpmndi_elem, tag(BPMNDI, "BPMNPlane"),
                           id="BPMNPlane_1", bpmnElement=plane_ref)
 
-    for p in participants:
-        pl = pool_layout[p["id"]]
-        shape = ET.SubElement(plane, tag(BPMNDI, "BPMNShape"), {
-            "id":           f"Participant_{p['id']}_di",
-            "bpmnElement":  f"Participant_{p['id']}",
-            "isHorizontal": "true",
-        })
-        ET.SubElement(shape, tag(DC, "Bounds"),
-                      x=str(pl["x"]), y=str(pl["y"]),
-                      width=str(pl["w"]), height=str(pl["h"]))
+    # Pool shapes (only when collaboration exists)
+    if has_collaboration:
+        for p in participants:
+            pl = pool_layout[p["id"]]
+            shape = ET.SubElement(plane, tag(BPMNDI, "BPMNShape"), {
+                "id":           f"Participant_{p['id']}_di",
+                "bpmnElement":  f"Participant_{p['id']}",
+                "isHorizontal": "true",
+            })
+            ET.SubElement(shape, tag(DC, "Bounds"),
+                          x=str(pl["x"]), y=str(pl["y"]),
+                          width=str(pl["w"]), height=str(pl["h"]))
 
+    # Lane shapes
+    for p in participants:
+        for lane in p.get("lanes", []):
+            ll = lane_layout[lane["id"]]
+            shape = ET.SubElement(plane, tag(BPMNDI, "BPMNShape"), {
+                "id":           f"{lane['id']}_di",
+                "bpmnElement":  lane["id"],
+                "isHorizontal": "true",
+            })
+            ET.SubElement(shape, tag(DC, "Bounds"),
+                          x=str(ll["x"]), y=str(ll["y"]),
+                          width=str(ll["w"]), height=str(ll["h"]))
+
+    # Node shapes
     for n_id, layout in node_layout.items():
         n_type = node_type_map.get(n_id, "")
         attrs  = {"id": f"{n_id}_di", "bpmnElement": n_id}
@@ -346,6 +459,7 @@ def create_bpmn_xml(json_data, output_path):
                       x=str(layout["x"]), y=str(layout["y"]),
                       width=str(layout["w"]), height=str(layout["h"]))
 
+    # Sequence flow edges
     for i, flow in enumerate(seq_flows):
         src, tgt = flow["from"], flow["to"]
         if src not in node_layout or tgt not in node_layout:
@@ -361,6 +475,7 @@ def create_bpmn_xml(json_data, output_path):
         ET.SubElement(edge, tag(DI, "waypoint"),
                       x=str(t["x"]),           y=str(t["y"] + t["h"] // 2))
 
+    # Message flow edges
     node_to_pool_id = {n["id"]: n.get("participant") for n in _get_all_nodes(json_data)}
 
     for i, mf in enumerate(message_flows):
@@ -405,7 +520,7 @@ def create_bpmn_xml(json_data, output_path):
 
 if __name__ == "__main__":
     # --- CONFIGURATION ---
-    case_name          = "case_1"
+    case_name          = "check_8"
     pipeline_name      = "direct_extraction_pipeline"
     prompting_strategy = "few_shot"
     # ---------------------

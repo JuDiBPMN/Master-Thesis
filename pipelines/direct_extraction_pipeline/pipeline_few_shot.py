@@ -7,6 +7,7 @@ except Exception:
 
 import json
 import os
+from pathlib import Path
 
 llm = None
 
@@ -19,7 +20,7 @@ def load_model():
             repo_id="TheBloke/Llama-2-7B-Chat-GGUF",
             filename="llama-2-7b-chat.Q2_K.gguf",
             n_ctx=4096,
-            n_gpu_layers=-1,
+            n_gpu_layers=0,
             verbose=False
         )
     return llm
@@ -77,7 +78,7 @@ BPMN_SCHEMA = {
       }
     },
     "events": {
-      "description": "BPMN event nodes only (start, end, intermediate). Do NOT put tasks or gateways here. Use startEvent for the beginning of a process, endEvent for the end, intermediateCatchEvent for waiting points (e.g. 'food is prepared'), intermediateThrowEvent for sending signals.",
+      "description": "BPMN event nodes only (start, end, intermediate). Do NOT put tasks or gateways here.",
       "type": "array",
       "items": {
         "type": "object",
@@ -106,7 +107,7 @@ BPMN_SCHEMA = {
       }
     },
     "gateways": {
-      "description": "BPMN gateway nodes only (splits and joins). Do NOT put tasks or events here. Use exclusiveGateway (XOR) for either/or decisions, parallelGateway (AND) for concurrent splits/joins, inclusiveGateway (OR) for one-or-more branches.",
+      "description": "BPMN gateway nodes only (splits and joins). Do NOT put tasks or events here.",
       "type": "array",
       "items": {
         "type": "object",
@@ -135,38 +136,7 @@ BPMN_SCHEMA = {
       }
     },
     "sequence_flows": {
-      "description": "Control-flow edges. Both 'from' and 'to' must be node ids within the same pool. Cross-pool communication must use message_flows instead.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "from": {
-            "description": "Id of the source node. Must exist in tasks, events, or gateways.",
-            "type": "string"
-          },
-          "to": {
-            "description": "Id of the target node. Must exist in tasks, events, or gateways.",
-            "type": "string"
-          },
-          "condition": {
-            "description": "Condition label for flows leaving an exclusiveGateway or inclusiveGateway.",
-            "type": "string"
-          },
-          "isDefault": {
-            "description": "True if this is the default outgoing flow from a gateway when no condition matches.",
-            "type": "boolean"
-          },
-          "participant": {
-            "description": "Pool id that both 'from' and 'to' belong to.",
-            "type": "string"
-          }
-        },
-        "required": ["from", "to"]
-      }
-    },
-    "message_flows": {
-      "description": "Communication edges between different pools. 'from' and 'to' must belong to different pools.",
+      "description": "Control-flow edges. Both 'from' and 'to' must be node ids within the same pool.",
       "type": "array",
       "items": {
         "type": "object",
@@ -174,10 +144,23 @@ BPMN_SCHEMA = {
           "id": {"type": "string"},
           "from": {"type": "string"},
           "to": {"type": "string"},
-          "name": {
-            "description": "Label describing what is being communicated.",
-            "type": "string"
-          }
+          "condition": {"type": "string"},
+          "isDefault": {"type": "boolean"},
+          "participant": {"type": "string"}
+        },
+        "required": ["from", "to"]
+      }
+    },
+    "message_flows": {
+      "description": "Communication edges between different pools.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "from": {"type": "string"},
+          "to": {"type": "string"},
+          "name": {"type": "string"}
         },
         "required": ["from", "to", "name"]
       }
@@ -193,7 +176,7 @@ BPMN_SCHEMA = {
           "dataType": {"type": "string", "enum": ["string", "number", "boolean", "object"]},
           "description": {"type": "string"}
         },
-        "required": ["id", "nameq", "dataType"]
+        "required": ["id", "name", "dataType"]
       }
     }
   },
@@ -201,184 +184,78 @@ BPMN_SCHEMA = {
 }
 
 
-# --- Few-shot example (case_2) ---
-# This example is excluded when running on case_2 itself to avoid eval contamination.
-FEW_SHOT_EXAMPLE = {
-  "participants": [
-    {
-      "id": "employee",
-      "name": "Employee",
-      "type": "pool"
-    },
-    {
-      "id": "manager",
-      "name": "Manager",
-      "type": "pool"
-    }
-  ],
-  "tasks": [
-    {
-      "id": "record_idea",
-      "name": "Record Idea in Document",
-      "type": "task",
-      "participant": "employee"
-    },
-    {
-      "id": "submit_request",
-      "name": "Submit Request for Approval",
-      "type": "task",
-      "participant": "employee"
-    },
-    {
-      "id": "assess_request",
-      "name": "Assess Request for Approval",
-      "type": "task",
-      "participant": "manager"
-    },
-    {
-      "id": "initiate_project_plan",
-      "name": "Initiate Project Plan",
-      "type": "task",
-      "participant": "manager"
-    },
-    {
-      "id": "lay_out_timeline",
-      "name": "Lay Out Timeline",
-      "type": "task",
-      "participant": "manager"
-    },
-    {
-      "id": "set_up_budget",
-      "name": "Set Up Budget",
-      "type": "task",
-      "participant": "manager"
-    },
-    {
-      "id": "state_resources",
-      "name": "State Required Resources",
-      "type": "task",
-      "participant": "manager"
-    },
-    {
-      "id": "communicate_rejection",
-      "name": "Communicate Rejection",
-      "type": "task",
-      "participant": "manager"
-    }
-  ],
-  "events": [
-    {
-      "id": "start_employee",
-      "name": "Start",
-      "type": "startEvent",
-      "participant": "employee",
-      "eventDefinition": "none"
-    },
-    {
-      "id": "end_employee_approved",
-      "name": "Project Started",
-      "type": "endEvent",
-      "participant": "employee",
-      "eventDefinition": "none"
-    },
-    {
-      "id": "end_employee_rejected",
-      "name": "Rejection Received",
-      "type": "endEvent",
-      "participant": "employee",
-      "eventDefinition": "none"
-    },
-    {
-      "id": "start_manager",
-      "name": "Request Received",
-      "type": "startEvent",
-      "participant": "manager",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "end_manager_approved",
-      "name": "Project Started",
-      "type": "endEvent",
-      "participant": "manager",
-      "eventDefinition": "none"
-    },
-    {
-      "id": "end_manager_rejected",
-      "name": "Rejection Communicated",
-      "type": "endEvent",
-      "participant": "manager",
-      "eventDefinition": "none"
-    }
-  ],
-  "gateways": [
-    {
-      "id": "gateway_approved_split",
-      "name": "Project Approved?",
-      "type": "exclusiveGateway",
-      "participant": "manager",
-      "gatewayDirection": "diverging"
-    },
-    {
-      "id": "gateway_planning_split",
-      "name": "Plan in Parallel",
-      "type": "parallelGateway",
-      "participant": "manager",
-      "gatewayDirection": "diverging"
-    },
-    {
-      "id": "gateway_planning_join",
-      "name": "Planning Complete",
-      "type": "parallelGateway",
-      "participant": "manager",
-      "gatewayDirection": "converging"
-    }
-  ],
-  "sequence_flows": [
-    { "id": "sf1",  "from": "start_employee",        "to": "record_idea" },
-    { "id": "sf2",  "from": "record_idea",            "to": "submit_request" },
-    { "id": "sf3",  "from": "start_manager",          "to": "assess_request" },
-    { "id": "sf4",  "from": "assess_request",         "to": "gateway_approved_split" },
-    { "id": "sf5",  "from": "gateway_approved_split", "to": "initiate_project_plan", "condition": "Approved" },
-    { "id": "sf6",  "from": "gateway_approved_split", "to": "communicate_rejection", "condition": "Rejected" },
-    { "id": "sf7",  "from": "initiate_project_plan",  "to": "gateway_planning_split" },
-    { "id": "sf8",  "from": "gateway_planning_split", "to": "lay_out_timeline" },
-    { "id": "sf9",  "from": "gateway_planning_split", "to": "set_up_budget" },
-    { "id": "sf10", "from": "gateway_planning_split", "to": "state_resources" },
-    { "id": "sf11", "from": "lay_out_timeline",       "to": "gateway_planning_join" },
-    { "id": "sf12", "from": "set_up_budget",          "to": "gateway_planning_join" },
-    { "id": "sf13", "from": "state_resources",        "to": "gateway_planning_join" },
-    { "id": "sf14", "from": "gateway_planning_join",  "to": "end_manager_approved" },
-    { "id": "sf15", "from": "communicate_rejection",  "to": "end_manager_rejected" }
-  ],
-  "message_flows": [
-    {
-      "id": "mf1",
-      "from": "submit_request",
-      "to": "start_manager",
-      "name": "Approval Request"
-    },
-    {
-      "id": "mf2",
-      "from": "gateway_planning_join",
-      "to": "end_employee_approved",
-      "name": "Project Start Notification"
-    },
-    {
-      "id": "mf3",
-      "from": "communicate_rejection",
-      "to": "end_employee_rejected",
-      "name": "Rejection Notice"
-    }
-  ],
-  "data": []
-}
+# ── Few-shot case loader ───────────────────────────────────────────────────────
 
+def load_few_shot_cases(few_shot_dir, exclude_case=None):
+    """
+    Load all (text, json) pairs from few_shot_dir.
+
+    Each case must have two files with the same stem:
+        <stem>.txt   — the process description
+        <stem>.json  — the correct BPMN JSON
+
+    Cases whose stem matches exclude_case are skipped (use this to avoid
+    eval contamination when the test case is also a few-shot example).
+
+    Returns a list of dicts: [{"name": stem, "text": ..., "json": ...}, ...]
+    """
+    few_shot_dir = Path(few_shot_dir)
+    cases = []
+    missing = []
+
+    # Find all .txt files and look for a matching .json
+    for txt_path in sorted(few_shot_dir.glob("*.txt")):
+        stem      = txt_path.stem
+        json_path = txt_path.with_suffix(".json")
+
+        if exclude_case and stem == exclude_case:
+            print(f"  [few-shot loader] Skipping '{stem}' (excluded to avoid eval contamination)")
+            continue
+
+        if not json_path.exists():
+            missing.append(stem)
+            continue
+
+        try:
+            text = txt_path.read_text(encoding="utf-8").strip()
+            bpmn = json.loads(json_path.read_text(encoding="utf-8"))
+            cases.append({"name": stem, "text": text, "json": bpmn})
+        except Exception as e:
+            print(f"  [few-shot loader] WARNING: Could not load '{stem}': {e}")
+
+    if missing:
+        print(f"  [few-shot loader] WARNING: No matching .json for: {missing}")
+
+    print(f"  [few-shot loader] Loaded {len(cases)} few-shot case(s) from '{few_shot_dir}'")
+    return cases
+
+
+def build_few_shot_block(cases):
+    """
+    Turn a list of loaded cases into a formatted prompt block.
+    Each example is separated clearly so the model can pattern-match on all of them.
+    """
+    if not cases:
+        return ""
+
+    lines = []
+    for i, case in enumerate(cases, 1):
+        lines.append(f"--- EXAMPLE {i}: {case['name']} ---")
+        lines.append("PROCESS DESCRIPTION:")
+        lines.append(case["text"])
+        lines.append("")
+        lines.append("CORRECT BPMN JSON OUTPUT:")
+        lines.append(json.dumps(case["json"], indent=2))
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+# ── Validation ────────────────────────────────────────────────────────────────
 
 def save_json_to_file(obj, path):
-    from pathlib import Path
     p = Path(path)
-    if p.parent and not p.parent.exists():
-        p.parent.mkdir(parents=True, exist_ok=True)
+    p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, ensure_ascii=False)
 
@@ -390,8 +267,7 @@ def is_valid_bpmn(obj):
     if "nodes" in obj:
         return False, (
             "Output contains a 'nodes' array, which is not valid. "
-            "You must use three separate arrays: 'tasks', 'events', and 'gateways'. "
-            "Do not combine them into a single 'nodes' array."
+            "You must use three separate arrays: 'tasks', 'events', and 'gateways'."
         )
 
     for key in ("participants", "tasks", "events", "gateways", "sequence_flows"):
@@ -445,8 +321,7 @@ def is_valid_bpmn(obj):
                 lane_ids = {l["id"] for l in parent.get("lanes", [])} if parent else set()
                 if lane_id not in lane_ids:
                     return f"{label} '{nid}' references unknown lane '{lane_id}'"
-            name = node.get("name", "")
-            if str(name).strip() in ("...", "None", ""):
+            if str(node.get("name", "")).strip() in ("...", "None", ""):
                 return f"{label} '{nid}' has a placeholder or empty name"
             node_ids.add(nid)
         return None
@@ -458,9 +333,9 @@ def is_valid_bpmn(obj):
     if not isinstance(tasks, list) or len(tasks) == 0:
         return False, "tasks must be a non-empty array"
     if not isinstance(events, list):
-        return False, "events must be an array (can be empty)"
+        return False, "events must be an array"
     if not isinstance(gateways, list):
-        return False, "gateways must be an array (can be empty)"
+        return False, "gateways must be an array"
 
     for nodes, valid_types, label in [
         (tasks,    VALID_TASK_TYPES,    "task"),
@@ -503,6 +378,8 @@ def is_valid_bpmn(obj):
     return True, None
 
 
+# ── Model ─────────────────────────────────────────────────────────────────────
+
 SYSTEM_MSG = (
     "You are a business process modeling expert. "
     "Extract structured BPMN models from process descriptions. "
@@ -528,29 +405,26 @@ def _call_model(model, prompt):
     return str(result)
 
 
-def extract_bpmn_few_shot(process_description, case_name, output_file=None, retries=2):
-    if case_name == "case_2":
-        print("WARNING: case_2 is the few-shot example. Results will be inflated — exclude from evaluation.")
+# ── Main extraction function ───────────────────────────────────────────────────
 
-    case_2_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "cases", "case_2.txt")
-    try:
-        with open(case_2_path, "r", encoding="utf-8") as f:
-            example_process = f.read()
-    except FileNotFoundError:
-        example_process = "[Example process description not found]"
-    
-    example_output  = json.dumps(FEW_SHOT_EXAMPLE, indent=2)
+def extract_bpmn_few_shot(process_description, case_name, few_shot_dir, output_file=None, retries=2):
+    """
+    Extract a BPMN JSON from process_description using few-shot examples
+    loaded from few_shot_dir. The case matching case_name is excluded from
+    the few-shot examples to avoid eval contamination.
+    """
+    # Load all few-shot cases except the one being evaluated
+    cases          = load_few_shot_cases(few_shot_dir, exclude_case=case_name)
+    few_shot_block = build_few_shot_block(cases)
+
+    if not few_shot_block:
+        print("WARNING: No few-shot examples were loaded. Running zero-shot.")
 
     prompt = f"""Extract a structured BPMN model from the process description below.
 
-Here is an example of a process description and its correct BPMN JSON output:
+Here are {len(cases)} example(s) showing correct process descriptions and their BPMN JSON outputs:
 
---- EXAMPLE PROCESS ---
-{example_process}
-
---- EXAMPLE OUTPUT ---
-{example_output}
-
+{few_shot_block}
 --- NOW EXTRACT ---
 Process description: {process_description}
 
@@ -558,7 +432,7 @@ Apply the same structure to the process description above. Rules:
 - Use concrete names from the description. Do not use placeholders like "...", "None", or empty strings.
 - Every task, event, and gateway must reference a valid participant id declared in participants.
 - sequence_flows must stay within a single pool. Cross-pool communication goes in message_flows.
-- Every process must have at least one startEvent and one endEvent.
+- Every pool must have at least one startEvent and one endEvent.
 - Output exactly these top-level keys: participants, tasks, events, gateways, sequence_flows.
 - Do NOT use a 'nodes' array. Tasks, events, and gateways are always separate arrays.
 - Every gateway must have gatewayDirection of either "diverging" or "converging".
@@ -570,7 +444,7 @@ Apply the same structure to the process description above. Rules:
         print(e)
         return None
 
-    print(f"Initial prompt:\n{prompt}\n")
+    print(f"Running few-shot extraction for '{case_name}' with {len(cases)} example(s)...")
     result_text = _call_model(model, prompt)
     print("Model output:\n", result_text)
 
@@ -636,38 +510,47 @@ Re-extract the full BPMN model and fix the issue described above. Remember:
     return json_result
 
 
+# ── Entry point ───────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     case_name = "case_1"
 
-    SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-    CASES_DIR    = os.path.join(PROJECT_ROOT, "cases")
-    OUTPUT_DIR   = os.path.join(SCRIPT_DIR, "outputs")
+    SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+    CASES_DIR     = os.path.join(PROJECT_ROOT, "cases")
+    FEW_SHOT_DIR  = os.path.join(PROJECT_ROOT, "few_shot_cases")  
+    OUTPUT_DIR    = os.path.join(SCRIPT_DIR, "outputs")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
     out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_few_shot_bpmn.json")
 
     print("--- Few-Shot Pipeline Started ---")
-    print(f"Project Root is dit few shot?: {PROJECT_ROOT}")
-    print(f"Reading from: {input_path}")
-    print(f"Saving to:    {out_file}")
+    print(f"Case:          {case_name}")
+    print(f"Cases dir:     {CASES_DIR}")
+    print(f"Few-shot dir:  {FEW_SHOT_DIR}")
+    print(f"Output:        {out_file}")
     print("---------------------------------")
 
     try:
         if not os.path.exists(input_path):
-            raise FileNotFoundError
+            raise FileNotFoundError(f"Case file not found: {input_path}")
 
         with open(input_path, "r", encoding="utf-8") as f:
             process_text = f.read()
 
-        print(f"🤖 LLM is analyzing '{case_name}' (few-shot)...")
-        bpmn_json = extract_bpmn_few_shot(process_text, case_name=case_name, output_file=out_file, retries=2)
+        bpmn_json = extract_bpmn_few_shot(
+            process_description=process_text,
+            case_name=case_name,
+            few_shot_dir=FEW_SHOT_DIR,
+            output_file=out_file,
+            retries=2
+        )
 
         if bpmn_json:
-            print(f"Success! View the output in the sidebar under: outputs/{case_name}_few_shot_bpmn.json")
+            print(f"Success! Output saved to: outputs/{case_name}_few_shot_bpmn.json")
         else:
             print("Model extraction failed. Check the logs above.")
 
-    except FileNotFoundError:
-        print(f"Error: '{case_name}.txt' not found in {CASES_DIR}")
+    except FileNotFoundError as e:
+        print(f"Error: {e}")

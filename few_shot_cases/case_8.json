@@ -1,0 +1,71 @@
+{
+    "participants": [
+      {
+        "id": "bank",
+        "name": "Bank",
+        "type": "pool"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "check_credit_score",
+        "name": "Check Credit Score",
+        "type": "task",
+        "participant": "bank"
+      },
+      {
+        "id": "notify_approval",
+        "name": "Notify Applicant of Approval",
+        "type": "task",
+        "participant": "bank"
+      },
+      {
+        "id": "notify_rejection",
+        "name": "Notify Applicant of Rejection",
+        "type": "task",
+        "participant": "bank"
+      }
+    ],
+    "events": [
+      {
+        "id": "start_review",
+        "name": "Loan Application Received",
+        "type": "startEvent",
+        "participant": "bank",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "end_approved",
+        "name": "Loan Approved",
+        "type": "endEvent",
+        "participant": "bank",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "end_rejected",
+        "name": "Loan Rejected",
+        "type": "endEvent",
+        "participant": "bank",
+        "eventDefinition": "none"
+      }
+    ],
+    "gateways": [
+      {
+        "id": "gateway_credit",
+        "name": "Credit Score Sufficient?",
+        "type": "exclusiveGateway",
+        "participant": "bank",
+        "gatewayDirection": "diverging"
+      }
+    ],
+    "sequence_flows": [
+      { "id": "sf1", "from": "start_review",    "to": "check_credit_score" },
+      { "id": "sf2", "from": "check_credit_score", "to": "gateway_credit" },
+      { "id": "sf3", "from": "gateway_credit",  "to": "notify_approval",  "condition": "Sufficient" },
+      { "id": "sf4", "from": "gateway_credit",  "to": "notify_rejection", "condition": "Insufficient" },
+      { "id": "sf5", "from": "notify_approval", "to": "end_approved" },
+      { "id": "sf6", "from": "notify_rejection","to": "end_rejected" }
+    ],
+    "message_flows": [],
+    "data": []
+  }

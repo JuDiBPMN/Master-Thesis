@@ -1,0 +1,137 @@
+{
+    "participants": [
+      {
+        "id": "customer",
+        "name": "Customer",
+        "type": "pool"
+      },
+      {
+        "id": "warehouse",
+        "name": "Warehouse",
+        "type": "pool"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "place_order",
+        "name": "Place Order",
+        "type": "task",
+        "participant": "customer"
+      },
+      {
+        "id": "receive_shipment",
+        "name": "Receive Shipment",
+        "type": "task",
+        "participant": "customer"
+      },
+      {
+        "id": "receive_order_cancellation",
+        "name": "Receive Order Cancellation",
+        "type": "task",
+        "participant": "customer"
+      },
+      {
+        "id": "check_stock",
+        "name": "Check Stock",
+        "type": "task",
+        "participant": "warehouse"
+      },
+      {
+        "id": "ship_order",
+        "name": "Ship Order",
+        "type": "task",
+        "participant": "warehouse"
+      },
+      {
+        "id": "notify_cancellation",
+        "name": "Notify Customer of Cancellation",
+        "type": "task",
+        "participant": "warehouse"
+      }
+    ],
+    "events": [
+      {
+        "id": "start_customer",
+        "name": "Start",
+        "type": "startEvent",
+        "participant": "customer",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "end_customer_shipped",
+        "name": "Shipment Received",
+        "type": "endEvent",
+        "participant": "customer",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "end_customer_cancelled",
+        "name": "Order Cancelled",
+        "type": "endEvent",
+        "participant": "customer",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "start_warehouse",
+        "name": "Order Received",
+        "type": "startEvent",
+        "participant": "warehouse",
+        "eventDefinition": "message"
+      },
+      {
+        "id": "end_warehouse_shipped",
+        "name": "Order Shipped",
+        "type": "endEvent",
+        "participant": "warehouse",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "end_warehouse_cancelled",
+        "name": "Cancellation Sent",
+        "type": "endEvent",
+        "participant": "warehouse",
+        "eventDefinition": "none"
+      }
+    ],
+    "gateways": [
+      {
+        "id": "gateway_stock",
+        "name": "Item in Stock?",
+        "type": "exclusiveGateway",
+        "participant": "warehouse",
+        "gatewayDirection": "diverging"
+      }
+    ],
+    "sequence_flows": [
+      { "id": "sf1", "from": "start_customer",             "to": "place_order" },
+      { "id": "sf2", "from": "receive_shipment",           "to": "end_customer_shipped" },
+      { "id": "sf3", "from": "receive_order_cancellation", "to": "end_customer_cancelled" },
+      { "id": "sf4", "from": "start_warehouse",            "to": "check_stock" },
+      { "id": "sf5", "from": "check_stock",                "to": "gateway_stock" },
+      { "id": "sf6", "from": "gateway_stock",              "to": "ship_order",          "condition": "In Stock" },
+      { "id": "sf7", "from": "gateway_stock",              "to": "notify_cancellation", "condition": "Out of Stock" },
+      { "id": "sf8", "from": "ship_order",                 "to": "end_warehouse_shipped" },
+      { "id": "sf9", "from": "notify_cancellation",        "to": "end_warehouse_cancelled" }
+    ],
+    "message_flows": [
+      {
+        "id": "mf1",
+        "from": "place_order",
+        "to": "start_warehouse",
+        "name": "Order"
+      },
+      {
+        "id": "mf2",
+        "from": "ship_order",
+        "to": "receive_shipment",
+        "name": "Shipment Notification"
+      },
+      {
+        "id": "mf3",
+        "from": "notify_cancellation",
+        "to": "receive_order_cancellation",
+        "name": "Cancellation Notice"
+      }
+    ],
+    "data": []
+  }

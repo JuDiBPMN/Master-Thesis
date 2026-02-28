@@ -1,0 +1,61 @@
+{
+    "participants": [
+      {
+        "id": "hr",
+        "name": "HR",
+        "type": "pool"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "create_account",
+        "name": "Create Account in System",
+        "type": "task",
+        "participant": "hr"
+      },
+      {
+        "id": "send_welcome_package",
+        "name": "Send Welcome Package",
+        "type": "task",
+        "participant": "hr"
+      },
+      {
+        "id": "organize_orientation",
+        "name": "Organize Orientation Session",
+        "type": "task",
+        "participant": "hr"
+      },
+      {
+        "id": "mark_complete",
+        "name": "Mark Onboarding as Complete",
+        "type": "task",
+        "participant": "hr"
+      }
+    ],
+    "events": [
+      {
+        "id": "start_onboarding",
+        "name": "New Employee Joins",
+        "type": "startEvent",
+        "participant": "hr",
+        "eventDefinition": "none"
+      },
+      {
+        "id": "end_onboarding",
+        "name": "Onboarding Complete",
+        "type": "endEvent",
+        "participant": "hr",
+        "eventDefinition": "none"
+      }
+    ],
+    "gateways": [],
+    "sequence_flows": [
+      { "id": "sf1", "from": "start_onboarding",    "to": "create_account" },
+      { "id": "sf2", "from": "create_account",       "to": "send_welcome_package" },
+      { "id": "sf3", "from": "send_welcome_package", "to": "attend_orientation" },
+      { "id": "sf4", "from": "attend_orientation",   "to": "mark_complete" },
+      { "id": "sf5", "from": "mark_complete",        "to": "end_onboarding" }
+    ],
+    "message_flows": [],
+    "data": []
+  }
