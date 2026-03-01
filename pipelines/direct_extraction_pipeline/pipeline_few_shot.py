@@ -8,6 +8,7 @@ except Exception:
 import json
 import os
 from pathlib import Path
+from collections import defaultdict
 
 llm = None
 
@@ -19,7 +20,7 @@ def load_model():
         llm = Llama.from_pretrained(
             repo_id="TheBloke/Llama-2-7B-Chat-GGUF",
             filename="llama-2-7b-chat.Q2_K.gguf",
-            n_ctx=4096,
+            n_ctx=8192,
             n_gpu_layers=0,
             verbose=False
         )
@@ -187,23 +188,9 @@ BPMN_SCHEMA = {
 # ── Few-shot case loader ───────────────────────────────────────────────────────
 
 def load_few_shot_cases(few_shot_dir, exclude_case=None):
-    """
-    Load all (text, json) pairs from few_shot_dir.
-
-    Each case must have two files with the same stem:
-        <stem>.txt   — the process description
-        <stem>.json  — the correct BPMN JSON
-
-    Cases whose stem matches exclude_case are skipped (use this to avoid
-    eval contamination when the test case is also a few-shot example).
-
-    Returns a list of dicts: [{"name": stem, "text": ..., "json": ...}, ...]
-    """
     few_shot_dir = Path(few_shot_dir)
-    cases = []
-    missing = []
+    cases, missing = [], []
 
-    # Find all .txt files and look for a matching .json
     for txt_path in sorted(few_shot_dir.glob("*.txt")):
         stem      = txt_path.stem
         json_path = txt_path.with_suffix(".json")
@@ -231,13 +218,8 @@ def load_few_shot_cases(few_shot_dir, exclude_case=None):
 
 
 def build_few_shot_block(cases):
-    """
-    Turn a list of loaded cases into a formatted prompt block.
-    Each example is separated clearly so the model can pattern-match on all of them.
-    """
     if not cases:
         return ""
-
     lines = []
     for i, case in enumerate(cases, 1):
         lines.append(f"--- EXAMPLE {i}: {case['name']} ---")
@@ -245,9 +227,9 @@ def build_few_shot_block(cases):
         lines.append(case["text"])
         lines.append("")
         lines.append("CORRECT BPMN JSON OUTPUT:")
-        lines.append(json.dumps(case["json"], indent=2))
+        # Compact JSON to save tokens
+        lines.append(json.dumps(case["json"], separators=(',', ':')))
         lines.append("")
-
     return "\n".join(lines)
 
 
@@ -261,121 +243,202 @@ def save_json_to_file(obj, path):
 
 
 def is_valid_bpmn(obj):
+    """
+    Returns (is_fully_valid, errors, warnings) where:
+    - is_fully_valid: True only when both errors AND warnings are empty
+    - errors:   list of blocking problems (XML will be broken)
+    - warnings: list of structural problems (XML imports but diagram is incomplete)
+    """
+    errors   = []
+    warnings = []
+
     if not isinstance(obj, dict):
-        return False, "Output is not a JSON object"
+        return False, ["Output is not a JSON object"], []
 
     if "nodes" in obj:
-        return False, (
-            "Output contains a 'nodes' array, which is not valid. "
-            "You must use three separate arrays: 'tasks', 'events', and 'gateways'."
+        errors.append(
+            "Output contains a 'nodes' array. "
+            "Use three separate arrays: 'tasks', 'events', and 'gateways'."
         )
 
     for key in ("participants", "tasks", "events", "gateways", "sequence_flows"):
         if key not in obj:
-            return False, (
+            errors.append(
                 f"Missing required top-level field: '{key}'. "
-                f"Required fields are: participants, tasks, events, gateways, sequence_flows."
+                f"Required: participants, tasks, events, gateways, sequence_flows."
             )
 
-    participants = obj.get("participants")
+    if errors:
+        return False, errors, warnings
+
+    participants = obj.get("participants", [])
     if not isinstance(participants, list) or len(participants) == 0:
-        return False, "participants must be a non-empty array"
+        return False, ["participants must be a non-empty array"], []
 
     participant_ids = set()
     for p in participants:
         if not isinstance(p, dict):
-            return False, "Each participant must be an object"
+            errors.append("Each participant must be an object")
+            continue
         if not p.get("id") or not p.get("name") or p.get("type") != "pool":
-            return False, f"Participant missing 'id', 'name', or type != 'pool': {p}"
+            errors.append(f"Participant missing 'id', 'name', or type != 'pool': {p}")
+            continue
         participant_ids.add(p["id"])
         for lane in p.get("lanes", []):
             if not isinstance(lane, dict) or not lane.get("id") or not lane.get("name"):
-                return False, f"Invalid lane in participant '{p['id']}'"
+                errors.append(f"Invalid lane in participant '{p['id']}'")
 
-    VALID_TASK_TYPES    = {"task", "userTask", "serviceTask", "scriptTask", "manualTask", "subProcess", "callActivity"}
-    VALID_EVENT_TYPES   = {"startEvent", "endEvent", "intermediateCatchEvent", "intermediateThrowEvent"}
-    VALID_GATEWAY_TYPES = {"exclusiveGateway", "parallelGateway", "inclusiveGateway", "eventBasedGateway"}
-    VALID_EVENT_DEFS    = {"none", "message", "timer", "signal", "conditional", "error", "escalation", "link"}
+    VALID_TASK_TYPES    = {"task","userTask","serviceTask","scriptTask","manualTask","subProcess","callActivity"}
+    VALID_EVENT_TYPES   = {"startEvent","endEvent","intermediateCatchEvent","intermediateThrowEvent"}
+    VALID_GATEWAY_TYPES = {"exclusiveGateway","parallelGateway","inclusiveGateway","eventBasedGateway"}
+    VALID_EVENT_DEFS    = {"none","message","timer","signal","conditional","error","escalation","link"}
 
-    node_ids = set()
+    node_ids    = set()
+    node_to_pool = {}
 
     def validate_nodes(nodes, valid_types, label):
         for node in nodes:
             if not isinstance(node, dict):
-                return f"Each {label} must be an object"
+                errors.append(f"Each {label} must be an object")
+                continue
             nid         = node.get("id")
             ntype       = node.get("type")
             participant = node.get("participant")
             if not nid or not ntype or not participant:
-                return f"{label} is missing 'id', 'type', or 'participant': {node}"
+                errors.append(f"{label} is missing 'id', 'type', or 'participant': {node}")
+                continue
             if ntype not in valid_types:
-                return f"Invalid {label} type '{ntype}'. Must be one of: {sorted(valid_types)}"
+                errors.append(f"Invalid {label} type '{ntype}'. Must be one of: {sorted(valid_types)}")
             if participant not in participant_ids:
-                return (
-                    f"{label} '{nid}' references unknown participant '{participant}'. "
-                    f"Declared participant ids are: {sorted(participant_ids)}"
+                errors.append(
+                    f"NODE '{nid}' has participant='{participant}' which is NOT declared in participants. "
+                    f"Declared participant ids are: {sorted(participant_ids)}. "
+                    f"Either add '{participant}' to the participants array, or change the participant field "
+                    f"to one of the declared ids."
                 )
             lane_id = node.get("lane")
             if lane_id:
                 parent   = next((p for p in participants if p["id"] == participant), None)
                 lane_ids = {l["id"] for l in parent.get("lanes", [])} if parent else set()
                 if lane_id not in lane_ids:
-                    return f"{label} '{nid}' references unknown lane '{lane_id}'"
+                    errors.append(f"{label} '{nid}' references unknown lane '{lane_id}'")
             if str(node.get("name", "")).strip() in ("...", "None", ""):
-                return f"{label} '{nid}' has a placeholder or empty name"
+                errors.append(f"{label} '{nid}' has a placeholder or empty name")
             node_ids.add(nid)
-        return None
+            node_to_pool[nid] = participant
 
     tasks    = obj.get("tasks", [])
     events   = obj.get("events", [])
     gateways = obj.get("gateways", [])
 
     if not isinstance(tasks, list) or len(tasks) == 0:
-        return False, "tasks must be a non-empty array"
+        errors.append("tasks must be a non-empty array")
     if not isinstance(events, list):
-        return False, "events must be an array"
+        errors.append("events must be an array")
     if not isinstance(gateways, list):
-        return False, "gateways must be an array"
+        errors.append("gateways must be an array")
 
-    for nodes, valid_types, label in [
-        (tasks,    VALID_TASK_TYPES,    "task"),
-        (events,   VALID_EVENT_TYPES,   "event"),
-        (gateways, VALID_GATEWAY_TYPES, "gateway"),
-    ]:
-        err = validate_nodes(nodes, valid_types, label)
-        if err:
-            return False, err
+    if errors:
+        return False, errors, warnings
+
+    validate_nodes(tasks,    VALID_TASK_TYPES,    "task")
+    validate_nodes(events,   VALID_EVENT_TYPES,   "event")
+    validate_nodes(gateways, VALID_GATEWAY_TYPES, "gateway")
 
     all_ids = [n["id"] for n in tasks + events + gateways]
     if len(all_ids) != len(set(all_ids)):
-        return False, "Duplicate node ids found across tasks, events, and gateways"
+        errors.append("Duplicate node ids found across tasks, events, and gateways")
 
     for event in events:
         ed = event.get("eventDefinition")
         if ed is not None and ed not in VALID_EVENT_DEFS:
-            return False, f"Invalid eventDefinition '{ed}'"
+            errors.append(f"Invalid eventDefinition '{ed}'")
 
-    seq = obj.get("sequence_flows")
+    seq = obj.get("sequence_flows", [])
     if not isinstance(seq, list):
-        return False, "sequence_flows must be an array"
-    for s in seq:
-        if not isinstance(s, dict):
-            return False, "Each sequence_flow must be an object"
-        if s.get("from") not in node_ids:
-            return False, f"sequence_flow 'from' id '{s.get('from')}' does not match any known node id"
-        if s.get("to") not in node_ids:
-            return False, f"sequence_flow 'to' id '{s.get('to')}' does not match any known node id"
+        errors.append("sequence_flows must be an array")
+    else:
+        for s in seq:
+            if not isinstance(s, dict):
+                errors.append("Each sequence_flow must be an object")
+                continue
+            if s.get("from") not in node_ids:
+                errors.append(
+                    f"sequence_flow 'from' id '{s.get('from')}' does not exist. "
+                    f"Every 'from' and 'to' in sequence_flows must exactly match a node id "
+                    f"declared in tasks, events, or gateways."
+                )
+            if s.get("to") not in node_ids:
+                errors.append(
+                    f"sequence_flow 'to' id '{s.get('to')}' does not exist. "
+                    f"Every 'from' and 'to' in sequence_flows must exactly match a node id "
+                    f"declared in tasks, events, or gateways."
+                )
 
     for mf in obj.get("message_flows", []):
         if not isinstance(mf, dict):
-            return False, "Each message_flow must be an object"
+            errors.append("Each message_flow must be an object")
+            continue
         if not mf.get("from") or not mf.get("to"):
-            return False, "Each message_flow must have 'from' and 'to'"
+            errors.append("Each message_flow must have 'from' and 'to'")
+            continue
         valid_refs = node_ids | participant_ids
         if mf["from"] not in valid_refs or mf["to"] not in valid_refs:
-            return False, f"message_flow references unknown id: {mf}"
+            errors.append(f"message_flow references unknown id: {mf}")
 
-    return True, None
+    # ── Warnings: structural completeness ─────────────────────────────────────
+    pool_has_start = defaultdict(bool)
+    pool_has_end   = defaultdict(bool)
+    for event in events:
+        pid = event.get("participant")
+        if event.get("type") == "startEvent":
+            pool_has_start[pid] = True
+        if event.get("type") == "endEvent":
+            pool_has_end[pid] = True
+
+    for pid in participant_ids:
+        if not pool_has_start[pid]:
+            warnings.append(
+                f"POOL '{pid}' has no startEvent. "
+                f"Every pool must have at least one startEvent. "
+                f"Add a startEvent with participant='{pid}' and eventDefinition='none' "
+                f"(or 'message' if it is triggered by another pool)."
+            )
+        if not pool_has_end[pid]:
+            warnings.append(
+                f"POOL '{pid}' has no endEvent. "
+                f"Every pool must have at least one endEvent. "
+                f"Add an endEvent with participant='{pid}' and eventDefinition='none', "
+                f"and connect it with a sequence_flow from the last node in that pool."
+            )
+
+    # Cross-pool sequence flows (structural warning, auto-promoted but still wrong)
+    for s in seq:
+        src_pool = node_to_pool.get(s.get("from"))
+        tgt_pool = node_to_pool.get(s.get("to"))
+        if src_pool and tgt_pool and src_pool != tgt_pool:
+            warnings.append(
+                f"sequence_flow '{s.get('from')}' -> '{s.get('to')}' crosses pools "
+                f"('{src_pool}' -> '{tgt_pool}'). "
+                f"Move this to message_flows instead."
+            )
+
+    is_fully_valid = len(errors) == 0 and len(warnings) == 0
+    return is_fully_valid, errors, warnings
+
+
+def _format_issues(errors, warnings):
+    """Format errors and warnings into a clear, actionable string for the retry prompt."""
+    lines = []
+    if errors:
+        lines.append("ERRORS (these must be fixed — the XML will be broken):")
+        for e in errors:
+            lines.append(f"  - {e}")
+    if warnings:
+        lines.append("WARNINGS (these must also be fixed — the diagram will be incomplete):")
+        for w in warnings:
+            lines.append(f"  - {w}")
+    return "\n".join(lines)
 
 
 # ── Model ─────────────────────────────────────────────────────────────────────
@@ -386,6 +449,7 @@ SYSTEM_MSG = (
     "Always output valid JSON matching the provided schema. "
     "Never use a 'nodes' array — always use separate 'tasks', 'events', and 'gateways' arrays. "
     "Every node must belong to a declared participant. "
+    "Every pool must have a startEvent and an endEvent. "
     "Sequence flows stay within pools; cross-pool communication uses message_flows."
 )
 
@@ -407,13 +471,7 @@ def _call_model(model, prompt):
 
 # ── Main extraction function ───────────────────────────────────────────────────
 
-def extract_bpmn_few_shot(process_description, case_name, few_shot_dir, output_file=None, retries=2):
-    """
-    Extract a BPMN JSON from process_description using few-shot examples
-    loaded from few_shot_dir. The case matching case_name is excluded from
-    the few-shot examples to avoid eval contamination.
-    """
-    # Load all few-shot cases except the one being evaluated
+def extract_bpmn_few_shot(process_description, case_name, few_shot_dir, output_file=None, retries=3):
     cases          = load_few_shot_cases(few_shot_dir, exclude_case=case_name)
     few_shot_block = build_few_shot_block(cases)
 
@@ -428,15 +486,16 @@ Here are {len(cases)} example(s) showing correct process descriptions and their 
 --- NOW EXTRACT ---
 Process description: {process_description}
 
-Apply the same structure to the process description above. Rules:
-- Use concrete names from the description. Do not use placeholders like "...", "None", or empty strings.
-- Every task, event, and gateway must reference a valid participant id declared in participants.
-- sequence_flows must stay within a single pool. Cross-pool communication goes in message_flows.
-- Every pool must have at least one startEvent and one endEvent.
+Apply the same structure. Follow these rules exactly:
+- Identify ALL participants (pools) mentioned in the description and declare every one of them in the participants array. If a node belongs to a pool, that pool MUST be in the participants array.
+- Every participant pool must have at least one startEvent and at least one endEvent. Do not leave any pool without these.
+- Every task, event, and gateway must have a 'participant' field that exactly matches an id declared in the participants array.
+- sequence_flows must only connect nodes within the same pool. Cross-pool communication goes in message_flows.
+- Every 'from' and 'to' in sequence_flows must exactly match a node id declared in tasks, events, or gateways.
 - Output exactly these top-level keys: participants, tasks, events, gateways, sequence_flows.
 - Do NOT use a 'nodes' array. Tasks, events, and gateways are always separate arrays.
-- Every gateway must have gatewayDirection of either "diverging" or "converging".
-- Every event must have an eventDefinition."""
+- Every gateway must have gatewayDirection set to either "diverging" or "converging".
+- Every event must have an eventDefinition field."""
 
     try:
         model = load_model()
@@ -454,29 +513,31 @@ Apply the same structure to the process description above. Rules:
         print(f"JSON parsing error: {e}")
         json_result = None
 
-    valid, reason = is_valid_bpmn(json_result)
+    fully_valid, errors, warnings = is_valid_bpmn(json_result) if json_result else (False, ["Failed to parse JSON"], [])
 
     attempt = 0
-    while not valid and attempt < retries:
+    while not fully_valid and attempt < retries:
         attempt += 1
-        print(f"\nValidation failed: {reason}. Retrying ({attempt}/{retries})...")
+        issues_text = _format_issues(errors, warnings)
+        print(f"\nIssues found (attempt {attempt}/{retries}):\n{issues_text}")
 
-        retry_prompt = f"""The previous BPMN output was invalid for the following reason:
+        retry_prompt = f"""The BPMN JSON you produced has the following issues that MUST ALL be fixed:
 
-{reason}
+{issues_text}
 
-Process description: {process_description}
+Original process description: {process_description}
 
-Previous invalid output: {result_text}
+Your previous (broken) output:
+{result_text}
 
-Re-extract the full BPMN model and fix the issue described above. Remember:
-- Output exactly these top-level keys: participants, tasks, events, gateways, sequence_flows.
-- Do NOT use a 'nodes' array. Tasks, events, and gateways are always separate arrays.
-- Every node must have a participant id that exactly matches an id declared in participants.
-- Every gateway must have gatewayDirection of either "diverging" or "converging".
-- Every event must have an eventDefinition."""
+Produce a corrected version of the complete BPMN JSON. Fix every issue listed above:
+- If a node has an undeclared participant, add that participant to the participants array OR change the node's participant to an already-declared id.
+- If a pool is missing a startEvent or endEvent, add one and connect it with a sequence_flow.
+- If a sequence_flow 'from' or 'to' id does not exist, either fix the id to match a real node or remove the flow.
+- If a sequence_flow crosses pools, move it to message_flows.
+Output the complete corrected JSON. Do not omit any part of the model."""
 
-        print(f"Retry prompt:\n{retry_prompt}\n")
+        print(f"Retry prompt (attempt {attempt}):\n{retry_prompt}\n")
         result_text = _call_model(model, retry_prompt)
         print(f"Model output (retry {attempt}):\n", result_text)
 
@@ -486,12 +547,14 @@ Re-extract the full BPMN model and fix the issue described above. Remember:
             print(f"JSON parsing error on retry: {e}")
             json_result = None
 
-        valid, reason = is_valid_bpmn(json_result)
+        fully_valid, errors, warnings = is_valid_bpmn(json_result) if json_result else (False, ["Failed to parse JSON"], [])
 
+    # ── Save output ───────────────────────────────────────────────────────────
     if json_result is None:
-        print("\nError: Failed to parse JSON from model output")
-    elif not valid:
-        print(f"\nWarning: Output did not pass validation after all retries. Reason: {reason}")
+        print("\nError: Failed to parse JSON from model output after all attempts.")
+    elif not fully_valid:
+        remaining = _format_issues(errors, warnings)
+        print(f"\nWarning: Output still has issues after {retries} retries:\n{remaining}")
         if output_file:
             invalid_path = output_file.replace(".json", "_invalid.json")
             try:
@@ -500,6 +563,7 @@ Re-extract the full BPMN model and fix the issue described above. Remember:
             except Exception as e:
                 print(f"Failed to write invalid JSON: {e}")
     else:
+        print("\nValidation passed.")
         if output_file:
             try:
                 save_json_to_file(json_result, output_file)
@@ -518,7 +582,7 @@ if __name__ == "__main__":
     SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
     CASES_DIR     = os.path.join(PROJECT_ROOT, "cases")
-    FEW_SHOT_DIR  = os.path.join(PROJECT_ROOT, "few_shot_cases")  
+    FEW_SHOT_DIR  = os.path.join(PROJECT_ROOT, "few_shot_cases")
     OUTPUT_DIR    = os.path.join(SCRIPT_DIR, "outputs")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -544,11 +608,11 @@ if __name__ == "__main__":
             case_name=case_name,
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
-            retries=2
+            retries=3
         )
 
         if bpmn_json:
-            print(f"Success! Output saved to: outputs/{case_name}_few_shot_bpmn.json")
+            print(f"Output saved to: outputs/{case_name}_few_shot_bpmn.json")
         else:
             print("Model extraction failed. Check the logs above.")
 

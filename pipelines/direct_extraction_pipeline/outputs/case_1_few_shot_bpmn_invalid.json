@@ -1,0 +1,51 @@
+{
+  "participants": [
+    {
+      "id": "Yamaha",
+      "name": "Yamaha",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "check-stock",
+      "name": "Check Stock",
+      "type": "task",
+      "participant": "Yamaha"
+    }
+  ],
+  "events": [
+    {
+      "id": "reject-order",
+      "name": "Reject Order",
+      "type": "endEvent",
+      "participant": "Sales department",
+      "eventDefinition": "conditional"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "confirm-order",
+      "name": "Confirm Order",
+      "type": "eventBasedGateway",
+      "participant": "Sales department",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "check-stock",
+      "to": "confirm-order",
+      "id": "flow-1"
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "confirm-order",
+      "to": "reject-order",
+      "name": "Reject Order",
+      "id": "flow-2"
+    }
+  ],
+  "data": []
+}
