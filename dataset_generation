@@ -1,0 +1,35 @@
+import json
+from pathlib import Path
+
+def convert_to_training_format(few_shot_dir, output_path):
+    few_shot_dir = Path(few_shot_dir)
+    records = []
+
+    INSTRUCTION = (
+        "Extract a structured BPMN model from the following process description. "
+        "Output valid JSON with exactly these top-level keys: participants, tasks, "
+        "events, gateways, sequence_flows. Every node must reference a declared "
+        "participant. Every pool must have a startEvent and endEvent. "
+        "Sequence flows stay within pools; cross-pool communication uses message_flows."
+    )
+
+    for txt_path in sorted(few_shot_dir.glob("*.txt")):
+        json_path = txt_path.with_suffix(".json")
+        if not json_path.exists():
+            continue
+        records.append({
+            "instruction": INSTRUCTION,
+            "input": txt_path.read_text(encoding="utf-8").strip(),
+            # Compact JSON saves tokens during training too
+            "output": json.dumps(
+                json.loads(json_path.read_text(encoding="utf-8")),
+                separators=(',', ':')
+            )
+        })
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(records, f, indent=2)
+
+    print(f"Wrote {len(records)} training records to {output_path}")
+
+convert_to_training_format("few_shot_cases", "training_data.json")
