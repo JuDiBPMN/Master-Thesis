@@ -31,7 +31,6 @@ BPMN_SCHEMA = {
   "type": "object",
   "properties": {
     "participants": {
-      "description": "Pools and optional lanes (swimlanes) that execute nodes.",
       "type": "array",
       "items": {
         "type": "object",
@@ -55,7 +54,6 @@ BPMN_SCHEMA = {
       }
     },
     "tasks": {
-      "description": "BPMN task/activity nodes. Do NOT put events or gateways here.",
       "type": "array",
       "items": {
         "type": "object",
@@ -67,11 +65,9 @@ BPMN_SCHEMA = {
             "enum": ["task", "userTask", "serviceTask", "scriptTask", "manualTask", "subProcess", "callActivity"]
           },
           "participant": {
-            "description": "Must exactly match an id declared in the participants array.",
             "type": "string"
           },
           "lane": {
-            "description": "Must exactly match a lane id within the declared participant, if lanes are defined.",
             "type": "string"
           }
         },
@@ -79,7 +75,6 @@ BPMN_SCHEMA = {
       }
     },
     "events": {
-      "description": "BPMN event nodes only (start, end, intermediate). Do NOT put tasks or gateways here.",
       "type": "array",
       "items": {
         "type": "object",
@@ -91,15 +86,12 @@ BPMN_SCHEMA = {
             "enum": ["startEvent", "endEvent", "intermediateCatchEvent", "intermediateThrowEvent"]
           },
           "participant": {
-            "description": "Must exactly match an id declared in the participants array.",
             "type": "string"
           },
           "lane": {
-            "description": "Must exactly match a lane id within the declared participant, if lanes are defined.",
             "type": "string"
           },
           "eventDefinition": {
-            "description": "The trigger type of this event. Use 'none' for plain start/end events with no special trigger.",
             "type": "string",
             "enum": ["none", "message", "timer", "signal", "conditional", "error", "escalation", "link"]
           }
@@ -108,7 +100,6 @@ BPMN_SCHEMA = {
       }
     },
     "gateways": {
-      "description": "BPMN gateway nodes only (splits and joins). Do NOT put tasks or events here.",
       "type": "array",
       "items": {
         "type": "object",
@@ -120,15 +111,12 @@ BPMN_SCHEMA = {
             "enum": ["exclusiveGateway", "parallelGateway", "inclusiveGateway", "eventBasedGateway"]
           },
           "participant": {
-            "description": "Must exactly match an id declared in the participants array.",
             "type": "string"
           },
           "lane": {
-            "description": "Must exactly match a lane id within the declared participant, if lanes are defined.",
             "type": "string"
           },
           "gatewayDirection": {
-            "description": "diverging = split (one incoming, multiple outgoing). converging = join (multiple incoming, one outgoing).",
             "type": "string",
             "enum": ["diverging", "converging"]
           }
@@ -137,7 +125,6 @@ BPMN_SCHEMA = {
       }
     },
     "sequence_flows": {
-      "description": "Control-flow edges. Both 'from' and 'to' must be node ids within the same pool.",
       "type": "array",
       "items": {
         "type": "object",
@@ -153,7 +140,6 @@ BPMN_SCHEMA = {
       }
     },
     "message_flows": {
-      "description": "Communication edges between different pools.",
       "type": "array",
       "items": {
         "type": "object",
@@ -167,7 +153,6 @@ BPMN_SCHEMA = {
       }
     },
     "data": {
-      "description": "Optional data objects referenced in conditions.",
       "type": "array",
       "items": {
         "type": "object",

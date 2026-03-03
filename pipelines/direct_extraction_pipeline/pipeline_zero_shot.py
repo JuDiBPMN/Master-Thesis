@@ -50,9 +50,56 @@ BPMN_SCHEMA = {
                 },
                 "required": ["from", "to"]
             }
-        }
+        },
+         "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "type": {
+            "type": "string",
+            "enum": ["startEvent", "endEvent", "intermediateCatchEvent", "intermediateThrowEvent"]
+          },
+          "participant": {
+            "type": "string"
+          },
+          "lane": {
+            "type": "string"
+          },
+          "eventDefinition": {
+            "type": "string",
+            "enum": ["none", "message", "timer", "signal", "conditional", "error", "escalation", "link"]
+          }
+        },
+        "required": ["id", "name", "type", "participant", "eventDefinition"]
+      }
     },
-    "required": ["tasks", "sequence_flows"]
+      "gateways": {
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "type": {
+        "type": "string",
+        "enum": ["exclusive", "parallel", "inclusive", "eventBased"]
+      },
+      "from": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "to": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+    "required": ["id", "type", "from", "to"]
+  }
+}
+    },
+    "required": ["tasks", "sequence_flows", "events", "gateways"]
 }
 
 
@@ -96,13 +143,16 @@ def is_valid_bpmn(obj):
 
 def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=2):
     if prompt_type == "zero-shot":
-        prompt = f"""Extract all tasks, actors, and sequence flows from this process description.
+        prompt = f"""Extract all tasks, events, actors, and sequence flows from this process description.
 
 Process description: {process_description}
 
 Output a JSON object with:
 - "tasks": array of objects with "id", "name", and "actor"
+- "events": array of objects with "id", "name", "type", "participant", and "eventDefinition"
 - "sequence_flows": array of objects with "from" and "to" (task ids)
+- "gatewways": array of objects with 1 or more "from" and 1 or more "to" (task ids)
+- each pool requires to have a starting and end-event, and all events require a participant (the pool they belong to)
 
 Use concrete task names and actors from the description. Do not use placeholders."""
     
@@ -124,7 +174,7 @@ Use concrete task names and actors from the description. Do not use placeholders
             "schema": BPMN_SCHEMA
         },
         temperature=0.0,
-        max_tokens=1024 # dit kan hoger als de business case gigantisch is en de json is afgesneden
+        max_tokens=4096 # dit kan hoger als de business case gigantisch is en de json is afgesneden
     )
     
     if isinstance(result, dict) and 'choices' in result:

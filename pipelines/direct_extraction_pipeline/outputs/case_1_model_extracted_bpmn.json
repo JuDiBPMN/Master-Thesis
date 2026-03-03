@@ -34,5 +34,35 @@
       "from": "send-invoice",
       "to": "ship-goods"
     }
+  ],
+  "events": [
+    {
+      "id": "reject-order",
+      "name": "Reject Order",
+      "type": "startEvent",
+      "participant": "Sales",
+      "eventDefinition": "conditional"
+    },
+    {
+      "id": "send-invoice-event",
+      "name": "Send Invoice Event",
+      "type": "startEvent",
+      "participant": "Sales",
+      "eventDefinition": "conditional"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "order-gateway",
+      "type": "eventBased",
+      "from": [
+        "check-stock",
+        "confirm-order"
+      ],
+      "to": [
+        "send-invoice",
+        "ship-goods"
+      ]
+    }
   ]
 }
