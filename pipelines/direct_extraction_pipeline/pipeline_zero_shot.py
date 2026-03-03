@@ -18,7 +18,7 @@ def load_model():
         llm = Llama.from_pretrained(
             repo_id="TheBloke/Llama-2-7B-Chat-GGUF",
             filename="llama-2-7b-chat.Q2_K.gguf",
-            n_ctx=2048,
+            n_ctx=4096,
             n_gpu_layers=-1,
             verbose=False
         )
@@ -70,7 +70,7 @@ BPMN_SCHEMA = {
           },
           "eventDefinition": {
             "type": "string",
-            "enum": ["none", "message", "timer", "signal", "conditional", "error", "escalation", "link"]
+            "enum": ["start", "end", "message", "timer"]
           }
         },
         "required": ["id", "name", "type", "participant", "eventDefinition"]
@@ -81,7 +81,6 @@ BPMN_SCHEMA = {
   "items": {
     "type": "object",
     "properties": {
-      "id": { "type": "string" },
       "type": {
         "type": "string",
         "enum": ["exclusive", "parallel", "inclusive", "eventBased"]
@@ -95,7 +94,7 @@ BPMN_SCHEMA = {
         "items": { "type": "string" }
       }
     },
-    "required": ["id", "type", "from", "to"]
+    "required": [ "type", "from", "to"]
   }
 }
     },
@@ -152,7 +151,7 @@ Output a JSON object with:
 - "events": array of objects with "id", "name", "type", "participant", and "eventDefinition"
 - "sequence_flows": array of objects with "from" and "to" (task ids)
 - "gatewways": array of objects with 1 or more "from" and 1 or more "to" (task ids)
-- each pool requires to have a starting and end-event, and all events require a participant (the pool they belong to)
+- each pool requires to have a starting and end-event with name "general", and all events require a participant (the pool they belong to)
 
 Use concrete task names and actors from the description. Do not use placeholders."""
     
@@ -215,7 +214,7 @@ Provide concrete names for all tasks and actors based on the process description
                 "schema": BPMN_SCHEMA
             },
             temperature=0.0,
-            max_tokens=1024
+            max_tokens=4096
         )
         
         if isinstance(result, dict) and 'choices' in result:

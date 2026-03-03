@@ -37,23 +37,36 @@
   ],
   "events": [
     {
-      "id": "reject-order",
-      "name": "Reject Order",
+      "id": "order-rejected",
+      "name": "Order Rejected",
       "type": "startEvent",
       "participant": "Sales",
-      "eventDefinition": "conditional"
+      "eventDefinition": "start"
     },
     {
-      "id": "send-invoice-event",
-      "name": "Send Invoice Event",
-      "type": "startEvent",
+      "id": "order-confirmed",
+      "name": "Order Confirmed",
+      "type": "endEvent",
       "participant": "Sales",
-      "eventDefinition": "conditional"
+      "eventDefinition": "end"
+    },
+    {
+      "id": "invoice-sent",
+      "name": "Invoice Sent",
+      "type": "endEvent",
+      "participant": "Sales",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "goods-shipped",
+      "name": "Goods Shipped",
+      "type": "endEvent",
+      "participant": "Logistics",
+      "eventDefinition": "end"
     }
   ],
   "gateways": [
     {
-      "id": "order-gateway",
       "type": "eventBased",
       "from": [
         "check-stock",
@@ -61,6 +74,15 @@
       ],
       "to": [
         "send-invoice",
+        "ship-goods"
+      ]
+    },
+    {
+      "type": "eventBased",
+      "from": [
+        "send-invoice"
+      ],
+      "to": [
         "ship-goods"
       ]
     }
