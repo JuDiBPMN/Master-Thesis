@@ -1,4 +1,5 @@
 from pathlib import Path
+from huggingface_hub import snapshot_download
 from mistral_inference.transformer import Transformer
 from mistral_inference.generate import generate
 from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
