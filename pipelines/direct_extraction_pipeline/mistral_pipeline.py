@@ -1,42 +1,30 @@
-from pathlib import Path
-from mistral_inference.transformer import Transformer
-from mistral_inference.generate import generate
-from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
-from mistral_common.protocol.instruct.messages import UserMessage, SystemMessage
-from mistral_common.protocol.instruct.request import ChatCompletionRequest
-from huggingface_hub import snapshot_download
+try:
+    from llama_cpp import Llama
+    _LLAMA_CPP_AVAILABLE = True
+except Exception:
+    Llama = None
+    _LLAMA_CPP_AVAILABLE = False
 
 import json
 import sys
 
-# ── Model path (same as your snapshot_download target) ──────────────────────
-MISTRAL_MODELS_PATH = Path.home().joinpath('mistral_models', '7B-Instruct-v0.3')
-MISTRAL_MODELS_PATH.mkdir(parents=True, exist_ok=True)
-snapshot_download(repo_id="mistralai/Mistral-7B-Instruct-v0.3", allow_patterns=["params.json", "consolidated.safetensors", "tokenizer.model.v3"], local_dir=MISTRAL_MODELS_PATH)
-
-
 llm = None
-tokenizer = None
 
 def load_model():
-    global llm, tokenizer
+    global llm
     if llm is None:
-        if not MISTRAL_MODELS_PATH.exists():
-            raise RuntimeError(
-                f"Mistral model not found at {MISTRAL_MODELS_PATH}. "
-                "Run snapshot_download first."
-            )
-        print("Loading Mistral tokenizer...")
-        tokenizer = MistralTokenizer.from_file(
-            str(MISTRAL_MODELS_PATH / "tokenizer.model.v3")
+        if not _LLAMA_CPP_AVAILABLE:
+            raise RuntimeError("llama-cpp-python is not installed.")
+        llm = Llama.from_pretrained(
+            repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
+            filename="mistral-7b-instruct-v0.2.Q5_K_M.gguf",
+            n_ctx=4096,
+            n_gpu_layers=-1,
+            verbose=False
         )
-        print("Loading Mistral model weights (this may take a minute)...")
-        llm = Transformer.from_folder(str(MISTRAL_MODELS_PATH))
-        print("Model loaded.")
-    return llm, tokenizer
+    return llm
 
 
-# ── Schema & helpers (unchanged) ─────────────────────────────────────────────
 BPMN_SCHEMA = {
     "type": "object",
     "properties": {
@@ -63,39 +51,59 @@ BPMN_SCHEMA = {
                 "required": ["from", "to"]
             }
         },
-        "events": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "string"},
-                    "name": {"type": "string"},
-                    "type": {"type": "string", "enum": ["startEvent", "endEvent", "intermediateCatchEvent", "intermediateThrowEvent"]},
-                    "participant": {"type": "string"},
-                    "lane": {"type": "string"},
-                    "eventDefinition": {"type": "string", "enum": ["start", "end", "message", "timer"]}
-                },
-                "required": ["id", "name", "type", "participant", "eventDefinition"]
-            }
+         "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "type": {
+            "type": "string",
+            "enum": ["startEvent", "endEvent", "intermediateCatchEvent", "intermediateThrowEvent"]
+          },
+          "participant": {
+            "type": "string"
+          },
+          "lane": {
+            "type": "string"
+          },
+          "eventDefinition": {
+            "type": "string",
+            "enum": ["start", "end", "message", "timer"]
+          }
         },
-        "gateways": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "type": {"type": "string", "enum": ["exclusive", "parallel", "inclusive", "eventBased"]},
-                    "from": {"type": "array", "items": {"type": "string"}},
-                    "to": {"type": "array", "items": {"type": "string"}}
-                },
-                "required": ["type", "from", "to"]
-            }
-        }
+        "required": ["id", "name", "type", "participant", "eventDefinition"]
+      }
+    },
+      "gateways": {
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "type": {
+        "type": "string",
+        "enum": ["exclusive", "parallel", "inclusive", "eventBased"]
+      },
+      "from": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "to": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+    "required": [ "type", "from", "to"]
+  }
+}
     },
     "required": ["tasks", "sequence_flows", "events", "gateways"]
 }
 
 
 def save_json_to_file(obj, path):
+    from pathlib import Path
     p = Path(path)
     if p.parent and not p.parent.exists():
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -132,154 +140,142 @@ def is_valid_bpmn(obj):
     return True
 
 
-# ── Core: call Mistral and parse JSON out of its reply ───────────────────────
-def _mistral_chat(system_text: str, user_text: str, max_tokens: int = 4096) -> str:
-    """
-    Tokenize a two-message conversation, run generate(), return the decoded text.
-    mistral_inference does NOT support constrained JSON decoding, so we ask the
-    model to return JSON in the prompt and extract it afterwards.
-    """
-    model, tok = load_model()
-
-    request = ChatCompletionRequest(
-        messages=[
-            SystemMessage(content=system_text),
-            UserMessage(content=user_text),
-        ]
-    )
-    encoded = tok.encode_chat_completion(request)
-    input_ids = encoded.tokens
-
-    # generate() returns a list of Results; we take the first
-    [result] = generate(
-        [input_ids],
-        model,
-        max_tokens=max_tokens,
-        temperature=0.0,
-        eos_id=tok.instruct_tokenizer.tokenizer.eos_id,
-    )
-    return tok.instruct_tokenizer.tokenizer.decode(result.tokens)
-
-
-def _extract_json_block(text: str) -> str:
-    """Pull the first {...} block out of the model reply."""
-    start = text.find("{")
-    if start == -1:
-        return text
-    depth = 0
-    for i, ch in enumerate(text[start:], start):
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                return text[start: i + 1]
-    return text[start:]  # malformed but let json.loads raise
-
-
 def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=2):
-    system_msg = (
-        "You are a business process modeling expert. "
-        "Always respond with a single, valid JSON object and nothing else — "
-        "no markdown fences, no explanation."
-    )
-
     if prompt_type == "zero-shot":
-        user_msg = f"""Extract all tasks, events, actors, and sequence flows from this process description.
+        prompt = f"""Extract all tasks, events, actors, and sequence flows from this process description.
 
 Process description: {process_description}
 
-Return a JSON object with exactly these keys:
-- "tasks": array of objects with "id", "name", "actor"
-- "events": array of objects with "id", "name", "type", "participant", "eventDefinition"
+Output a JSON object with:
+- "tasks": array of objects with "id", "name", and "actor"
+- "events": array of objects with "id", "name", "type", "participant", and "eventDefinition"
 - "sequence_flows": array of objects with "from" and "to" (task ids)
-- "gateways": array of objects with "type", "from" (array), "to" (array)
+- "gatewways": array of objects with 1 or more "from" and 1 or more "to" (task ids)
+- each pool requires to have a starting and end-event with name "general", and all events require a participant (the pool they belong to)
 
-Each pool must have a start and end event (eventDefinition "start"/"end", name "general").
-Use concrete names only — no placeholders."""
-
-    print(f"Initial prompt:\n{user_msg}\n")
-
+Use concrete task names and actors from the description. Do not use placeholders."""
+    
+    print(f"Initial prompt:\n{prompt}\n")
+    
     try:
-        raw = _mistral_chat(system_msg, user_msg)
+        model = load_model()
     except RuntimeError as e:
         print(e)
         return None
 
-    print("Model output:\n", raw)
-
+    result = model.create_chat_completion(
+        messages=[
+            {"role": "system", "content": "You are a business process modeling expert. Extract tasks and flows from process descriptions."},
+            {"role": "user", "content": prompt}
+        ],
+        response_format={
+            "type": "json_object",
+            "schema": BPMN_SCHEMA
+        },
+        temperature=0.0,
+        max_tokens=4096 # dit kan hoger als de business case gigantisch is en de json is afgesneden
+    )
+    
+    if isinstance(result, dict) and 'choices' in result:
+        result_text = result['choices'][0]['message']['content']
+    else:
+        result_text = str(result)
+    
+    print("Model output:\n", result_text)
+    
     try:
-        json_result = json.loads(_extract_json_block(raw))
+        json_result = json.loads(result_text)
     except json.JSONDecodeError as e:
         print(f"JSON parsing error: {e}")
         json_result = None
 
     attempt = 0
-    last_raw = raw
+    last_result_text = result_text
     while (not is_valid_bpmn(json_result)) and attempt < retries:
-        print(f"\nRetrying ({attempt + 1}/{retries})...")
+        print(f"\nParsed JSON invalid or contained placeholders; retrying ({attempt+1}/{retries})...")
 
-        retry_msg = f"""The previous output was invalid or contained placeholders.
+        clar_prompt = f"""The previous output contained placeholders or empty values. Extract concrete task names and actors from the process description.
 
 Process description: {process_description}
 
-Previous invalid output: {last_raw}
+Previous invalid output: {last_result_text}
 
-Provide a corrected JSON object with concrete task names and actors."""
-
-        print(f"Retry prompt:\n{retry_msg}\n")
-
+Provide concrete names for all tasks and actors based on the process description."""
+        
+        print(f"Retry prompt:\n{clar_prompt}\n")
+        
+        result = model.create_chat_completion(
+            messages=[
+                {"role": "system", "content": "You are a business process modeling expert. Extract tasks and flows from process descriptions with concrete names only."},
+                {"role": "user", "content": clar_prompt}
+            ],
+            response_format={
+                "type": "json_object",
+                "schema": BPMN_SCHEMA
+            },
+            temperature=0.0,
+            max_tokens=4096
+        )
+        
+        if isinstance(result, dict) and 'choices' in result:
+            last_result_text = result['choices'][0]['message']['content']
+        else:
+            last_result_text = str(result)
+            
+        print("Model output (retry):\n", last_result_text)
+        
         try:
-            last_raw = _mistral_chat(system_msg, retry_msg)
-        except RuntimeError as e:
-            print(e)
-            return None
-
-        print("Model output (retry):\n", last_raw)
-
-        try:
-            json_result = json.loads(_extract_json_block(last_raw))
+            json_result = json.loads(last_result_text)
         except json.JSONDecodeError as e:
             print(f"JSON parsing error on retry: {e}")
             json_result = None
-
+            
         attempt += 1
 
-    # ── Persist results ───────────────────────────────────────────────────────
     if json_result is None:
         print("\nError: Failed to parse JSON from model output")
-    elif not is_valid_bpmn(json_result):
-        print("\nWarning: Parsed JSON did not pass validation")
-        if output_file:
-            try:
-                save_json_to_file(json_result, output_file.replace('.json', '_invalid.json'))
-            except Exception as e:
-                print(f"Failed to write invalid JSON: {e}")
     else:
-        if output_file:
-            try:
-                save_json_to_file(json_result, output_file)
-                print(f"Wrote parsed JSON to {output_file}")
-            except Exception as e:
-                print(f"Failed to write JSON: {e}")
+        if not is_valid_bpmn(json_result):
+            print("\nWarning: Parsed JSON did not pass validation (contained placeholders or inconsistent ids)")
+            if output_file:
+                try:
+                    save_json_to_file(json_result, output_file.replace('.json', '_invalid.json'))
+                    print(f"Wrote invalid parsed JSON to {output_file.replace('.json', '_invalid.json')}")
+                except Exception as e:
+                    print(f"Failed to write invalid JSON to {output_file}: {e}")
+        else:
+            if output_file:
+                try:
+                    save_json_to_file(json_result, output_file)
+                    print(f"Wrote parsed JSON to {output_file}")
+                except Exception as e:
+                    print(f"Failed to write JSON to {output_file}: {e}")
 
     return json_result
 
-
-# ── Entry point (unchanged logic) ────────────────────────────────────────────
 import os
+import sys
 
 if __name__ == "__main__":
-    case_name = "case_1"
+    # ---------------------------------------------------------
+    # CONFIGURATION: Hier gewoon case namen invullen 
+    case_name = "case_1" 
+    # ---------------------------------------------------------
+
+    # 1. Path Discovery (Stays Partner-Proof & Subfolder-Aware)
+    # Finds the 'Master-Thesis' root by hopping up two levels
+    # Dit is best omdat we zo dezelfde pathnames verkrijgen 
+    # (de vorige code gaf andere pathnames (door andere pc))
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-
+    
     CASES_DIR = os.path.join(PROJECT_ROOT, "cases")
     OUTPUT_DIR = os.path.join(SCRIPT_DIR, "outputs")
-
+    
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+    # 2. Construct dynamic paths
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
     out_file = os.path.join(OUTPUT_DIR, f"{case_name}_model_extracted_bpmn.json")
 
@@ -288,21 +284,23 @@ if __name__ == "__main__":
     print(f"Reading from: {input_path}")
     print(f"Saving to:    {out_file}")
     print(f"-------------------------------")
-
+    
     try:
         if not os.path.exists(input_path):
             raise FileNotFoundError
 
         with open(input_path, "r", encoding="utf-8") as f:
             process_text = f.read()
-
-        print(f"LLM is analyzing '{case_name}'...")
+        
+        # 3. Run extraction
+        print(f"🤖 LLM is analyzing '{case_name}'...")
         bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=2)
-
+        
         if bpmn_json:
-            print(f"Success! Output: outputs/{case_name}_model_extracted_bpmn.json")
+            print(f"Success! View the output in the sidebar under: outputs/{case_name}_model_extracted_bpmn.json")
         else:
             print("Model extraction failed. Check the logs above.")
-
+            
     except FileNotFoundError:
-        print(f"Error: '{case_name}.txt' not found in {CASES_DIR}")
+        print(f"Error: The file '{case_name}.txt' was not found in {CASES_DIR}")
+        print(f"Check if you have a file named '{case_name}.txt' in that folder.")
