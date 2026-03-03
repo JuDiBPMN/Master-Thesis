@@ -5,8 +5,6 @@ from mistral_inference.generate import generate
 from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
 from mistral_common.protocol.instruct.messages import UserMessage, SystemMessage
 from mistral_common.protocol.instruct.request import ChatCompletionRequest
-from huggingface_hub import snapshot_download
-
 import json
 import sys
 
