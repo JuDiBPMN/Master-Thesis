@@ -1,0 +1,155 @@
+{
+  "participants": [
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "type": "pool"
+    },
+    {
+      "id": "Logistics",
+      "name": "Logistics",
+      "type": "pool"
+    },
+    {
+      "id": "Sales",
+      "name": "Sales",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "CheckAvailability",
+      "name": "Check Availability",
+      "type": "task",
+      "participant": "Logistics"
+    },
+    {
+      "id": "RejectOrder",
+      "name": "Reject Order",
+      "type": "task",
+      "participant": "Sales"
+    },
+    {
+      "id": "ConfirmOrder",
+      "name": "Confirm Order",
+      "type": "task",
+      "participant": "Sales"
+    },
+    {
+      "id": "SendInvoice",
+      "name": "Send Invoice",
+      "type": "task",
+      "participant": "Sales"
+    },
+    {
+      "id": "ShipGoods",
+      "name": "Ship Goods",
+      "type": "task",
+      "participant": "Logistics"
+    }
+  ],
+  "events": [
+    {
+      "id": "OrderPlaced",
+      "name": "Order Placed",
+      "type": "startEvent",
+      "participant": "Customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "OrderRejected",
+      "name": "Order Rejected",
+      "type": "endEvent",
+      "participant": "Sales",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "OrderConfirmed",
+      "name": "Order Confirmed",
+      "type": "endEvent",
+      "participant": "Sales",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "GoodsShipped",
+      "name": "Goods Shipped",
+      "type": "endEvent",
+      "participant": "Logistics",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "CheckAvailabilityGateway",
+      "name": "Check Availability",
+      "type": "exclusiveGateway",
+      "participant": "Logistics",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "OrderPlaced",
+      "to": "CheckAvailability"
+    },
+    {
+      "from": "CheckAvailability",
+      "to": "RejectOrder"
+    },
+    {
+      "from": "CheckAvailability",
+      "to": "ConfirmOrder"
+    },
+    {
+      "from": "ConfirmOrder",
+      "to": "SendInvoice"
+    },
+    {
+      "from": "ConfirmOrder",
+      "to": "ShipGoods"
+    },
+    {
+      "from": "RejectOrder",
+      "to": "OrderRejected"
+    },
+    {
+      "from": "OrderConfirmed",
+      "to": "GoodsShipped"
+    },
+    {
+      "from": "SendInvoice",
+      "to": "OrderConfirmed"
+    },
+    {
+      "from": "ShipGoods",
+      "to": "GoodsShipped"
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "CheckAvailability",
+      "to": "Logistics",
+      "name": "CheckAvailabilityMessage"
+    },
+    {
+      "from": "RejectOrder",
+      "to": "Sales",
+      "name": "RejectOrderMessage"
+    },
+    {
+      "from": "ConfirmOrder",
+      "to": "Sales",
+      "name": "ConfirmOrderMessage"
+    },
+    {
+      "from": "SendInvoice",
+      "to": "Sales",
+      "name": "SendInvoiceMessage"
+    },
+    {
+      "from": "ShipGoods",
+      "to": "Logistics",
+      "name": "ShipGoodsMessage"
+    }
+  ]
+}

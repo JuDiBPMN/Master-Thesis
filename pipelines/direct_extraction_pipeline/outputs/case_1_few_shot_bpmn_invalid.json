@@ -1,51 +1,134 @@
 {
-  "participants": [
-    {
-      "id": "Yamaha",
-      "name": "Yamaha",
-      "type": "pool"
-    }
-  ],
   "tasks": [
     {
-      "id": "check-stock",
-      "name": "Check Stock",
-      "type": "task",
-      "participant": "Yamaha"
-    }
-  ],
-  "events": [
+      "id": "1",
+      "name": "Place order on Yamaha website",
+      "actor": "Customer"
+    },
     {
-      "id": "reject-order",
-      "name": "Reject Order",
-      "type": "endEvent",
-      "participant": "Sales department",
-      "eventDefinition": "conditional"
-    }
-  ],
-  "gateways": [
+      "id": "2",
+      "name": "Check stock for availability of parts",
+      "actor": "Logistics department"
+    },
     {
-      "id": "confirm-order",
-      "name": "Confirm Order",
-      "type": "eventBasedGateway",
-      "participant": "Sales department",
-      "gatewayDirection": "converging"
+      "id": "3",
+      "name": "Reject order (if no stock)",
+      "actor": "Sales department"
+    },
+    {
+      "id": "4",
+      "name": "Confirm order (if stock available)",
+      "actor": "Sales department"
+    },
+    {
+      "id": "5",
+      "name": "Send invoice to customer",
+      "actor": "Sales department"
+    },
+    {
+      "id": "6",
+      "name": "Ship goods to customer",
+      "actor": "Logistics department"
     }
   ],
   "sequence_flows": [
     {
-      "from": "check-stock",
-      "to": "confirm-order",
-      "id": "flow-1"
-    }
-  ],
-  "message_flows": [
+      "from": "1",
+      "to": "2"
+    },
     {
-      "from": "confirm-order",
-      "to": "reject-order",
-      "name": "Reject Order",
-      "id": "flow-2"
+      "from": "2",
+      "to": "3"
+    },
+    {
+      "from": "2",
+      "to": "4"
+    },
+    {
+      "from": "4",
+      "to": "5"
+    },
+    {
+      "from": "4",
+      "to": "6"
+    },
+    {
+      "from": "5",
+      "to": "end"
+    },
+    {
+      "from": "6",
+      "to": "end"
     }
   ],
-  "data": []
+  "events": [
+    {
+      "id": "e1",
+      "name": "Order placed",
+      "type": "startEvent",
+      "participant": "Customer",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "e2",
+      "name": "Check stock for availability of parts",
+      "type": "intermediateCatchEvent",
+      "participant": "Logistics department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "e3",
+      "name": "Stock available",
+      "type": "intermediateThrowEvent",
+      "participant": "Logistics department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "e4",
+      "name": "Confirm order",
+      "type": "intermediateCatchEvent",
+      "participant": "Sales department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "e5",
+      "name": "Reject order and reimburse customer (if no stock)",
+      "type": "intermediateThrowEvent",
+      "participant": "Sales department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "e6",
+      "name": "Send invoice to customer",
+      "type": "intermediateCatchEvent",
+      "participant": "Sales department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "e7",
+      "name": "Ship goods to customer",
+      "type": "intermediateThrowEvent",
+      "participant": "Logistics department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "e8",
+      "name": "End",
+      "type": "endEvent",
+      "participant": "Customer",
+      "eventDefinition": "end"
+    }
+  ],
+  "gateways": [
+    {
+      "type": "exclusive",
+      "from": [
+        "e2"
+      ],
+      "to": [
+        "e3",
+        "e5"
+      ]
+    }
+  ]
 }

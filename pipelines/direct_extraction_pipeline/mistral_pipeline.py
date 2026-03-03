@@ -1,5 +1,5 @@
 try:
-    
+    from llama_cpp import Llama
     _LLAMA_CPP_AVAILABLE = True
 except Exception:
     Llama = None
@@ -16,8 +16,8 @@ def load_model():
         if not _LLAMA_CPP_AVAILABLE:
             raise RuntimeError("llama-cpp-python is not installed.")
         llm = Llama.from_pretrained(
-            repo_id="TheBloke/Llama-2-7B-Chat-GGUF",
-            filename="llama-2-7b-chat.Q2_K.gguf",
+            repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
+            filename="mistral-7b-instruct-v0.2.Q5_K_M.gguf",
             n_ctx=4096,
             n_gpu_layers=-1,
             verbose=False
@@ -96,20 +96,7 @@ BPMN_SCHEMA = {
     },
     "required": [ "type", "from", "to"]
   }
-},
-   "message_flows": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "from": {"type": "string"},
-          "to": {"type": "string"},
-          "name": {"type": "string"}
-        },
-        "required": ["from", "to", "name"]
-      }
-    }
+}
     },
     "required": ["tasks", "sequence_flows", "events", "gateways"]
 }
@@ -163,8 +150,7 @@ Output a JSON object with:
 - "tasks": array of objects with "id", "name", and "actor"
 - "events": array of objects with "id", "name", "type", "participant", and "eventDefinition"
 - "sequence_flows": array of objects with "from" and "to" (task ids)
-- "gateways": array of objects with 1 or more "from" and 1 or more "to" (task ids)
-- "message_flows": array of objects with "id", "from", "to", and "name"
+- "gatewways": array of objects with 1 or more "from" and 1 or more "to" (task ids)
 - each pool requires to have a starting and end-event with name "general", and all events require a participant (the pool they belong to)
 
 Use concrete task names and actors from the description. Do not use placeholders."""
