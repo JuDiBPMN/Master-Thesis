@@ -1,89 +1,118 @@
 {
   "tasks": [
     {
-      "id": "check-stock",
-      "name": "Check Stock",
-      "actor": "Logistics"
+      "id": "1",
+      "name": "Customer places order on Yamaha website",
+      "actor": "Customer"
     },
     {
-      "id": "confirm-order",
-      "name": "Confirm Order",
-      "actor": "Sales"
+      "id": "2",
+      "name": "Check stock for availability of parts",
+      "actor": "Logistics department"
     },
     {
-      "id": "send-invoice",
-      "name": "Send Invoice",
-      "actor": "Sales"
+      "id": "3",
+      "name": "Reject order and reimburse customer",
+      "actor": "Sales department"
     },
     {
-      "id": "ship-goods",
-      "name": "Ship Goods",
-      "actor": "Logistics"
+      "id": "4",
+      "name": "Confirm order",
+      "actor": "Sales department"
+    },
+    {
+      "id": "5",
+      "name": "Send invoice to customer",
+      "actor": "Sales department"
+    },
+    {
+      "id": "6",
+      "name": "Ship goods to customer",
+      "actor": "Logistics department"
     }
   ],
   "sequence_flows": [
     {
-      "from": "check-stock",
-      "to": "confirm-order"
+      "from": "1",
+      "to": "2"
     },
     {
-      "from": "confirm-order",
-      "to": "send-invoice"
+      "from": "2",
+      "to": "3"
     },
     {
-      "from": "send-invoice",
-      "to": "ship-goods"
+      "from": "2",
+      "to": "4"
+    },
+    {
+      "from": "4",
+      "to": "5"
+    },
+    {
+      "from": "4",
+      "to": "6"
     }
   ],
   "events": [
     {
-      "id": "order-rejected",
-      "name": "Order Rejected",
+      "id": "e1",
+      "name": "Order placed",
       "type": "startEvent",
-      "participant": "Sales",
+      "participant": "Customer",
       "eventDefinition": "start"
     },
     {
-      "id": "order-confirmed",
-      "name": "Order Confirmed",
-      "type": "endEvent",
-      "participant": "Sales",
+      "id": "e2",
+      "name": "Stock checked",
+      "type": "intermediateThrowEvent",
+      "participant": "Logistics department",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "e3",
+      "name": "Stock available",
+      "type": "intermediateCatchEvent",
+      "participant": "Logistics department",
       "eventDefinition": "end"
     },
     {
-      "id": "invoice-sent",
-      "name": "Invoice Sent",
-      "type": "endEvent",
-      "participant": "Sales",
+      "id": "e4",
+      "name": "Order confirmed",
+      "type": "intermediateThrowEvent",
+      "participant": "Sales department",
       "eventDefinition": "end"
     },
     {
-      "id": "goods-shipped",
-      "name": "Goods Shipped",
+      "id": "e5",
+      "name": "Invoice sent",
+      "type": "intermediateCatchEvent",
+      "participant": "Sales department",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "e6",
+      "name": "Goods shipped",
       "type": "endEvent",
-      "participant": "Logistics",
+      "participant": "Logistics department",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "e7",
+      "name": "Reimburse customer",
+      "type": "intermediateCatchEvent",
+      "participant": "Sales department",
       "eventDefinition": "end"
     }
   ],
   "gateways": [
     {
-      "type": "eventBased",
+      "type": "exclusive",
       "from": [
-        "check-stock",
-        "confirm-order"
+        "2"
       ],
       "to": [
-        "send-invoice",
-        "ship-goods"
-      ]
-    },
-    {
-      "type": "eventBased",
-      "from": [
-        "send-invoice"
-      ],
-      "to": [
-        "ship-goods"
+        "3",
+        "4"
       ]
     }
   ]
