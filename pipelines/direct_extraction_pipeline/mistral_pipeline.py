@@ -5,12 +5,16 @@ from mistral_inference.generate import generate
 from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
 from mistral_common.protocol.instruct.messages import UserMessage, SystemMessage
 from mistral_common.protocol.instruct.request import ChatCompletionRequest
+from huggingface_hub import snapshot_download
 
 import json
 import sys
 
 # ── Model path (same as your snapshot_download target) ──────────────────────
 MISTRAL_MODELS_PATH = Path.home().joinpath('mistral_models', '7B-Instruct-v0.3')
+MISTRAL_MODELS_PATH.mkdir(parents=True, exist_ok=True)
+snapshot_download(repo_id="mistralai/Mistral-7B-Instruct-v0.3", allow_patterns=["params.json", "consolidated.safetensors", "tokenizer.model.v3"], local_dir=MISTRAL_MODELS_PATH)
+
 
 llm = None
 tokenizer = None
