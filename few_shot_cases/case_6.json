@@ -121,38 +121,38 @@
     { "id": "courier_join_2", "name": "", "type": "exclusiveGateway", "participant": "courier_network", "gatewayDirection": "converging" }
   ],
   "sequence_flows": [
-    { "from": "order_received", "to": "split_parallel" },
-    { "from": "split_parallel", "to": "forward_order" },
-    { "from": "split_parallel", "to": "reach_out_courier" },
+    { "id": "sf1", "from": "order_received", "to": "split_parallel" },
+    { "id": "sf2", "from": "split_parallel", "to": "forward_order" },
+    { "id": "sf3", "from": "split_parallel", "to": "reach_out_courier" },
 
-    { "from": "restaurant_order_received", "to": "prepare_food" },
-    { "from": "prepare_food", "to": "food_prepared" },
-    { "from": "food_prepared", "to": "join_parallel" },
-    { "from": "courier_arrived", "to": "join_parallel" },
+    { "id": "sf4", "from": "restaurant_order_received", "to": "prepare_food" },
+    { "id": "sf5", "from": "prepare_food", "to": "food_prepared" },
+    { "id": "sf6", "from": "food_prepared", "to": "join_parallel" },
+    { "id": "sf7", "from": "courier_arrived", "to": "join_parallel" },
 
-    { "from": "courier_request_received", "to": "distance_split_1" },
-    { "from": "distance_split_1", "to": "bike_ride_to_restaurant", "condition": "< 5 km" },
-    { "from": "distance_split_1", "to": "scooter_ride_to_restaurant", "condition": ">= 5 km" },
-    { "from": "bike_ride_to_restaurant", "to": "courier_join_1" },
-    { "from": "scooter_ride_to_restaurant", "to": "courier_join_1" },
+    { "id": "sf8", "from": "courier_request_received", "to": "distance_split_1" },
+    { "id": "sf9", "from": "distance_split_1", "to": "bike_ride_to_restaurant", "condition": "< 5 km" },
+    { "id": "sf10", "from": "distance_split_1", "to": "scooter_ride_to_restaurant", "condition": ">= 5 km" },
+    { "id": "sf11", "from": "bike_ride_to_restaurant", "to": "courier_join_1" },
+    { "id": "sf12", "from": "scooter_ride_to_restaurant", "to": "courier_join_1" },
 
-    { "from": "pickup_ready_received", "to": "distance_split_2" },
-    { "from": "distance_split_2", "to": "bike_take_meal", "condition": "< 5 km" },
-    { "from": "distance_split_2", "to": "scooter_take_meal", "condition": ">= 5 km" },
-    { "from": "bike_take_meal", "to": "courier_join_2" },
-    { "from": "scooter_take_meal", "to": "courier_join_2" },
+    { "id": "sf13", "from": "pickup_ready_received", "to": "distance_split_2" },
+    { "id": "sf14", "from": "distance_split_2", "to": "bike_take_meal", "condition": "< 5 km" },
+    { "id": "sf15", "from": "distance_split_2", "to": "scooter_take_meal", "condition": ">= 5 km" },
+    { "id": "sf16", "from": "bike_take_meal", "to": "courier_join_2" },
+    { "id": "sf17", "from": "scooter_take_meal", "to": "courier_join_2" },
 
-    { "from": "delivery_confirmed", "to": "order_complete" }
+    { "id": "sf18", "from": "delivery_confirmed", "to": "order_complete" }
   ],
   "message_flows": [
-    { "from": "forward_order", "to": "restaurant_order_received", "name": "Order details" },
-    { "from": "reach_out_courier", "to": "courier_request_received", "name": "Courier request" },
+    { "id": "mf1", "from": "forward_order", "to": "restaurant_order_received", "name": "Order details" },
+    { "id": "mf2", "from": "reach_out_courier", "to": "courier_request_received", "name": "Courier request" },
 
-    { "from": "courier_join_1", "to": "courier_arrived", "name": "Courier arrived" },
+    { "id": "mf3", "from": "courier_join_1", "to": "courier_arrived", "name": "Courier arrived" },
 
-    { "from": "join_parallel", "to": "pickup_ready_received", "name": "Pickup ready" },
+    { "id": "mf4", "from": "join_parallel", "to": "pickup_ready_received", "name": "Pickup ready" },
 
-    { "from": "courier_join_2", "to": "delivery_confirmed", "name": "Order delivered" }
+    { "id": "mf5", "from": "courier_join_2", "to": "delivery_confirmed", "name": "Order delivered" }
   ],
   "data": []
 }

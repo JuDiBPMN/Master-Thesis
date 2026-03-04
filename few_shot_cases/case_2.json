@@ -142,7 +142,7 @@
     { "id": "sf14", "from": "set_up_budget",          "to": "gateway_planning_join" },
     { "id": "sf15", "from": "state_resources",        "to": "gateway_planning_join" },
     { "id": "sf16", "from": "gateway_planning_join",  "to":  "start_project" },
-    { "id": "sf17", "from": "communicate_rejection",  "to": "gateway_approved_join" }
+    { "id": "sf17", "from": "communicate_rejection",  "to": "gateway_approved_join" },
     { "id": "sf19", "from": "start_project",  "to": "gateway_approved_join" },
     { "id": "sf20", "from": "gateway_approved_join",  "to": "end_manager" }
   ],

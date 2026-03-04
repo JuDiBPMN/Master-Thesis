@@ -92,7 +92,7 @@
       "type": "startEvent",
       "participant": "rotterdam_sweater_shop",
       "lane": "anouk",
-      "eventDefinition": "none"
+      "eventDefinition": "start"
     },
     {
       "id": "package_complete",
@@ -108,7 +108,7 @@
       "type": "endEvent",
       "participant": "rotterdam_sweater_shop",
       "lane": "anouk",
-      "eventDefinition": "none"
+      "eventDefinition": "end"
     }
   ],
   "gateways": [
@@ -156,38 +156,38 @@
     }
   ],
   "sequence_flows": [
-    { "from": "order_received", "to": "pg_split_prepare" },
+    { "id": "sf1", "from": "order_received", "to": "pg_split_prepare" },
 
-    { "from": "pg_split_prepare", "to": "pick_out_sweaters" },
-    { "from": "pg_split_prepare", "to": "collect_packaging_material" },
+    { "id": "sf2", "from": "pg_split_prepare", "to": "pick_out_sweaters" },
+    { "id": "sf3", "from": "pg_split_prepare", "to": "collect_packaging_material" },
 
-    { "from": "pick_out_sweaters", "to": "pg_join_prepare" },
-    { "from": "collect_packaging_material", "to": "pg_join_prepare" },
+    { "id": "sf4", "from": "pick_out_sweaters", "to": "pg_join_prepare" },
+    { "id": "sf5",   "from": "collect_packaging_material", "to": "pg_join_prepare" },
 
-    { "from": "pg_join_prepare", "to": "assemble_package" },
-    { "from": "assemble_package", "to": "package_complete" },
+    { "id": "sf6", "from": "pg_join_prepare", "to": "assemble_package" },
+    { "id": "sf7", "from": "assemble_package", "to": "package_complete" },
 
-    { "from": "package_complete", "to": "pg_split_invoice_delivery" },
+    { "id": "sf8", "from": "package_complete", "to": "pg_split_invoice_delivery" },
 
-    { "from": "pg_split_invoice_delivery", "to": "email_invoice" },
-    { "from": "pg_split_invoice_delivery", "to": "xg_deliver_to" },
+    { "id": "sf9", "from": "pg_split_invoice_delivery", "to": "email_invoice" },
+    { "id": "sf10", "from": "pg_split_invoice_delivery", "to": "xg_deliver_to" },
 
-    { "from": "xg_deliver_to", "to": "ride_bike_to_customer", "condition": "Rotterdam" },
-    { "from": "ride_bike_to_customer", "to": "deliver_package" },
-    { "from": "deliver_package", "to": "xg_delivery_done_merge" },
+    { "id": "sf11", "from": "xg_deliver_to", "to": "ride_bike_to_customer", "condition": "Rotterdam" },
+    { "id": "sf12", "from": "ride_bike_to_customer", "to": "deliver_package" },
+    { "id": "sf13",  "from": "deliver_package", "to": "xg_delivery_done_merge" },
 
-    { "from": "xg_deliver_to", "to": "ride_bike_to_postnl_store", "condition": "NL" },
-    { "from": "ride_bike_to_postnl_store", "to": "send_package_via_postnl" },
-    { "from": "send_package_via_postnl", "to": "xg_delivery_done_merge" },
+    { "id": "sf14", "from": "xg_deliver_to", "to": "ride_bike_to_postnl_store", "condition": "NL" },
+    { "id": "sf15", "from": "ride_bike_to_postnl_store", "to": "send_package_via_postnl" },
+    { "id": "sf16", "from": "send_package_via_postnl", "to": "xg_delivery_done_merge" },
 
-    { "from": "xg_deliver_to", "to": "ride_bike_to_dhl_store", "condition": "International" },
-    { "from": "ride_bike_to_dhl_store", "to": "send_package_via_dhl" },
-    { "from": "send_package_via_dhl", "to": "xg_delivery_done_merge" },
+    { "id": "sf17", "from": "xg_deliver_to", "to": "ride_bike_to_dhl_store", "condition": "International" },
+    { "id": "sf18", "from": "ride_bike_to_dhl_store", "to": "send_package_via_dhl" },
+    { "id": "sf19", "from": "send_package_via_dhl", "to": "xg_delivery_done_merge" },
 
-    { "from": "email_invoice", "to": "pg_join_finish" },
-    { "from": "xg_delivery_done_merge", "to": "pg_join_finish" },
+    { "id": "sf20", "from": "email_invoice", "to": "pg_join_finish" },
+    { "id": "sf21", "from": "xg_delivery_done_merge", "to": "pg_join_finish" },
 
-    { "from": "pg_join_finish", "to": "order_completed" }
+    { "id": "sf22", "from": "pg_join_finish", "to": "order_completed" }
   ],
   "message_flows": [],
   "data": []

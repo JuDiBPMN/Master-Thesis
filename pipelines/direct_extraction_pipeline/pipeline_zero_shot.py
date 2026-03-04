@@ -70,7 +70,7 @@ BPMN_SCHEMA = {
           },
           "eventDefinition": {
             "type": "string",
-            "enum": ["start", "end", "message", "timer"]
+            "enum": ["start", "end", "message", "timer", "none"]
           }
         },
         "required": ["id", "name", "type", "participant", "eventDefinition"]
@@ -109,7 +109,30 @@ BPMN_SCHEMA = {
         },
         "required": ["from", "to", "name"]
       }
-    }
+    },
+    "data": {
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {"type": "string"},
+      "name": {"type": "string"}
+    },
+    "required": ["id", "name"],
+  }
+},
+"data_associations": {
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "from": {"type": "string"},
+      "to": {"type": "string"},
+      "type": {"type": "string", "enum": ["input", "output"]}
+    },
+    "required": ["from", "to", "type"]
+  }
+}
     },
     "required": ["tasks", "sequence_flows", "events", "gateways"]
 }

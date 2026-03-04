@@ -19,60 +19,39 @@ def load_model():
             repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
             filename="mistral-7b-instruct-v0.2.Q5_K_M.gguf",
             n_ctx=10000,
-            n_gpu_layers=-1,
+            n_gpu_layers=1,
             verbose=False
         )
     return llm
 
 
 BPMN_SCHEMA = {
-  "type": "object",
-  "properties": {
-    "participants": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "type": {"type": "string", "enum": ["pool"]},
-          "lanes": {
+    "type": "object",
+    "properties": {
+        "tasks": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {"type": "string"},
-                "name": {"type": "string"}
-              },
-              "required": ["id", "name"]
+                "type": "object",
+                "properties": {
+                    "id": {"type": "string"},
+                    "name": {"type": "string"},
+                    "actor": {"type": "string"}
+                },
+                "required": ["id", "name", "actor"]
             }
-          }
         },
-        "required": ["id", "name", "type"]
-      }
-    },
-    "tasks": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "type": {
-            "type": "string",
-            "enum": ["task", "userTask", "serviceTask", "scriptTask", "manualTask", "subProcess", "callActivity"]
-          },
-          "participant": {
-            "type": "string"
-          },
-          "lane": {
-            "type": "string"
-          }
+        "sequence_flows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "from": {"type": "string"},
+                    "to": {"type": "string"}
+                },
+                "required": ["from", "to"]
+            }
         },
-        "required": ["id", "name", "type", "participant"]
-      }
-    },
-    "events": {
+         "events": {
       "type": "array",
       "items": {
         "type": "object",
@@ -91,53 +70,34 @@ BPMN_SCHEMA = {
           },
           "eventDefinition": {
             "type": "string",
-            "enum": ["none", "message", "timer", "signal", "conditional", "error", "escalation", "link"]
+            "enum": ["start", "end", "message", "timer", "none"]
           }
         },
         "required": ["id", "name", "type", "participant", "eventDefinition"]
       }
     },
-    "gateways": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "type": {
-            "type": "string",
-            "enum": ["exclusiveGateway", "parallelGateway", "inclusiveGateway", "eventBasedGateway"]
-          },
-          "participant": {
-            "type": "string"
-          },
-          "lane": {
-            "type": "string"
-          },
-          "gatewayDirection": {
-            "type": "string",
-            "enum": ["diverging", "converging"]
-          }
-        },
-        "required": ["id", "name", "type", "participant", "gatewayDirection"]
+      "gateways": {
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "type": {
+        "type": "string",
+        "enum": ["exclusive", "parallel", "inclusive", "eventBased"]
+      },
+      "from": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "to": {
+        "type": "array",
+        "items": { "type": "string" }
       }
     },
-    "sequence_flows": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "from": {"type": "string"},
-          "to": {"type": "string"},
-          "condition": {"type": "string"},
-          "isDefault": {"type": "boolean"},
-          "participant": {"type": "string"}
-        },
-        "required": ["from", "to"]
-      }
-    },
-    "message_flows": {
+    "required": [ "type", "from", "to"]
+  }
+},
+   "message_flows": {
       "type": "array",
       "items": {
         "type": "object",
@@ -151,20 +111,30 @@ BPMN_SCHEMA = {
       }
     },
     "data": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "dataType": {"type": "string", "enum": ["string", "number", "boolean", "object"]},
-          "description": {"type": "string"}
-        },
-        "required": ["id", "name", "dataType"]
-      }
-    }
-  },
-  "required": ["participants", "tasks", "events", "gateways", "sequence_flows"]
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {"type": "string"},
+      "name": {"type": "string"}
+    },
+    "required": ["id", "name"],
+  }
+},
+"data_associations": {
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "from": {"type": "string"},
+      "to": {"type": "string"},
+      "type": {"type": "string", "enum": ["input", "output"]}
+    },
+    "required": ["from", "to", "type"]
+  }
+}
+    },
+    "required": ["tasks", "sequence_flows", "events", "gateways"]
 }
 
 
@@ -208,18 +178,37 @@ def is_valid_bpmn(obj):
 
 def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=2):
     if prompt_type == "zero-shot":
-        prompt = f"""Extract all tasks, events, actors, and sequence flows from this process description.
+        prompt = fprompt = f"""You are a BPMN 2.0 expert. Extract a structured process model from the description below.
 
-Process description: {process_description}
+## Rules
+1. Each distinct action by a single actor = one task. Never merge actions.
+2. Decision points (if/else, approved/rejected) = EXCLUSIVE gateway (XOR). Add a gateway node, not just branching flows.
+3. Simultaneous/parallel actions ("at the same time", "simultaneously", "while") = PARALLEL gateway (AND). Add both a split and a join gateway.
+4. Every pool must have exactly one startEvent and one endEvent.
+5. Gateway IDs must appear in sequence_flows; tasks that are "behind" a gateway connect TO the gateway, not directly to each other.
+6. NEVER leave gateways empty if the process has decisions or parallelism.
 
-Output a JSON object with:
-- "tasks": array of objects with "id", "name", and "actor"
-- "events": array of objects with "id", "name", "type", "participant", and "eventDefinition"
-- "sequence_flows": array of objects with "from" and "to" (task ids)
-- "gateways": array of objects with 1 or more "from" and 1 or more "to" (task ids)
-- each pool requires to have a starting and end-event with name "general", and all events require a participant (the pool they belong to)
+## Signal words → gateway type
+- "if", "approved", "rejected", "otherwise", "either" → exclusive (XOR)
+- "simultaneously", "at the same time", "in parallel", "while" → parallel (AND)
+- "one of", "any of" → inclusive (OR)
 
-Use concrete task names and actors from the description. Do not use placeholders."""
+- A parallel gateway ALWAYS comes in pairs: one split (1 in, many out) AND one join (many in, 1 out)
+- An exclusive split (if/else) must have exactly 2+ outgoing flows with conditions, one per outcome
+- Never use an exclusive gateway to join parallel branches — use a parallel gateway join
+
+- If a task produces a document or artifact mentioned in the description, add it to "data" and create a data_association with type "output"
+- Task "name" should be a short verb phrase only (e.g. "Assess request"). Never include the actor's name in the task name.
+- If a task consumes a document, add a data_association with type "input"
+- Common signals for data objects: "record X", "submit a X", "send a X", "initiate a X", 
+  "receives a X", "notified of X" → these produce or consume data objects- An exclusive gateway splits AFTER the decision task. The gateway's "from" is the task that makes 
+  the decision, "to" lists the outcome branches. Never leave "from" empty.
+- data_association "from"/"to" values must exactly match an id already defined in the "tasks" or 
+  "data" arrays. Never invent new ids.
+## Process description
+{process_description}
+
+Return a JSON object matching the schema exactly. Do not merge tasks. Do not skip gateways."""
     
     print(f"Initial prompt:\n{prompt}\n")
     
@@ -325,7 +314,7 @@ import sys
 if __name__ == "__main__":
     # ---------------------------------------------------------
     # CONFIGURATION: Hier gewoon case namen invullen 
-    case_name = "case_1" 
+    case_name = "case_2" 
     # ---------------------------------------------------------
 
     # 1. Path Discovery (Stays Partner-Proof & Subfolder-Aware)
