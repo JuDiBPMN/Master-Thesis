@@ -18,7 +18,7 @@ def load_model():
         llm = Llama.from_pretrained(
             repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
             filename="mistral-7b-instruct-v0.2.Q5_K_M.gguf",
-            n_ctx=4096,
+            n_ctx=10000,
             n_gpu_layers=-1,
             verbose=False
         )
@@ -26,32 +26,53 @@ def load_model():
 
 
 BPMN_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "tasks": {
+  "type": "object",
+  "properties": {
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "type": {"type": "string", "enum": ["pool"]},
+          "lanes": {
             "type": "array",
             "items": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "string"},
-                    "name": {"type": "string"},
-                    "actor": {"type": "string"}
-                },
-                "required": ["id", "name", "actor"]
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "name": {"type": "string"}
+              },
+              "required": ["id", "name"]
             }
+          }
         },
-        "sequence_flows": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "from": {"type": "string"},
-                    "to": {"type": "string"}
-                },
-                "required": ["from", "to"]
-            }
+        "required": ["id", "name", "type"]
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "type": {
+            "type": "string",
+            "enum": ["task", "userTask", "serviceTask", "scriptTask", "manualTask", "subProcess", "callActivity"]
+          },
+          "participant": {
+            "type": "string"
+          },
+          "lane": {
+            "type": "string"
+          }
         },
-         "events": {
+        "required": ["id", "name", "type", "participant"]
+      }
+    },
+    "events": {
       "type": "array",
       "items": {
         "type": "object",
@@ -70,35 +91,80 @@ BPMN_SCHEMA = {
           },
           "eventDefinition": {
             "type": "string",
-            "enum": ["start", "end", "message", "timer"]
+            "enum": ["none", "message", "timer", "signal", "conditional", "error", "escalation", "link"]
           }
         },
         "required": ["id", "name", "type", "participant", "eventDefinition"]
       }
     },
-      "gateways": {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "type": {
-        "type": "string",
-        "enum": ["exclusive", "parallel", "inclusive", "eventBased"]
-      },
-      "from": {
-        "type": "array",
-        "items": { "type": "string" }
-      },
-      "to": {
-        "type": "array",
-        "items": { "type": "string" }
+    "gateways": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "type": {
+            "type": "string",
+            "enum": ["exclusiveGateway", "parallelGateway", "inclusiveGateway", "eventBasedGateway"]
+          },
+          "participant": {
+            "type": "string"
+          },
+          "lane": {
+            "type": "string"
+          },
+          "gatewayDirection": {
+            "type": "string",
+            "enum": ["diverging", "converging"]
+          }
+        },
+        "required": ["id", "name", "type", "participant", "gatewayDirection"]
       }
     },
-    "required": [ "type", "from", "to"]
-  }
-}
+    "sequence_flows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "from": {"type": "string"},
+          "to": {"type": "string"},
+          "condition": {"type": "string"},
+          "isDefault": {"type": "boolean"},
+          "participant": {"type": "string"}
+        },
+        "required": ["from", "to"]
+      }
     },
-    "required": ["tasks", "sequence_flows", "events", "gateways"]
+    "message_flows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "from": {"type": "string"},
+          "to": {"type": "string"},
+          "name": {"type": "string"}
+        },
+        "required": ["from", "to", "name"]
+      }
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "dataType": {"type": "string", "enum": ["string", "number", "boolean", "object"]},
+          "description": {"type": "string"}
+        },
+        "required": ["id", "name", "dataType"]
+      }
+    }
+  },
+  "required": ["participants", "tasks", "events", "gateways", "sequence_flows"]
 }
 
 
@@ -150,7 +216,7 @@ Output a JSON object with:
 - "tasks": array of objects with "id", "name", and "actor"
 - "events": array of objects with "id", "name", "type", "participant", and "eventDefinition"
 - "sequence_flows": array of objects with "from" and "to" (task ids)
-- "gatewways": array of objects with 1 or more "from" and 1 or more "to" (task ids)
+- "gateways": array of objects with 1 or more "from" and 1 or more "to" (task ids)
 - each pool requires to have a starting and end-event with name "general", and all events require a participant (the pool they belong to)
 
 Use concrete task names and actors from the description. Do not use placeholders."""
@@ -173,7 +239,7 @@ Use concrete task names and actors from the description. Do not use placeholders
             "schema": BPMN_SCHEMA
         },
         temperature=0.0,
-        max_tokens=4096 # dit kan hoger als de business case gigantisch is en de json is afgesneden
+        max_tokens=10000 # dit kan hoger als de business case gigantisch is en de json is afgesneden
     )
     
     if isinstance(result, dict) and 'choices' in result:
@@ -214,7 +280,7 @@ Provide concrete names for all tasks and actors based on the process description
                 "schema": BPMN_SCHEMA
             },
             temperature=0.0,
-            max_tokens=4096
+            max_tokens=10000
         )
         
         if isinstance(result, dict) and 'choices' in result:
@@ -294,7 +360,7 @@ if __name__ == "__main__":
         
         # 3. Run extraction
         print(f"🤖 LLM is analyzing '{case_name}'...")
-        bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=2)
+        bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=0)
         
         if bpmn_json:
             print(f"Success! View the output in the sidebar under: outputs/{case_name}_model_extracted_bpmn.json")
