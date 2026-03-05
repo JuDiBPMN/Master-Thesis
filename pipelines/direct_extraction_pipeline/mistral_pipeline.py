@@ -40,6 +40,29 @@ BPMN_SCHEMA = {
                 "required": ["id", "name", "actor"]
             }
         },
+        "participants": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":    {"type": "string"},
+                    "name":  {"type": "string"},
+                    "type":  {"type": "string", "enum": ["pool"]},
+                    "lanes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id":   {"type": "string"},
+                                "name": {"type": "string"}
+                            },
+                            "required": ["id", "name"]
+                        }
+                    }
+                },
+                "required": ["id", "name", "type"]
+            }
+        },
         "sequence_flows": {
             "type": "array",
             "items": {
@@ -134,7 +157,7 @@ BPMN_SCHEMA = {
   }
 }
     },
-    "required": ["tasks", "sequence_flows", "events", "gateways"]
+    "required": ["participants", "tasks", "sequence_flows", "events", "gateways"]
 }
 
 

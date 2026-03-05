@@ -1,34 +1,51 @@
 {
+  "participants": [
+    {
+      "id": "Logistics",
+      "name": "Logistics department",
+      "type": "pool"
+    },
+    {
+      "id": "Sales",
+      "name": "Sales department",
+      "type": "pool"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "type": "pool"
+    }
+  ],
   "tasks": [
     {
       "id": "check_stock",
       "name": "Check Stock",
-      "actor": "Logistics department"
+      "actor": "Logistics"
     },
     {
       "id": "reject_order",
       "name": "Reject Order",
-      "actor": "Sales department"
+      "actor": "Sales"
     },
     {
       "id": "reimburse_customer",
       "name": "Reimburse Customer",
-      "actor": "Sales department"
+      "actor": "Sales"
     },
     {
       "id": "confirm_order",
       "name": "Confirm Order",
-      "actor": "Sales department"
+      "actor": "Sales"
     },
     {
       "id": "send_invoice",
       "name": "Send Invoice",
-      "actor": "Sales department"
+      "actor": "Sales"
     },
     {
       "id": "ship_goods",
       "name": "Ship Goods",
-      "actor": "Logistics department"
+      "actor": "Logistics"
     }
   ],
   "sequence_flows": [
@@ -47,33 +64,46 @@
     {
       "from": "confirm_order",
       "to": "ship_goods"
+    },
+    {
+      "from": "reject_order",
+      "to": "reimburse_customer"
     }
   ],
   "events": [
     {
-      "id": "start",
-      "name": "Start",
+      "id": "order_received",
+      "name": "Order Received",
       "type": "startEvent",
-      "participant": "none",
+      "participant": "Customer",
       "eventDefinition": "none"
     },
     {
-      "id": "end",
-      "name": "End",
+      "id": "order_processed",
+      "name": "Order Processed",
+      "type": "intermediateThrowEvent",
+      "participant": "Sales",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "order_completed",
+      "name": "Order Completed",
       "type": "endEvent",
-      "participant": "none",
+      "participant": "Customer",
       "eventDefinition": "none"
     }
   ],
   "gateways": [
     {
-      "type": "exclusive",
+      "id": "gateway_stock",
+      "type": "exclusiveGateway",
+      "participant": "Logistics",
       "from": [
-        "confirm_order"
+        "check_stock"
       ],
       "to": [
         "reject_order",
-        "ship_goods"
+        "confirm_order"
       ]
     }
   ],
@@ -93,12 +123,12 @@
   ],
   "data_associations": [
     {
-      "from": "confirm_order",
+      "from": "check_stock",
       "to": "order",
-      "type": "output"
+      "type": "input"
     },
     {
-      "from": "reject_order",
+      "from": "confirm_order",
       "to": "order",
       "type": "output"
     },
