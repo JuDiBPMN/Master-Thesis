@@ -1,0 +1,5 @@
+Upon receiving an order by the production facility team, the order is processed. 
+For orders 25 000 euros and higher, the production of fresh products is triggered. 
+For orders below 25 000 euros, stock items are used. 
+The team concurrently organizes shipping and packages the ordered products. 
+Once both steps are completed, the order is shipped. 

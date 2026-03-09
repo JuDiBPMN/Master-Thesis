@@ -1,0 +1,95 @@
+{
+  "participants": [
+    {
+      "id": "photographer",
+      "name": "Photographer",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "receive_pictures",
+      "name": "Receive Pictures",
+      "type": "task",
+      "participant": "photographer"
+    },
+    {
+      "id": "clean_pictures",
+      "name": "Clean Pictures",
+      "type": "task",
+      "participant": "photographer"
+    },
+    {
+      "id": "remove_imperfections",
+      "name": "Remove Imperfections",
+      "type": "task",
+      "participant": "photographer"
+    },
+    {
+      "id": "whiten_teeth",
+      "name": "Whiten Teeth",
+      "type": "task",
+      "participant": "photographer"
+    },
+    {
+      "id": "adjust_light_settings",
+      "name": "Adjust Light Settings",
+      "type": "task",
+      "participant": "photographer"
+    },
+    {
+      "id": "organize_in_gallery",
+      "name": "Organize in Gallery",
+      "type": "task",
+      "participant": "photographer"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_photographer",
+      "name": "Start",
+      "type": "startEvent",
+      "participant": "photographer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_photographer",
+      "name": "End",
+      "type": "endEvent",
+      "participant": "photographer",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_parallel_split",
+      "name": "Start Concurrent Editing",
+      "type": "parallelGateway",
+      "participant": "photographer",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Editing Complete",
+      "type": "parallelGateway",
+      "participant": "photographer",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    { "id": "sf1", "from": "start_photographer", "to": "receive_pictures" },
+    { "id": "sf2", "from": "receive_pictures", "to": "clean_pictures" },
+    { "id": "sf3", "from": "clean_pictures", "to": "gateway_parallel_split" },
+    { "id": "sf4", "from": "gateway_parallel_split", "to": "remove_imperfections" },
+    { "id": "sf5", "from": "gateway_parallel_split", "to": "whiten_teeth" },
+    { "id": "sf6", "from": "gateway_parallel_split", "to": "adjust_light_settings" },
+    { "id": "sf7", "from": "remove_imperfections", "to": "gateway_parallel_join" },
+    { "id": "sf8", "from": "whiten_teeth", "to": "gateway_parallel_join" },
+    { "id": "sf9", "from": "adjust_light_settings", "to": "gateway_parallel_join" },
+    { "id": "sf10", "from": "gateway_parallel_join", "to": "organize_in_gallery" },
+    { "id": "sf11", "from": "organize_in_gallery", "to": "end_photographer" }
+  ],
+  "message_flows": [],
+  "data": [],
+  "data_associations": []
+}
