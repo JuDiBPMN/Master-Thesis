@@ -18,15 +18,14 @@ def load_model():
         if not _LLAMA_CPP_AVAILABLE:
             raise RuntimeError("llama-cpp-python is not installed.")
 
-        # Pipelines all sit one level below project root, same as few_shot_pipeline.py
         SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-        PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
-        model_path   = os.path.join(PROJECT_ROOT, "fine_tuned_LLM", "bpmn-finetuned.gguf")
+        PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+        model_path   = os.path.join(PROJECT_ROOT, "_fine_tuned_llm", "bpmn-finetuned.gguf")
 
         if not os.path.exists(model_path):
             raise FileNotFoundError(
                 f"Fine-tuned model not found at: {model_path}\n"
-                f"Make sure bpmn-finetuned.gguf is inside the 'fine_tuned_LLM/' folder "
+                f"Make sure bpmn-finetuned.gguf is inside the 'fine-tuned-llm/' folder "
                 f"at the project root."
             )
 
@@ -405,7 +404,6 @@ def _format_issues(errors, warnings):
 
 # ── Model ─────────────────────────────────────────────────────────────────────
 
-# Must match the Alpaca-style format used during fine-tuning
 INSTRUCTION = (
     "Extract a structured BPMN model from the following process description. "
     "Output valid JSON with exactly these top-level keys: participants, tasks, "
@@ -427,8 +425,7 @@ SYSTEM_MSG = (
 
 def _build_prompt(process_description):
     """
-    Wrap the input in the same Alpaca-style format used during fine-tuning
-    so the model recognises the pattern at inference time.
+    Alpaca-style prompt — must match the format used during fine-tuning.
     """
     return (
         f"### Instruction:\n{INSTRUCTION}\n\n"
@@ -454,10 +451,11 @@ def _call_model(model, prompt):
 
 # ── Main extraction function ───────────────────────────────────────────────────
 
-def extract_bpmn_fine_tuned(process_description, case_name, output_file=None, retries=3):
+def extract_bpmn_fine_tuned(process_description, case_name, output_file=None):
     """
     Extract a BPMN JSON from process_description using the fine-tuned model.
     No few-shot examples needed — the schema is baked into the model weights.
+    No retry logic — single-pass extraction only.
     """
     prompt = _build_prompt(process_description)
 
@@ -477,67 +475,21 @@ def extract_bpmn_fine_tuned(process_description, case_name, output_file=None, re
         print(f"JSON parsing error: {e}")
         json_result = None
 
-    fully_valid, errors, warnings = (
-        is_valid_bpmn(json_result) if json_result
-        else (False, ["Failed to parse JSON"], [])
-    )
-
-    attempt = 0
-    while not fully_valid and attempt < retries:
-        attempt += 1
-        issues_text = _format_issues(errors, warnings)
-        print(f"\nIssues found (attempt {attempt}/{retries}):\n{issues_text}")
-
-        retry_prompt = _build_prompt(
-            f"{process_description}\n\n"
-            f"Your previous output had the following issues that MUST ALL be fixed:\n"
-            f"{issues_text}\n\n"
-            f"Previous (broken) output:\n{result_text}\n\n"
-            f"Produce a corrected complete BPMN JSON fixing every issue:\n"
-            f"- Undeclared participant: add it to the participants array or change "
-            f"the node's participant to an already-declared id.\n"
-            f"- Missing startEvent or endEvent: add one to that pool and connect it "
-            f"with a sequence_flow.\n"
-            f"- sequence_flow 'from'/'to' id does not exist: fix the id to match a "
-            f"real node or remove the flow.\n"
-            f"- sequence_flow crosses pools: move it to message_flows instead.\n"
-            f"Output the complete corrected JSON. Do not omit any part of the model."
-        )
-
-        print(f"Retry prompt (attempt {attempt}):\n{retry_prompt}\n")
-        result_text = _call_model(model, retry_prompt)
-        print(f"Model output (retry {attempt}):\n", result_text)
-
-        try:
-            json_result = json.loads(result_text)
-        except json.JSONDecodeError as e:
-            print(f"JSON parsing error on retry: {e}")
-            json_result = None
-
-        fully_valid, errors, warnings = (
-            is_valid_bpmn(json_result) if json_result
-            else (False, ["Failed to parse JSON"], [])
-        )
+    # ── Validate and report issues (no retries) ───────────────────────────────
+    if json_result is not None:
+        fully_valid, errors, warnings = is_valid_bpmn(json_result)
+        if not fully_valid:
+            issues_text = _format_issues(errors, warnings)
+            print(f"\nValidation issues (no retry — recording as-is):\n{issues_text}")
 
     # ── Save output ───────────────────────────────────────────────────────────
     if json_result is None:
-        print("\nError: Failed to parse JSON from model output after all attempts.")
-    elif not fully_valid:
-        remaining = _format_issues(errors, warnings)
-        print(f"\nWarning: Output still has issues after {retries} retries:\n{remaining}")
-        if output_file:
-            invalid_path = output_file.replace(".json", "_invalid.json")
-            try:
-                save_json_to_file(json_result, invalid_path)
-                print(f"Wrote invalid output to {invalid_path}")
-            except Exception as e:
-                print(f"Failed to write invalid JSON: {e}")
+        print("\nError: Failed to parse JSON from model output.")
     else:
-        print("\nValidation passed.")
         if output_file:
             try:
                 save_json_to_file(json_result, output_file)
-                print(f"Wrote output to {output_file}")
+                print(f"\nWrote output to {output_file}")
             except Exception as e:
                 print(f"Failed to write JSON: {e}")
 
@@ -547,10 +499,12 @@ def extract_bpmn_fine_tuned(process_description, case_name, output_file=None, re
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
+    # --- CONFIGURATION ---
     case_name = "case_1"
+    # ---------------------
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
     CASES_DIR    = os.path.join(PROJECT_ROOT, "cases")
     OUTPUT_DIR   = os.path.join(SCRIPT_DIR, "outputs")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -575,7 +529,6 @@ if __name__ == "__main__":
             process_description=process_text,
             case_name=case_name,
             output_file=out_file,
-            retries=3
         )
 
         if bpmn_json:
