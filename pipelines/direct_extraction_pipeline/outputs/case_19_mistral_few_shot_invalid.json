@@ -1,0 +1,345 @@
+{
+  "pools": [
+    {
+      "id": "online_store",
+      "name": "Online Store"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "system",
+      "name": "System",
+      "pool": "online_store"
+    },
+    {
+      "id": "warehouse",
+      "name": "Warehouse",
+      "pool": "online_store"
+    },
+    {
+      "id": "finance_department",
+      "name": "Finance Department",
+      "pool": "online_store"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "register_order",
+      "name": "Register Order",
+      "type": "task",
+      "lane": "system"
+    },
+    {
+      "id": "check_stock",
+      "name": "Check Stock Availability",
+      "type": "task",
+      "lane": "system"
+    },
+    {
+      "id": "notify_customer_out_of_stock",
+      "name": "Notify Customer of Out of Stock",
+      "type": "task",
+      "lane": "system"
+    },
+    {
+      "id": "cancel_order",
+      "name": "Cancel Order",
+      "type": "task",
+      "lane": "system"
+    },
+    {
+      "id": "confirm_order",
+      "name": "Confirm Order",
+      "type": "task",
+      "lane": "system"
+    },
+    {
+      "id": "prepare_shipment",
+      "name": "Prepare Shipment",
+      "type": "task",
+      "lane": "warehouse"
+    },
+    {
+      "id": "process_payment",
+      "name": "Process Payment",
+      "type": "task",
+      "lane": "finance_department"
+    },
+    {
+      "id": "send_payment_authorization_request",
+      "name": "Send Payment Authorization Request",
+      "type": "task",
+      "lane": "finance_department"
+    },
+    {
+      "id": "verify_payment_details",
+      "name": "Verify Payment Details",
+      "type": "task",
+      "lane": "payment_provider"
+    },
+    {
+      "id": "approve_payment",
+      "name": "Approve Payment",
+      "type": "task",
+      "lane": "finance_department"
+    },
+    {
+      "id": "reject_payment",
+      "name": "Reject Payment",
+      "type": "task",
+      "lane": "finance_department"
+    },
+    {
+      "id": "cancel_order_on_payment_rejection",
+      "name": "Cancel Order on Payment Rejection",
+      "type": "task",
+      "lane": "system"
+    },
+    {
+      "id": "confirm_payment_to_store",
+      "name": "Confirm Payment to Store",
+      "type": "task",
+      "lane": "finance_department"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_order",
+      "name": "Start Order",
+      "type": "startEvent",
+      "lane": "system",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_order",
+      "name": "End Order",
+      "type": "endEvent",
+      "lane": "customer",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_stock_check",
+      "name": "Stock Available?",
+      "type": "exclusiveGateway",
+      "lane": "system",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_payment_approval",
+      "name": "Payment Approved?",
+      "type": "exclusiveGateway",
+      "lane": "finance_department",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel",
+      "name": "Parallel Activities",
+      "type": "parallelGateway",
+      "lane": "online_store",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Parallel Activities Complete",
+      "type": "parallelGateway",
+      "lane": "online_store",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_order",
+      "to": "register_order"
+    },
+    {
+      "id": "sf2",
+      "from": "register_order",
+      "to": "check_stock"
+    },
+    {
+      "id": "sf3",
+      "from": "check_stock",
+      "to": "gateway_stock_check"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_stock_check",
+      "to": "notify_customer_out_of_stock",
+      "condition": "Out of Stock"
+    },
+    {
+      "id": "sf5",
+      "from": "gateway_stock_check",
+      "to": "cancel_order",
+      "condition": "Available"
+    },
+    {
+      "id": "sf6",
+      "from": "cancel_order",
+      "to": "end_order"
+    },
+    {
+      "id": "sf7",
+      "from": "register_order",
+      "to": "confirm_order"
+    },
+    {
+      "id": "sf8",
+      "from": "confirm_order",
+      "to": "gateway_parallel"
+    },
+    {
+      "id": "sf9",
+      "from": "gateway_parallel",
+      "to": "prepare_shipment",
+      "condition": "Warehouse"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_parallel",
+      "to": "process_payment",
+      "condition": "Finance Department"
+    },
+    {
+      "id": "sf11",
+      "from": "prepare_shipment",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf12",
+      "from": "process_payment",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf13",
+      "from": "gateway_payment_approval",
+      "to": "confirm_payment_to_store"
+    },
+    {
+      "id": "sf14",
+      "from": "gateway_payment_approval",
+      "to": "reject_payment",
+      "condition": "Rejected"
+    },
+    {
+      "id": "sf15",
+      "from": "confirm_payment_to_store",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf16",
+      "from": "reject_payment",
+      "to": "cancel_order_on_payment_rejection"
+    },
+    {
+      "id": "sf17",
+      "from": "notify_customer_out_of_stock",
+      "to": "end_order"
+    },
+    {
+      "id": "sf18",
+      "from": "prepare_shipment",
+      "to": "ship_laptop"
+    },
+    {
+      "id": "sf19",
+      "from": "ship_laptop",
+      "to": "dispatch_shipment"
+    },
+    {
+      "id": "sf20",
+      "from": "dispatch_shipment",
+      "to": "customer"
+    },
+    {
+      "id": "sf21",
+      "from": "customer",
+      "to": "receive_shipping_confirmation"
+    },
+    {
+      "id": "sf22",
+      "from": "receive_shipping_confirmation",
+      "to": "end_order"
+    }
+  ],
+  "message_flows": [],
+  "data": [
+    {
+      "id": "order_information",
+      "name": "Order Information"
+    },
+    {
+      "id": "payment_details",
+      "name": "Payment Details"
+    },
+    {
+      "id": "shipping_confirmation",
+      "name": "Shipping Confirmation"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "register_order",
+      "to": "order_information",
+      "type": "input"
+    },
+    {
+      "from": "check_stock",
+      "to": "order_information",
+      "type": "input"
+    },
+    {
+      "from": "notify_customer_out_of_stock",
+      "to": "shipping_confirmation",
+      "type": "output"
+    },
+    {
+      "from": "cancel_order",
+      "to": "order_information",
+      "type": "output"
+    },
+    {
+      "from": "confirm_order",
+      "to": "order_information",
+      "type": "output"
+    },
+    {
+      "from": "prepare_shipment",
+      "to": "shipping_confirmation",
+      "type": "output"
+    },
+    {
+      "from": "process_payment",
+      "to": "payment_details",
+      "type": "input"
+    },
+    {
+      "from": "send_payment_authorization_request",
+      "to": "payment_details",
+      "type": "output"
+    },
+    {
+      "from": "verify_payment_details",
+      "to": "payment_details",
+      "type": "output"
+    },
+    {
+      "from": "approve_payment",
+      "to": "payment_details",
+      "type": "output"
+    },
+    {
+      "from": "reject_payment",
+      "to": "payment_details",
+      "type": "output"
+    },
+    {
+      "from": "cancel_order_on_payment_rejection",
+      "to": "order_information",
+      "type": "output"
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "tasks": [
+    {
+      "id": "receive_invoice",
+      "name": "Receive Invoice",
+      "actor": "finance_department"
+    },
+    {
+      "id": "verify_amount",
+      "name": "Verify Invoice Amount",
+      "actor": "clerk"
+    },
+    {
+      "id": "check_purchase_order",
+      "name": "Check Purchase Order",
+      "actor": "clerk"
+    },
+    {
+      "id": "book_invoice",
+      "name": "Book Invoice",
+      "actor": "clerk"
+    },
+    {
+      "id": "pay_invoice",
+      "name": "Pay Invoice",
+      "actor": "finance_department"
+    },
+    {
+      "id": "notify_supplier",
+      "name": "Notify Supplier of Payment",
+      "actor": "finance_department"
+    }
+  ],
+  "participants": [
+    {
+      "id": "finance_department",
+      "name": "Finance Department",
+      "type": "pool",
+      "lanes": [
+        {
+          "id": "finance_lane",
+          "name": "Finance"
+        }
+      ]
+    },
+    {
+      "id": "clerk",
+      "name": "Clerk",
+      "type": "lane",
+      "pool": "finance_department"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "receive_invoice",
+      "to": "verify_amount"
+    },
+    {
+      "from": "verify_amount",
+      "to": "check_purchase_order"
+    },
+    {
+      "from": "check_purchase_order",
+      "to": "book_invoice"
+    },
+    {
+      "from": "book_invoice",
+      "to": "pay_invoice"
+    },
+    {
+      "from": "pay_invoice",
+      "to": "notify_supplier"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_process",
+      "name": "Start",
+      "type": "startEvent",
+      "participant": "finance_department",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_process",
+      "name": "End",
+      "type": "endEvent",
+      "participant": "finance_department",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "type": "parallel",
+      "from": [
+        "verify_amount",
+        "check_purchase_order"
+      ],
+      "to": [
+        "book_invoice"
+      ]
+    }
+  ]
+}

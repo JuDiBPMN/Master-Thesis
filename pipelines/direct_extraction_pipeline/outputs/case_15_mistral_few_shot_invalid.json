@@ -1,0 +1,90 @@
+{
+  "tasks": [
+    {
+      "id": "receive_pictures",
+      "name": "Receive Pictures",
+      "actor": "photographer\","
+    }
+  ],
+  "participants": [
+    {
+      "id": "photographer",
+      "name": "Photographer",
+      "type": "pool",
+      "lanes": [
+        {
+          "id": "lane1",
+          "name": "lane1"
+        }
+      ]
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "receive_pictures",
+      "to": "cleaning"
+    },
+    {
+      "from": "cleaning",
+      "to": "remove_imperfections"
+    },
+    {
+      "from": "remove_imperfections",
+      "to": "whitening_teeth"
+    },
+    {
+      "from": "whitening_teeth",
+      "to": "adjust_light_settings"
+    },
+    {
+      "from": "adjust_light_settings",
+      "to": "organize_pictures"
+    },
+    {
+      "from": "organize_pictures",
+      "to": "end_photographer"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_photographer",
+      "name": "Start",
+      "type": "startEvent",
+      "participant": "photographer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_photographer",
+      "name": "End",
+      "type": "endEvent",
+      "participant": "photographer",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "type": "parallel",
+      "from": [
+        "cleaning",
+        "remove_imperfections",
+        "whitening_teeth"
+      ],
+      "to": [
+        "organize_pictures"
+      ]
+    }
+  ],
+  "data": [
+    {
+      "id": "pictures",
+      "name": "Pictures"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "receive_pictures",
+      "to": "pictures",
+      "type": "input"
+    }
+  ]
+}

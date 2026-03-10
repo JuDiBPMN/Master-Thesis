@@ -1,9 +1,15 @@
 {
-    "participants": [
+    "lanes": [
+      {
+        "id": "bank_employee",
+        "name": "Bank Employee",
+        "pool": "bank"
+      }
+    ],
+    "pools": [
       {
         "id": "bank",
-        "name": "Bank",
-        "type": "pool"
+        "name": "Bank"
       }
     ],
     "tasks": [
@@ -11,19 +17,25 @@
         "id": "check_credit_score",
         "name": "Check Credit Score",
         "type": "task",
-        "participant": "bank"
+        "lane": "bank_employee"
       },
       {
-        "id": "notify_approval",
-        "name": "Notify Applicant of Approval",
+        "id": "approve",
+        "name": "Approve Loan Application",
         "type": "task",
-        "participant": "bank"
+        "lane": "bank_employee"
       },
       {
-        "id": "notify_rejection",
-        "name": "Notify Applicant of Rejection",
+        "id": "reject",
+        "name": "Reject Loan Application",
         "type": "task",
-        "participant": "bank"
+        "lane": "bank_employee"
+      },
+        {
+        "id": "notify_decision",
+        "name": "Notify Applicant of Decision",
+        "type": "task",
+        "lane": "bank_employee"
       }
     ],
     "events": [
@@ -31,40 +43,42 @@
         "id": "start_review",
         "name": "Loan Application Received",
         "type": "startEvent",
-        "participant": "bank",
+        "lane": "bank_employee",
         "eventDefinition": "none"
       },
       {
-        "id": "end_approved",
-        "name": "Loan Approved",
+        "id": "end_review",
+        "name": "Loan Review Complete",
         "type": "endEvent",
-        "participant": "bank",
-        "eventDefinition": "none"
-      },
-      {
-        "id": "end_rejected",
-        "name": "Loan Rejected",
-        "type": "endEvent",
-        "participant": "bank",
+        "lane": "bank_employee",
         "eventDefinition": "none"
       }
+      
     ],
     "gateways": [
       {
-        "id": "gateway_credit",
+        "id": "gateway_credit_split",
         "name": "Credit Score Sufficient?",
         "type": "exclusiveGateway",
-        "participant": "bank",
+        "lane": "bank_employee",
+        "gatewayDirection": "diverging"
+      },
+      {
+        "id": "gateway_credit_join",
+        "name": "Credit Score Sufficient?",
+        "type": "exclusiveGateway",
+        "lane": "bank_employee",
         "gatewayDirection": "diverging"
       }
     ],
     "sequence_flows": [
       { "id": "sf1", "from": "start_review",    "to": "check_credit_score" },
-      { "id": "sf2", "from": "check_credit_score", "to": "gateway_credit" },
-      { "id": "sf3", "from": "gateway_credit",  "to": "notify_approval",  "condition": "Sufficient" },
-      { "id": "sf4", "from": "gateway_credit",  "to": "notify_rejection", "condition": "Insufficient" },
-      { "id": "sf5", "from": "notify_approval", "to": "end_approved" },
-      { "id": "sf6", "from": "notify_rejection","to": "end_rejected" }
+      { "id": "sf2", "from": "check_credit_score", "to": "gateway_credit_split" },
+      { "id": "sf3", "from": "gateway_credit_split",  "to": "approve",  "condition": "Sufficient" },
+      { "id": "sf4", "from": "gateway_credit_split",  "to": "reject", "condition": "Insufficient" },
+      { "id": "sf5", "from": "approve",  "to": "gateway_credit_join"},
+      { "id": "sf6", "from": "reject",  "to": "gateway_credit_join"},
+      { "id": "sf7", "from": "notify_decision","to": "end_review" }
     ],
     "message_flows": [],
     "data": []
