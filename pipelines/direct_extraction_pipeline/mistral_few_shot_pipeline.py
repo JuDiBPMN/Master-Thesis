@@ -611,7 +611,7 @@ Output the complete corrected JSON. Do not omit any part of the model."""
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    case_name = "case_22" # <-- Just change this to run a different case with few-shot examples
+    case_name = "case_23" # <-- Just change this to run a different case with few-shot examples
 
     SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -642,7 +642,7 @@ if __name__ == "__main__":
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
             retries=0,
-            case_ids=[2, 8] # choose cases for few-shot examples
+            case_ids=[21, 22] # choose cases for few-shot examples
         )
 
         if bpmn_json:
