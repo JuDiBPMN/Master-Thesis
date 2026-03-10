@@ -1,0 +1,119 @@
+{
+  "participants": [
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "order-placed",
+      "name": "Place Order",
+      "type": "task",
+      "participant": "Customer"
+    },
+    {
+      "id": "order-received",
+      "name": "Receive Order",
+      "type": "task",
+      "participant": "Warehouse"
+    },
+    {
+      "id": "check-in-stock",
+      "name": "Check in Stock",
+      "type": "task",
+      "participant": "Warehouse"
+    },
+    {
+      "id": "ship-order",
+      "name": "Ship Order",
+      "type": "task",
+      "participant": "Warehouse"
+    },
+    {
+      "id": "notify-customer",
+      "name": "Notify Customer",
+      "type": "task",
+      "participant": "Warehouse"
+    },
+    {
+      "id": "receive-shipment",
+      "name": "Receive Shipment",
+      "type": "task",
+      "participant": "Customer"
+    },
+    {
+      "id": "cancel-order",
+      "name": "Cancel Order",
+      "type": "task",
+      "participant": "Warehouse"
+    },
+    {
+      "id": "notify-customer-cancel",
+      "name": "Notify Customer",
+      "type": "task",
+      "participant": "Warehouse"
+    }
+  ],
+  "events": [
+    {
+      "id": "order-placed-event",
+      "name": "Order Placed",
+      "type": "startEvent",
+      "participant": "Customer",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "check-in-stock-gateway",
+      "name": "Check in Stock",
+      "type": "exclusiveGateway",
+      "participant": "Warehouse",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "order-placed-event",
+      "to": "order-received",
+      "participant": "Warehouse"
+    },
+    {
+      "from": "order-received",
+      "to": "check-in-stock",
+      "participant": "Warehouse"
+    },
+    {
+      "from": "check-in-stock",
+      "to": "ship-order",
+      "participant": "Warehouse"
+    },
+    {
+      "from": "ship-order",
+      "to": "notify-customer",
+      "participant": "Warehouse"
+    },
+    {
+      "from": "notify-customer",
+      "to": "receive-shipment",
+      "participant": "Customer"
+    },
+    {
+      "from": "check-in-stock-gateway",
+      "to": "cancel-order",
+      "participant": "Warehouse"
+    },
+    {
+      "from": "cancel-order",
+      "to": "notify-customer-cancel",
+      "participant": "Warehouse"
+    },
+    {
+      "from": "notify-customer-cancel",
+      "to": "order-placed-event",
+      "participant": "Customer"
+    }
+  ]
+}

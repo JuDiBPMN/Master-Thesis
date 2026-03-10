@@ -369,7 +369,19 @@ if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
     CASES_TO_EVALUATE = [
         "case_2",
-
+        "case_6",
+        "case_7",
+        "case_8",
+        "case_9",
+        "case_10",
+        "case_11",
+        "case_12",
+        "case_13",
+        "case_14",
+        "case_15",
+        "case_16",
+        "case_17",
+        "case_18"
     ]
     # ── END CONFIGURATION ──────────────────────────────────────────────────────
 

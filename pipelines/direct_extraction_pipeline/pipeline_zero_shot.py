@@ -296,7 +296,7 @@ import sys
 if __name__ == "__main__":
     # ---------------------------------------------------------
     # CONFIGURATION: Hier gewoon case namen invullen 
-    case_name = "case_1" 
+    case_name = "case_2" 
     # ---------------------------------------------------------
 
     # 1. Path Discovery (Stays Partner-Proof & Subfolder-Aware)

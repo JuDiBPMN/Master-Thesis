@@ -1,0 +1,134 @@
+{
+  "participants": [
+    {
+      "id": "Restaurant",
+      "name": "Restaurant",
+      "type": "pool"
+    },
+    {
+      "id": "CourierNetwork",
+      "name": "CourierNetwork",
+      "type": "pool"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "StartOrder",
+      "name": "Start Order",
+      "type": "task",
+      "participant": "Restaurant"
+    },
+    {
+      "id": "PrepareFood",
+      "name": "Prepare Food",
+      "type": "task",
+      "participant": "Restaurant"
+    },
+    {
+      "id": "ReachOutCourier",
+      "name": "Reach Out Courier",
+      "type": "task",
+      "participant": "Platform"
+    },
+    {
+      "id": "AssignCourier",
+      "name": "Assign Courier",
+      "type": "task",
+      "participant": "CourierNetwork"
+    },
+    {
+      "id": "StartBikeCourier",
+      "name": "Start Bike Courier",
+      "type": "task",
+      "participant": "CourierNetwork"
+    },
+    {
+      "id": "StartScooterCourier",
+      "name": "Start Scooter Courier",
+      "type": "task",
+      "participant": "CourierNetwork"
+    },
+    {
+      "id": "DeliverFood",
+      "name": "Deliver Food",
+      "type": "task",
+      "participant": "CourierNetwork"
+    },
+    {
+      "id": "StartOrderCustomer",
+      "name": "Start Order Customer",
+      "type": "task",
+      "participant": "Customer"
+    }
+  ],
+  "events": [
+    {
+      "id": "NewOrder",
+      "name": "New Order",
+      "type": "startEvent",
+      "participant": "Platform",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "DistanceGateway",
+      "name": "Distance Gateway",
+      "type": "exclusiveGateway",
+      "participant": "Platform",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "NewOrder",
+      "to": "StartOrder",
+      "participant": "Restaurant"
+    },
+    {
+      "from": "NewOrder",
+      "to": "ReachOutCourier",
+      "participant": "Platform"
+    },
+    {
+      "from": "ReachOutCourier",
+      "to": "DistanceGateway",
+      "participant": "CourierNetwork"
+    },
+    {
+      "from": "DistanceGateway",
+      "to": "StartBikeCourier",
+      "participant": "CourierNetwork"
+    },
+    {
+      "from": "DistanceGateway",
+      "to": "StartScooterCourier",
+      "participant": "CourierNetwork"
+    },
+    {
+      "from": "StartBikeCourier",
+      "to": "DeliverFood",
+      "participant": "CourierNetwork"
+    },
+    {
+      "from": "StartScooterCourier",
+      "to": "DeliverFood",
+      "participant": "CourierNetwork"
+    },
+    {
+      "from": "DeliverFood",
+      "to": "StartOrderCustomer",
+      "participant": "CourierNetwork"
+    },
+    {
+      "from": "StartOrderCustomer",
+      "to": "EndOrder",
+      "participant": "Customer"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "participants": [
+    {
+      "id": "PM",
+      "name": "Product Manager",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "request_quotes",
+      "name": "Request Product Quotes",
+      "type": "task",
+      "participant": "PM"
+    }
+  ],
+  "events": [
+    {
+      "id": "receive_quotes",
+      "name": "Receive Product Quotes",
+      "type": "startEvent",
+      "participant": "PM",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "evaluate_quotes",
+      "name": "Evaluate Product Quotes",
+      "type": "exclusiveGateway",
+      "participant": "PM",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "receive_quotes",
+      "to": "request_quotes",
+      "participant": "PM"
+    },
+    {
+      "from": "request_quotes",
+      "to": "evaluate_quotes",
+      "participant": "PM"
+    },
+    {
+      "from": "evaluate_quotes",
+      "to": "request_quotes",
+      "participant": "PM"
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "evaluate_quotes",
+      "to": "PM",
+      "name": "contract_request"
+    }
+  ],
+  "data": [
+    {
+      "id": "contract_request",
+      "name": "Contract Request",
+      "dataType": "string"
+    }
+  ]
+}
