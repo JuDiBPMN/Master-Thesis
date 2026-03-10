@@ -1,173 +1,174 @@
 {
-  "participants": [
+  "pools": [
     {
-      "id": "Employee",
-      "name": "Employee",
-      "type": "pool",
-      "lanes": [
-        {
-          "id": "Employee",
-          "name": "Employee"
-        }
-      ]
+      "id": "approval_committee",
+      "name": "Approval Committee"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "project_manager",
+      "name": "Project Manager",
+      "pool": "approval_committee"
+    },
+    {
+      "id": "finance_department",
+      "name": "Finance Department",
+      "pool": "approval_committee"
+    },
+    {
+      "id": "hr_department",
+      "name": "HR Department",
+      "pool": "approval_committee"
     }
   ],
   "tasks": [
     {
-      "id": "RecordBasicIdea",
-      "name": "Record Basic Idea",
+      "id": "submit_proposal",
+      "name": "Submit Project Proposal",
       "type": "task",
-      "participant": "Employee",
-      "lane": "Employee"
+      "lane": "project_manager"
     },
     {
-      "id": "SubmitRequest",
-      "name": "Submit Request for Approval",
+      "id": "assess_budget",
+      "name": "Assess Budget Viable",
       "type": "task",
-      "participant": "Employee",
-      "lane": "Employee"
+      "lane": "finance_department"
     },
     {
-      "id": "AssessRequest",
-      "name": "Assess Request for Approval",
+      "id": "evaluate_resources",
+      "name": "Evaluate Resource Availability",
       "type": "task",
-      "participant": "Manager",
-      "lane": "Manager"
+      "lane": "hr_department"
     },
     {
-      "id": "InitiateProjectPlan",
-      "name": "Initiate Project Plan",
+      "id": "review_proposal",
+      "name": "Review Proposal",
       "type": "task",
-      "participant": "Manager",
-      "lane": "Manager"
+      "lane": "approval_committee"
     },
     {
-      "id": "RejectPlan",
-      "name": "Reject Plan",
+      "id": "approve_project",
+      "name": "Approve Project",
       "type": "task",
-      "participant": "Manager",
-      "lane": "Manager"
+      "lane": "approval_committee"
     },
     {
-      "id": "CommunicateRejection",
-      "name": "Communicate Rejection",
+      "id": "request_revision",
+      "name": "Request Proposal Revision",
       "type": "task",
-      "participant": "Manager",
-      "lane": "Manager"
+      "lane": "approval_committee"
     }
   ],
   "events": [
     {
-      "id": "SubmitIdea",
-      "name": "Submit Idea",
+      "id": "start_approval",
+      "name": "Project Approval Process Started",
       "type": "startEvent",
-      "participant": "Employee",
-      "eventDefinition": "none",
-      "lane": "Employee"
+      "lane": "project_manager",
+      "eventDefinition": "none"
     },
     {
-      "id": "ReceiveApproval",
-      "name": "Receive Approval",
-      "type": "intermediateCatchEvent",
-      "participant": "Manager",
-      "eventDefinition": "none",
-      "lane": "Manager"
-    },
-    {
-      "id": "ReceiveRejection",
-      "name": "Receive Rejection",
-      "type": "intermediateCatchEvent",
-      "participant": "Manager",
-      "eventDefinition": "none",
-      "lane": "Manager"
-    },
-    {
-      "id": "StartProject",
-      "name": "Start Project",
+      "id": "end_approval",
+      "name": "Project Approval Process Ended",
       "type": "endEvent",
-      "participant": "Manager",
-      "eventDefinition": "none",
-      "lane": "Manager"
+      "lane": "approval_committee",
+      "eventDefinition": "none"
     }
   ],
   "gateways": [
     {
-      "id": "Gateway",
-      "name": "Gateway",
+      "id": "gateway_finance_split",
+      "name": "Budget Assessment",
       "type": "exclusiveGateway",
-      "participant": "Manager",
-      "gatewayDirection": "diverging",
-      "lane": "Manager"
+      "lane": "approval_committee",
+      "gatewayDirection": "diverging"
     },
     {
-      "id": "Gateway",
-      "name": "Gateway",
-      "type": "inclusiveGateway",
-      "participant": "Manager",
-      "gatewayDirection": "converging",
-      "lane": "Manager"
+      "id": "gateway_hr_split",
+      "name": "Resource Availability Assessment",
+      "type": "exclusiveGateway",
+      "lane": "approval_committee",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_approval_split",
+      "name": "Approval Decision",
+      "type": "exclusiveGateway",
+      "lane": "approval_committee",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Parallel Processes Converge",
+      "type": "parallelGateway",
+      "lane": "approval_committee",
+      "gatewayDirection": "converging"
     }
   ],
   "sequence_flows": [
     {
-      "from": "SubmitIdea",
-      "to": "RecordBasicIdea"
+      "id": "sf1",
+      "from": "start_approval",
+      "to": "submit_proposal"
     },
     {
-      "from": "RecordBasicIdea",
-      "to": "SubmitRequest"
+      "id": "sf2",
+      "from": "submit_proposal",
+      "to": "gateway_finance_split"
     },
     {
-      "from": "SubmitRequest",
-      "to": "AssessRequest"
+      "id": "sf3",
+      "from": "gateway_finance_split",
+      "to": "approve_project",
+      "condition": "Positive"
     },
     {
-      "from": "AssessRequest",
-      "to": "Gateway"
+      "id": "sf4",
+      "from": "gateway_finance_split",
+      "to": "request_revision",
+      "condition": "Negative"
     },
     {
-      "from": "Gateway",
-      "to": "InitiateProjectPlan",
-      "condition": "true"
+      "id": "sf5",
+      "from": "submit_proposal",
+      "to": "gateway_hr_split"
     },
     {
-      "from": "Gateway",
-      "to": "RejectPlan",
-      "condition": "false"
+      "id": "sf6",
+      "from": "gateway_hr_split",
+      "to": "gateway_approval_split"
     },
     {
-      "from": "RejectPlan",
-      "to": "CommunicateRejection"
+      "id": "sf7",
+      "from": "gateway_approval_split",
+      "to": "approve_project",
+      "condition": "Both Positive"
     },
     {
-      "from": "InitiateProjectPlan",
-      "to": "StartProject"
+      "id": "sf8",
+      "from": "gateway_approval_split",
+      "to": "request_revision",
+      "condition": "At least One Negative"
     },
     {
-      "from": "CommunicateRejection",
-      "to": "StartProject"
+      "id": "sf9",
+      "from": "gateway_parallel_join",
+      "to": "end_approval"
     }
   ],
-  "message_flows": [
+  "message_flows": [],
+  "data": [
     {
-      "from": "AssessRequest",
-      "to": "InitiateProjectPlan",
-      "name": "Project Plan Message"
-    },
+      "id": "project_proposal",
+      "name": "Project Proposal Document"
+    }
+  ],
+  "data_associations": [
     {
-      "from": "AssessRequest",
-      "to": "RejectPlan",
-      "name": "Rejection Message"
-    },
-    {
-      "from": "InitiateProjectPlan",
-      "to": "StartProject",
-      "name": "Project Start Message"
-    },
-    {
-      "from": "RejectPlan",
-      "to": "CommunicateRejection",
-      "name": "Rejection Message"
+      "from": "submit_proposal",
+      "to": "project_proposal",
+      "type": "output"
     }
   ]
 }

@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="1.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_client_pool" name="Client" processRef="Process_client_pool"/>
+    <bpmn:participant id="actor_support_pool" name="Support Desk" processRef="Process_support_pool"/>
+    <bpmn:participant id="actor_dev_pool" name="Development Team" processRef="Process_dev_pool"/>
+    <bpmn:messageFlow id="mf1" name="Bug Report" sourceRef="submit_bug" targetRef="start_support"/>
+    <bpmn:messageFlow id="mf2" name="Escalated Bug Report" sourceRef="escalate_bug" targetRef="start_dev"/>
+    <bpmn:messageFlow id="mf3" name="Future Fix Notice" sourceRef="notify_future" targetRef="end_client_low"/>
+    <bpmn:messageFlow id="mf4" name="Closure Notification" sourceRef="close_report" targetRef="confirm_resolution"/>
+    <bpmn:messageFlow id="mf5" name="Fix Notification" sourceRef="notify_support" targetRef="confirm_resolution"/>
+    <bpmn:messageFlow id="mf6" name="Resolution Confirmation" sourceRef="confirm_resolution" targetRef="end_client_resolved"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_client_pool" name="Client" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_client_pool">
+      <bpmn:lane id="client" name="Client">
+        <bpmn:flowNodeRef>start_client</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_client_low</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_client_resolved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>submit_bug</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_client" name="Start"/>
+    <bpmn:endEvent id="end_client_low" name="Future Fix Acknowledged"/>
+    <bpmn:endEvent id="end_client_resolved" name="Resolution Confirmed"/>
+    <bpmn:task id="submit_bug" name="Submit Bug Report"/>
+  </bpmn:process>
+  <bpmn:process id="Process_support_pool" name="Support Desk" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_support_pool">
+      <bpmn:lane id="support" name="Support Desk">
+        <bpmn:flowNodeRef>start_support</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_support_low</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_support_resolved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_report</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>log_backlog</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>notify_future</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>escalate_bug</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>confirm_resolution</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_severity</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_support" name="Bug Report Received">
+      <bpmn:messageEventDefinition id="start_support_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_support_low" name="Client Notified"/>
+    <bpmn:endEvent id="end_support_resolved" name="Resolution Confirmed"/>
+    <bpmn:task id="review_report" name="Review Bug Report"/>
+    <bpmn:task id="log_backlog" name="Log Bug in Backlog"/>
+    <bpmn:task id="notify_future" name="Notify Client: Future Release Fix"/>
+    <bpmn:task id="escalate_bug" name="Escalate Bug to Development Team"/>
+    <bpmn:task id="confirm_resolution" name="Confirm Resolution with Client"/>
+    <bpmn:exclusiveGateway id="split_severity" name="Bug Severity?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_support" targetRef="review_report"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="review_report" targetRef="split_severity"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="split_severity" targetRef="log_backlog" name="Low severity">
+      <bpmn:conditionExpression>Low severity</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf4" sourceRef="split_severity" targetRef="escalate_bug" name="High severity">
+      <bpmn:conditionExpression>High severity</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf5" sourceRef="log_backlog" targetRef="notify_future"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="notify_future" targetRef="end_support_low"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="confirm_resolution" targetRef="end_support_resolved"/>
+  </bpmn:process>
+  <bpmn:process id="Process_dev_pool" name="Development Team" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_dev_pool">
+      <bpmn:lane id="dev_team" name="Development Team">
+        <bpmn:flowNodeRef>start_dev</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_dev_closed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_dev_fixed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>investigate_bug</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>close_report</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>deploy_fix</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>notify_support</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_reproducible</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_dev" name="Bug Report Received">
+      <bpmn:messageEventDefinition id="start_dev_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_dev_closed" name="Report Closed"/>
+    <bpmn:endEvent id="end_dev_fixed" name="Fix Deployed"/>
+    <bpmn:task id="investigate_bug" name="Investigate Bug"/>
+    <bpmn:task id="close_report" name="Close Bug Report"/>
+    <bpmn:task id="deploy_fix" name="Deploy Fix"/>
+    <bpmn:task id="notify_support" name="Notify Support Desk of Fix"/>
+    <bpmn:exclusiveGateway id="split_reproducible" name="Bug Reproducible?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="start_dev" targetRef="investigate_bug"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="investigate_bug" targetRef="split_reproducible"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="split_reproducible" targetRef="close_report" name="Cannot be reproduced">
+      <bpmn:conditionExpression>Cannot be reproduced</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf10" sourceRef="split_reproducible" targetRef="deploy_fix" name="Reproducible">
+      <bpmn:conditionExpression>Reproducible</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf11" sourceRef="close_report" targetRef="end_dev_closed"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="deploy_fix" targetRef="notify_support"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="notify_support" targetRef="end_dev_fixed"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_client_pool_di" bpmnElement="actor_client_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="900" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_support_pool_di" bpmnElement="actor_support_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="200" width="1620" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_dev_pool_di" bpmnElement="actor_dev_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="380" width="1460" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="client_di" bpmnElement="client" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="870" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="support_di" bpmnElement="support" isHorizontal="true">
+        <dc:Bounds x="40" y="200" width="1590" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="dev_team_di" bpmnElement="dev_team" isHorizontal="true">
+        <dc:Bounds x="40" y="380" width="1430" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_client_di" bpmnElement="start_client">
+        <dc:Bounds x="110" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_client_low_di" bpmnElement="end_client_low">
+        <dc:Bounds x="270" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_client_resolved_di" bpmnElement="end_client_resolved">
+        <dc:Bounds x="430" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_bug_di" bpmnElement="submit_bug">
+        <dc:Bounds x="590" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_support_di" bpmnElement="start_support">
+        <dc:Bounds x="110" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="confirm_resolution_di" bpmnElement="confirm_resolution">
+        <dc:Bounds x="270" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_report_di" bpmnElement="review_report">
+        <dc:Bounds x="430" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_support_resolved_di" bpmnElement="end_support_resolved">
+        <dc:Bounds x="590" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_severity_di" bpmnElement="split_severity" isMarkerVisible="true">
+        <dc:Bounds x="750" y="255" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="log_backlog_di" bpmnElement="log_backlog">
+        <dc:Bounds x="910" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="escalate_bug_di" bpmnElement="escalate_bug">
+        <dc:Bounds x="1070" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_future_di" bpmnElement="notify_future">
+        <dc:Bounds x="1230" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_support_low_di" bpmnElement="end_support_low">
+        <dc:Bounds x="1390" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_dev_di" bpmnElement="start_dev">
+        <dc:Bounds x="110" y="442" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="investigate_bug_di" bpmnElement="investigate_bug">
+        <dc:Bounds x="270" y="420" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_reproducible_di" bpmnElement="split_reproducible" isMarkerVisible="true">
+        <dc:Bounds x="430" y="435" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="close_report_di" bpmnElement="close_report">
+        <dc:Bounds x="590" y="420" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="deploy_fix_di" bpmnElement="deploy_fix">
+        <dc:Bounds x="750" y="420" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_dev_closed_di" bpmnElement="end_dev_closed">
+        <dc:Bounds x="910" y="442" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_support_di" bpmnElement="notify_support">
+        <dc:Bounds x="1070" y="420" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_dev_fixed_di" bpmnElement="end_dev_fixed">
+        <dc:Bounds x="1230" y="442" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="146" y="280"/>
+        <di:waypoint x="430" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="530" y="280"/>
+        <di:waypoint x="750" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="800" y="280"/>
+        <di:waypoint x="910" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="800" y="280"/>
+        <di:waypoint x="1070" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="1010" y="280"/>
+        <di:waypoint x="1230" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="1330" y="280"/>
+        <di:waypoint x="1390" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="146" y="460"/>
+        <di:waypoint x="270" y="460"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="370" y="460"/>
+        <di:waypoint x="430" y="460"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="480" y="460"/>
+        <di:waypoint x="590" y="460"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="480" y="460"/>
+        <di:waypoint x="750" y="460"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="690" y="460"/>
+        <di:waypoint x="910" y="460"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="850" y="460"/>
+        <di:waypoint x="1070" y="460"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="1170" y="460"/>
+        <di:waypoint x="1230" y="460"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="370" y="280"/>
+        <di:waypoint x="590" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="640" y="140"/>
+        <di:waypoint x="128" y="262"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="1120" y="320"/>
+        <di:waypoint x="128" y="442"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
+        <di:waypoint x="1280" y="240"/>
+        <di:waypoint x="288" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf4_di" bpmnElement="mf4">
+        <di:waypoint x="640" y="420"/>
+        <di:waypoint x="320" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf5_di" bpmnElement="mf5">
+        <di:waypoint x="1120" y="420"/>
+        <di:waypoint x="320" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf6_di" bpmnElement="mf6">
+        <di:waypoint x="320" y="240"/>
+        <di:waypoint x="448" y="118"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

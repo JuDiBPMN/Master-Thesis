@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="1.0">
+  <bpmn:process id="Process_marketing_agency" name="Marketing Agency" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_marketing_agency">
+      <bpmn:lane id="creative_director" name="Creative Director">
+        <bpmn:flowNodeRef>start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>assign_project</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>reassign_tasks</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_parallel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>join_revision</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="copywriter" name="Copywriter">
+        <bpmn:flowNodeRef>draft_text</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="graphic_designer" name="Graphic Designer">
+        <bpmn:flowNodeRef>create_visuals</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="social_media_manager" name="Social Media Manager">
+        <bpmn:flowNodeRef>define_schedule</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="project_manager" name="Project Manager">
+        <bpmn:flowNodeRef>end_published</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_package</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>publish_campaign</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>join_parallel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_approval</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start" name="Campaign Request Received"/>
+    <bpmn:endEvent id="end_published" name="Campaign Published"/>
+    <bpmn:task id="assign_project" name="Assign Project"/>
+    <bpmn:task id="draft_text" name="Draft Campaign Text"/>
+    <bpmn:task id="create_visuals" name="Create Visual Assets"/>
+    <bpmn:task id="define_schedule" name="Define Posting Schedule"/>
+    <bpmn:task id="review_package" name="Review Combined Package"/>
+    <bpmn:task id="publish_campaign" name="Publish Campaign"/>
+    <bpmn:task id="reassign_tasks" name="Reassign Relevant Tasks"/>
+    <bpmn:parallelGateway id="split_parallel" name="Split Work into Tracks" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="join_parallel" name="All Tracks Complete" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="split_approval" name="Client Approved?" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="join_revision" name="Revision Loop Join" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start" targetRef="assign_project"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="assign_project" targetRef="join_revision"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="join_revision" targetRef="split_parallel"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="split_parallel" targetRef="draft_text"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="split_parallel" targetRef="create_visuals"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="split_parallel" targetRef="define_schedule"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="draft_text" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="create_visuals" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="define_schedule" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="join_parallel" targetRef="review_package"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="review_package" targetRef="split_approval"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="split_approval" targetRef="publish_campaign" name="Client approves">
+      <bpmn:conditionExpression>Client approves</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf13" sourceRef="split_approval" targetRef="reassign_tasks" name="Client requests revisions">
+      <bpmn:conditionExpression>Client requests revisions</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf14" sourceRef="reassign_tasks" targetRef="join_revision"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="publish_campaign" targetRef="end_published"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_marketing_agency">
+      <bpmndi:BPMNShape id="creative_director_di" bpmnElement="creative_director" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="950" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="copywriter_di" bpmnElement="copywriter" isHorizontal="true">
+        <dc:Bounds x="40" y="180" width="950" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="graphic_designer_di" bpmnElement="graphic_designer" isHorizontal="true">
+        <dc:Bounds x="40" y="340" width="950" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="social_media_manager_di" bpmnElement="social_media_manager" isHorizontal="true">
+        <dc:Bounds x="40" y="500" width="950" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="project_manager_di" bpmnElement="project_manager" isHorizontal="true">
+        <dc:Bounds x="40" y="660" width="950" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start">
+        <dc:Bounds x="110" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="reassign_tasks_di" bpmnElement="reassign_tasks">
+        <dc:Bounds x="270" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="assign_project_di" bpmnElement="assign_project">
+        <dc:Bounds x="430" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="join_revision_di" bpmnElement="join_revision" isMarkerVisible="true">
+        <dc:Bounds x="590" y="75" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_parallel_di" bpmnElement="split_parallel" isMarkerVisible="true">
+        <dc:Bounds x="750" y="75" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="draft_text_di" bpmnElement="draft_text">
+        <dc:Bounds x="110" y="220" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="create_visuals_di" bpmnElement="create_visuals">
+        <dc:Bounds x="110" y="380" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="define_schedule_di" bpmnElement="define_schedule">
+        <dc:Bounds x="110" y="540" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="join_parallel_di" bpmnElement="join_parallel" isMarkerVisible="true">
+        <dc:Bounds x="110" y="715" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_package_di" bpmnElement="review_package">
+        <dc:Bounds x="270" y="700" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_approval_di" bpmnElement="split_approval" isMarkerVisible="true">
+        <dc:Bounds x="430" y="715" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="publish_campaign_di" bpmnElement="publish_campaign">
+        <dc:Bounds x="590" y="700" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_published_di" bpmnElement="end_published">
+        <dc:Bounds x="750" y="722" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="146" y="100"/>
+        <di:waypoint x="430" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="530" y="100"/>
+        <di:waypoint x="590" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="640" y="100"/>
+        <di:waypoint x="750" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="800" y="100"/>
+        <di:waypoint x="110" y="260"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="800" y="100"/>
+        <di:waypoint x="110" y="420"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="800" y="100"/>
+        <di:waypoint x="110" y="580"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="210" y="260"/>
+        <di:waypoint x="110" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="210" y="420"/>
+        <di:waypoint x="110" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="210" y="580"/>
+        <di:waypoint x="110" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="160" y="740"/>
+        <di:waypoint x="270" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="370" y="740"/>
+        <di:waypoint x="430" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="480" y="740"/>
+        <di:waypoint x="590" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="480" y="740"/>
+        <di:waypoint x="270" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="370" y="100"/>
+        <di:waypoint x="590" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="690" y="740"/>
+        <di:waypoint x="750" y="740"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

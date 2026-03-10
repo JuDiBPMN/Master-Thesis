@@ -617,7 +617,7 @@ def create_bpmn_xml(json_data, output_path):
 
 if __name__ == "__main__":
     # --- CONFIGURATION ---
-    case_name          = "case_1"
+    case_name          = "case_16"
     pipeline_name      = "direct_extraction_pipeline"
     prompting_strategy = "fine_tuned"
     # ---------------------

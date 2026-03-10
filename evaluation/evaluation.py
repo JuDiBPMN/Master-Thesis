@@ -86,7 +86,7 @@ def flow_pairs(obj):
 def message_flow_pairs(obj):
     mapping = id_to_name_map(obj)
     part_names = {p["id"]: normalise(p["name"])
-                  for p in obj.get("participants", [])
+                  for p in obj.get("lanes", [])
                   if isinstance(p, dict) and p.get("id")}
     all_names = {**mapping, **part_names}
     pairs = set()
@@ -100,10 +100,10 @@ def message_flow_pairs(obj):
     return pairs
 
 
-def participant_names(obj):
+def lane_names(obj):
     return {
         normalise(p["name"])
-        for p in obj.get("participants", [])
+        for p in obj.get("lanes", [])
         if isinstance(p, dict) and p.get("name")
     }
 
@@ -146,8 +146,8 @@ def evaluate_case(predicted, ground_truth):
     gt_mflows   = message_flow_pairs(ground_truth)
     mflow_p, mflow_r, mflow_f1 = f1(pred_mflows, gt_mflows)
 
-    pred_parts = participant_names(predicted)
-    gt_parts   = participant_names(ground_truth)
+    pred_parts = lane_names(predicted)
+    gt_parts   = lane_names(ground_truth)
     part_recall = (
         len(pred_parts & gt_parts) / len(gt_parts)
         if gt_parts else 0.0
@@ -175,7 +175,7 @@ def evaluate_case(predicted, ground_truth):
         "mflow_precision":     mflow_p,
         "mflow_recall":        mflow_r,
         "mflow_f1":            mflow_f1,
-        "participant_recall":  round(part_recall, 3),
+        "lane_recall":  round(part_recall, 3),
         "gateway_type_acc":    gw_type_acc,
         "_pred_tasks":         task_names(predicted),
         "_gt_tasks":           task_names(ground_truth),
@@ -214,15 +214,15 @@ def print_case_result(case_name, approach, metrics):
           f"R:{metrics['flow_recall']:.3f}  F1:{metrics['flow_f1']:.3f}")
     print(f"  │  Msg flows    P:{metrics['mflow_precision']:.3f}  "
           f"R:{metrics['mflow_recall']:.3f}  F1:{metrics['mflow_f1']:.3f}")
-    print(f"  │  Participants recall: {metrics['participant_recall']:.3f}")
+    print(f"  │  lanes recall: {metrics['lane_recall']:.3f}")
     gw = metrics["gateway_type_acc"]
     print(f"  │  Gateway type accuracy: {'N/A' if gw is None else f'{gw:.3f}'}")
 
-    # Participants
+    # lanes
     missing_parts = metrics["_gt_parts"]   - metrics["_pred_parts"]
     extra_parts   = metrics["_pred_parts"] - metrics["_gt_parts"]
     print(f"  │")
-    print(f"  │  PARTICIPANTS")
+    print(f"  │  lanes")
     print(f"  │    Expected : {fmt_set(metrics['_gt_parts'])}")
     print(f"  │    Got      : {fmt_set(metrics['_pred_parts'])}")
     if missing_parts:
@@ -230,7 +230,7 @@ def print_case_result(case_name, approach, metrics):
     if extra_parts:
         print(f"  │    + Extra  : {fmt_set(extra_parts)}")
     if not missing_parts and not extra_parts:
-        print(f"  │    ✓ All participants matched")
+        print(f"  │    ✓ All lanes matched")
 
     # Tasks
     missing_tasks = metrics["_gt_tasks"]   - metrics["_pred_tasks"]
@@ -335,7 +335,7 @@ def print_summary_table(all_results):
               f"{avg([m['node_f1']            for m in values]):>8} "
               f"{avg([m['flow_f1']            for m in values]):>8} "
               f"{avg([m['mflow_f1']           for m in values]):>9} "
-              f"{avg([m['participant_recall'] for m in values]):>9} "
+              f"{avg([m['lane_recall'] for m in values]):>9} "
               f"{str(avg([m['gateway_type_acc'] for m in values])):>8}")
     print_separator()
 
@@ -369,19 +369,6 @@ if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
     CASES_TO_EVALUATE = [
         "case_2",
-        "case_6",
-        "case_7",
-        "case_8",
-        "case_9",
-        "case_10",
-        "case_11",
-        "case_12",
-        "case_13",
-        "case_14",
-        "case_15",
-        "case_16",
-        "case_17",
-        "case_18"
     ]
     # ── END CONFIGURATION ──────────────────────────────────────────────────────
 

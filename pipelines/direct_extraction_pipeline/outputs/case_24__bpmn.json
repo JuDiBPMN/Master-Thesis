@@ -1,0 +1,65 @@
+{
+    "pools": [
+      { "id": "client_pool",     "name": "Client" },
+      { "id": "support_pool",    "name": "Support Desk" },
+      { "id": "dev_pool",        "name": "Development Team" }
+    ],
+    "lanes": [
+      { "id": "client",          "name": "Client",            "pool": "client_pool" },
+      { "id": "support",         "name": "Support Desk",      "pool": "support_pool" },
+      { "id": "dev_team",        "name": "Development Team",  "pool": "dev_pool" }
+    ],
+    "tasks": [
+      { "id": "submit_bug",          "name": "Submit Bug Report",                    "type": "task", "lane": "client" },
+      { "id": "review_report",       "name": "Review Bug Report",                    "type": "task", "lane": "support" },
+      { "id": "log_backlog",         "name": "Log Bug in Backlog",                   "type": "task", "lane": "support" },
+      { "id": "notify_future",       "name": "Notify Client: Future Release Fix",    "type": "task", "lane": "support" },
+      { "id": "escalate_bug",        "name": "Escalate Bug to Development Team",     "type": "task", "lane": "support" },
+      { "id": "investigate_bug",     "name": "Investigate Bug",                      "type": "task", "lane": "dev_team" },
+      { "id": "close_report",        "name": "Close Bug Report",                     "type": "task", "lane": "dev_team" },
+      { "id": "deploy_fix",          "name": "Deploy Fix",                           "type": "task", "lane": "dev_team" },
+      { "id": "notify_support",      "name": "Notify Support Desk of Fix",           "type": "task", "lane": "dev_team" },
+      { "id": "confirm_resolution",  "name": "Confirm Resolution with Client",       "type": "task", "lane": "support" }
+    ],
+    "events": [
+      { "id": "start_client",        "name": "Start",                        "type": "startEvent", "lane": "client",   "eventDefinition": "none" },
+      { "id": "end_client_low",      "name": "Future Fix Acknowledged",      "type": "endEvent",   "lane": "client",   "eventDefinition": "none" },
+      { "id": "end_client_resolved", "name": "Resolution Confirmed",         "type": "endEvent",   "lane": "client",   "eventDefinition": "none" },
+      { "id": "start_support",       "name": "Bug Report Received",          "type": "startEvent", "lane": "support",  "eventDefinition": "message" },
+      { "id": "end_support_low",     "name": "Client Notified",              "type": "endEvent",   "lane": "support",  "eventDefinition": "none" },
+      { "id": "end_support_resolved","name": "Resolution Confirmed",         "type": "endEvent",   "lane": "support",  "eventDefinition": "none" },
+      { "id": "start_dev",           "name": "Bug Report Received",          "type": "startEvent", "lane": "dev_team", "eventDefinition": "message" },
+      { "id": "end_dev_closed",      "name": "Report Closed",                "type": "endEvent",   "lane": "dev_team", "eventDefinition": "none" },
+      { "id": "end_dev_fixed",       "name": "Fix Deployed",                 "type": "endEvent",   "lane": "dev_team", "eventDefinition": "none" }
+    ],
+    "gateways": [
+      { "id": "split_severity",      "name": "Bug Severity?",           "type": "exclusiveGateway", "lane": "support",  "gatewayDirection": "diverging" },
+      { "id": "split_reproducible",  "name": "Bug Reproducible?",       "type": "exclusiveGateway", "lane": "dev_team", "gatewayDirection": "diverging" }
+    ],
+    "sequence_flows": [
+      { "id": "sf1",  "from": "start_support",       "to": "review_report" },
+      { "id": "sf2",  "from": "review_report",        "to": "split_severity" },
+      { "id": "sf3",  "from": "split_severity",       "to": "log_backlog",       "condition": "Low severity" },
+      { "id": "sf4",  "from": "split_severity",       "to": "escalate_bug",      "condition": "High severity" },
+      { "id": "sf5",  "from": "log_backlog",          "to": "notify_future" },
+      { "id": "sf6",  "from": "notify_future",        "to": "end_support_low" },
+      { "id": "sf7",  "from": "start_dev",            "to": "investigate_bug" },
+      { "id": "sf8",  "from": "investigate_bug",      "to": "split_reproducible" },
+      { "id": "sf9",  "from": "split_reproducible",   "to": "close_report",      "condition": "Cannot be reproduced" },
+      { "id": "sf10", "from": "split_reproducible",   "to": "deploy_fix",        "condition": "Reproducible" },
+      { "id": "sf11", "from": "close_report",         "to": "end_dev_closed" },
+      { "id": "sf12", "from": "deploy_fix",           "to": "notify_support" },
+      { "id": "sf13", "from": "notify_support",       "to": "end_dev_fixed" },
+      { "id": "sf14", "from": "confirm_resolution",   "to": "end_support_resolved" }
+    ],
+    "message_flows": [
+      { "id": "mf1", "from": "submit_bug",       "to": "start_support",          "name": "Bug Report" },
+      { "id": "mf2", "from": "escalate_bug",     "to": "start_dev",              "name": "Escalated Bug Report" },
+      { "id": "mf3", "from": "notify_future",    "to": "end_client_low",         "name": "Future Fix Notice" },
+      { "id": "mf4", "from": "close_report",     "to": "confirm_resolution",     "name": "Closure Notification" },
+      { "id": "mf5", "from": "notify_support",   "to": "confirm_resolution",     "name": "Fix Notification" },
+      { "id": "mf6", "from": "confirm_resolution","to": "end_client_resolved",   "name": "Resolution Confirmation" }
+    ],
+    "data": [],
+    "data_associations": []
+  }

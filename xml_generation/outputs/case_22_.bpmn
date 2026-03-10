@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="1.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_student_pool" name="Student" processRef="Process_student_pool"/>
+    <bpmn:participant id="actor_university_pool" name="University Administration" processRef="Process_university_pool"/>
+    <bpmn:messageFlow id="mf1" name="Thesis Submission" sourceRef="submit_thesis" targetRef="start_admin"/>
+    <bpmn:messageFlow id="mf2" name="Thesis Package" sourceRef="forward_thesis" targetRef="start_exam"/>
+    <bpmn:messageFlow id="mf3" name="Incomplete Notice" sourceRef="notify_incomplete" targetRef="end_student_incomplete"/>
+    <bpmn:messageFlow id="mf4" name="Pass Notification" sourceRef="notify_pass" targetRef="end_student_pass"/>
+    <bpmn:messageFlow id="mf5" name="Rejection Notice" sourceRef="send_rejection" targetRef="end_student_fail"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_student_pool" name="Student" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_student_pool">
+      <bpmn:lane id="student" name="Student">
+        <bpmn:flowNodeRef>start_student</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_student_incomplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_student_pass</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_student_fail</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>submit_thesis</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_student" name="Start"/>
+    <bpmn:endEvent id="end_student_incomplete" name="Submission Rejected"/>
+    <bpmn:endEvent id="end_student_pass" name="Thesis Passed"/>
+    <bpmn:endEvent id="end_student_fail" name="Thesis Failed"/>
+    <bpmn:task id="submit_thesis" name="Submit Thesis"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_student" targetRef="submit_thesis"/>
+  </bpmn:process>
+  <bpmn:process id="Process_university_pool" name="University Administration" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_university_pool">
+      <bpmn:lane id="admin_office" name="Administration Office">
+        <bpmn:flowNodeRef>start_admin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_admin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_completeness</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>notify_incomplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>forward_thesis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_complete</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="exam_board" name="Examination Board">
+        <bpmn:flowNodeRef>start_exam</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_exam_pass</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_exam_fail</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>evaluate_thesis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>issue_grade</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>notify_pass</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_rejection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_outcome</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_admin" name="Thesis Received">
+      <bpmn:messageEventDefinition id="start_admin_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_admin" name="Thesis Forwarded"/>
+    <bpmn:startEvent id="start_exam" name="Thesis Received">
+      <bpmn:messageEventDefinition id="start_exam_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_exam_pass" name="Grade Issued"/>
+    <bpmn:endEvent id="end_exam_fail" name="Rejection Sent"/>
+    <bpmn:task id="check_completeness" name="Check Submission Completeness"/>
+    <bpmn:task id="notify_incomplete" name="Notify Student of Missing Documents"/>
+    <bpmn:task id="forward_thesis" name="Forward Thesis to Examination Board"/>
+    <bpmn:task id="evaluate_thesis" name="Evaluate Thesis"/>
+    <bpmn:task id="issue_grade" name="Issue Grade"/>
+    <bpmn:task id="notify_pass" name="Notify Student of Pass"/>
+    <bpmn:task id="send_rejection" name="Send Rejection Notice to Student"/>
+    <bpmn:exclusiveGateway id="split_complete" name="Submission Complete?" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="split_outcome" name="Thesis Outcome?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="start_admin" targetRef="check_completeness"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="check_completeness" targetRef="split_complete"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="split_complete" targetRef="notify_incomplete" name="Incomplete">
+      <bpmn:conditionExpression>Incomplete</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf5" sourceRef="split_complete" targetRef="forward_thesis" name="Complete">
+      <bpmn:conditionExpression>Complete</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf6" sourceRef="notify_incomplete" targetRef="end_admin"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="forward_thesis" targetRef="end_admin"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="start_exam" targetRef="evaluate_thesis"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="evaluate_thesis" targetRef="split_outcome"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="split_outcome" targetRef="issue_grade" name="Pass">
+      <bpmn:conditionExpression>Pass</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf11" sourceRef="split_outcome" targetRef="send_rejection" name="Fail">
+      <bpmn:conditionExpression>Fail</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf12" sourceRef="issue_grade" targetRef="notify_pass"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="notify_pass" targetRef="end_exam_pass"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="send_rejection" targetRef="end_exam_fail"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_student_pool_di" bpmnElement="actor_student_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="980" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_university_pool_di" bpmnElement="actor_university_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="200" width="1460" height="320"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="student_di" bpmnElement="student" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="950" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="admin_office_di" bpmnElement="admin_office" isHorizontal="true">
+        <dc:Bounds x="40" y="200" width="1430" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="exam_board_di" bpmnElement="exam_board" isHorizontal="true">
+        <dc:Bounds x="40" y="360" width="1430" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_student_di" bpmnElement="start_student">
+        <dc:Bounds x="110" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_student_incomplete_di" bpmnElement="end_student_incomplete">
+        <dc:Bounds x="270" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_student_pass_di" bpmnElement="end_student_pass">
+        <dc:Bounds x="430" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_student_fail_di" bpmnElement="end_student_fail">
+        <dc:Bounds x="590" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_thesis_di" bpmnElement="submit_thesis">
+        <dc:Bounds x="750" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_admin_di" bpmnElement="start_admin">
+        <dc:Bounds x="110" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_completeness_di" bpmnElement="check_completeness">
+        <dc:Bounds x="270" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_complete_di" bpmnElement="split_complete" isMarkerVisible="true">
+        <dc:Bounds x="430" y="255" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_incomplete_di" bpmnElement="notify_incomplete">
+        <dc:Bounds x="590" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="forward_thesis_di" bpmnElement="forward_thesis">
+        <dc:Bounds x="750" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_admin_di" bpmnElement="end_admin">
+        <dc:Bounds x="910" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_exam_di" bpmnElement="start_exam">
+        <dc:Bounds x="110" y="422" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="evaluate_thesis_di" bpmnElement="evaluate_thesis">
+        <dc:Bounds x="270" y="400" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_outcome_di" bpmnElement="split_outcome" isMarkerVisible="true">
+        <dc:Bounds x="430" y="415" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="issue_grade_di" bpmnElement="issue_grade">
+        <dc:Bounds x="590" y="400" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_rejection_di" bpmnElement="send_rejection">
+        <dc:Bounds x="750" y="400" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_pass_di" bpmnElement="notify_pass">
+        <dc:Bounds x="910" y="400" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_exam_fail_di" bpmnElement="end_exam_fail">
+        <dc:Bounds x="1070" y="422" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_exam_pass_di" bpmnElement="end_exam_pass">
+        <dc:Bounds x="1230" y="422" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="146" y="100"/>
+        <di:waypoint x="750" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="146" y="280"/>
+        <di:waypoint x="270" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="370" y="280"/>
+        <di:waypoint x="430" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="480" y="280"/>
+        <di:waypoint x="590" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="480" y="280"/>
+        <di:waypoint x="750" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="690" y="280"/>
+        <di:waypoint x="910" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="850" y="280"/>
+        <di:waypoint x="910" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="146" y="440"/>
+        <di:waypoint x="270" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="370" y="440"/>
+        <di:waypoint x="430" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="480" y="440"/>
+        <di:waypoint x="590" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="480" y="440"/>
+        <di:waypoint x="750" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="690" y="440"/>
+        <di:waypoint x="910" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="1010" y="440"/>
+        <di:waypoint x="1230" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="850" y="440"/>
+        <di:waypoint x="1070" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="800" y="140"/>
+        <di:waypoint x="128" y="262"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="800" y="240"/>
+        <di:waypoint x="128" y="458"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
+        <di:waypoint x="640" y="240"/>
+        <di:waypoint x="288" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf4_di" bpmnElement="mf4">
+        <di:waypoint x="960" y="400"/>
+        <di:waypoint x="448" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf5_di" bpmnElement="mf5">
+        <di:waypoint x="800" y="400"/>
+        <di:waypoint x="608" y="118"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

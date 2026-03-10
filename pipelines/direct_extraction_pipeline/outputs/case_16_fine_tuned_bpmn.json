@@ -1,123 +1,248 @@
 {
-  "participants": [
+  "pools": [
     {
-      "id": "cook",
-      "name": "cook",
-      "type": "pool"
+      "id": "web_shop",
+      "name": "Web Shop"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Anouk",
+      "name": "Anouk",
+      "pool": "web_shop"
+    },
+    {
+      "id": "Jan",
+      "name": "Jan",
+      "pool": "web_shop"
     }
   ],
   "tasks": [
     {
-      "id": "collect_ingredients",
-      "name": "Collect ingredients",
+      "id": "receive_new_order",
+      "name": "Receive New Order",
       "type": "task",
-      "participant": "cook"
+      "lane": "Anouk"
     },
     {
-      "id": "heat_pan",
-      "name": "Heat pan",
+      "id": "pick_sweaters",
+      "name": "Pick Out Sweaters",
       "type": "task",
-      "participant": "cook"
+      "lane": "Anouk"
     },
     {
-      "id": "cut_vegetables",
-      "name": "Cut vegetables",
+      "id": "collect_packaging",
+      "name": "Collect Packaging Material",
       "type": "task",
-      "participant": "cook"
+      "lane": "Jan"
     },
     {
-      "id": "cook_vegetables",
-      "name": "Cook vegetables",
+      "id": "assemble_parcel",
+      "name": "Assemble Parcel",
       "type": "task",
-      "participant": "cook"
+      "lane": "Anouk"
     },
     {
-      "id": "fill_water",
-      "name": "Fill water",
+      "id": "prepare_delivery",
+      "name": "Prepare Delivery",
       "type": "task",
-      "participant": "cook"
+      "lane": "Jan"
     },
     {
-      "id": "boil_water",
-      "name": "Boil water",
+      "id": "deliver_locally",
+      "name": "Deliver Locally",
       "type": "task",
-      "participant": "cook"
+      "lane": "Jan"
     },
     {
-      "id": "cook_pasta",
-      "name": "Cook pasta",
+      "id": "deliver_nationally_postnl",
+      "name": "Deliver Nationally (PostNL)",
       "type": "task",
-      "participant": "cook"
+      "lane": "Jan"
     },
     {
-      "id": "serve_pasta",
-      "name": "Serve pasta",
+      "id": "deliver_internationally_dhl",
+      "name": "Deliver Internationally (DHL)",
       "type": "task",
-      "participant": "cook"
+      "lane": "Jan"
+    },
+    {
+      "id": "email_invoice",
+      "name": "Email Invoice",
+      "type": "task",
+      "lane": "Anouk"
     }
   ],
   "events": [
     {
-      "id": "start",
-      "name": "Start",
+      "id": "new_order_received",
+      "name": "New Order Received",
       "type": "startEvent",
-      "participant": "cook",
+      "lane": "Anouk",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "order_completed",
+      "name": "Order Completed",
+      "type": "endEvent",
+      "lane": "Anouk",
       "eventDefinition": "none"
     }
   ],
   "gateways": [
     {
-      "id": "parallel",
-      "name": "Parallel",
-      "type": "parallelGateway",
-      "participant": "cook",
+      "id": "gateway_delivery_type",
+      "name": "Delivery Type",
+      "type": "exclusiveGateway",
+      "lane": "Jan",
       "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_delivery_split",
+      "name": "Deliver Locally/Nationally/Internationally",
+      "type": "parallelGateway",
+      "lane": "Jan",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_delivery_join",
+      "name": "Delivery Prepared",
+      "type": "parallelGateway",
+      "lane": "Jan",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_delivery_approved_join",
+      "name": "Delivery Approved?",
+      "type": "exclusiveGateway",
+      "lane": "Jan",
+      "gatewayDirection": "converging"
     }
   ],
   "sequence_flows": [
     {
-      "from": "collect_ingredients",
-      "to": "heat_pan"
+      "id": "sf1",
+      "from": "new_order_received",
+      "to": "receive_new_order"
     },
     {
-      "from": "heat_pan",
-      "to": "cut_vegetables"
+      "id": "sf2",
+      "from": "receive_new_order",
+      "to": "pick_sweaters"
     },
     {
-      "from": "cut_vegetables",
-      "to": "cook_vegetables"
+      "id": "sf3",
+      "from": "pick_sweaters",
+      "to": "collect_packaging"
     },
     {
-      "from": "fill_water",
-      "to": "boil_water"
+      "id": "sf4",
+      "from": "collect_packaging",
+      "to": "assemble_parcel"
     },
     {
-      "from": "boil_water",
-      "to": "cook_pasta"
+      "id": "sf5",
+      "from": "assemble_parcel",
+      "to": "prepare_delivery"
     },
     {
-      "from": "cook_pasta",
-      "to": "serve_pasta"
+      "id": "sf6",
+      "from": "prepare_delivery",
+      "to": "gateway_delivery_type"
     },
     {
-      "from": "heat_pan",
-      "to": "parallel",
-      "condition": "none"
+      "id": "sf7",
+      "from": "gateway_delivery_type",
+      "to": "deliver_locally",
+      "condition": "Local"
     },
     {
-      "from": "cut_vegetables",
-      "to": "parallel",
-      "condition": "none"
+      "id": "sf8",
+      "from": "gateway_delivery_type",
+      "to": "deliver_nationally_postnl",
+      "condition": "National"
     },
     {
-      "from": "fill_water",
-      "to": "parallel",
-      "condition": "none"
+      "id": "sf9",
+      "from": "gateway_delivery_type",
+      "to": "deliver_internationally_dhl",
+      "condition": "International"
     },
     {
-      "from": "boil_water",
-      "to": "parallel",
-      "condition": "none"
+      "id": "sf10",
+      "from": "deliver_locally",
+      "to": "gateway_delivery_join"
+    },
+    {
+      "id": "sf11",
+      "from": "deliver_nationally_postnl",
+      "to": "gateway_delivery_join"
+    },
+    {
+      "id": "sf12",
+      "from": "deliver_internationally_dhl",
+      "to": "gateway_delivery_join"
+    },
+    {
+      "id": "sf13",
+      "from": "gateway_delivery_join",
+      "to": "email_invoice"
+    },
+    {
+      "id": "sf14",
+      "from": "email_invoice",
+      "to": "gateway_delivery_approved_join"
+    },
+    {
+      "id": "sf15",
+      "from": "gateway_delivery_approved_join",
+      "to": "order_completed"
+    }
+  ],
+  "message_flows": [],
+  "data": [
+    {
+      "id": "order",
+      "name": "Order"
+    },
+    {
+      "id": "sweaters",
+      "name": "Sweaters"
+    },
+    {
+      "id": "packaging_material",
+      "name": "Packaging Material"
+    },
+    {
+      "id": "invoice",
+      "name": "Invoice"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "receive_new_order",
+      "to": "order",
+      "type": "input"
+    },
+    {
+      "from": "pick_sweaters",
+      "to": "sweaters",
+      "type": "output"
+    },
+    {
+      "from": "collect_packaging",
+      "to": "packaging_material",
+      "type": "output"
+    },
+    {
+      "from": "assemble_parcel",
+      "to": "order",
+      "type": "output"
+    },
+    {
+      "from": "email_invoice",
+      "to": "invoice",
+      "type": "output"
     }
   ]
 }

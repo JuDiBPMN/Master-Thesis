@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="1.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_customer_pool" name="Customer" processRef="Process_customer_pool"/>
+    <bpmn:participant id="actor_ecommerce_pool" name="E-Commerce Company" processRef="Process_ecommerce_pool"/>
+    <bpmn:messageFlow id="mf1" name="Return Request" sourceRef="submit_return" targetRef="start_cs"/>
+    <bpmn:messageFlow id="mf2" name="Rejection Notice" sourceRef="notify_rejected" targetRef="end_customer_rejected"/>
+    <bpmn:messageFlow id="mf3" name="Return Confirmation" sourceRef="send_confirmation" targetRef="end_customer_confirmed"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_customer_pool" name="Customer" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_customer_pool">
+      <bpmn:lane id="customer" name="Customer">
+        <bpmn:flowNodeRef>start_customer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_customer_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_customer_confirmed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>submit_return</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_customer" name="Start"/>
+    <bpmn:endEvent id="end_customer_rejected" name="Return Rejected"/>
+    <bpmn:endEvent id="end_customer_confirmed" name="Return Confirmed"/>
+    <bpmn:task id="submit_return" name="Submit Return Request"/>
+  </bpmn:process>
+  <bpmn:process id="Process_ecommerce_pool" name="E-Commerce Company" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_ecommerce_pool">
+      <bpmn:lane id="customer_service" name="Customer Service">
+        <bpmn:flowNodeRef>start_cs</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_cs</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_cs_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>verify_eligibility</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>notify_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_confirmation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_eligible</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_parallel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>join_parallel</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="warehouse" name="Warehouse">
+        <bpmn:flowNodeRef>arrange_collection</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="finance" name="Finance">
+        <bpmn:flowNodeRef>initiate_refund</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_cs" name="Return Request Received">
+      <bpmn:messageEventDefinition id="start_cs_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_cs" name="Confirmation Sent"/>
+    <bpmn:endEvent id="end_cs_rejected" name="Rejection Sent"/>
+    <bpmn:task id="verify_eligibility" name="Verify Return Eligibility"/>
+    <bpmn:task id="notify_rejected" name="Notify Customer of Rejection"/>
+    <bpmn:task id="arrange_collection" name="Arrange Item Collection"/>
+    <bpmn:task id="initiate_refund" name="Initiate Refund Process"/>
+    <bpmn:task id="send_confirmation" name="Send Confirmation to Customer"/>
+    <bpmn:exclusiveGateway id="split_eligible" name="Item Eligible for Return?" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="split_parallel" name="Start Parallel Processing" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="join_parallel" name="Both Tasks Complete" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_cs" targetRef="verify_eligibility"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="verify_eligibility" targetRef="split_eligible"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="split_eligible" targetRef="notify_rejected" name="Not eligible">
+      <bpmn:conditionExpression>Not eligible</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf4" sourceRef="split_eligible" targetRef="split_parallel" name="Eligible">
+      <bpmn:conditionExpression>Eligible</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf5" sourceRef="notify_rejected" targetRef="end_cs_rejected"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="split_parallel" targetRef="arrange_collection"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="split_parallel" targetRef="initiate_refund"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="arrange_collection" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="initiate_refund" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="join_parallel" targetRef="send_confirmation"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="send_confirmation" targetRef="end_cs"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_customer_pool_di" bpmnElement="actor_customer_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="900" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_ecommerce_pool_di" bpmnElement="actor_ecommerce_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="200" width="1620" height="480"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="customer_di" bpmnElement="customer" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="870" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="customer_service_di" bpmnElement="customer_service" isHorizontal="true">
+        <dc:Bounds x="40" y="200" width="1590" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="warehouse_di" bpmnElement="warehouse" isHorizontal="true">
+        <dc:Bounds x="40" y="360" width="1590" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="finance_di" bpmnElement="finance" isHorizontal="true">
+        <dc:Bounds x="40" y="520" width="1590" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_customer_di" bpmnElement="start_customer">
+        <dc:Bounds x="110" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_customer_rejected_di" bpmnElement="end_customer_rejected">
+        <dc:Bounds x="270" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_customer_confirmed_di" bpmnElement="end_customer_confirmed">
+        <dc:Bounds x="430" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_return_di" bpmnElement="submit_return">
+        <dc:Bounds x="590" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_cs_di" bpmnElement="start_cs">
+        <dc:Bounds x="110" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="join_parallel_di" bpmnElement="join_parallel" isMarkerVisible="true">
+        <dc:Bounds x="270" y="255" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="verify_eligibility_di" bpmnElement="verify_eligibility">
+        <dc:Bounds x="430" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_confirmation_di" bpmnElement="send_confirmation">
+        <dc:Bounds x="590" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_eligible_di" bpmnElement="split_eligible" isMarkerVisible="true">
+        <dc:Bounds x="750" y="255" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_cs_di" bpmnElement="end_cs">
+        <dc:Bounds x="910" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_rejected_di" bpmnElement="notify_rejected">
+        <dc:Bounds x="1070" y="240" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_parallel_di" bpmnElement="split_parallel" isMarkerVisible="true">
+        <dc:Bounds x="1230" y="255" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_cs_rejected_di" bpmnElement="end_cs_rejected">
+        <dc:Bounds x="1390" y="262" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="arrange_collection_di" bpmnElement="arrange_collection">
+        <dc:Bounds x="110" y="400" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="initiate_refund_di" bpmnElement="initiate_refund">
+        <dc:Bounds x="110" y="560" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="146" y="280"/>
+        <di:waypoint x="430" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="530" y="280"/>
+        <di:waypoint x="750" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="800" y="280"/>
+        <di:waypoint x="1070" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="800" y="280"/>
+        <di:waypoint x="1230" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="1170" y="280"/>
+        <di:waypoint x="1390" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="1280" y="280"/>
+        <di:waypoint x="110" y="440"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="1280" y="280"/>
+        <di:waypoint x="110" y="600"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="210" y="440"/>
+        <di:waypoint x="270" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="210" y="600"/>
+        <di:waypoint x="270" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="320" y="280"/>
+        <di:waypoint x="590" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="690" y="280"/>
+        <di:waypoint x="910" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="640" y="140"/>
+        <di:waypoint x="128" y="262"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="1120" y="240"/>
+        <di:waypoint x="288" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
+        <di:waypoint x="640" y="240"/>
+        <di:waypoint x="448" y="118"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
