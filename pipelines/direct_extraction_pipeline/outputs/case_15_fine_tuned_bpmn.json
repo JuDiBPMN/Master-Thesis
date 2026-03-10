@@ -1,0 +1,128 @@
+{
+  "participants": [
+    {
+      "id": "Photographer",
+      "name": "Photographer",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "clean_pictures",
+      "name": "Clean Pictures",
+      "type": "task",
+      "participant": "Photographer"
+    },
+    {
+      "id": "remove_imperfections",
+      "name": "Remove Imperfections",
+      "type": "task",
+      "participant": "Photographer"
+    },
+    {
+      "id": "whiten_teeth",
+      "name": "Whiten Teeth",
+      "type": "task",
+      "participant": "Photographer"
+    },
+    {
+      "id": "adjust_light_settings",
+      "name": "Adjust Light Settings",
+      "type": "task",
+      "participant": "Photographer"
+    },
+    {
+      "id": "organize_gallery",
+      "name": "Organize Gallery",
+      "type": "task",
+      "participant": "Photographer"
+    }
+  ],
+  "events": [
+    {
+      "id": "start",
+      "name": "Start",
+      "type": "startEvent",
+      "participant": "Photographer",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "end",
+      "name": "End",
+      "type": "exclusiveGateway",
+      "participant": "Photographer",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "clean_pictures",
+      "to": "remove_imperfections",
+      "participant": "Photographer"
+    },
+    {
+      "from": "clean_pictures",
+      "to": "whiten_teeth",
+      "participant": "Photographer"
+    },
+    {
+      "from": "clean_pictures",
+      "to": "adjust_light_settings",
+      "participant": "Photographer"
+    },
+    {
+      "from": "remove_imperfections",
+      "to": "whiten_teeth",
+      "participant": "Photographer"
+    },
+    {
+      "from": "remove_imperfections",
+      "to": "adjust_light_settings",
+      "participant": "Photographer"
+    },
+    {
+      "from": "whiten_teeth",
+      "to": "adjust_light_settings",
+      "participant": "Photographer"
+    },
+    {
+      "from": "adjust_light_settings",
+      "to": "organize_gallery",
+      "participant": "Photographer"
+    },
+    {
+      "from": "organize_gallery",
+      "to": "end",
+      "participant": "Photographer"
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "clean_pictures",
+      "to": "Photographer",
+      "name": "clean_pictures_message"
+    },
+    {
+      "from": "remove_imperfections",
+      "to": "Photographer",
+      "name": "remove_imperfections_message"
+    },
+    {
+      "from": "whiten_teeth",
+      "to": "Photographer",
+      "name": "whiten_teeth_message"
+    },
+    {
+      "from": "adjust_light_settings",
+      "to": "Photographer",
+      "name": "adjust_light_settings_message"
+    },
+    {
+      "from": "organize_gallery",
+      "to": "Photographer",
+      "name": "organize_gallery_message"
+    }
+  ]
+}

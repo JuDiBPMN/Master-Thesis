@@ -1,0 +1,173 @@
+{
+  "participants": [
+    {
+      "id": "Employee",
+      "name": "Employee",
+      "type": "pool",
+      "lanes": [
+        {
+          "id": "Employee",
+          "name": "Employee"
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "RecordBasicIdea",
+      "name": "Record Basic Idea",
+      "type": "task",
+      "participant": "Employee",
+      "lane": "Employee"
+    },
+    {
+      "id": "SubmitRequest",
+      "name": "Submit Request for Approval",
+      "type": "task",
+      "participant": "Employee",
+      "lane": "Employee"
+    },
+    {
+      "id": "AssessRequest",
+      "name": "Assess Request for Approval",
+      "type": "task",
+      "participant": "Manager",
+      "lane": "Manager"
+    },
+    {
+      "id": "InitiateProjectPlan",
+      "name": "Initiate Project Plan",
+      "type": "task",
+      "participant": "Manager",
+      "lane": "Manager"
+    },
+    {
+      "id": "RejectPlan",
+      "name": "Reject Plan",
+      "type": "task",
+      "participant": "Manager",
+      "lane": "Manager"
+    },
+    {
+      "id": "CommunicateRejection",
+      "name": "Communicate Rejection",
+      "type": "task",
+      "participant": "Manager",
+      "lane": "Manager"
+    }
+  ],
+  "events": [
+    {
+      "id": "SubmitIdea",
+      "name": "Submit Idea",
+      "type": "startEvent",
+      "participant": "Employee",
+      "eventDefinition": "none",
+      "lane": "Employee"
+    },
+    {
+      "id": "ReceiveApproval",
+      "name": "Receive Approval",
+      "type": "intermediateCatchEvent",
+      "participant": "Manager",
+      "eventDefinition": "none",
+      "lane": "Manager"
+    },
+    {
+      "id": "ReceiveRejection",
+      "name": "Receive Rejection",
+      "type": "intermediateCatchEvent",
+      "participant": "Manager",
+      "eventDefinition": "none",
+      "lane": "Manager"
+    },
+    {
+      "id": "StartProject",
+      "name": "Start Project",
+      "type": "endEvent",
+      "participant": "Manager",
+      "eventDefinition": "none",
+      "lane": "Manager"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Gateway",
+      "name": "Gateway",
+      "type": "exclusiveGateway",
+      "participant": "Manager",
+      "gatewayDirection": "diverging",
+      "lane": "Manager"
+    },
+    {
+      "id": "Gateway",
+      "name": "Gateway",
+      "type": "inclusiveGateway",
+      "participant": "Manager",
+      "gatewayDirection": "converging",
+      "lane": "Manager"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "SubmitIdea",
+      "to": "RecordBasicIdea"
+    },
+    {
+      "from": "RecordBasicIdea",
+      "to": "SubmitRequest"
+    },
+    {
+      "from": "SubmitRequest",
+      "to": "AssessRequest"
+    },
+    {
+      "from": "AssessRequest",
+      "to": "Gateway"
+    },
+    {
+      "from": "Gateway",
+      "to": "InitiateProjectPlan",
+      "condition": "true"
+    },
+    {
+      "from": "Gateway",
+      "to": "RejectPlan",
+      "condition": "false"
+    },
+    {
+      "from": "RejectPlan",
+      "to": "CommunicateRejection"
+    },
+    {
+      "from": "InitiateProjectPlan",
+      "to": "StartProject"
+    },
+    {
+      "from": "CommunicateRejection",
+      "to": "StartProject"
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "AssessRequest",
+      "to": "InitiateProjectPlan",
+      "name": "Project Plan Message"
+    },
+    {
+      "from": "AssessRequest",
+      "to": "RejectPlan",
+      "name": "Rejection Message"
+    },
+    {
+      "from": "InitiateProjectPlan",
+      "to": "StartProject",
+      "name": "Project Start Message"
+    },
+    {
+      "from": "RejectPlan",
+      "to": "CommunicateRejection",
+      "name": "Rejection Message"
+    }
+  ]
+}

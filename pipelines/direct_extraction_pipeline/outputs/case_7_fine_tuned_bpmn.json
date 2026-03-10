@@ -1,0 +1,184 @@
+{
+  "participants": [
+    {
+      "id": "1",
+      "name": "Anouk",
+      "type": "pool",
+      "lanes": [
+        {
+          "id": "1",
+          "name": "Order Processing"
+        },
+        {
+          "id": "2",
+          "name": "Delivery"
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "1",
+      "name": "Pick out sweaters from storage unit",
+      "type": "task",
+      "participant": "1",
+      "lane": "1"
+    },
+    {
+      "id": "2",
+      "name": "Collect packaging material from basement",
+      "type": "task",
+      "participant": "1",
+      "lane": "1"
+    },
+    {
+      "id": "3",
+      "name": "Assemble parcel",
+      "type": "task",
+      "participant": "1",
+      "lane": "1"
+    },
+    {
+      "id": "4",
+      "name": "Email invoice to customer",
+      "type": "task",
+      "participant": "1",
+      "lane": "2"
+    },
+    {
+      "id": "5",
+      "name": "Take delivery to customer’s address",
+      "type": "task",
+      "participant": "2",
+      "lane": "2"
+    },
+    {
+      "id": "6",
+      "name": "Take delivery to PostNL shop",
+      "type": "task",
+      "participant": "2",
+      "lane": "2"
+    },
+    {
+      "id": "7",
+      "name": "Send parcel out as international DHL delivery",
+      "type": "task",
+      "participant": "2",
+      "lane": "2"
+    }
+  ],
+  "events": [
+    {
+      "id": "1",
+      "name": "New order received",
+      "type": "startEvent",
+      "participant": "1",
+      "eventDefinition": "none",
+      "lane": "1"
+    },
+    {
+      "id": "2",
+      "name": "Order completed",
+      "type": "endEvent",
+      "participant": "1",
+      "eventDefinition": "none",
+      "lane": "1"
+    },
+    {
+      "id": "3",
+      "name": "Delivery initiated",
+      "type": "startEvent",
+      "participant": "2",
+      "eventDefinition": "none",
+      "lane": "2"
+    },
+    {
+      "id": "4",
+      "name": "Delivery completed",
+      "type": "endEvent",
+      "participant": "2",
+      "eventDefinition": "none",
+      "lane": "2"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "1",
+      "name": "Parallel processing",
+      "type": "parallelGateway",
+      "participant": "1",
+      "gatewayDirection": "diverging",
+      "lane": "1"
+    },
+    {
+      "id": "2",
+      "name": "Parallel processing",
+      "type": "parallelGateway",
+      "participant": "2",
+      "gatewayDirection": "diverging",
+      "lane": "2"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "1",
+      "to": "1"
+    },
+    {
+      "from": "1",
+      "to": "2"
+    },
+    {
+      "from": "1",
+      "to": "3"
+    },
+    {
+      "from": "1",
+      "to": "4"
+    },
+    {
+      "from": "2",
+      "to": "5"
+    },
+    {
+      "from": "2",
+      "to": "6"
+    },
+    {
+      "from": "2",
+      "to": "7"
+    },
+    {
+      "from": "3",
+      "to": "4"
+    },
+    {
+      "from": "4",
+      "to": "2"
+    },
+    {
+      "from": "4",
+      "to": "5"
+    },
+    {
+      "from": "4",
+      "to": "6"
+    },
+    {
+      "from": "4",
+      "to": "7"
+    },
+    {
+      "from": "5",
+      "to": "2"
+    },
+    {
+      "from": "6",
+      "to": "2"
+    },
+    {
+      "from": "7",
+      "to": "2"
+    }
+  ]
+}

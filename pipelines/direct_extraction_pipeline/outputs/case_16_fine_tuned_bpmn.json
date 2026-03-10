@@ -1,0 +1,123 @@
+{
+  "participants": [
+    {
+      "id": "cook",
+      "name": "cook",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "collect_ingredients",
+      "name": "Collect ingredients",
+      "type": "task",
+      "participant": "cook"
+    },
+    {
+      "id": "heat_pan",
+      "name": "Heat pan",
+      "type": "task",
+      "participant": "cook"
+    },
+    {
+      "id": "cut_vegetables",
+      "name": "Cut vegetables",
+      "type": "task",
+      "participant": "cook"
+    },
+    {
+      "id": "cook_vegetables",
+      "name": "Cook vegetables",
+      "type": "task",
+      "participant": "cook"
+    },
+    {
+      "id": "fill_water",
+      "name": "Fill water",
+      "type": "task",
+      "participant": "cook"
+    },
+    {
+      "id": "boil_water",
+      "name": "Boil water",
+      "type": "task",
+      "participant": "cook"
+    },
+    {
+      "id": "cook_pasta",
+      "name": "Cook pasta",
+      "type": "task",
+      "participant": "cook"
+    },
+    {
+      "id": "serve_pasta",
+      "name": "Serve pasta",
+      "type": "task",
+      "participant": "cook"
+    }
+  ],
+  "events": [
+    {
+      "id": "start",
+      "name": "Start",
+      "type": "startEvent",
+      "participant": "cook",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "parallel",
+      "name": "Parallel",
+      "type": "parallelGateway",
+      "participant": "cook",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "collect_ingredients",
+      "to": "heat_pan"
+    },
+    {
+      "from": "heat_pan",
+      "to": "cut_vegetables"
+    },
+    {
+      "from": "cut_vegetables",
+      "to": "cook_vegetables"
+    },
+    {
+      "from": "fill_water",
+      "to": "boil_water"
+    },
+    {
+      "from": "boil_water",
+      "to": "cook_pasta"
+    },
+    {
+      "from": "cook_pasta",
+      "to": "serve_pasta"
+    },
+    {
+      "from": "heat_pan",
+      "to": "parallel",
+      "condition": "none"
+    },
+    {
+      "from": "cut_vegetables",
+      "to": "parallel",
+      "condition": "none"
+    },
+    {
+      "from": "fill_water",
+      "to": "parallel",
+      "condition": "none"
+    },
+    {
+      "from": "boil_water",
+      "to": "parallel",
+      "condition": "none"
+    }
+  ]
+}

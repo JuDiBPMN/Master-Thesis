@@ -500,7 +500,7 @@ def extract_bpmn_fine_tuned(process_description, case_name, output_file=None):
 
 if __name__ == "__main__":
     # --- CONFIGURATION ---
-    case_name = "case_1"
+    case_name = "case_2"
     # ---------------------
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))

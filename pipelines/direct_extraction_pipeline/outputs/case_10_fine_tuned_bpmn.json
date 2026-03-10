@@ -1,0 +1,172 @@
+{
+  "participants": [
+    {
+      "id": "F",
+      "name": "Finance Department",
+      "type": "pool"
+    },
+    {
+      "id": "C",
+      "name": "Clerk",
+      "type": "pool"
+    },
+    {
+      "id": "S",
+      "name": "Supplier",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T1",
+      "name": "Receive Invoice",
+      "type": "task",
+      "participant": "F"
+    },
+    {
+      "id": "T2",
+      "name": "Verify Invoice Amount",
+      "type": "task",
+      "participant": "C"
+    },
+    {
+      "id": "T3",
+      "name": "Verify Purchase Order",
+      "type": "task",
+      "participant": "C"
+    },
+    {
+      "id": "T4",
+      "name": "Book Invoice",
+      "type": "task",
+      "participant": "C"
+    },
+    {
+      "id": "T5",
+      "name": "Pay Invoice",
+      "type": "task",
+      "participant": "C"
+    },
+    {
+      "id": "T6",
+      "name": "Notify Supplier",
+      "type": "task",
+      "participant": "F"
+    },
+    {
+      "id": "T7",
+      "name": "Receive Payment Notification",
+      "type": "task",
+      "participant": "S"
+    }
+  ],
+  "events": [
+    {
+      "id": "E1",
+      "name": "Invoice Received",
+      "type": "startEvent",
+      "participant": "F",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "E2",
+      "name": "Payment Received",
+      "type": "endEvent",
+      "participant": "S",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "G1",
+      "name": "Continue",
+      "type": "exclusiveGateway",
+      "participant": "C",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "E1",
+      "to": "T1",
+      "participant": "F"
+    },
+    {
+      "from": "E1",
+      "to": "T2",
+      "participant": "C"
+    },
+    {
+      "from": "E1",
+      "to": "T3",
+      "participant": "C"
+    },
+    {
+      "from": "T2",
+      "to": "T4",
+      "participant": "C"
+    },
+    {
+      "from": "T3",
+      "to": "T4",
+      "participant": "C"
+    },
+    {
+      "from": "T4",
+      "to": "T5",
+      "participant": "C"
+    },
+    {
+      "from": "T5",
+      "to": "T6",
+      "participant": "C"
+    },
+    {
+      "from": "T6",
+      "to": "E2",
+      "participant": "F"
+    },
+    {
+      "from": "T7",
+      "to": "E2",
+      "participant": "S"
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "T1",
+      "to": "T2",
+      "name": "Invoice Verification"
+    },
+    {
+      "from": "T2",
+      "to": "T3",
+      "name": "Purchase Order Verification"
+    },
+    {
+      "from": "T3",
+      "to": "T4",
+      "name": "Invoice Booking"
+    },
+    {
+      "from": "T4",
+      "to": "T5",
+      "name": "Invoice Payment"
+    },
+    {
+      "from": "T5",
+      "to": "T6",
+      "name": "Payment Notification"
+    },
+    {
+      "from": "T6",
+      "to": "T7",
+      "name": "Payment Receipt"
+    },
+    {
+      "from": "T7",
+      "to": "E2",
+      "name": "Payment Confirmation"
+    }
+  ]
+}
