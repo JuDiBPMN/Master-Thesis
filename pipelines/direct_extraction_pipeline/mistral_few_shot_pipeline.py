@@ -30,27 +30,31 @@ def load_model():
 BPMN_SCHEMA = {
     "type": "object",
     "properties": {
-          "participants": {
+        "pools": {
             "type": "array",
+            "description": "Top-level containers representing an organisation or external entity (e.g. 'Rotterdam Sweater Shop', 'Customer'). A pool groups lanes together. If only one lane exists with no subdivision, still create a pool with one lane.",
             "items": {
                 "type": "object",
                 "properties": {
-                    "id":    {"type": "string"},
-                    "name":  {"type": "string"},
-                    "type":  {"type": "string", "enum": ["pool"]},
-                    "lanes": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id":   {"type": "string"},
-                                "name": {"type": "string"}
-                            },
-                            "required": ["id", "name"]
-                        }
-                    }
+                    "id":   {"type": "string"},
+                    "name": {"type": "string"}
                 },
-                "required": ["id", "name", "type"]
+                "required": ["id", "name"],
+                "additionalProperties": False
+            }
+        },
+        "lanes": {
+            "type": "array",
+            "description": "The actors within a pool: people, roles, or departments (e.g. 'Anouk', 'Jan', 'Accountancy'). Every task/event/gateway is performed by a lane. Each lane belongs to exactly one pool.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":   {"type": "string"},
+                    "name": {"type": "string"},
+                    "pool": {"type": "string", "description": "The id of the parent pool this lane belongs to."}
+                },
+                "required": ["id", "name", "pool"],
+                "additionalProperties": False
             }
         },
         "tasks": {
@@ -58,106 +62,102 @@ BPMN_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "id": {"type": "string"},
+                    "id":   {"type": "string"},
                     "name": {"type": "string"},
-                    "actor": {"type": "string"}
+                    "type": {"type": "string", "enum": ["task", "userTask", "serviceTask", "scriptTask", "manualTask", "subProcess", "callActivity"]},
+                    "lane": {"type": "string", "description": "The id of the lane responsible for this task."}
                 },
-                "required": ["id", "name", "actor"]
+                "required": ["id", "name", "type", "lane"],
+                "additionalProperties": False
             }
         },
-      
-        "sequence_flows": {
+        "events": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":              {"type": "string"},
+                    "name":            {"type": "string"},
+                    "type":            {"type": "string", "enum": ["startEvent", "endEvent", "intermediateCatchEvent", "intermediateThrowEvent"]},
+                    "lane":            {"type": "string", "description": "The id of the lane this event belongs to."},
+                    "eventDefinition": {"type": "string", "enum": ["none", "message", "timer", "signal", "error", "escalation", "conditional", "link"]}
+                },
+                "required": ["id", "name", "type", "lane", "eventDefinition"],
+                "additionalProperties": False
+            }
+        },
+        "gateways": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":               {"type": "string"},
+                    "name":             {"type": "string"},
+                    "type":             {"type": "string", "enum": ["exclusiveGateway", "parallelGateway", "inclusiveGateway", "eventBasedGateway"]},
+                    "lane":             {"type": "string", "description": "The id of the lane this gateway belongs to."},
+                    "gatewayDirection": {"type": "string", "enum": ["diverging", "converging"]}
+                },
+                "required": ["id", "name", "type", "lane", "gatewayDirection"],
+                "additionalProperties": False
+            }
+        },
+      "sequence_flows": {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "id":        {"type": "string"},
+            "from":      {"type": "string"},
+            "to":        {"type": "string"},
+            "condition": {
+                "type": "string",
+                "description": "Only on flows leaving an exclusiveGateway or inclusiveGateway. Describes the condition under which this path is taken (e.g. 'order below 25.000 EUR' or 'approved')."
+            }
+        },
+        "required": ["id", "from", "to"]
+    }
+},
+        "message_flows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":   {"type": "string"},
+                    "from": {"type": "string"},
+                    "to":   {"type": "string"},
+                    "name": {"type": "string"}
+                },
+                "required": ["id", "from", "to", "name"],
+                "additionalProperties": False
+            }
+        },
+        "data": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":   {"type": "string"},
+                    "name": {"type": "string"}
+                },
+                "required": ["id", "name"],
+                "additionalProperties": False
+            }
+        },
+        "data_associations": {
             "type": "array",
             "items": {
                 "type": "object",
                 "properties": {
                     "from": {"type": "string"},
-                    "to": {"type": "string"}
+                    "to":   {"type": "string"},
+                    "type": {"type": "string", "enum": ["input", "output"]}
                 },
-                "required": ["from", "to"]
+                "required": ["from", "to", "type"],
+                "additionalProperties": False
             }
-        },
-         "events": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "type": {
-            "type": "string",
-            "enum": ["startEvent", "endEvent", "intermediateCatchEvent", "intermediateThrowEvent"]
-          },
-          "participant": {
-            "type": "string"
-          },
-          "lane": {
-            "type": "string"
-          },
-          "eventDefinition": {
-            "type": "string",
-            "enum": ["start", "end", "message", "timer", "none"]
-          }
-        },
-        "required": ["id", "name", "type", "participant", "eventDefinition"]
-      }
+        }
     },
-"gateways": {
-    "type": "array",
-    "items": {
-        "type": "object",
-        "properties": {
-            "id":   {"type": "string"},   # ← add this
-            "name": {"type": "string"},   # ← add this (optional but useful)
-            "type": {
-                "type": "string",
-                "enum": ["exclusiveGateway", "parallelGateway", "inclusiveGateway", "eventBasedGateway"]
-            },
-            "participant": {"type": "string"},  # ← add this
-            "from": {"type": "array", "items": {"type": "string"}},
-            "to":   {"type": "array", "items": {"type": "string"}}
-        },
-        "required": ["id", "type", "participant", "from", "to"]  # ← add id & participant
-    }
-},
-   "message_flows": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "from": {"type": "string"},
-          "to": {"type": "string"},
-          "name": {"type": "string"}
-        },
-        "required": ["from", "to", "name"]
-      }
-    },
-    "data": {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "id": {"type": "string"},
-      "name": {"type": "string"}
-    },
-    "required": ["id", "name"],
-  }
-},
-"data_associations": {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "from": {"type": "string"},
-      "to": {"type": "string"},
-      "type": {"type": "string", "enum": ["input", "output"]}
-    },
-    "required": ["from", "to", "type"]
-  }
-}
-    },
-    "required": ["participants", "tasks", "sequence_flows", "events", "gateways"]
+    "required": ["pools", "lanes", "tasks", "events", "gateways", "sequence_flows", "message_flows"]
 }
 
 
@@ -483,8 +483,8 @@ Here are {len(cases)} example(s) showing process descriptions and their correct 
 --- NOW EXTRACT ---
 Process description: {process_description}
 
-## Rules
-1. Each distinct action by a single actor = one task. Never merge actions.
+### Rules
+1. Each distinct action by a single lane = one task. Never merge actions.
 2. Decision points (if/else, approved/rejected) = EXCLUSIVE gateway (XOR). Add a gateway node, not just branching flows.
 3. Simultaneous/parallel actions ("at the same time", "simultaneously", "while") = PARALLEL gateway (AND). Add both a split and a join gateway.
 4. Every pool must have exactly one startEvent and one endEvent.
@@ -499,23 +499,36 @@ Process description: {process_description}
 - A parallel gateway ALWAYS comes in pairs: one split (1 in, many out) AND one join (many in, 1 out)
 - An exclusive split (if/else) must have exactly 2+ outgoing flows with conditions, one per outcome
 - Never use an exclusive gateway to join parallel branches — use a parallel gateway join
+- For each out exclusive split there must be an exclusive join, and for each parallel split there must be a parallel join.
+- Give the gateway a meaningfull name like "gateway_approved_split" or "gateway_approved_join" to make it clear which split and join belong together and what the gateway represents. Never name them "gateway1", "gateway2", etc.
 
 - If a task produces a document or artifact mentioned in the description, add it to "data" and create a data_association with type "output"
-- Task "name" should be a short verb phrase only (e.g. "Assess request"). Never include the actor's name in the task name.
+- For sequence flow: A task should have one incoming sequence flow and one outgoing sequence flow, except for the start and end event in the pool. 
+- Task "name" should be a short verb phrase only (e.g. "Assess request"). Never include the lane's name in the task name.
 - If a task consumes a document, add a data_association with type "input"
 - Common signals for data objects: "record X", "submit a X", "send a X", "initiate a X", 
   "receives a X", "notified of X" → these produce or consume data objects- An exclusive gateway splits AFTER the decision task. The gateway's "from" is the task that makes 
   the decision, "to" lists the outcome branches. Never leave "from" empty.
 - data_association "from"/"to" values must exactly match an id already defined in the "tasks" or 
   "data" arrays. Never invent new ids.
-  ## Participants / Pools / Lanes
-- Internal departments or roles within the same organization = LANES inside one pool (e.g. "Company" or the organization's name).
-- External parties (e.g. Customer, Supplier, Bank) = their own separate pool.
-- Every task/event/gateway must set "participant" to the pool id and "lane" to the lane id when lanes exist.
+
+  ## Pools vs Lanes
+- A pool = an organisation. A lane = a role/person within that organisation.
+- If actors work for the same organisation → ONE pool, each actor is a lane.
+- Never create one pool per role or person. Pool names are organisations, not roles.
+
+## Example:
+""pools": [ "id": "company", "name": "Company" ],
+"lanes": [
+  "id": "employee", "name": "Employee", "pool": "company",
+   "id": "manager",  "name": "Manager",  "pool": "company" ]
+## Wrong example (never do this):
+"pools": [ "id": "employee_pool", "name": "Employee Pool" ,  "id": "manager_pool", "name": "Manager Pool" ]
 ## Process description
 {process_description}
 
 Return a JSON object matching the schema exactly. Do not merge tasks. Do not skip gateways."""
+    
     
 
     try:
@@ -598,7 +611,7 @@ Output the complete corrected JSON. Do not omit any part of the model."""
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    case_name = "case_7"
+    case_name = "case_7" # <-- Just change this to run a different case with few-shot examples
 
     SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -608,7 +621,7 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_mistral_few_shot.json")
+    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_few_shot_mistral.json")
 
     print("--- Few-Shot Pipeline Started ---")
     print(f"Case:          {case_name}")
@@ -629,10 +642,10 @@ if __name__ == "__main__":
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
             retries=0,
-            case_ids=[2, 8]
+            case_ids=[2, 8] # choose cases for few-shot examples
         )
 
         if bpmn_json:
-            print(f"Output saved to: outputs/{case_name}_mistral_few_shot.json")
+            print(f"Output saved to: outputs/{case_name}_few_shot_mistral.json")
         else:
             print("Model extraction failed. Check the logs above.")

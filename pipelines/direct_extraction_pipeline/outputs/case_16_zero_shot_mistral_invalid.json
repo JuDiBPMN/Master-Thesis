@@ -1,0 +1,181 @@
+{
+  "pools": [
+    {
+      "id": "kitchen",
+      "name": "Kitchen"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "cook",
+      "name": "Cook",
+      "pool": "kitchen"
+    },
+    {
+      "id": "cook_assistant",
+      "name": "Cook Assistant",
+      "pool": "kitchen"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "collect_ingredients",
+      "name": "Collect ingredients",
+      "type": "task",
+      "lane": "cook"
+    },
+    {
+      "id": "heat_pan",
+      "name": "Heat pan",
+      "type": "task",
+      "lane": "cook"
+    },
+    {
+      "id": "cut_vegetables",
+      "name": "Cut vegetables",
+      "type": "task",
+      "lane": "cook"
+    },
+    {
+      "id": "cook_vegetables",
+      "name": "Cook vegetables",
+      "type": "task",
+      "lane": "cook"
+    },
+    {
+      "id": "fill_bowl_with_water",
+      "name": "Fill bowl with water",
+      "type": "task",
+      "lane": "cook"
+    },
+    {
+      "id": "heat_water",
+      "name": "Heat water",
+      "type": "task",
+      "lane": "cook"
+    },
+    {
+      "id": "cook_pasta",
+      "name": "Cook pasta",
+      "type": "task",
+      "lane": "cook"
+    },
+    {
+      "id": "boil_water",
+      "name": "Boil water",
+      "type": "task",
+      "lane": "cook"
+    },
+    {
+      "id": "serve_pasta",
+      "name": "Serve pasta",
+      "type": "task",
+      "lane": "cook"
+    },
+    {
+      "id": "assist_cook",
+      "name": "Assist cook",
+      "type": "task",
+      "lane": "cook_assistant"
+    }
+  ],
+  "events": [
+    {
+      "id": "start",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "cook",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "cook",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_heat_vegetables",
+      "name": "gateway_heat_vegetables",
+      "type": "exclusiveGateway",
+      "lane": "cook",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_cook_vegetables",
+      "name": "gateway_cook_vegetables",
+      "type": "parallelGateway",
+      "lane": "cook",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_cook_pasta",
+      "name": "gateway_cook_pasta",
+      "type": "exclusiveGateway",
+      "lane": "cook",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "collect_ingredients",
+      "to": "heat_pan"
+    },
+    {
+      "id": "sf2",
+      "from": "heat_pan",
+      "to": "gateway_heat_vegetables"
+    },
+    {
+      "id": "sf3",
+      "from": "gateway_heat_vegetables",
+      "to": "cut_vegetables"
+    },
+    {
+      "id": "sf4",
+      "from": "cut_vegetables",
+      "to": "cook_vegetables"
+    },
+    {
+      "id": "sf5",
+      "from": "heat_water",
+      "to": "gateway_cook_pasta"
+    },
+    {
+      "id": "sf6",
+      "from": "gateway_cook_pasta",
+      "to": "cook_pasta"
+    },
+    {
+      "id": "sf7",
+      "from": "cook_pasta",
+      "to": "gateway_cook_vegetables"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_cook_vegetables",
+      "to": "serve_past"
+    },
+    {
+      "id": "sf9",
+      "from": "gateway_heat_vegetables",
+      "to": "fill_bowl_with_water"
+    },
+    {
+      "id": "sf10",
+      "from": "fill_bowl_with_water",
+      "to": "heat_water"
+    },
+    {
+      "id": "sf11",
+      "from": "gateway_cook_pasta",
+      "to": "end"
+    }
+  ],
+  "message_flows": [],
+  "data": [],
+  "data_associations": []
+}

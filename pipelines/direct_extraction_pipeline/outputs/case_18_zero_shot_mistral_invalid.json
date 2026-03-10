@@ -1,0 +1,205 @@
+{
+  "pools": [
+    {
+      "id": "OrderProcessingPool",
+      "name": "Order Processing Pool"
+    },
+    {
+      "id": "ProductionPool",
+      "name": "Production Pool"
+    }
+  ],
+  "lanes": [],
+  "tasks": [
+    {
+      "id": "ReceiveOrder",
+      "name": "Receive order",
+      "type": "task",
+      "lane": "OrderProcessingPool"
+    },
+    {
+      "id": "CheckOrderValue",
+      "name": "Check order value",
+      "type": "task",
+      "lane": "OrderProcessingPool"
+    },
+    {
+      "id": "TriggerProduction",
+      "name": "Trigger production",
+      "type": "task",
+      "lane": "ProductionPool"
+    },
+    {
+      "id": "UseStockItems",
+      "name": "Use stock items",
+      "type": "task",
+      "lane": "ProductionPool"
+    },
+    {
+      "id": "OrganizeShipping",
+      "name": "Organize shipping",
+      "type": "task",
+      "lane": "OrderProcessingPool"
+    },
+    {
+      "id": "PackageProducts",
+      "name": "Package products",
+      "type": "task",
+      "lane": "OrderProcessingPool"
+    },
+    {
+      "id": "ShipOrder",
+      "name": "Ship order",
+      "type": "task",
+      "lane": "OrderProcessingPool"
+    }
+  ],
+  "events": [
+    {
+      "id": "StartOrderProcessing",
+      "name": "Start Order Processing",
+      "type": "startEvent",
+      "lane": "OrderProcessingPool",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndOrderProcessing",
+      "name": "End Order Processing",
+      "type": "endEvent",
+      "lane": "OrderProcessingPool",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "StartProduction",
+      "name": "Start Production",
+      "type": "intermediateThrowEvent",
+      "lane": "ProductionPool",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndProduction",
+      "name": "End Production",
+      "type": "intermediateCatchEvent",
+      "lane": "ProductionPool",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "StartShipping",
+      "name": "Start Shipping",
+      "type": "intermediateThrowEvent",
+      "lane": "OrderProcessingPool",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndShipping",
+      "name": "End Shipping",
+      "type": "intermediateCatchEvent",
+      "lane": "OrderProcessingPool",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "OrderValueDecision",
+      "name": "Order value decision",
+      "type": "exclusiveGateway",
+      "lane": "OrderProcessingPool",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "ProductionParallel",
+      "name": "Production parallel",
+      "type": "parallelGateway",
+      "lane": "ProductionPool",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "ShippingParallel",
+      "name": "Shipping parallel",
+      "type": "parallelGateway",
+      "lane": "OrderProcessingPool",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "ReceiveOrder_CheckOrderValue",
+      "from": "ReceiveOrder",
+      "to": "CheckOrderValue"
+    },
+    {
+      "id": "CheckOrderValue_OrderValueDecision",
+      "from": "CheckOrderValue",
+      "to": "OrderValueDecision"
+    },
+    {
+      "id": "OrderValueDecision_TriggerProduction",
+      "from": "OrderValueDecision",
+      "to": "TriggerProduction"
+    },
+    {
+      "id": "OrderValueDecision_UseStockItems",
+      "from": "OrderValueDecision",
+      "to": "UseStockItems"
+    },
+    {
+      "id": "ProductionParallel_ProduceFreshProducts",
+      "from": "ProductionParallel",
+      "to": "TriggerProduction"
+    },
+    {
+      "id": "ProductionParallel_UseStockItems",
+      "from": "ProductionParallel",
+      "to": "UseStockItems"
+    },
+    {
+      "id": "OrganizeShipping_PackageProducts",
+      "from": "OrganizeShipping",
+      "to": "PackageProducts"
+    },
+    {
+      "id": "OrderValueDecision_OrganizeShipping",
+      "from": "OrderValueDecision",
+      "to": "OrganizeShipping"
+    },
+    {
+      "id": "ProductionParallel_ShipOrder",
+      "from": "ProductionParallel",
+      "to": "EndProduction"
+    },
+    {
+      "id": "UseStockItems_ShipOrder",
+      "from": "UseStockItems",
+      "to": "EndProduction"
+    },
+    {
+      "id": "ShippingParallel_ShipOrder",
+      "from": "ShippingParallel",
+      "to": "EndShipping"
+    },
+    {
+      "id": "PackageProducts_ShipOrder",
+      "from": "PackageProducts",
+      "to": "ShipOrder"
+    },
+    {
+      "id": "EndProduction_EndOrderProcessing",
+      "from": "EndProduction",
+      "to": "EndOrderProcessing"
+    },
+    {
+      "id": "EndShipping_EndOrderProcessing",
+      "from": "EndShipping",
+      "to": "EndOrderProcessing"
+    }
+  ],
+  "message_flows": [],
+  "data": [],
+  "data_associations": [
+    {
+      "from": "CheckOrderValue",
+      "to": "OrderValueDecision",
+      "type": "output"
+    }
+  ]
+}

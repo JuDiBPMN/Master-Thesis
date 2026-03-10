@@ -1,0 +1,110 @@
+{
+  "tasks": [
+    {
+      "id": "check_credit_score",
+      "name": "Check Credit Score",
+      "actor": "bank_employee"
+    },
+    {
+      "id": "decide_loan",
+      "name": "Decide Loan",
+      "actor": "bank_employee"
+    },
+    {
+      "id": "notify_approval",
+      "name": "Notify Applicant of Approval",
+      "actor": "bank"
+    },
+    {
+      "id": "notify_rejection",
+      "name": "Notify Applicant of Rejection",
+      "actor": "bank"
+    }
+  ],
+  "participants": [
+    {
+      "id": "bank_employee",
+      "name": "Bank Employee",
+      "type": "lane",
+      "pool": "bank"
+    },
+    {
+      "id": "bank",
+      "name": "Bank",
+      "type": "pool",
+      "lanes": [
+        {
+          "id": "customer_service",
+          "name": "Customer Service"
+        }
+      ]
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "check_credit_score",
+      "to": "decide_loan"
+    },
+    {
+      "from": "decide_loan",
+      "to": "notify_approval"
+    },
+    {
+      "from": "decide_loan",
+      "to": "notify_rejection"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_review",
+      "name": "Loan Application Received",
+      "type": "startEvent",
+      "participant": "bank",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_approved",
+      "name": "Loan Approved",
+      "type": "endEvent",
+      "participant": "bank",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_rejected",
+      "name": "Loan Rejected",
+      "type": "endEvent",
+      "participant": "bank",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "type": "exclusive",
+      "from": [
+        "decide_loan"
+      ],
+      "to": []
+    },
+    {
+      "type": "parallel",
+      "from": [],
+      "to": [
+        "notify_approval",
+        "notify_rejection"
+      ]
+    }
+  ],
+  "data": [
+    {
+      "id": "credit_score",
+      "name": "Credit Score"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "check_credit_score",
+      "to": "credit_score",
+      "type": "input"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+The process starts when a customer places an order for a laptop on the online store's website. The order information is automatically registered in the store’s order management system.
+
+The system then checks whether the requested laptop is available in stock.
+
+If the laptop is not available, the customer receives a notification that the product is out of stock and the order is cancelled.
+
+If the laptop is available, the order is confirmed and registered in the system. After the order is confirmed, two activities are started at the same time. The warehouse prepares the laptop for shipment while the finance department processes the payment.
+
+The finance department sends a payment authorization request to the payment provider. The payment provider verifies the payment details and decides whether the payment can be approved.
+
+If the payment is rejected, the finance department cancels the order and the customer receives a message explaining that the payment failed.
+
+If the payment is approved, the finance department confirms the payment to the store.
+
+Meanwhile, the warehouse packs the laptop and prepares it for delivery.
+
+Once both the payment has been confirmed and the package has been prepared, the laptop is shipped to the customer. After the shipment has been dispatched, the customer receives a shipping confirmation with tracking information.
+
+The process ends when the customer receives the laptop.
