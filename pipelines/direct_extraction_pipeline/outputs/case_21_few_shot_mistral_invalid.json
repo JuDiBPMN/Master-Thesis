@@ -1,0 +1,205 @@
+{
+  "pools": [
+    {
+      "id": "marketing_agency",
+      "name": "Marketing Agency"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "creative_director",
+      "name": "Creative Director",
+      "pool": "marketing_agency"
+    },
+    {
+      "id": "copywriter",
+      "name": "Copywriter",
+      "pool": "marketing_agency"
+    },
+    {
+      "id": "graphic_designer",
+      "name": "Graphic Designer",
+      "pool": "marketing_agency"
+    },
+    {
+      "id": "social_media_manager",
+      "name": "Social Media Manager",
+      "pool": "marketing_agency"
+    },
+    {
+      "id": "project_manager",
+      "name": "Project Manager",
+      "pool": "marketing_agency"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "receive_campaign_request",
+      "name": "Receive Campaign Request",
+      "type": "task",
+      "lane": "creative_director"
+    },
+    {
+      "id": "assign_project",
+      "name": "Assign Project",
+      "type": "task",
+      "lane": "creative_director"
+    },
+    {
+      "id": "draft_campaign_text",
+      "name": "Draft Campaign Text",
+      "type": "task",
+      "lane": "copywriter"
+    },
+    {
+      "id": "create_visual_assets",
+      "name": "Create Visual Assets",
+      "type": "task",
+      "lane": "graphic_designer"
+    },
+    {
+      "id": "define_posting_schedule",
+      "name": "Define Posting Schedule",
+      "type": "task",
+      "lane": "social_media_manager"
+    },
+    {
+      "id": "review_combined_package",
+      "name": "Review Combined Package",
+      "type": "task",
+      "lane": "project_manager"
+    },
+    {
+      "id": "publish_campaign",
+      "name": "Publish Campaign",
+      "type": "task",
+      "lane": "project_manager"
+    },
+    {
+      "id": "receive_client_revisions",
+      "name": "Receive Client Revisions",
+      "type": "task",
+      "lane": "creative_director"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_campaign",
+      "name": "Start Campaign",
+      "type": "startEvent",
+      "lane": "creative_director",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_campaign",
+      "name": "End Campaign",
+      "type": "endEvent",
+      "lane": "project_manager",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_parallel_split",
+      "name": "Parallel Tracks Start",
+      "type": "parallelGateway",
+      "lane": "creative_director",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Parallel Tracks Complete",
+      "type": "parallelGateway",
+      "lane": "project_manager",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_approval_split",
+      "name": "Client Approval?",
+      "type": "exclusiveGateway",
+      "lane": "project_manager",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_campaign",
+      "to": "receive_campaign_request"
+    },
+    {
+      "id": "sf2",
+      "from": "receive_campaign_request",
+      "to": "assign_project"
+    },
+    {
+      "id": "sf3",
+      "from": "assign_project",
+      "to": "gateway_parallel_split"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_parallel_split",
+      "to": "draft_campaign_text"
+    },
+    {
+      "id": "sf5",
+      "from": "draft_campaign_text",
+      "to": "create_visual_assets"
+    },
+    {
+      "id": "sf6",
+      "from": "create_visual_assets",
+      "to": "define_posting_schedule"
+    },
+    {
+      "id": "sf7",
+      "from": "define_posting_schedule",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_parallel_join",
+      "to": "review_combined_package"
+    },
+    {
+      "id": "sf9",
+      "from": "review_combined_package",
+      "to": "gateway_approval_split"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_approval_split",
+      "to": "publish_campaign"
+    },
+    {
+      "id": "sf11",
+      "from": "gateway_approval_split",
+      "to": "receive_client_revisions"
+    },
+    {
+      "id": "sf12",
+      "from": "receive_client_revisions",
+      "to": "gateway_approval_split"
+    }
+  ],
+  "message_flows": [],
+  "data": [
+    {
+      "id": "campaign_package",
+      "name": "Campaign Package"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "assign_project",
+      "to": "campaign_package",
+      "type": "output"
+    },
+    {
+      "from": "publish_campaign",
+      "to": "campaign_package",
+      "type": "output"
+    }
+  ]
+}
