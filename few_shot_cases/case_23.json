@@ -1,0 +1,58 @@
+{
+    "pools": [
+      { "id": "customer_pool",  "name": "Customer" },
+      { "id": "ecommerce_pool", "name": "E-Commerce Company" }
+    ],
+    "lanes": [
+      { "id": "customer",         "name": "Customer",         "pool": "customer_pool" },
+      { "id": "customer_service", "name": "Customer Service", "pool": "ecommerce_pool" },
+      { "id": "warehouse",        "name": "Warehouse",        "pool": "ecommerce_pool" },
+      { "id": "finance",          "name": "Finance",          "pool": "ecommerce_pool" }
+    ],
+    "tasks": [
+      { "id": "submit_return",      "name": "Submit Return Request",        "type": "task", "lane": "customer" },
+      { "id": "verify_eligibility", "name": "Verify Return Eligibility",    "type": "task", "lane": "customer_service" },
+      { "id": "notify_rejected",    "name": "Notify Customer of Rejection", "type": "task", "lane": "customer_service" },
+      { "id": "send_confirmation",  "name": "Send Confirmation to Customer","type": "task", "lane": "customer_service" },
+      { "id": "arrange_collection", "name": "Arrange Item Collection",      "type": "task", "lane": "warehouse" },
+      { "id": "initiate_refund",    "name": "Initiate Refund Process",      "type": "task", "lane": "finance" }
+    ],
+    "events": [
+      { "id": "start_customer",  "name": "Start",                     "type": "startEvent",              "lane": "customer",         "eventDefinition": "none" },
+      { "id": "Event_0muyk3x",   "name": "Receive rejection",         "type": "intermediateCatchEvent",  "lane": "customer",         "eventDefinition": "message" },
+      { "id": "Event_0tpcr9s",   "name": "Receive confirmation",      "type": "intermediateCatchEvent",  "lane": "customer",         "eventDefinition": "message" },
+      { "id": "Event_0lnnv01",   "name": "Return Rejected",           "type": "endEvent",                "lane": "customer",         "eventDefinition": "none" },
+      { "id": "Event_1r6yhp5",   "name": "Return Confirmed",          "type": "endEvent",                "lane": "customer",         "eventDefinition": "none" },
+      { "id": "start_cs",        "name": "Return Request Received",   "type": "startEvent",              "lane": "customer_service", "eventDefinition": "message" },
+      { "id": "end_cs_rejected", "name": "Rejection Sent",            "type": "endEvent",                "lane": "customer_service", "eventDefinition": "none" },
+      { "id": "end_cs",          "name": "End",                       "type": "endEvent",                "lane": "customer_service", "eventDefinition": "none" }
+    ],
+    "gateways": [
+      { "id": "split_eligible", "name": "Item Eligible for Return?",  "type": "exclusiveGateway", "lane": "customer_service", "gatewayDirection": "diverging" },
+      { "id": "split_parallel", "name": "Start Parallel Processing",  "type": "parallelGateway",  "lane": "customer_service", "gatewayDirection": "diverging" },
+      { "id": "join_parallel",  "name": "Both Tasks Complete",        "type": "parallelGateway",  "lane": "customer_service", "gatewayDirection": "converging" }
+    ],
+    "sequence_flows": [
+      { "id": "Flow_1kd72rx", "from": "start_customer",    "to": "submit_return" },
+      { "id": "Flow_0vatbql", "from": "Event_0muyk3x",     "to": "Event_0lnnv01" },
+      { "id": "Flow_1kdv6t5", "from": "Event_0tpcr9s",     "to": "Event_1r6yhp5" },
+      { "id": "sf1",          "from": "start_cs",          "to": "verify_eligibility" },
+      { "id": "sf2",          "from": "verify_eligibility","to": "split_eligible" },
+      { "id": "sf3",          "from": "split_eligible",    "to": "notify_rejected",    "condition": "Not eligible" },
+      { "id": "sf4",          "from": "split_eligible",    "to": "split_parallel",     "condition": "Eligible" },
+      { "id": "sf5",          "from": "notify_rejected",   "to": "end_cs_rejected" },
+      { "id": "sf6",          "from": "split_parallel",    "to": "arrange_collection" },
+      { "id": "sf7",          "from": "split_parallel",    "to": "initiate_refund" },
+      { "id": "sf8",          "from": "arrange_collection","to": "join_parallel" },
+      { "id": "sf9",          "from": "initiate_refund",   "to": "join_parallel" },
+      { "id": "sf10",         "from": "join_parallel",     "to": "send_confirmation" },
+      { "id": "sf11",         "from": "send_confirmation", "to": "end_cs" }
+    ],
+    "message_flows": [
+      { "id": "mf1",          "from": "submit_return",    "to": "start_cs",        "name": "Return Request" },
+      { "id": "Flow_19rlkps", "from": "notify_rejected",  "to": "Event_0muyk3x",   "name": "Rejection Notice" },
+      { "id": "Flow_14qsqvk", "from": "send_confirmation","to": "Event_0tpcr9s",   "name": "Confirmation" }
+    ],
+    "data": [],
+    "data_associations": []
+  }
