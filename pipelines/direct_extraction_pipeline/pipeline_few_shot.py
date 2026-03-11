@@ -562,12 +562,12 @@ Output the complete corrected JSON. Do not omit any part of the model."""
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    case_name = "case_1"
+    case_name = "case_26"
 
     SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
     CASES_DIR     = os.path.join(PROJECT_ROOT, "cases")
-    FEW_SHOT_DIR  = os.path.join(PROJECT_ROOT, "few_shot_cases")
+    FEW_SHOT_DIR  = os.path.join(PROJECT_ROOT, "few_shotgun_cases")
     OUTPUT_DIR    = os.path.join(SCRIPT_DIR, "outputs")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
