@@ -1,0 +1,366 @@
+{
+  "pools": [
+    {
+      "id": "city_council",
+      "name": "City Council"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "applicant",
+      "name": "Applicant",
+      "pool": "city_council"
+    },
+    {
+      "id": "permits_officer",
+      "name": "Permits Officer",
+      "pool": "city_council"
+    },
+    {
+      "id": "urban_planning_department",
+      "name": "Urban Planning Department",
+      "pool": "city_council"
+    },
+    {
+      "id": "safety_inspection_department",
+      "name": "Safety Inspection Department",
+      "pool": "city_council"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_application",
+      "name": "Submit Application",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "register_application",
+      "name": "Register Application",
+      "type": "task",
+      "lane": "permits_officer"
+    },
+    {
+      "id": "check_completeness",
+      "name": "Check Completeness",
+      "type": "task",
+      "lane": "permits_officer"
+    },
+    {
+      "id": "notify_missing_info",
+      "name": "Notify Applicant of Missing Info",
+      "type": "task",
+      "lane": "permits_officer"
+    },
+    {
+      "id": "forward_application",
+      "name": "Forward Application",
+      "type": "task",
+      "lane": "permits_officer"
+    },
+    {
+      "id": "assess_zoning_compliance",
+      "name": "Assess Zoning Compliance",
+      "type": "task",
+      "lane": "urban_planning_department"
+    },
+    {
+      "id": "record_zoning_verdict",
+      "name": "Record Zoning Verdict",
+      "type": "task",
+      "lane": "urban_planning_department"
+    },
+    {
+      "id": "conduct_structural_review",
+      "name": "Conduct Structural Review",
+      "type": "task",
+      "lane": "safety_inspection_department"
+    },
+    {
+      "id": "record_structural_verdict",
+      "name": "Record Structural Verdict",
+      "type": "task",
+      "lane": "safety_inspection_department"
+    },
+    {
+      "id": "review_combined_outcomes",
+      "name": "Review Combined Outcomes",
+      "type": "task",
+      "lane": "permits_officer"
+    },
+    {
+      "id": "issue_rejection_notice",
+      "name": "Issue Rejection Notice",
+      "type": "task",
+      "lane": "permits_officer"
+    },
+    {
+      "id": "issue_building_permit",
+      "name": "Issue Building Permit",
+      "type": "task",
+      "lane": "permits_officer"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_application",
+      "name": "Start Application Received",
+      "type": "startEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_application_rejected",
+      "name": "Application Rejected",
+      "type": "endEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_check_completeness",
+      "name": "Application Checked for Completeness",
+      "type": "startEvent",
+      "lane": "permits_officer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_check_completeness_complete",
+      "name": "Application Complete",
+      "type": "intermediateThrowEvent",
+      "lane": "permits_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_check_completeness_incomplete",
+      "name": "Application Incomplete",
+      "type": "intermediateCatchEvent",
+      "lane": "permits_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "start_forward_application",
+      "name": "Application Forwarded",
+      "type": "startEvent",
+      "lane": "permits_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_forward_application_urban_planning",
+      "name": "Application Forwarded to Urban Planning Department",
+      "type": "intermediateCatchEvent",
+      "lane": "urban_planning_department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_forward_application_safety_inspection",
+      "name": "Application Forwarded to Safety Inspection Department",
+      "type": "intermediateCatchEvent",
+      "lane": "safety_inspection_department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_assess_zoning_compliance",
+      "name": "Zoning Compliance Assessed",
+      "type": "endEvent",
+      "lane": "urban_planning_department",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_conduct_structural_review",
+      "name": "Structural Review Conducted",
+      "type": "endEvent",
+      "lane": "safety_inspection_department",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_review_combined_outcomes",
+      "name": "Combined Outcomes Reviewed",
+      "type": "endEvent",
+      "lane": "permits_officer",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_complete",
+      "name": "Application Complete?",
+      "type": "exclusiveGateway",
+      "lane": "permits_officer",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "split_parallel",
+      "name": "Split Application Forwarding",
+      "type": "parallelGateway",
+      "lane": "permits_officer",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Join Application Forwarding",
+      "type": "parallelGateway",
+      "lane": "permits_officer",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_zoning_compliance",
+      "name": "Zoning Compliance Verdict?",
+      "type": "exclusiveGateway",
+      "lane": "permits_officer",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_structural_safety",
+      "name": "Structural Safety Verdict?",
+      "type": "exclusiveGateway",
+      "lane": "permits_officer",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_application",
+      "to": "submit_application"
+    },
+    {
+      "id": "sf2",
+      "from": "submit_application",
+      "to": "register_application"
+    },
+    {
+      "id": "sf3",
+      "from": "register_application",
+      "to": "check_completeness"
+    },
+    {
+      "id": "sf4",
+      "from": "check_completeness",
+      "to": "split_complete"
+    },
+    {
+      "id": "sf5",
+      "from": "split_complete",
+      "to": "notify_missing_info",
+      "condition": "Incomplete"
+    },
+    {
+      "id": "sf6",
+      "from": "split_complete",
+      "to": "split_parallel"
+    },
+    {
+      "id": "sf7",
+      "from": "split_parallel",
+      "to": "forward_application"
+    },
+    {
+      "id": "sf8",
+      "from": "forward_application",
+      "to": "assess_zoning_compliance"
+    },
+    {
+      "id": "sf9",
+      "from": "assess_zoning_compliance",
+      "to": "gateway_zoning_compliance"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_zoning_compliance",
+      "to": "record_zoning_verdict",
+      "condition": "Compliant"
+    },
+    {
+      "id": "sf11",
+      "from": "gateway_zoning_compliance",
+      "to": "issue_rejection_notice",
+      "condition": "Non-Compliant"
+    },
+    {
+      "id": "sf12",
+      "from": "gateway_structural_safety",
+      "to": "conduct_structural_review"
+    },
+    {
+      "id": "sf13",
+      "from": "conduct_structural_review",
+      "to": "record_structural_verdict"
+    },
+    {
+      "id": "sf14",
+      "from": "record_structural_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf15",
+      "from": "join_parallel",
+      "to": "review_combined_outcomes"
+    },
+    {
+      "id": "sf16",
+      "from": "review_combined_outcomes",
+      "to": "gateway_approved_split"
+    },
+    {
+      "id": "sf17",
+      "from": "gateway_approved_split",
+      "to": "issue_building_permit"
+    },
+    {
+      "id": "sf18",
+      "from": "gateway_approved_split",
+      "to": "end_review_combined_outcomes"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "submit_application",
+      "to": "start_check_completeness",
+      "name": "Application Submitted"
+    }
+  ],
+  "data": [
+    {
+      "id": "application_data",
+      "name": "Application Data"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "submit_application",
+      "to": "application_data",
+      "type": "output"
+    },
+    {
+      "from": "register_application",
+      "to": "application_data",
+      "type": "input"
+    },
+    {
+      "from": "assess_zoning_compliance",
+      "to": "application_data",
+      "type": "output"
+    },
+    {
+      "from": "record_zoning_verdict",
+      "to": "application_data",
+      "type": "output"
+    },
+    {
+      "from": "conduct_structural_review",
+      "to": "application_data",
+      "type": "output"
+    },
+    {
+      "from": "record_structural_verdict",
+      "to": "application_data",
+      "type": "output"
+    },
+    {
+      "from": "issue_building_permit",
+      "to": "application_data",
+      "type": "output"
+    }
+  ]
+}

@@ -1,0 +1,272 @@
+{
+  "pools": [
+    {
+      "id": "recruitment_agency",
+      "name": "Recruitment Agency"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "recruiter",
+      "name": "Recruiter",
+      "pool": "recruitment_agency"
+    },
+    {
+      "id": "client",
+      "name": "Client",
+      "pool": "recruitment_agency"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "receive_vacancy",
+      "name": "Receive Job Vacancy",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "screen_database",
+      "name": "Screen Existing Candidates",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "post_vacancy_externally",
+      "name": "Post Vacancy Externally",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "receive_applications",
+      "name": "Receive Applications",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "shortlist_candidates",
+      "name": "Shortlist Candidates",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "submit_profiles",
+      "name": "Submit Profiles to Client",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "schedule_interviews",
+      "name": "Schedule Interviews",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "receive_hiring_decision",
+      "name": "Receive Hiring Decision",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "issue_placement_confirmation",
+      "name": "Issue Placement Confirmation",
+      "type": "task",
+      "lane": "recruiter"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_recruiter",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "recruiter",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1q3jg8i",
+      "name": "New Search Started",
+      "type": "intermediateCatchEvent",
+      "lane": "recruiter",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1j7qk2l",
+      "name": "Hiring Decision Made",
+      "type": "intermediateCatchEvent",
+      "lane": "recruiter",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3jg8h",
+      "name": "Client Decides on Next Steps",
+      "type": "intermediateCatchEvent",
+      "lane": "client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3jg8j",
+      "name": "Client Rejects All Profiles",
+      "type": "intermediateCatchEvent",
+      "lane": "client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3jg8k",
+      "name": "Client Selects Candidates for Interview",
+      "type": "intermediateCatchEvent",
+      "lane": "client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3jg8l",
+      "name": "Client Makes Hiring Decision",
+      "type": "intermediateCatchEvent",
+      "lane": "client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_recruiter",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "recruiter",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_suitable",
+      "name": "Suitable Candidates Found?",
+      "type": "exclusiveGateway",
+      "lane": "recruiter",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "split_parallel",
+      "name": "Parallel Processing",
+      "type": "parallelGateway",
+      "lane": "recruiter",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Both Tasks Complete",
+      "type": "parallelGateway",
+      "lane": "recruiter",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_client_decision",
+      "name": "Client Decision Gateway",
+      "type": "exclusiveGateway",
+      "lane": "recruiter",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_recruiter",
+      "to": "receive_vacancy"
+    },
+    {
+      "id": "sf2",
+      "from": "receive_vacancy",
+      "to": "screen_database"
+    },
+    {
+      "id": "sf3",
+      "from": "screen_database",
+      "to": "split_suitable"
+    },
+    {
+      "id": "sf4",
+      "from": "split_suitable",
+      "to": "post_vacancy_externally",
+      "condition": "No suitable candidates"
+    },
+    {
+      "id": "sf5",
+      "from": "split_suitable",
+      "to": "receive_applications",
+      "condition": "Suitable candidates"
+    },
+    {
+      "id": "sf6",
+      "from": "receive_applications",
+      "to": "shortlist_candidates"
+    },
+    {
+      "id": "sf7",
+      "from": "shortlist_candidates",
+      "to": "submit_profiles"
+    },
+    {
+      "id": "sf8",
+      "from": "submit_profiles",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf9",
+      "from": "join_parallel",
+      "to": "schedule_interviews"
+    },
+    {
+      "id": "sf10",
+      "from": "schedule_interviews",
+      "to": "receive_hiring_decision"
+    },
+    {
+      "id": "sf11",
+      "from": "receive_hiring_decision",
+      "to": "gateway_client_decision"
+    },
+    {
+      "id": "sf12",
+      "from": "gateway_client_decision",
+      "to": "issue_placement_confirmation",
+      "condition": "Candidate selected"
+    },
+    {
+      "id": "sf13",
+      "from": "gateway_client_decision",
+      "to": "Event_1q3jg8i",
+      "condition": "New search started"
+    },
+    {
+      "id": "sf14",
+      "from": "issue_placement_confirmation",
+      "to": "end_recruiter"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "receive_vacancy",
+      "to": "Event_1j7qk2l",
+      "name": "Hiring Decision"
+    },
+    {
+      "id": "mf2",
+      "from": "submit_profiles",
+      "to": "Event_1q3jg8k",
+      "name": "Client Decides on Next Steps"
+    }
+  ],
+  "data": [
+    {
+      "id": "vacancy",
+      "name": "Job Vacancy"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "receive_vacancy",
+      "to": "vacancy",
+      "type": "input"
+    },
+    {
+      "from": "submit_profiles",
+      "to": "vacancy",
+      "type": "output"
+    }
+  ]
+}
