@@ -1,0 +1,103 @@
+{
+  "tasks": [
+    {
+      "id": "SUBMIT_BUG_REPORT",
+      "name": "Submit Bug Report",
+      "actor": "CLIENT"
+    },
+    {
+      "id": "REVIEW_BUG_REPORT",
+      "name": "Review Bug Report",
+      "actor": "SUPPORT_DESK"
+    },
+    {
+      "id": "ESCALATE_BUG",
+      "name": "Escalate Bug",
+      "actor": "SUPPORT_DESK"
+    },
+    {
+      "id": "INVESTIGATE_BUG",
+      "name": "Investigate Bug",
+      "actor": "DEVELOPMENT_TEAM"
+    },
+    {
+      "id": "DEPLOY_FIX",
+      "name": "Deploy Fix",
+      "actor": "DEVELOPMENT_TEAM"
+    },
+    {
+      "id": "CONFIRM_RESOLUTION",
+      "name": "Confirm Resolution",
+      "actor": "SUPPORT_DESK"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "SUBMIT_BUG_REPORT",
+      "to": "REVIEW_BUG_REPORT"
+    },
+    {
+      "from": "REVIEW_BUG_REPORT",
+      "to": "ESCALATE_BUG"
+    },
+    {
+      "from": "ESCALATE_BUG",
+      "to": "INVESTIGATE_BUG"
+    },
+    {
+      "from": "INVESTIGATE_BUG",
+      "to": "DEPLOY_FIX"
+    },
+    {
+      "from": "DEPLOY_FIX",
+      "to": "CONFIRM_RESOLUTION"
+    }
+  ],
+  "events": [
+    {
+      "id": "SUBMIT_BUG_REPORT",
+      "name": "Submit Bug Report",
+      "type": "startEvent",
+      "participant": "CLIENT",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "REVIEW_BUG_REPORT",
+      "name": "Review Bug Report",
+      "type": "endEvent",
+      "participant": "SUPPORT_DESK",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "ESCALATE_BUG",
+      "name": "Escalate Bug",
+      "type": "startEvent",
+      "participant": "SUPPORT_DESK",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "INVESTIGATE_BUG",
+      "name": "Investigate Bug",
+      "type": "endEvent",
+      "participant": "DEVELOPMENT_TEAM",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "DEPLOY_FIX",
+      "name": "Deploy Fix",
+      "type": "startEvent",
+      "participant": "DEVELOPMENT_TEAM",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "CONFIRM_RESOLUTION",
+      "name": "Confirm Resolution",
+      "type": "endEvent",
+      "participant": "SUPPORT_DESK",
+      "eventDefinition": "end"
+    }
+  ],
+  "gateways": [],
+  "message_flows": [],
+  "data": []
+}

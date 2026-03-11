@@ -1,0 +1,105 @@
+{
+  "tasks": [
+    {
+      "id": "creative_director",
+      "name": "Creative Director",
+      "actor": "John"
+    },
+    {
+      "id": "copywriter",
+      "name": "Copywriter",
+      "actor": "Jane"
+    },
+    {
+      "id": "graphic_designer",
+      "name": "Graphic Designer",
+      "actor": "Bob"
+    },
+    {
+      "id": "social_media_manager",
+      "name": "Social Media Manager",
+      "actor": "Emily"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "creative_director",
+      "to": "copywriter"
+    },
+    {
+      "from": "copywriter",
+      "to": "graphic_designer"
+    },
+    {
+      "from": "graphic_designer",
+      "to": "social_media_manager"
+    },
+    {
+      "from": "creative_director",
+      "to": "social_media_manager"
+    }
+  ],
+  "events": [
+    {
+      "id": "new_campaign_request",
+      "name": "New Campaign Request",
+      "type": "startEvent",
+      "participant": "John",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "campaign_text_drafting",
+      "name": "Campaign Text Drafting",
+      "type": "startEvent",
+      "participant": "Jane",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "campaign_visual_assets_creation",
+      "name": "Campaign Visual Assets Creation",
+      "type": "startEvent",
+      "participant": "Bob",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "campaign_publishing",
+      "name": "Campaign Publishing",
+      "type": "endEvent",
+      "participant": "Emily",
+      "eventDefinition": "end"
+    }
+  ],
+  "gateways": [
+    {
+      "type": "parallel",
+      "from": [
+        "creative_director",
+        "copywriter",
+        "graphic_designer",
+        "social_media_manager"
+      ],
+      "to": [
+        "copywriter",
+        "graphic_designer",
+        "social_media_manager"
+      ]
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "creative_director",
+      "to": "copywriter",
+      "name": "Assign Campaign Text Drafting Task"
+    },
+    {
+      "from": "copywriter",
+      "to": "graphic_designer",
+      "name": "Assign Campaign Visual Assets Creation Task"
+    },
+    {
+      "from": "graphic_designer",
+      "to": "social_media_manager",
+      "name": "Assign Campaign Publishing Task"
+    }
+  ]
+}

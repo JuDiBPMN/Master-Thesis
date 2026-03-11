@@ -1,7 +1,7 @@
 try:
-    
+    from llama_cpp import Llama
     _LLAMA_CPP_AVAILABLE = True
-except Exception:
+except ImportError:
     Llama = None
     _LLAMA_CPP_AVAILABLE = False
 
@@ -296,7 +296,7 @@ import sys
 if __name__ == "__main__":
     # ---------------------------------------------------------
     # CONFIGURATION: Hier gewoon case namen invullen 
-    case_name = "case_2" 
+    case_name = "case_30" 
     # ---------------------------------------------------------
 
     # 1. Path Discovery (Stays Partner-Proof & Subfolder-Aware)

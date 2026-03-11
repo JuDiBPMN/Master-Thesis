@@ -1,0 +1,179 @@
+{
+  "tasks": [
+    {
+      "id": "kick-off",
+      "name": "Kick-off",
+      "actor": "editorial-manager"
+    },
+    {
+      "id": "proofread",
+      "name": "Proofread",
+      "actor": "editor"
+    },
+    {
+      "id": "format-pages",
+      "name": "Format Pages",
+      "actor": "layout-designer"
+    },
+    {
+      "id": "design-cover",
+      "name": "Design Cover",
+      "actor": "layout-designer"
+    },
+    {
+      "id": "send-to-printer",
+      "name": "Send to Printer",
+      "actor": "print-manager"
+    },
+    {
+      "id": "print-proof",
+      "name": "Print Proof",
+      "actor": "print-manager"
+    },
+    {
+      "id": "review-proof",
+      "name": "Review Proof",
+      "actor": "editorial-manager"
+    },
+    {
+      "id": "apply-corrections",
+      "name": "Apply Corrections",
+      "actor": "layout-designer"
+    },
+    {
+      "id": "new-proof",
+      "name": "New Proof",
+      "actor": "layout-designer"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "kick-off",
+      "to": "proofread"
+    },
+    {
+      "from": "proofread",
+      "to": "format-pages"
+    },
+    {
+      "from": "format-pages",
+      "to": "design-cover"
+    },
+    {
+      "from": "design-cover",
+      "to": "send-to-printer"
+    },
+    {
+      "from": "send-to-printer",
+      "to": "print-proof"
+    },
+    {
+      "from": "print-proof",
+      "to": "review-proof"
+    },
+    {
+      "from": "review-proof",
+      "to": "apply-corrections"
+    },
+    {
+      "from": "apply-corrections",
+      "to": "new-proof"
+    }
+  ],
+  "events": [
+    {
+      "id": "kick-off",
+      "name": "Kick-off",
+      "type": "startEvent",
+      "participant": "editorial-manager",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "proofread",
+      "name": "Proofread",
+      "type": "endEvent",
+      "participant": "editor",
+      "eventDefinition": "end"
+    }
+  ],
+  "gateways": [
+    {
+      "type": "exclusive",
+      "from": [
+        "kick-off",
+        "proofread"
+      ],
+      "to": [
+        "format-pages"
+      ]
+    },
+    {
+      "type": "exclusive",
+      "from": [
+        "format-pages"
+      ],
+      "to": [
+        "design-cover"
+      ]
+    },
+    {
+      "type": "exclusive",
+      "from": [
+        "design-cover"
+      ],
+      "to": [
+        "send-to-printer"
+      ]
+    },
+    {
+      "type": "exclusive",
+      "from": [
+        "send-to-printer"
+      ],
+      "to": [
+        "print-proof"
+      ]
+    },
+    {
+      "type": "exclusive",
+      "from": [
+        "print-proof"
+      ],
+      "to": [
+        "review-proof"
+      ]
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "kick-off",
+      "to": "proofread",
+      "name": "Kick-off to Proofread"
+    },
+    {
+      "from": "proofread",
+      "to": "format-pages",
+      "name": "Proofread to Format Pages"
+    },
+    {
+      "from": "format-pages",
+      "to": "design-cover",
+      "name": "Format Pages to Design Cover"
+    },
+    {
+      "from": "design-cover",
+      "to": "send-to-printer",
+      "name": "Design Cover to Send to Printer"
+    },
+    {
+      "from": "send-to-printer",
+      "to": "print-proof",
+      "name": "Send to Printer to Print Proof"
+    },
+    {
+      "from": "print-proof",
+      "to": "review-proof",
+      "name": "Print Proof to Review Proof"
+    }
+  ]
+}
