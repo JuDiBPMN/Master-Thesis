@@ -1,0 +1,129 @@
+{
+  "tasks": [
+    {
+      "id": "Claim_Intake",
+      "name": "Claim Intake",
+      "actor": "Claims_Intake_Team"
+    },
+    {
+      "id": "Fraud_Detection",
+      "name": "Fraud Detection",
+      "actor": "Fraud_Detection_Team"
+    },
+    {
+      "id": "Assessment",
+      "name": "Assessment",
+      "actor": "Assessment_Team"
+    },
+    {
+      "id": "Claim_Evaluation",
+      "name": "Claim Evaluation",
+      "actor": "Claims_Handler"
+    },
+    {
+      "id": "Rejection",
+      "name": "Rejection",
+      "actor": "Claims_Handler"
+    },
+    {
+      "id": "Payment_Processing",
+      "name": "Payment Processing",
+      "actor": "Finance_Team"
+    },
+    {
+      "id": "Customer_Notification",
+      "name": "Customer Notification",
+      "actor": "Claims_Handler"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "Claim_Intake",
+      "to": "Fraud_Detection"
+    },
+    {
+      "from": "Fraud_Detection",
+      "to": "Assessment"
+    },
+    {
+      "from": "Assessment",
+      "to": "Claim_Evaluation"
+    },
+    {
+      "from": "Claim_Evaluation",
+      "to": "Rejection"
+    },
+    {
+      "from": "Rejection",
+      "to": "Payment_Processing"
+    },
+    {
+      "from": "Payment_Processing",
+      "to": "Customer_Notification"
+    }
+  ],
+  "events": [
+    {
+      "id": "Claim_Intake",
+      "name": "Claim Intake",
+      "type": "startEvent",
+      "participant": "Claims_Intake_Team",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "Fraud_Detection",
+      "name": "Fraud Detection",
+      "type": "startEvent",
+      "participant": "Fraud_Detection_Team",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "Assessment",
+      "name": "Assessment",
+      "type": "startEvent",
+      "participant": "Assessment_Team",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "Claim_Evaluation",
+      "name": "Claim Evaluation",
+      "type": "startEvent",
+      "participant": "Claims_Handler",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "Rejection",
+      "name": "Rejection",
+      "type": "endEvent",
+      "participant": "Claims_Handler",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "Payment_Processing",
+      "name": "Payment Processing",
+      "type": "endEvent",
+      "participant": "Finance_Team",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "Customer_Notification",
+      "name": "Customer Notification",
+      "type": "endEvent",
+      "participant": "Claims_Handler",
+      "eventDefinition": "end"
+    }
+  ],
+  "gateways": [
+    {
+      "type": "parallel",
+      "from": [
+        "Claim_Intake",
+        "Fraud_Detection"
+      ],
+      "to": [
+        "Assessment"
+      ]
+    }
+  ],
+  "message_flows": []
+}

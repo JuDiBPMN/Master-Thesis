@@ -1,0 +1,208 @@
+{
+  "tasks": [
+    {
+      "id": "RECRUITER_RECEIVES_JOB_VACANCY",
+      "name": "Recruiter receives job vacancy from client company",
+      "actor": "RECRUITER"
+    },
+    {
+      "id": "SCREEN_EXISTING_CANDIDATES",
+      "name": "Recruiter screens existing candidate database",
+      "actor": "RECRUITER"
+    },
+    {
+      "id": "POST_VACANCY_EXTERNALLY",
+      "name": "Recruiter posts job vacancy externally",
+      "actor": "RECRUITER"
+    },
+    {
+      "id": "RECEIVE_APPLICATIONS",
+      "name": "Applications received from external candidates",
+      "actor": "RECRUITER"
+    },
+    {
+      "id": "SHORTLIST_CANDIDATES",
+      "name": "Recruiter shortlists candidates",
+      "actor": "RECRUITER"
+    },
+    {
+      "id": "SUBMIT_PROFILES",
+      "name": "Recruiter submits profiles to client",
+      "actor": "RECRUITER"
+    },
+    {
+      "id": "CLIENT_REVIEWS_PROFILES",
+      "name": "Client reviews profiles",
+      "actor": "CLIENT"
+    },
+    {
+      "id": "SELECT_CANDIDATES_FOR_INTERVIEW",
+      "name": "Client selects candidates for interview",
+      "actor": "CLIENT"
+    },
+    {
+      "id": "SCHEDULE_INTERVIEWS",
+      "name": "Interviews scheduled",
+      "actor": "RECRUITER"
+    },
+    {
+      "id": "CLIENT_MAKES_HIRING_DECISION",
+      "name": "Client makes hiring decision",
+      "actor": "CLIENT"
+    },
+    {
+      "id": "CONFIRM_PLACEMENT",
+      "name": "Placement confirmation issued",
+      "actor": "RECRUITER"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "RECRUITER_RECEIVES_JOB_VACANCY",
+      "to": "SCREEN_EXISTING_CANDIDATES"
+    },
+    {
+      "from": "SCREEN_EXISTING_CANDIDATES",
+      "to": "POST_VACANCY_EXTERNALLY"
+    },
+    {
+      "from": "POST_VACANCY_EXTERNALLY",
+      "to": "RECEIVE_APPLICATIONS"
+    },
+    {
+      "from": "RECEIVE_APPLICATIONS",
+      "to": "SHORTLIST_CANDIDATES"
+    },
+    {
+      "from": "SHORTLIST_CANDIDATES",
+      "to": "SUBMIT_PROFILES"
+    },
+    {
+      "from": "SUBMIT_PROFILES",
+      "to": "CLIENT_REVIEWS_PROFILES"
+    },
+    {
+      "from": "CLIENT_REVIEWS_PROFILES",
+      "to": "SELECT_CANDIDATES_FOR_INTERVIEW"
+    },
+    {
+      "from": "SELECT_CANDIDATES_FOR_INTERVIEW",
+      "to": "SCHEDULE_INTERVIEWS"
+    },
+    {
+      "from": "SCHEDULE_INTERVIEWS",
+      "to": "CLIENT_MAKES_HIRING_DECISION"
+    },
+    {
+      "from": "CLIENT_MAKES_HIRING_DECISION",
+      "to": "CONFIRM_PLACEMENT"
+    }
+  ],
+  "events": [
+    {
+      "id": "RECRUITER_RECEIVES_JOB_VACANCY",
+      "name": "Recruiter receives job vacancy from client company",
+      "type": "intermediateCatchEvent",
+      "participant": "RECRUITER",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "SCREEN_EXISTING_CANDIDATES",
+      "name": "Recruiter screens existing candidate database",
+      "type": "intermediateCatchEvent",
+      "participant": "RECRUITER",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "POST_VACANCY_EXTERNALLY",
+      "name": "Recruiter posts job vacancy externally",
+      "type": "intermediateCatchEvent",
+      "participant": "RECRUITER",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "RECEIVE_APPLICATIONS",
+      "name": "Applications received from external candidates",
+      "type": "intermediateCatchEvent",
+      "participant": "RECRUITER",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "SHORTLIST_CANDIDATES",
+      "name": "Recruiter shortlists candidates",
+      "type": "intermediateCatchEvent",
+      "participant": "RECRUITER",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "SUBMIT_PROFILES",
+      "name": "Recruiter submits profiles to client",
+      "type": "intermediateCatchEvent",
+      "participant": "RECRUITER",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "CLIENT_REVIEWS_PROFILES",
+      "name": "Client reviews profiles",
+      "type": "intermediateCatchEvent",
+      "participant": "CLIENT",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "SELECT_CANDIDATES_FOR_INTERVIEW",
+      "name": "Client selects candidates for interview",
+      "type": "intermediateCatchEvent",
+      "participant": "CLIENT",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "SCHEDULE_INTERVIEWS",
+      "name": "Interviews scheduled",
+      "type": "intermediateCatchEvent",
+      "participant": "RECRUITER",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "CLIENT_MAKES_HIRING_DECISION",
+      "name": "Client makes hiring decision",
+      "type": "intermediateCatchEvent",
+      "participant": "CLIENT",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "CONFIRM_PLACEMENT",
+      "name": "Placement confirmation issued",
+      "type": "intermediateCatchEvent",
+      "participant": "RECRUITER",
+      "eventDefinition": "end"
+    }
+  ],
+  "gateways": [
+    {
+      "type": "inclusive",
+      "from": [
+        "RECRUITER_RECEIVES_JOB_VACANCY"
+      ],
+      "to": [
+        "SCREEN_EXISTING_CANDIDATES"
+      ]
+    },
+    {
+      "type": "inclusive",
+      "from": [
+        "SCREEN_EXISTING_CANDIDATES"
+      ],
+      "to": [
+        "POST_VACANCY_EXTERNALLY"
+      ]
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "RECRUITER_RECEIVES_JOB_VACANCY",
+      "to": "CLIENT_REVIEWS_PROFILES",
+      "name": "Job vacancy received from client",
+      "id": "JOB_VACANCY_RECEIVED"
+    }
+  ]
+}

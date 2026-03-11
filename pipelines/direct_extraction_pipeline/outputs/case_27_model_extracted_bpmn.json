@@ -1,0 +1,205 @@
+{
+  "tasks": [
+    {
+      "id": "examine-patient",
+      "name": "Examine Patient",
+      "actor": "General Practitioner"
+    },
+    {
+      "id": "decide-referral",
+      "name": "Decide Referral",
+      "actor": "General Practitioner"
+    },
+    {
+      "id": "send-referral-request",
+      "name": "Send Referral Request",
+      "actor": "General Practitioner"
+    },
+    {
+      "id": "review-referral",
+      "name": "Review Referral",
+      "actor": "Hospital Intake Department"
+    },
+    {
+      "id": "book-appointment",
+      "name": "Book Appointment",
+      "actor": "Specialist"
+    },
+    {
+      "id": "examine-patient",
+      "name": "Examine Patient",
+      "actor": "Specialist"
+    },
+    {
+      "id": "record-diagnosis",
+      "name": "Record Diagnosis",
+      "actor": "Specialist"
+    },
+    {
+      "id": "schedule-treatment-plan",
+      "name": "Schedule Treatment Plan",
+      "actor": "Specialist"
+    },
+    {
+      "id": "discharge-patient",
+      "name": "Discharge Patient",
+      "actor": "Specialist"
+    },
+    {
+      "id": "notificate-general-practitioner",
+      "name": "Notificate General Practitioner",
+      "actor": "General Practitioner"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "examine-patient",
+      "to": "decide-referral"
+    },
+    {
+      "from": "decide-referral",
+      "to": "send-referral-request"
+    },
+    {
+      "from": "send-referral-request",
+      "to": "review-referral"
+    },
+    {
+      "from": "review-referral",
+      "to": "book-appointment"
+    },
+    {
+      "from": "book-appointment",
+      "to": "examine-patient"
+    },
+    {
+      "from": "examine-patient",
+      "to": "record-diagnosis"
+    },
+    {
+      "from": "record-diagnosis",
+      "to": "schedule-treatment-plan"
+    },
+    {
+      "from": "schedule-treatment-plan",
+      "to": "discharge-patient"
+    },
+    {
+      "from": "discharge-patient",
+      "to": "notificate-general-practitioner"
+    }
+  ],
+  "events": [
+    {
+      "id": "examine-patient",
+      "name": "Examine Patient",
+      "type": "startEvent",
+      "participant": "General Practitioner",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "decide-referral",
+      "name": "Decide Referral",
+      "type": "startEvent",
+      "participant": "General Practitioner",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "send-referral-request",
+      "name": "Send Referral Request",
+      "type": "startEvent",
+      "participant": "General Practitioner",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "review-referral",
+      "name": "Review Referral",
+      "type": "startEvent",
+      "participant": "Hospital Intake Department",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "book-appointment",
+      "name": "Book Appointment",
+      "type": "startEvent",
+      "participant": "Specialist",
+      "eventDefinition": "start"
+    },
+    {
+      "id": "examine-patient",
+      "name": "Examine Patient",
+      "type": "endEvent",
+      "participant": "Specialist",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "record-diagnosis",
+      "name": "Record Diagnosis",
+      "type": "endEvent",
+      "participant": "Specialist",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "schedule-treatment-plan",
+      "name": "Schedule Treatment Plan",
+      "type": "endEvent",
+      "participant": "Specialist",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "discharge-patient",
+      "name": "Discharge Patient",
+      "type": "endEvent",
+      "participant": "Specialist",
+      "eventDefinition": "end"
+    },
+    {
+      "id": "notificate-general-practitioner",
+      "name": "Notificate General Practitioner",
+      "type": "endEvent",
+      "participant": "General Practitioner",
+      "eventDefinition": "end"
+    }
+  ],
+  "gateways": [
+    {
+      "type": "eventBased",
+      "from": [
+        "examine-patient",
+        "decide-referral",
+        "send-referral-request",
+        "review-referral",
+        "book-appointment",
+        "examine-patient",
+        "record-diagnosis",
+        "schedule-treatment-plan",
+        "discharge-patient"
+      ],
+      "to": [
+        "examine-patient",
+        "decide-referral",
+        "send-referral-request",
+        "review-referral",
+        "book-appointment",
+        "examine-patient",
+        "record-diagnosis",
+        "schedule-treatment-plan",
+        "discharge-patient"
+      ]
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "send-referral-request",
+      "to": "review-referral",
+      "name": "Send Referral Request",
+      "id": "send-referral-request"
+    },
+    {
+      "from": "review-referral",
+      "to": "book-appointment",
+      "name": "Review Referral",
+      "id": "review-referral"
+    }
+  ]
+}
