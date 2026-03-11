@@ -1,0 +1,215 @@
+{
+  "pools": [
+    {
+      "id": "recruitment_agency",
+      "name": "Recruitment Agency"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "recruiter",
+      "name": "Recruiter",
+      "pool": "recruitment_agency"
+    },
+    {
+      "id": "client",
+      "name": "Client",
+      "pool": "recruitment_agency"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "receive_job_vacancy",
+      "name": "Receive job vacancy",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "screen_candidate_database",
+      "name": "Screen candidate database",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "post_vacancy_externally",
+      "name": "Post vacancy externally",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "receive_applications",
+      "name": "Receive applications",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "shortlist_candidates",
+      "name": "Shortlist candidates",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "submit_profiles_to_client",
+      "name": "Submit profiles to client",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "review_submitted_profiles",
+      "name": "Review submitted profiles",
+      "type": "task",
+      "lane": "client"
+    },
+    {
+      "id": "decide_on_next_steps",
+      "name": "Decide on next steps",
+      "type": "task",
+      "lane": "client"
+    },
+    {
+      "id": "notify_recruiter_of_rejection",
+      "name": "Notify recruiter of rejection",
+      "type": "task",
+      "lane": "client"
+    },
+    {
+      "id": "schedule_interviews",
+      "name": "Schedule interviews",
+      "type": "task",
+      "lane": "recruiter"
+    },
+    {
+      "id": "make_hiring_decision",
+      "name": "Make hiring decision",
+      "type": "task",
+      "lane": "client"
+    },
+    {
+      "id": "issue_placement_confirmation",
+      "name": "Issue placement confirmation",
+      "type": "task",
+      "lane": "recruiter"
+    }
+  ],
+  "events": [
+    {
+      "id": "start",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "recruiter",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "recruiter",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_no_suitable_candidates",
+      "name": "No suitable candidates",
+      "type": "exclusiveGateway",
+      "lane": "recruiter",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_suitable_candidates",
+      "name": "Suitable candidates",
+      "type": "exclusiveGateway",
+      "lane": "recruiter",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_receive_applications",
+      "name": "Receive applications",
+      "type": "parallelGateway",
+      "lane": "recruiter",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_submit_profiles",
+      "name": "Submit profiles",
+      "type": "parallelGateway",
+      "lane": "recruiter",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf_receive_job_vacancy_to_screen_candidate_database",
+      "from": "receive_job_vacancy",
+      "to": "screen_candidate_database"
+    },
+    {
+      "id": "sf_no_suitable_candidates_to_post_vacancy_externally",
+      "from": "screen_candidate_database",
+      "to": "gateway_no_suitable_candidates"
+    },
+    {
+      "id": "sf_no_suitable_candidates_to_receive_applications",
+      "from": "gateway_no_suitable_candidates",
+      "to": "post_vacancy_externally"
+    },
+    {
+      "id": "sf_receive_applications_to_shortlist_candidates",
+      "from": "gateway_receive_applications",
+      "to": "shortlist_candidates"
+    },
+    {
+      "id": "sf_suitable_candidates_to_submit_profiles",
+      "from": "gateway_suitable_candidates",
+      "to": "submit_profiles_to_client"
+    },
+    {
+      "id": "sf_submit_profiles_to_client_to_review_submitted_profiles",
+      "from": "submit_profiles_to_client",
+      "to": "review_submitted_profiles"
+    },
+    {
+      "id": "sf_client_rejects_all_profiles_to_notify_recruiter_of_rejection",
+      "from": "gateway_no_suitable_candidates",
+      "to": "notify_recruiter_of_rejection"
+    },
+    {
+      "id": "sf_client_selects_candidates_for_interview_to_schedule_interviews",
+      "from": "gateway_suitable_candidates",
+      "to": "schedule_interviews"
+    },
+    {
+      "id": "sf_make_hiring_decision_to_issue_placement_confirmation",
+      "from": "make_hiring_decision",
+      "to": "issue_placement_confirmation"
+    },
+    {
+      "id": "sf_issue_placement_confirmation_to_end",
+      "from": "issue_placement_confirmation",
+      "to": "end"
+    }
+  ],
+  "message_flows": [],
+  "data": [
+    {
+      "id": "job_vacancy",
+      "name": "Job vacancy"
+    },
+    {
+      "id": "candidate_profiles",
+      "name": "Candidate profiles"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "receive_job_vacancy",
+      "to": "job_vacancy",
+      "type": "input"
+    },
+    {
+      "from": "submit_profiles_to_client",
+      "to": "candidate_profiles",
+      "type": "output"
+    }
+  ]
+}

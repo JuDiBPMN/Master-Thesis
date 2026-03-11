@@ -1,0 +1,179 @@
+{
+  "pools": [
+    {
+      "id": "marketing_agency",
+      "name": "Marketing Agency"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "project_manager",
+      "name": "Project Manager",
+      "pool": "marketing_agency"
+    },
+    {
+      "id": "creative_director",
+      "name": "Creative Director",
+      "pool": "marketing_agency"
+    },
+    {
+      "id": "copywriter",
+      "name": "Copywriter",
+      "pool": "marketing_agency"
+    },
+    {
+      "id": "graphic_designer",
+      "name": "Graphic Designer",
+      "pool": "marketing_agency"
+    },
+    {
+      "id": "social_media_manager",
+      "name": "Social Media Manager",
+      "pool": "marketing_agency"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "receive_campaign_request",
+      "name": "Receive request",
+      "type": "subProcess",
+      "lane": "creative_director"
+    },
+    {
+      "id": "assign_project",
+      "name": "Assign project",
+      "type": "task",
+      "lane": "creative_director"
+    },
+    {
+      "id": "copywriting_draft",
+      "name": "Draft text",
+      "type": "task",
+      "lane": "copywriter"
+    },
+    {
+      "id": "graphic_design",
+      "name": "Create visual assets",
+      "type": "task",
+      "lane": "graphic_designer"
+    },
+    {
+      "id": "define_posting_schedule",
+      "name": "Define schedule",
+      "type": "task",
+      "lane": "social_media_manager"
+    },
+    {
+      "id": "review_package",
+      "name": "Review package",
+      "type": "task",
+      "lane": "project_manager"
+    },
+    {
+      "id": "publish_campaign",
+      "name": "Publish campaign",
+      "type": "task",
+      "lane": "project_manager"
+    },
+    {
+      "id": "receive_revisions",
+      "name": "Receive revisions",
+      "type": "task",
+      "lane": "project_manager"
+    }
+  ],
+  "events": [
+    {
+      "id": "start",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "creative_director",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "project_manager",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "parallel_gateway_1",
+      "name": "Parallel gateway_1",
+      "type": "parallelGateway",
+      "lane": "creative_director",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "exclusive_gateway_1",
+      "name": "Exclusive gateway_1",
+      "type": "exclusiveGateway",
+      "lane": "project_manager",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "parallel_gateway_2",
+      "name": "Parallel gateway_2",
+      "type": "parallelGateway",
+      "lane": "project_manager",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf_1",
+      "from": "receive_campaign_request",
+      "to": "assign_project"
+    },
+    {
+      "id": "sf_2",
+      "from": "assign_project",
+      "to": "parallel_gateway_1"
+    },
+    {
+      "id": "sf_3",
+      "from": "parallel_gateway_1",
+      "to": "copywriting_draft"
+    },
+    {
+      "id": "sf_4",
+      "from": "parallel_gateway_1",
+      "to": "graphic_design"
+    },
+    {
+      "id": "sf_5",
+      "from": "parallel_gateway_1",
+      "to": "define_posting_schedule"
+    },
+    {
+      "id": "sf_6",
+      "from": "parallel_gateway_2",
+      "to": "review_package"
+    },
+    {
+      "id": "sf_7",
+      "from": "exclusive_gateway_1",
+      "to": "publish_campaign"
+    },
+    {
+      "id": "sf_8",
+      "from": "exclusive_gateway_1",
+      "to": "receive_revisions"
+    },
+    {
+      "id": "sf_9",
+      "from": "publish_campaign",
+      "to": "end"
+    },
+    {
+      "id": "sf_10",
+      "from": "receive_revisions",
+      "to": "review_package"
+    }
+  ],
+  "message_flows": [],
+  "data": [],
+  "data_associations": []
+}

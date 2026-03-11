@@ -1,0 +1,158 @@
+{
+  "pools": [
+    {
+      "id": "university",
+      "name": "University"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "administration_officer",
+      "name": "Administration Officer",
+      "pool": "university"
+    },
+    {
+      "id": "examination_board_member",
+      "name": "Examination Board Member",
+      "pool": "university"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "student_submits_thesis",
+      "name": "Student submits thesis",
+      "type": "subProcess",
+      "lane": "administration_officer"
+    },
+    {
+      "id": "check_completeness",
+      "name": "Check completeness",
+      "type": "task",
+      "lane": "administration_officer"
+    },
+    {
+      "id": "notify_student_of_missing_documents",
+      "name": "Notify student",
+      "type": "task",
+      "lane": "administration_officer"
+    },
+    {
+      "id": "evaluate_thesis",
+      "name": "Evaluate thesis",
+      "type": "task",
+      "lane": "examination_board_member"
+    },
+    {
+      "id": "decide_on_outcome",
+      "name": "Decide on outcome",
+      "type": "task",
+      "lane": "examination_board_member"
+    },
+    {
+      "id": "issue_grade_and_notify_student",
+      "name": "Issue grade and notify student",
+      "type": "task",
+      "lane": "examination_board_member"
+    },
+    {
+      "id": "send_rejection_notice",
+      "name": "Send rejection notice",
+      "type": "task",
+      "lane": "examination_board_member"
+    }
+  ],
+  "events": [
+    {
+      "id": "start",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "administration_officer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "administration_officer",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_check_completeness",
+      "name": "gateway_check_completeness",
+      "type": "exclusiveGateway",
+      "lane": "administration_officer",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_evaluate_outcome",
+      "name": "gateway_evaluate_outcome",
+      "type": "exclusiveGateway",
+      "lane": "examination_board_member",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_parallel_process",
+      "name": "gateway_parallel_process",
+      "type": "parallelGateway",
+      "lane": "none",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "student_submits_thesis",
+      "to": "check_completeness"
+    },
+    {
+      "id": "sf2",
+      "from": "check_completeness",
+      "to": "gateway_check_completeness"
+    },
+    {
+      "id": "sf3",
+      "from": "gateway_check_completeness",
+      "to": "notify_student_of_missing_documents"
+    },
+    {
+      "id": "sf4",
+      "from": "notify_student_of_missing_documents",
+      "to": "end"
+    },
+    {
+      "id": "sf5",
+      "from": "check_completeness",
+      "to": "gateway_parallel_process"
+    },
+    {
+      "id": "sf6",
+      "from": "gateway_parallel_process",
+      "to": "evaluate_thesis"
+    },
+    {
+      "id": "sf7",
+      "from": "evaluate_thesis",
+      "to": "gateway_evaluate_outcome"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_evaluate_outcome",
+      "to": "issue_grade_and_notify_student"
+    },
+    {
+      "id": "sf9",
+      "from": "issue_grade_and_notify_student",
+      "to": "end"
+    },
+    {
+      "id": "sf10",
+      "from": "evaluate_thesis",
+      "to": "send_rejection_notice"
+    }
+  ],
+  "message_flows": [],
+  "data": [],
+  "data_associations": []
+}

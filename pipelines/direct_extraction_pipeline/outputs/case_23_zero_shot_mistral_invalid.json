@@ -1,0 +1,151 @@
+{
+  "pools": [
+    {
+      "id": "ecommerce_company",
+      "name": "E-commerce Company"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "customer_service",
+      "name": "Customer Service",
+      "pool": "ecommerce_company"
+    },
+    {
+      "id": "warehouse_team",
+      "name": "Warehouse Team",
+      "pool": "ecommerce_company"
+    },
+    {
+      "id": "finance_team",
+      "name": "Finance Team",
+      "pool": "ecommerce_company"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "customer_submits_return_request",
+      "name": "Submits return request",
+      "type": "userTask",
+      "lane": "customer_service"
+    },
+    {
+      "id": "verifies_return_eligibility",
+      "name": "Verifies eligibility",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "arranges_collection",
+      "name": "Arranges collection",
+      "type": "task",
+      "lane": "warehouse_team"
+    },
+    {
+      "id": "initiates_refund_process",
+      "name": "Initiates refund process",
+      "type": "task",
+      "lane": "finance_team"
+    },
+    {
+      "id": "sends_confirmation_to_customer",
+      "name": "Sends confirmation",
+      "type": "task",
+      "lane": "customer_service"
+    }
+  ],
+  "events": [
+    {
+      "id": "start",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_eligibility_split",
+      "name": "gateway_eligibility_split",
+      "type": "exclusiveGateway",
+      "lane": "",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_collection_and_refund_join",
+      "name": "gateway_collection_and_refund_join",
+      "type": "parallelGateway",
+      "lane": "",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_return_rejected",
+      "name": "gateway_return_rejected",
+      "type": "exclusiveGateway",
+      "lane": "",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "flow_eligibility_to_customer_service",
+      "from": "start",
+      "to": "customer_submits_return_request"
+    },
+    {
+      "id": "flow_customer_service_to_gateway_eligibility_split",
+      "from": "customer_service",
+      "to": "gateway_eligibility_split"
+    },
+    {
+      "id": "flow_gateway_eligibility_split_to_customer_service_rejected",
+      "from": "gateway_eligibility_split",
+      "to": "gateway_return_rejected"
+    },
+    {
+      "id": "flow_gateway_return_rejected_to_end",
+      "from": "gateway_return_rejected",
+      "to": "end"
+    },
+    {
+      "id": "flow_gateway_eligibility_split_to_warehouse_team",
+      "from": "gateway_eligibility_split",
+      "to": "arranges_collection"
+    },
+    {
+      "id": "flow_gateway_eligibility_split_to_finance_team",
+      "from": "gateway_eligibility_split",
+      "to": "initiates_refund_process"
+    },
+    {
+      "id": "flow_warehouse_team_to_gateway_collection_and_refund_join",
+      "from": "arranges_collection",
+      "to": "gateway_collection_and_refund_join"
+    },
+    {
+      "id": "flow_finance_team_to_gateway_collection_and_refund_join",
+      "from": "initiates_refund_process",
+      "to": "gateway_collection_and_refund_join"
+    },
+    {
+      "id": "flow_gateway_collection_and_refund_join_to_customer_service",
+      "from": "gateway_collection_and_refund_join",
+      "to": "sends_confirmation_to_customer"
+    },
+    {
+      "id": "flow_sends_confirmation_to_customer_to_end",
+      "from": "sends_confirmation_to_customer",
+      "to": "end"
+    }
+  ],
+  "message_flows": [],
+  "data": [],
+  "data_associations": []
+}
