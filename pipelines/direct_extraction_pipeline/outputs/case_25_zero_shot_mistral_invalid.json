@@ -1,0 +1,236 @@
+{
+  "pools": [
+    {
+      "id": "publishing_house",
+      "name": "Publishing House"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "editorial_manager",
+      "name": "Editorial Manager",
+      "pool": "publishing_house"
+    },
+    {
+      "id": "editor",
+      "name": "Editor",
+      "pool": "publishing_house"
+    },
+    {
+      "id": "layout_designer",
+      "name": "Layout Designer",
+      "pool": "publishing_house"
+    },
+    {
+      "id": "print_manager",
+      "name": "Print Manager",
+      "pool": "publishing_house"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "manuscript_accepted",
+      "name": "Manuscript accepted",
+      "type": "manualTask",
+      "lane": "editorial_manager"
+    },
+    {
+      "id": "assign_manuscript",
+      "name": "Assign manuscript",
+      "type": "task",
+      "lane": "editorial_manager"
+    },
+    {
+      "id": "edit_manuscript",
+      "name": "Edit manuscript",
+      "type": "task",
+      "lane": "editor"
+    },
+    {
+      "id": "format_pages",
+      "name": "Format pages",
+      "type": "task",
+      "lane": "layout_designer"
+    },
+    {
+      "id": "design_cover",
+      "name": "Design cover",
+      "type": "task",
+      "lane": "layout_designer"
+    },
+    {
+      "id": "review_proof",
+      "name": "Review proof",
+      "type": "task",
+      "lane": "editorial_manager"
+    },
+    {
+      "id": "approve_proof",
+      "name": "Approve proof",
+      "type": "task",
+      "lane": "editorial_manager"
+    },
+    {
+      "id": "identify_issues",
+      "name": "Identify issues",
+      "type": "task",
+      "lane": "editorial_manager"
+    },
+    {
+      "id": "apply_corrections",
+      "name": "Apply corrections",
+      "type": "task",
+      "lane": "layout_designer"
+    },
+    {
+      "id": "request_new_proof",
+      "name": "Request new proof",
+      "type": "task",
+      "lane": "editorial_manager"
+    },
+    {
+      "id": "send_files_to_printer",
+      "name": "Send files to printer",
+      "type": "task",
+      "lane": "print_manager"
+    },
+    {
+      "id": "produce_proof_copy",
+      "name": "Produce proof copy",
+      "type": "task",
+      "lane": "printer"
+    },
+    {
+      "id": "review_full_print_order",
+      "name": "Review full print order",
+      "type": "task",
+      "lane": "editorial_manager"
+    }
+  ],
+  "events": [
+    {
+      "id": "start",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "editorial_manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "editorial_manager",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_simultaneous_assign",
+      "name": "gateway_simultaneous_assign",
+      "type": "parallelGateway",
+      "lane": "none",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_editing_complete",
+      "name": "gateway_editing_complete",
+      "type": "exclusiveGateway",
+      "lane": "none",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_layout_complete",
+      "name": "gateway_layout_complete",
+      "type": "exclusiveGateway",
+      "lane": "none",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_proof_approved",
+      "name": "gateway_proof_approved",
+      "type": "exclusiveGateway",
+      "lane": "none",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf_manuscript_accepted_assign",
+      "from": "manuscript_accepted",
+      "to": "assign_manuscript"
+    },
+    {
+      "id": "sf_assign_manuscript_edit",
+      "from": "assign_manuscript",
+      "to": "edit_manuscript"
+    },
+    {
+      "id": "sf_edit_manuscript_format",
+      "from": "edit_manuscript",
+      "to": "format_pages"
+    },
+    {
+      "id": "sf_format_pages_design_cover",
+      "from": "format_pages",
+      "to": "design_cover"
+    },
+    {
+      "id": "sf_design_cover_gateway_simultaneous_assign",
+      "from": "design_cover",
+      "to": "gateway_simultaneous_assign"
+    },
+    {
+      "id": "sf_gateway_simultaneous_assign_editing",
+      "from": "gateway_simultaneous_assign",
+      "to": "gateway_editing_complete"
+    },
+    {
+      "id": "sf_gateway_editing_complete_review_proof",
+      "from": "gateway_editing_complete",
+      "to": "review_proof"
+    },
+    {
+      "id": "sf_review_proof_approve_proof",
+      "from": "review_proof",
+      "to": "approve_proof"
+    },
+    {
+      "id": "sf_approve_proof_gateway_proof_approved",
+      "from": "approve_proof",
+      "to": "gateway_proof_approved"
+    },
+    {
+      "id": "sf_gateway_proof_approved_full_print_order",
+      "from": "gateway_proof_approved",
+      "to": "review_full_print_order"
+    },
+    {
+      "id": "sf_identify_issues_apply_corrections",
+      "from": "gateway_proof_approved",
+      "to": "identify_issues"
+    },
+    {
+      "id": "sf_apply_corrections_request_new_proof",
+      "from": "apply_corrections",
+      "to": "request_new_proof"
+    },
+    {
+      "id": "sf_request_new_proof_gateway_simultaneous_assign",
+      "from": "request_new_proof",
+      "to": "gateway_simultaneous_assign"
+    },
+    {
+      "id": "sf_gateway_simultaneous_assign_editing",
+      "from": "gateway_simultaneous_assign",
+      "to": "gateway_editing_complete"
+    },
+    {
+      "id": "sf_gateway_editing_complete_review_proof",
+      "from": "gateway_editing_complete",
+      "to": "review_proof"
+    }
+  ],
+  "message_flows": [],
+  "data": [],
+  "data_associations": []
+}
