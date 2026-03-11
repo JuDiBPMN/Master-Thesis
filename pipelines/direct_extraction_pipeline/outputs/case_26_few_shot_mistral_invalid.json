@@ -1,0 +1,216 @@
+{
+  "pools": [
+    {
+      "id": "logistics_company",
+      "name": "Logistics Company"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "logistics_coordinator",
+      "name": "Logistics Coordinator",
+      "pool": "logistics_company"
+    },
+    {
+      "id": "warehouse_team",
+      "name": "Warehouse Team",
+      "pool": "logistics_company"
+    },
+    {
+      "id": "transport_planning_team",
+      "name": "Transport Planning Team",
+      "pool": "logistics_company"
+    },
+    {
+      "id": "driver",
+      "name": "Driver",
+      "pool": "logistics_company"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "register_shipment",
+      "name": "Register Shipment",
+      "type": "task",
+      "lane": "logistics_coordinator"
+    },
+    {
+      "id": "pick_and_pack_items",
+      "name": "Pick and Pack Items",
+      "type": "task",
+      "lane": "warehouse_team"
+    },
+    {
+      "id": "assign_driver_and_vehicle",
+      "name": "Assign Driver and Vehicle",
+      "type": "task",
+      "lane": "transport_planning_team"
+    },
+    {
+      "id": "generate_shipping_label",
+      "name": "Generate Shipping Label",
+      "type": "task",
+      "lane": "logistics_coordinator"
+    },
+    {
+      "id": "deliver_parcel",
+      "name": "Deliver Parcel",
+      "type": "task",
+      "lane": "driver"
+    },
+    {
+      "id": "mark_shipment_as_delivered",
+      "name": "Mark Shipment as Delivered",
+      "type": "task",
+      "lane": "driver"
+    },
+    {
+      "id": "schedule_redelivery_attempt",
+      "name": "Schedule Redelivery Attempt",
+      "type": "task",
+      "lane": "warehouse_team"
+    }
+  ],
+  "events": [
+    {
+      "id": "start",
+      "name": "New Order Confirmed",
+      "type": "startEvent",
+      "lane": "logistics_coordinator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_delivered",
+      "name": "Delivery Successful",
+      "type": "endEvent",
+      "lane": "driver",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_redelivery",
+      "name": "Redelivery Attempted",
+      "type": "endEvent",
+      "lane": "warehouse_team",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_parallel",
+      "name": "Split Parallel Tracks",
+      "type": "parallelGateway",
+      "lane": "logistics_coordinator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Join Parallel Tracks",
+      "type": "parallelGateway",
+      "lane": "logistics_coordinator",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_delivery_success",
+      "name": "Delivery Success?",
+      "type": "exclusiveGateway",
+      "lane": "driver",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start",
+      "to": "register_shipment"
+    },
+    {
+      "id": "sf2",
+      "from": "register_shipment",
+      "to": "split_parallel"
+    },
+    {
+      "id": "sf3",
+      "from": "split_parallel",
+      "to": "pick_and_pack_items"
+    },
+    {
+      "id": "sf4",
+      "from": "split_parallel",
+      "to": "assign_driver_and_vehicle"
+    },
+    {
+      "id": "sf5",
+      "from": "pick_and_pack_items",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf6",
+      "from": "assign_driver_and_vehicle",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf7",
+      "from": "join_parallel",
+      "to": "generate_shipping_label"
+    },
+    {
+      "id": "sf8",
+      "from": "generate_shipping_label",
+      "to": "deliver_parcel"
+    },
+    {
+      "id": "sf9",
+      "from": "deliver_parcel",
+      "to": "gateway_delivery_success"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_delivery_success",
+      "to": "end_delivered"
+    },
+    {
+      "id": "sf11",
+      "from": "gateway_delivery_success",
+      "to": "end"
+    },
+    {
+      "id": "sf12",
+      "from": "split_parallel",
+      "to": "schedule_redelivery_attempt"
+    },
+    {
+      "id": "sf13",
+      "from": "schedule_redelivery_attempt",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf14",
+      "from": "end_redelivery",
+      "to": "join_parallel"
+    }
+  ],
+  "message_flows": [],
+  "data": [
+    {
+      "id": "shipment_data",
+      "name": "Shipment Data"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "register_shipment",
+      "to": "shipment_data",
+      "type": "output"
+    },
+    {
+      "from": "generate_shipping_label",
+      "to": "shipment_data",
+      "type": "output"
+    },
+    {
+      "from": "schedule_redelivery_attempt",
+      "to": "shipment_data",
+      "type": "output"
+    }
+  ]
+}

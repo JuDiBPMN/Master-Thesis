@@ -1,0 +1,309 @@
+{
+  "pools": [
+    {
+      "id": "hospital",
+      "name": "Hospital"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "general_practitioner",
+      "name": "General Practitioner",
+      "pool": "hospital"
+    },
+    {
+      "id": "intake_coordinator",
+      "name": "Intake Coordinator",
+      "pool": "hospital"
+    },
+    {
+      "id": "specialist",
+      "name": "Specialist",
+      "pool": "hospital"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "examine_patient",
+      "name": "Examine Patient",
+      "type": "task",
+      "lane": "general_practitioner"
+    },
+    {
+      "id": "decide_referral",
+      "name": "Decide Referral",
+      "type": "task",
+      "lane": "general_practitioner"
+    },
+    {
+      "id": "send_referral",
+      "name": "Send Referral Request",
+      "type": "task",
+      "lane": "general_practitioner"
+    },
+    {
+      "id": "check_availability",
+      "name": "Check Availability",
+      "type": "task",
+      "lane": "intake_coordinator"
+    },
+    {
+      "id": "notify_gp",
+      "name": "Notify General Practitioner",
+      "type": "task",
+      "lane": "intake_coordinator"
+    },
+    {
+      "id": "book_appointment",
+      "name": "Book Appointment",
+      "type": "task",
+      "lane": "intake_coordinator"
+    },
+    {
+      "id": "send_notification",
+      "name": "Send Notification to Patient",
+      "type": "task",
+      "lane": "intake_coordinator"
+    },
+    {
+      "id": "receive_referral",
+      "name": "Receive Referral",
+      "type": "task",
+      "lane": "specialist"
+    },
+    {
+      "id": "examine_patient_specialist",
+      "name": "Examine Patient",
+      "type": "task",
+      "lane": "specialist"
+    },
+    {
+      "id": "record_diagnosis",
+      "name": "Record Diagnosis",
+      "type": "task",
+      "lane": "specialist"
+    },
+    {
+      "id": "schedule_treatment",
+      "name": "Schedule Treatment",
+      "type": "task",
+      "lane": "specialist"
+    },
+    {
+      "id": "discharge_patient",
+      "name": "Discharge Patient",
+      "type": "task",
+      "lane": "specialist"
+    },
+    {
+      "id": "notify_gp",
+      "name": "Notify General Practitioner",
+      "type": "task",
+      "lane": "specialist"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_gp",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "general_practitioner",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_gp",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "general_practitioner",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_ic",
+      "name": "Referral Received",
+      "type": "startEvent",
+      "lane": "intake_coordinator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_ic",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "intake_coordinator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_s",
+      "name": "Specialist Received Referral",
+      "type": "startEvent",
+      "lane": "specialist",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_s",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "specialist",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_referral_needed",
+      "name": "Referral Needed?",
+      "type": "exclusiveGateway",
+      "lane": "general_practitionter",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_availability",
+      "name": "Availability?",
+      "type": "exclusiveGateway",
+      "lane": "intake_coordinator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_treatment_required",
+      "name": "Treatment Required?",
+      "type": "exclusiveGateway",
+      "lane": "specialist",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_processing",
+      "name": "Parallel Processing",
+      "type": "parallelGateway",
+      "lane": "intake_coordinator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Both Tasks Complete",
+      "type": "parallelGateway",
+      "lane": "intake_coordinator",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_gp",
+      "to": "examine_patient"
+    },
+    {
+      "id": "sf2",
+      "from": "examine_patient",
+      "to": "decide_referral"
+    },
+    {
+      "id": "sf3",
+      "from": "decide_referral",
+      "to": "gateway_referral_needed"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_referral_needed",
+      "to": "send_referral"
+    },
+    {
+      "id": "sf5",
+      "from": "send_referral",
+      "to": "gateway_parallel_processing"
+    },
+    {
+      "id": "sf6",
+      "from": "gateway_parallel_processing",
+      "to": "check_availability"
+    },
+    {
+      "id": "sf7",
+      "from": "check_availability",
+      "to": "gateway_availability"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_availability",
+      "to": "notify_gp"
+    },
+    {
+      "id": "sf9",
+      "from": "notify_gp",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_parallel_join",
+      "to": "receive_referral"
+    },
+    {
+      "id": "sf11",
+      "from": "receive_referral",
+      "to": "examine_patient_specialist"
+    },
+    {
+      "id": "sf12",
+      "from": "examine_patient_specialist",
+      "to": "record_diagnosis"
+    },
+    {
+      "id": "sf13",
+      "from": "record_diagnosis",
+      "to": "gateway_treatment_required"
+    },
+    {
+      "id": "sf14",
+      "from": "gateway_treatment_required",
+      "to": "schedule_treatment"
+    },
+    {
+      "id": "sf15",
+      "from": "schedule_treatment",
+      "to": "discharge_patient"
+    },
+    {
+      "id": "sf16",
+      "from": "discharge_patient",
+      "to": "notify_gp"
+    },
+    {
+      "id": "sf17",
+      "from": "notify_gp",
+      "to": "end_s"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "send_referral",
+      "to": "start_ic",
+      "name": "Referral Request"
+    }
+  ],
+  "data": [
+    {
+      "id": "referral_request",
+      "name": "Referral Request"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "examine_patient",
+      "to": "referral_request",
+      "type": "output"
+    },
+    {
+      "from": "decide_referral",
+      "to": "referral_request",
+      "type": "output"
+    },
+    {
+      "from": "send_referral",
+      "to": "referral_request",
+      "type": "output"
+    },
+    {
+      "from": "receive_referral",
+      "to": "referral_request",
+      "type": "input"
+    }
+  ]
+}
