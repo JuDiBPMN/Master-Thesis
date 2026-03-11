@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:process id="Process_publishing_house" name="Publishing House" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_publishing_house">
+      <bpmn:lane id="editorial_manager" name="Editorial Manager">
+        <bpmn:flowNodeRef>start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>accept_manuscript</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>assign_editor</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>assign_layout_designer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_proof</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>identify_issues</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>request_new_proof</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_simultaneous</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_approved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_parallel_join</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="editor" name="Editor">
+        <bpmn:flowNodeRef>proofread_manuscript</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="layout_designer" name="Layout Designer">
+        <bpmn:flowNodeRef>format_pages</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>design_cover</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>apply_corrections</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="print_manager" name="Print Manager">
+        <bpmn:flowNodeRef>end_process</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>place_full_print_order</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start" name="Manuscript Accepted"/>
+    <bpmn:endEvent id="end_process" name="Process Ends"/>
+    <bpmn:task id="accept_manuscript" name="Accept Manuscript"/>
+    <bpmn:task id="assign_editor" name="Assign Editor"/>
+    <bpmn:task id="assign_layout_designer" name="Assign Layout Designer"/>
+    <bpmn:task id="proofread_manuscript" name="Proofread Manuscript"/>
+    <bpmn:task id="format_pages" name="Format Pages"/>
+    <bpmn:task id="design_cover" name="Design Cover"/>
+    <bpmn:task id="review_proof" name="Review Proof"/>
+    <bpmn:task id="identify_issues" name="Identify Issues"/>
+    <bpmn:task id="apply_corrections" name="Apply Corrections"/>
+    <bpmn:task id="request_new_proof" name="Request New Proof"/>
+    <bpmn:task id="place_full_print_order" name="Place Full Print Order"/>
+    <bpmn:parallelGateway id="gateway_simultaneous" name="Simultaneous Assignment" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="gateway_approved" name="Proof Approved?" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="gateway_rejected" name="Proof Rejected?" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gateway_parallel_join" name="Both Branches Join" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start" targetRef="accept_manuscript"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="accept_manuscript" targetRef="gateway_simultaneous"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="gateway_simultaneous" targetRef="proofread_manuscript"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="proofread_manuscript" targetRef="gateway_approved"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="gateway_approved" targetRef="place_full_print_order"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="gateway_approved" targetRef="end_process"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="gateway_rejected" targetRef="identify_issues"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="identify_issues" targetRef="apply_corrections"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="apply_corrections" targetRef="request_new_proof"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="request_new_proof" targetRef="gateway_parallel_join"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="gateway_parallel_join" targetRef="proofread_manuscript"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_publishing_house">
+      <bpmndi:BPMNShape id="editorial_manager_di" bpmnElement="editorial_manager" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1670" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="editor_di" bpmnElement="editor" isHorizontal="true">
+        <dc:Bounds x="40" y="180" width="1670" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="layout_designer_di" bpmnElement="layout_designer" isHorizontal="true">
+        <dc:Bounds x="40" y="340" width="1670" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="print_manager_di" bpmnElement="print_manager" isHorizontal="true">
+        <dc:Bounds x="40" y="500" width="1670" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start">
+        <dc:Bounds x="132" y="28" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="assign_editor_di" bpmnElement="assign_editor">
+        <dc:Bounds x="100" y="33" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="assign_layout_designer_di" bpmnElement="assign_layout_designer">
+        <dc:Bounds x="100" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_proof_di" bpmnElement="review_proof">
+        <dc:Bounds x="100" y="86" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_rejected_di" bpmnElement="gateway_rejected" isMarkerVisible="true">
+        <dc:Bounds x="125" y="128" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="accept_manuscript_di" bpmnElement="accept_manuscript">
+        <dc:Bounds x="290" y="33" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="identify_issues_di" bpmnElement="identify_issues">
+        <dc:Bounds x="290" y="86" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="request_new_proof_di" bpmnElement="request_new_proof">
+        <dc:Bounds x="670" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_simultaneous_di" bpmnElement="gateway_simultaneous" isMarkerVisible="true">
+        <dc:Bounds x="505" y="75" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_approved_di" bpmnElement="gateway_approved" isMarkerVisible="true">
+        <dc:Bounds x="1265" y="75" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_parallel_join_di" bpmnElement="gateway_parallel_join" isMarkerVisible="true">
+        <dc:Bounds x="885" y="75" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="proofread_manuscript_di" bpmnElement="proofread_manuscript">
+        <dc:Bounds x="1050" y="220" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="format_pages_di" bpmnElement="format_pages">
+        <dc:Bounds x="100" y="353" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="design_cover_di" bpmnElement="design_cover">
+        <dc:Bounds x="100" y="406" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="apply_corrections_di" bpmnElement="apply_corrections">
+        <dc:Bounds x="480" y="380" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_process_di" bpmnElement="end_process">
+        <dc:Bounds x="1462" y="535" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="place_full_print_order_di" bpmnElement="place_full_print_order">
+        <dc:Bounds x="1430" y="566" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="168" y="46"/>
+        <di:waypoint x="229" y="46"/>
+        <di:waypoint x="229" y="73"/>
+        <di:waypoint x="290" y="73"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="390" y="73"/>
+        <di:waypoint x="447" y="73"/>
+        <di:waypoint x="447" y="100"/>
+        <di:waypoint x="505" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="555" y="100"/>
+        <di:waypoint x="802" y="100"/>
+        <di:waypoint x="802" y="260"/>
+        <di:waypoint x="1050" y="260"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="1150" y="260"/>
+        <di:waypoint x="1207" y="260"/>
+        <di:waypoint x="1207" y="100"/>
+        <di:waypoint x="1265" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="1315" y="100"/>
+        <di:waypoint x="1372" y="100"/>
+        <di:waypoint x="1372" y="606"/>
+        <di:waypoint x="1430" y="606"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="1315" y="100"/>
+        <di:waypoint x="1388" y="100"/>
+        <di:waypoint x="1388" y="553"/>
+        <di:waypoint x="1462" y="553"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="175" y="153"/>
+        <di:waypoint x="232" y="153"/>
+        <di:waypoint x="232" y="126"/>
+        <di:waypoint x="290" y="126"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="390" y="126"/>
+        <di:waypoint x="435" y="126"/>
+        <di:waypoint x="435" y="420"/>
+        <di:waypoint x="480" y="420"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="580" y="420"/>
+        <di:waypoint x="625" y="420"/>
+        <di:waypoint x="625" y="100"/>
+        <di:waypoint x="670" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="770" y="100"/>
+        <di:waypoint x="885" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="935" y="100"/>
+        <di:waypoint x="992" y="100"/>
+        <di:waypoint x="992" y="260"/>
+        <di:waypoint x="1050" y="260"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
