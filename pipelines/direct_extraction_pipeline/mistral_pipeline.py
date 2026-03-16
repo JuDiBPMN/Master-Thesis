@@ -168,40 +168,187 @@ def save_json_to_file(obj, path):
         json.dump(obj, f, indent=2, ensure_ascii=False)
 
 
+from collections import defaultdict
+
 def is_valid_bpmn(obj):
+    """
+    Returns (is_fully_valid, errors, warnings).
+    - errors:   blocking problems
+    - warnings: structural problems (missing start/end events, cross-pool sequence flows)
+    """
+    errors, warnings = [], []
+
     if not isinstance(obj, dict):
-        return False
-    tasks = obj.get("tasks")
-    seq = obj.get("sequence_flows")
-    if not isinstance(tasks, list) or len(tasks) == 0:
-        return False
-    ids = set()
+        return False, ["Output is not a JSON object"], []
+
+    # ── Required top-level keys ───────────────────────────────────────────────
+    for key in ("pools", "lanes", "tasks", "events", "gateways", "sequence_flows", "message_flows"):
+        if key not in obj:
+            errors.append(f"Missing required field: '{key}'")
+    if errors:
+        return False, errors, []
+
+    pools    = obj["pools"]
+    lanes    = obj["lanes"]
+    tasks    = obj["tasks"]
+    events   = obj["events"]
+    gateways = obj["gateways"]
+    seq      = obj["sequence_flows"]
+    mflows   = obj["message_flows"]
+
+    # ── Pools & lanes ─────────────────────────────────────────────────────────
+    pool_ids = set()
+    for p in pools:
+        if not p.get("id") or not p.get("name"):
+            errors.append(f"Pool missing 'id' or 'name': {p}")
+        else:
+            pool_ids.add(p["id"])
+
+    lane_ids = set()
+    for l in lanes:
+        if not l.get("id") or not l.get("name"):
+            errors.append(f"Lane missing 'id' or 'name': {l}")
+        elif l.get("pool") not in pool_ids:
+            errors.append(f"Lane '{l['id']}' references unknown pool '{l.get('pool')}'")
+        else:
+            lane_ids.add(l["id"])
+
+    # ── Node validation ───────────────────────────────────────────────────────
+    VALID_TASK_TYPES    = {"task","userTask","serviceTask","scriptTask","manualTask","subProcess","callActivity"}
+    VALID_EVENT_TYPES   = {"startEvent","endEvent","intermediateCatchEvent","intermediateThrowEvent"}
+    VALID_EVENT_DEFS    = {"none","message","timer","signal","error","escalation","conditional","link"}
+    VALID_GATEWAY_TYPES = {"exclusiveGateway","parallelGateway","inclusiveGateway","eventBasedGateway"}
+    VALID_GW_DIRS       = {"diverging","converging"}
+
+    node_ids     = set()
+    node_to_lane = {}
+
+    def validate_nodes(nodes, valid_types, label, extra_checks=None):
+        for n in nodes:
+            nid = n.get("id")
+            if not nid or not n.get("name") or not n.get("type") or not n.get("lane"):
+                errors.append(f"{label} missing 'id', 'name', 'type', or 'lane': {n}")
+                continue
+            if n["type"] not in valid_types:
+                errors.append(f"{label} '{nid}': invalid type '{n['type']}'")
+            if n["lane"] not in lane_ids:
+                errors.append(f"{label} '{nid}': unknown lane '{n['lane']}'")
+            if nid in node_ids:
+                errors.append(f"Duplicate node id '{nid}'")
+            node_ids.add(nid)
+            node_to_lane[nid] = n["lane"]
+            if extra_checks:
+                extra_checks(n)
+
+    def check_event(e):
+        ed = e.get("eventDefinition")
+        if not ed or ed not in VALID_EVENT_DEFS:
+            errors.append(f"Event '{e.get('id')}': invalid or missing eventDefinition '{ed}'")
+
+    def check_gateway(g):
+        if g.get("gatewayDirection") not in VALID_GW_DIRS:
+            errors.append(f"Gateway '{g.get('id')}': invalid gatewayDirection '{g.get('gatewayDirection')}'")
+
+    validate_nodes(tasks,    VALID_TASK_TYPES,    "Task")
+    validate_nodes(events,   VALID_EVENT_TYPES,   "Event",   check_event)
+    validate_nodes(gateways, VALID_GATEWAY_TYPES, "Gateway", check_gateway)
+
+    # ── Sequence flows ────────────────────────────────────────────────────────
+    incoming = defaultdict(int)
+    outgoing = defaultdict(int)
+
+    for sf in seq:
+        src, tgt = sf.get("from"), sf.get("to")
+        if src not in node_ids:
+            errors.append(f"sequence_flow '{sf.get('id')}': unknown 'from' node '{src}'")
+        if tgt not in node_ids:
+            errors.append(f"sequence_flow '{sf.get('id')}': unknown 'to' node '{tgt}'")
+        if src in node_ids and tgt in node_ids:
+            # Cross-lane within same pool is fine; cross-pool is not
+            src_pool = next((l["pool"] for l in lanes if l["id"] == node_to_lane.get(src)), None)
+            tgt_pool = next((l["pool"] for l in lanes if l["id"] == node_to_lane.get(tgt)), None)
+            if src_pool and tgt_pool and src_pool != tgt_pool:
+                warnings.append(
+                    f"sequence_flow '{sf.get('id')}' crosses pools ('{src_pool}' -> '{tgt_pool}'). "
+                    f"Use message_flows for inter-pool communication."
+                )
+            outgoing[src] += 1
+            incoming[tgt] += 1
+
+    # ── Message flows ─────────────────────────────────────────────────────────
+    valid_refs = node_ids | pool_ids
+    for mf in mflows:
+        if mf.get("from") not in valid_refs or mf.get("to") not in valid_refs:
+            errors.append(f"message_flow '{mf.get('id')}': unknown 'from' or 'to' reference")
+        if not mf.get("name"):
+            errors.append(f"message_flow '{mf.get('id')}': missing 'name'")
+
+    # ── Structural warnings ───────────────────────────────────────────────────
+    # Each pool needs at least one start and end event
+    lane_to_pool = {l["id"]: l["pool"] for l in lanes}
+    pool_has_start = defaultdict(bool)
+    pool_has_end   = defaultdict(bool)
+    for e in events:
+        pid = lane_to_pool.get(e.get("lane"))
+        if e.get("type") == "startEvent": pool_has_start[pid] = True
+        if e.get("type") == "endEvent":   pool_has_end[pid]   = True
+    for pid in pool_ids:
+        if not pool_has_start[pid]:
+            warnings.append(f"Pool '{pid}' has no startEvent")
+        if not pool_has_end[pid]:
+            warnings.append(f"Pool '{pid}' has no endEvent")
+
+    # Each task must have at least one incoming and one outgoing flow
     for t in tasks:
-        if not isinstance(t, dict):
-            return False
         tid = t.get("id")
-        name = t.get("name")
-        lane = t.get("lane")
-        if not tid or not name or not lane:
-            return False
-        if any(str(v).strip() in ("...", "", "None") for v in (name, lane)):
-            return False
-        ids.add(tid)
-    if not isinstance(seq, list):
-        return False
-    for s in seq:
-        if not isinstance(s, dict):
-            return False
-        if s.get("from") not in ids or s.get("to") not in ids:
-            return False
-    return True
+        if tid not in node_ids: continue
+        if incoming[tid] == 0:
+            warnings.append(f"Task '{tid}' has no incoming sequence flow")
+        if outgoing[tid] == 0:
+            warnings.append(f"Task '{tid}' has no outgoing sequence flow")
+
+    # Each gateway should have correct in/out counts
+    for g in gateways:
+        gid = g.get("id")
+        if gid not in node_ids: continue
+        direction = g.get("gatewayDirection")
+        if direction == "diverging" and incoming[gid] == 0:
+            warnings.append(f"Diverging gateway '{gid}' has no incoming flow")
+        if direction == "diverging" and outgoing[gid] < 2:
+            warnings.append(f"Diverging gateway '{gid}' has fewer than 2 outgoing flows")
+        if direction == "converging" and incoming[gid] < 2:
+            warnings.append(f"Converging gateway '{gid}' has fewer than 2 incoming flows")
+        if direction == "converging" and outgoing[gid] == 0:
+            warnings.append(f"Converging gateway '{gid}' has no outgoing flow")
+
+    # Start events should have no incoming, end events no outgoing
+    for e in events:
+        eid = e.get("id")
+        if eid not in node_ids: continue
+        if e.get("type") == "startEvent" and incoming[eid] > 0:
+            warnings.append(f"startEvent '{eid}' has incoming sequence flows")
+        if e.get("type") == "endEvent" and outgoing[eid] > 0:
+            warnings.append(f"endEvent '{eid}' has outgoing sequence flows")
+
+    return len(errors) == 0 and len(warnings) == 0, errors, warnings
+
+
+def _format_issues(errors, warnings):
+    lines = []
+    if errors:
+        lines.append("ERRORS:")
+        lines.extend(f"  - {e}" for e in errors)
+    if warnings:
+        lines.append("WARNINGS:")
+        lines.extend(f"  - {w}" for w in warnings)
+    return "\n".join(lines)
 
 
 def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=2):
     if prompt_type == "zero-shot":
         prompt = fprompt = f"""You are a BPMN 2.0 expert. Extract a structured process model from the description below.
 
-## Rules
+### Rules
 1. Each distinct action by a single lane = one task. Never merge actions.
 2. Decision points (if/else, approved/rejected) = EXCLUSIVE gateway (XOR). Add a gateway node, not just branching flows.
 3. Simultaneous/parallel actions ("at the same time", "simultaneously", "while") = PARALLEL gateway (AND). Add both a split and a join gateway.
@@ -221,6 +368,7 @@ def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None,
 - Give the gateway a meaningfull name like "gateway_approved_split" or "gateway_approved_join" to make it clear which split and join belong together and what the gateway represents. Never name them "gateway1", "gateway2", etc.
 
 - If a task produces a document or artifact mentioned in the description, add it to "data" and create a data_association with type "output"
+- For sequence flow: A task should have one incoming sequence flow and one outgoing sequence flow, except for the start and end event in the pool. 
 - Task "name" should be a short verb phrase only (e.g. "Assess request"). Never include the lane's name in the task name.
 - If a task consumes a document, add a data_association with type "input"
 - Common signals for data objects: "record X", "submit a X", "send a X", "initiate a X", 
@@ -350,7 +498,7 @@ import sys
 if __name__ == "__main__":
     # ---------------------------------------------------------
     # CONFIGURATION: Hier gewoon case namen invullen 
-    case_name = "case_30" 
+    case_name = "case_11" 
     # ---------------------------------------------------------
 
     # 1. Path Discovery (Stays Partner-Proof & Subfolder-Aware)
