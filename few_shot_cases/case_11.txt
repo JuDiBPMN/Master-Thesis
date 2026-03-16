@@ -1,1 +1,5 @@
-A customer places an order. The order is received by the warehouse. The warehouse checks whether the item is in stock. If the item is in stock, the warehouse ships the order and notifies the customer that the order has been shipped. The customer receives the shipment and the process ends. If the item is not in stock, the warehouse notifies the customer that the order is cancelled. The customer receives the cancellation and the process ends.
+A marketing agency produces a campaign package for a client. 
+When a new campaign request comes in, the creative director assigns the project and then splits the work into three parallel tracks: 
+the copywriter drafts the campaign text, the graphic designer creates the visual assets, and the social media manager defines the posting schedule. 
+All three tracks must be completed before the project manager reviews the combined package. If the client approves the package, the campaign is published and the process ends. 
+If the client requests revisions, the creative director reassigns the relevant tasks and the review cycle repeats.

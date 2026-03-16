@@ -1,6 +1,1 @@
-The cook collects the ingredients. 
-He then heats a pan for his pasta sauce on the stove. He will cut the vegetables and 
-cook them in the heated sauce pan. In the meanwhile, he fills up a bowl with water, 
-salts the water and boils it on the stove. 
-The cook then cooks his pasta in the boiling water for the prescribed time. 
-When the pasta is cooked, he serves the pasta with sauce.
+A logistics company ships orders on behalf of an online retailer. When the retailer confirms a new order, the logistics coordinator registers the shipment and then triggers two parallel tracks: the warehouse team picks and packs the items, and the transport planning team assigns a driver and vehicle. Once both tracks are complete, the logistics coordinator generates the shipping label and hands the parcel to the assigned driver. The driver delivers the parcel to the customer. If the delivery is successful, the driver marks the shipment as delivered and the process ends. If the delivery fails because the customer is unavailable, the driver returns the parcel to the warehouse and the warehouse team schedules a redelivery attempt, after which the delivery is tried again.

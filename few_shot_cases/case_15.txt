@@ -1,3 +1,11 @@
-Upon receiving the pictures, the photographer begins cleaning them. 
-He then starts removing imperfections, whitening teeth and adjusting light settings concurrently. 
-After completion of the editing process, the photographer then organizes the pictures in the gallery.
+A publishing house prepares a book for release. 
+When a manuscript is accepted, 
+the editorial manager kicks off the production process by simultaneously assigning the manuscript 
+to the editor and to the layout designer. 
+The editor proofreads and corrects the manuscript. 
+The layout designer formats the pages and designs the cover. 
+Once both the editing and the layout are complete, the print manager sends the files to the printer. 
+The printer produces a proof copy. The editorial manager reviews the proof. 
+If the proof is approved, the print manager places the full print order and the process ends.
+If the proof is rejected, the editorial manager identifies the issues and the layout designer 
+applies the corrections, after which a new proof is requested and the review repeats.

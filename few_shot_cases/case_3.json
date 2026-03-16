@@ -1,0 +1,162 @@
+{
+  "participants": [
+     {
+      "id": "Project_Manager_Approval",
+      "name": "Project Manager Approval",
+      "type": "pool"
+    },
+    {
+      "id": "project_manager",
+      "name": "Project Manager",
+      "type": "lane"
+    },
+    {
+      "id": "finance_department",
+      "name": "Finance Department",
+      "type": "lane"
+    },
+    {
+      "id": "hr_department",
+      "name": "HR Department",
+      "type": "lane"
+    },
+    {
+      "id": "approval_committee",
+      "name": "Approval Committee",
+      "type": "lane"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_proposal",
+      "name": "Submit Proposal",
+      "type": "task",
+      "participant": "project_manager"
+    },
+    {
+      "id": "assess_budget_viability",
+      "name": "Assess Budget Viability",
+      "type": "task",
+      "participant": "finance_department"
+    },
+    {
+      "id": "assess_resource_availability",
+      "name": "Assess Resource Availability",
+      "type": "task",
+      "participant": "hr_department"
+    },
+    {
+      "id": "review_proposal",
+      "name": "Review Proposal",
+      "type": "task",
+      "participant": "approval_committee"
+    },
+    {
+      "id": "request_revision",
+      "name": "Request Revision",
+      "type": "task",
+      "participant": "approval_committee"
+    },
+    {
+      "id": "approve_project",
+      "name": "Approve Project",
+      "type": "task",
+      "participant": "approval_committee"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_project_manager",
+      "name": "Start",
+      "type": "startEvent",
+      "participant": "project_manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_approval_committee",
+      "name": "End",
+      "type": "endEvent",
+      "participant": "approval_committee",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_parallel_split",
+      "name": "Start Concurrent Assessments",
+      "type": "parallelGateway",
+      "participant": "hr_department",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Assessments Complete",
+      "type": "parallelGateway",
+      "participant": "hr_department",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_assessment_split",
+      "name": "Assessment Outcome?",
+      "type": "exclusiveGateway",
+      "participant": "approval_committee",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_assessment_join",
+      "name": "Approval/Revision Complete",
+      "type": "exclusiveGateway",
+      "participant": "approval_committee",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    { "id": "sf1", "from": "start_project_manager", "to": "submit_proposal" },
+    { "id": "sf2", "from": "submit_proposal", "to": "gateway_parallel_split" },
+    { "id": "sf3", "from": "gateway_parallel_split", "to": "assess_budget_viability" },
+    { "id": "sf4", "from": "gateway_parallel_split", "to": "assess_resource_availability" },
+    { "id": "sf5", "from": "assess_budget_viability", "to": "gateway_parallel_join" },
+    { "id": "sf6", "from": "assess_resource_availability", "to": "gateway_parallel_join" },
+    { "id": "sf7", "from": "gateway_parallel_join", "to": "review_proposal" },
+    { "id": "sf8", "from": "review_proposal", "to": "gateway_assessment_split" },
+    { "id": "sf9", "from": "gateway_assessment_split", "to": "request_revision", "condition": "at least one assessment is negative" },
+    { "id": "sf10", "from": "gateway_assessment_split", "to": "approve_project", "condition": "both assessments are positive" },
+    { "id": "sf11", "from": "request_revision", "to": "gateway_assessment_join" },
+    { "id": "sf12", "from": "approve_project", "to": "gateway_assessment_join" },
+    { "id": "sf13", "from": "gateway_assessment_join", "to": "end_approval_committee" }
+  ],
+  "message_flows": [],
+  "data": [
+    {
+      "id": "project_proposal",
+      "name": "Project Proposal"
+    }
+  ],
+  "data_associations": [
+    {
+      "from": "submit_proposal",
+      "to": "project_proposal",
+      "type": "output"
+    },
+    {
+      "from": "project_proposal",
+      "to": "assess_budget_viability",
+      "type": "input"
+    },
+    {
+      "from": "project_proposal",
+      "to": "assess_resource_availability",
+      "type": "input"
+    },
+    {
+      "from": "project_proposal",
+      "to": "review_proposal",
+      "type": "input"
+    },
+    {
+      "from": "request_revision",
+      "to": "project_proposal",
+      "type": "output"
+    }
+  ]
+}
