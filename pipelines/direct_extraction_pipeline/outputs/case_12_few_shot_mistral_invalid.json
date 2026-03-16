@@ -1,0 +1,203 @@
+{
+  "pools": [
+    {
+      "id": "university",
+      "name": "University"
+    },
+    {
+      "id": "student_pool",
+      "name": "Student"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "administration",
+      "name": "Administration Office",
+      "pool": "university"
+    },
+    {
+      "id": "student",
+      "name": "Student",
+      "pool": "student_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_thesis",
+      "name": "Submit Thesis",
+      "type": "task",
+      "lane": "student"
+    },
+    {
+      "id": "check_completeness",
+      "name": "Check Submission Completeness",
+      "type": "task",
+      "lane": "administration"
+    },
+    {
+      "id": "notify_missing_docs",
+      "name": "Notify Student of Missing Docs",
+      "type": "task",
+      "lane": "administration"
+    },
+    {
+      "id": "evaluate_thesis",
+      "name": "Evaluate Thesis",
+      "type": "task",
+      "lane": "examination_board"
+    },
+    {
+      "id": "issue_grade",
+      "name": "Issue Grade",
+      "type": "task",
+      "lane": "examination_board"
+    },
+    {
+      "id": "send_rejection_notice",
+      "name": "Send Rejection Notice",
+      "type": "task",
+      "lane": "examination_board"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_student",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "student",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0qjxq3x",
+      "name": "Receive missing docs notification",
+      "type": "intermediateCatchEvent",
+      "lane": "student",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_student",
+      "name": "Process Ends",
+      "type": "endEvent",
+      "lane": "student",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1jw3y5s",
+      "name": "Receive grade",
+      "type": "intermediateCatchEvent",
+      "lane": "student",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3kz12",
+      "name": "Receive rejection notice",
+      "type": "intermediateCatchEvent",
+      "lane": "student",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "start_admin",
+      "name": "Thesis Submitted",
+      "type": "startEvent",
+      "lane": "administration",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0xqzq3w",
+      "name": "Receive complete submission",
+      "type": "intermediateCatchEvent",
+      "lane": "administration",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_admin",
+      "name": "Process Ends",
+      "type": "endEvent",
+      "lane": "administration",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_completeness",
+      "name": "Submission Completeness?",
+      "type": "exclusiveGateway",
+      "lane": "administration",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Flow_1j3q2vx",
+      "from": "start_student",
+      "to": "submit_thesis"
+    },
+    {
+      "id": "Flow_03qxq1r",
+      "from": "submit_thesis",
+      "to": "check_completeness"
+    },
+    {
+      "id": "sf1",
+      "from": "check_completeness",
+      "to": "split_completeness"
+    },
+    {
+      "id": "sf2",
+      "from": "split_completeness",
+      "to": "notify_missing_docs",
+      "condition": "Incomplete"
+    },
+    {
+      "id": "sf3",
+      "from": "split_completeness",
+      "to": "evaluate_thesis",
+      "condition": "Complete"
+    },
+    {
+      "id": "Flow_13qwz1s",
+      "from": "evaluate_thesis",
+      "to": "issue_grade"
+    },
+    {
+      "id": "Flow_0vqxz2r",
+      "from": "issue_grade",
+      "to": "send_rejection_notice"
+    },
+    {
+      "id": "Flow_14qxz3w",
+      "from": "send_rejection_notice",
+      "to": "end_student"
+    },
+    {
+      "id": "Flow_0w3qxz1",
+      "from": "issue_grade",
+      "to": "send_rejection_notice"
+    },
+    {
+      "id": "Flow_15qxz2e",
+      "from": "send_rejection_notice",
+      "to": "end_student"
+    },
+    {
+      "id": "Flow_16qxz3t",
+      "from": "issue_grade",
+      "to": "Event_1jw3y5s"
+    },
+    {
+      "id": "Flow_0x3qxz1r",
+      "from": "evaluate_thesis",
+      "to": "Event_0xqzq3w"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "submit_thesis",
+      "to": "start_admin",
+      "name": "Thesis Submitted"
+    }
+  ],
+  "data": [],
+  "data_associations": []
+}

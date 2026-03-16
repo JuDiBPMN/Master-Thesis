@@ -488,7 +488,7 @@ Process description: {process_description}
 - "one of", "any of" → inclusive (OR)
 
 - A parallel gateway ALWAYS comes in pairs: one split (1 in, many out) AND one join (many in, 1 out)
-- An exclusive split (if/else) must have exactly 2+ outgoing flows with conditions, one per outcome
+- An exclusive split (if/else) must have exactly 2 outgoing flows with conditions, one per outcome
 - Never use an exclusive gateway to join parallel branches — use a parallel gateway join
 - For each out exclusive split there must be an exclusive join, and for each parallel split there must be a parallel join.
 - Give the gateway a meaningfull name like "gateway_approved_split" or "gateway_approved_join" to make it clear which split and join belong together and what the gateway represents. Never name them "gateway1", "gateway2", etc.
@@ -602,7 +602,7 @@ Output the complete corrected JSON. Do not omit any part of the model."""
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    case_name = "case_1" # <-- Just change this to run a different case with few-shot examples
+    case_name = "case_12" # <-- Just change this to run a different case with few-shot examples
 
     SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -633,7 +633,7 @@ if __name__ == "__main__":
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
             retries=0,
-            case_ids=[21, 22, 23] # choose cases for few-shot examples
+            case_ids=[11, 13, 14] # choose cases for few-shot examples
         )
 
         if bpmn_json:

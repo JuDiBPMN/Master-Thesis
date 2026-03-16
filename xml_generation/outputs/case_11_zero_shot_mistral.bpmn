@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_marketing_agency" name="Marketing Agency" processRef="Process_marketing_agency"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="project_manager" targetRef="exclusive_gateway_approval"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_marketing_agency" name="Marketing Agency" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_marketing_agency">
+      <bpmn:lane id="creative_director" name="Creative Director">
+        <bpmn:flowNodeRef>start_event</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>receive_campaign_request</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>assign_project</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>parallel_gateway_assign</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="project_manager" name="Project Manager">
+        <bpmn:flowNodeRef>end_event</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>project_review</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>publish_campaign</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>exclusive_gateway_approval</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>parallel_gateway_revisions</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="copywriter" name="Copywriter">
+        <bpmn:flowNodeRef>copywriting_draft</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="graphic_designer" name="Graphic Designer">
+        <bpmn:flowNodeRef>graphic_design</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="social_media_manager" name="Social Media Manager">
+        <bpmn:flowNodeRef>social_media_planning</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_event" name="Start"/>
+    <bpmn:endEvent id="end_event" name="End"/>
+    <bpmn:task id="receive_campaign_request" name="Receive request"/>
+    <bpmn:task id="assign_project" name="Assign project"/>
+    <bpmn:task id="copywriting_draft" name="Draft text"/>
+    <bpmn:task id="graphic_design" name="Create visual assets"/>
+    <bpmn:task id="social_media_planning" name="Define posting schedule"/>
+    <bpmn:task id="project_review" name="Review package"/>
+    <bpmn:task id="publish_campaign" name="Publish campaign"/>
+    <bpmn:parallelGateway id="parallel_gateway_assign" name="Parallel gateway - Assign tasks" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="exclusive_gateway_approval" name="Exclusive gateway - Client approval" gatewayDirection="converging"/>
+    <bpmn:parallelGateway id="parallel_gateway_revisions" name="Parallel gateway - Revisions" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf_receive_request_assign_project" sourceRef="receive_campaign_request" targetRef="assign_project"/>
+    <bpmn:sequenceFlow id="sf_assign_project_parallel_gateway" sourceRef="assign_project" targetRef="parallel_gateway_assign"/>
+    <bpmn:sequenceFlow id="sf_parallel_gateway_assign_copywriting_draft" sourceRef="parallel_gateway_assign" targetRef="copywriting_draft"/>
+    <bpmn:sequenceFlow id="sf_parallel_gateway_assign_graphic_design" sourceRef="parallel_gateway_assign" targetRef="graphic_design"/>
+    <bpmn:sequenceFlow id="sf_parallel_gateway_assign_social_media_planning" sourceRef="parallel_gateway_assign" targetRef="social_media_planning"/>
+    <bpmn:sequenceFlow id="sf_exclusive_gateway_approval_publish" sourceRef="exclusive_gateway_approval" targetRef="publish_campaign"/>
+    <bpmn:sequenceFlow id="sf_exclusive_gateway_approval_revisions" sourceRef="exclusive_gateway_approval" targetRef="parallel_gateway_revisions"/>
+    <bpmn:sequenceFlow id="sf_parallel_gateway_revisions_assign_project" sourceRef="parallel_gateway_revisions" targetRef="assign_project"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_marketing_agency_di" bpmnElement="actor_marketing_agency" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1130" height="800"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="creative_director_di" bpmnElement="creative_director" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1100" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="project_manager_di" bpmnElement="project_manager" isHorizontal="true">
+        <dc:Bounds x="40" y="180" width="1100" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="copywriter_di" bpmnElement="copywriter" isHorizontal="true">
+        <dc:Bounds x="40" y="340" width="1100" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="graphic_designer_di" bpmnElement="graphic_designer" isHorizontal="true">
+        <dc:Bounds x="40" y="500" width="1100" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="social_media_manager_di" bpmnElement="social_media_manager" isHorizontal="true">
+        <dc:Bounds x="40" y="660" width="1100" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_event_di" bpmnElement="start_event">
+        <dc:Bounds x="132" y="55" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="receive_campaign_request_di" bpmnElement="receive_campaign_request">
+        <dc:Bounds x="100" y="86" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="assign_project_di" bpmnElement="assign_project">
+        <dc:Bounds x="480" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="parallel_gateway_assign_di" bpmnElement="parallel_gateway_assign" isMarkerVisible="true">
+        <dc:Bounds x="695" y="75" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_event_di" bpmnElement="end_event">
+        <dc:Bounds x="132" y="202" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="project_review_di" bpmnElement="project_review">
+        <dc:Bounds x="100" y="220" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="exclusive_gateway_approval_di" bpmnElement="exclusive_gateway_approval" isMarkerVisible="true">
+        <dc:Bounds x="125" y="275" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="publish_campaign_di" bpmnElement="publish_campaign">
+        <dc:Bounds x="290" y="193" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="parallel_gateway_revisions_di" bpmnElement="parallel_gateway_revisions" isMarkerVisible="true">
+        <dc:Bounds x="315" y="261" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="copywriting_draft_di" bpmnElement="copywriting_draft">
+        <dc:Bounds x="860" y="380" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="graphic_design_di" bpmnElement="graphic_design">
+        <dc:Bounds x="860" y="540" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="social_media_planning_di" bpmnElement="social_media_planning">
+        <dc:Bounds x="860" y="700" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf_receive_request_assign_project_di" bpmnElement="sf_receive_request_assign_project">
+        <di:waypoint x="200" y="126"/>
+        <di:waypoint x="340" y="126"/>
+        <di:waypoint x="340" y="100"/>
+        <di:waypoint x="480" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_assign_project_parallel_gateway_di" bpmnElement="sf_assign_project_parallel_gateway">
+        <di:waypoint x="580" y="100"/>
+        <di:waypoint x="695" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_parallel_gateway_assign_copywriting_draft_di" bpmnElement="sf_parallel_gateway_assign_copywriting_draft">
+        <di:waypoint x="745" y="100"/>
+        <di:waypoint x="802" y="100"/>
+        <di:waypoint x="802" y="420"/>
+        <di:waypoint x="860" y="420"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_parallel_gateway_assign_graphic_design_di" bpmnElement="sf_parallel_gateway_assign_graphic_design">
+        <di:waypoint x="745" y="100"/>
+        <di:waypoint x="802" y="100"/>
+        <di:waypoint x="802" y="580"/>
+        <di:waypoint x="860" y="580"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_parallel_gateway_assign_social_media_planning_di" bpmnElement="sf_parallel_gateway_assign_social_media_planning">
+        <di:waypoint x="745" y="100"/>
+        <di:waypoint x="802" y="100"/>
+        <di:waypoint x="802" y="740"/>
+        <di:waypoint x="860" y="740"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_exclusive_gateway_approval_publish_di" bpmnElement="sf_exclusive_gateway_approval_publish">
+        <di:waypoint x="175" y="300"/>
+        <di:waypoint x="232" y="300"/>
+        <di:waypoint x="232" y="233"/>
+        <di:waypoint x="290" y="233"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_exclusive_gateway_approval_revisions_di" bpmnElement="sf_exclusive_gateway_approval_revisions">
+        <di:waypoint x="175" y="300"/>
+        <di:waypoint x="245" y="300"/>
+        <di:waypoint x="245" y="286"/>
+        <di:waypoint x="315" y="286"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_parallel_gateway_revisions_assign_project_di" bpmnElement="sf_parallel_gateway_revisions_assign_project">
+        <di:waypoint x="365" y="286"/>
+        <di:waypoint x="422" y="286"/>
+        <di:waypoint x="422" y="100"/>
+        <di:waypoint x="480" y="100"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

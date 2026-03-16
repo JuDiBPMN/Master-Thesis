@@ -362,14 +362,15 @@ def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None,
 - "one of", "any of" → inclusive (OR)
 
 - A parallel gateway ALWAYS comes in pairs: one split (1 in, many out) AND one join (many in, 1 out)
-- An exclusive split (if/else) must have exactly 2+ outgoing flows with conditions, one per outcome
+- An exclusive gateway (if/else) must have exactly 1 incoming sequence flow and 2 or more outgoing sequence flows with conditions
 - Never use an exclusive gateway to join parallel branches — use a parallel gateway join
-- For each out exclusive split there must be an exclusive join, and for each parallel split there must be a parallel join.
+- For each exclusive split there must be an exclusive join, and for each parallel split there must be a parallel join.
 - Give the gateway a meaningfull name like "gateway_approved_split" or "gateway_approved_join" to make it clear which split and join belong together and what the gateway represents. Never name them "gateway1", "gateway2", etc.
 
 - If a task produces a document or artifact mentioned in the description, add it to "data" and create a data_association with type "output"
-- For sequence flow: A task should have one incoming sequence flow and one outgoing sequence flow, except for the start and end event in the pool. 
-- Task "name" should be a short verb phrase only (e.g. "Assess request"). Never include the lane's name in the task name.
+- For sequence flow: Every task must ALWAYS have 1 incoming sequence flow and 1 outgoing sequence flow, 
+- The start event must ALWAYS have 1 outgoing sequence flow and the end event must ALWAYS have 1 incoming sequence flow in the pool. 
+- Task "name" must be a short verb phrase only (e.g. "Assess request"). Never include the lane's name in the task name.
 - If a task consumes a document, add a data_association with type "input"
 - Common signals for data objects: "record X", "submit a X", "send a X", "initiate a X", 
   "receives a X", "notified of X" → these produce or consume data objects- An exclusive gateway splits AFTER the decision task. The gateway's "from" is the task that makes 
@@ -498,7 +499,7 @@ import sys
 if __name__ == "__main__":
     # ---------------------------------------------------------
     # CONFIGURATION: Hier gewoon case namen invullen 
-    case_name = "case_11" 
+    case_name = "case_12" 
     # ---------------------------------------------------------
 
     # 1. Path Discovery (Stays Partner-Proof & Subfolder-Aware)

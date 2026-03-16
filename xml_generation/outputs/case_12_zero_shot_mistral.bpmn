@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_university" name="University" processRef="Process_university"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="gateway_outcome_decision_pass" targetRef="issue_grade_and_notify_student"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="gateway_outcome_decision_fail" targetRef="send_rejection_notice_to_student"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_university" name="University" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_university">
+      <bpmn:lane id="administration_officer" name="Administration Officer">
+        <bpmn:flowNodeRef>start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>student_submits_thesis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_submission_completeness</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>notify_student_missing_documents</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>forward_thesis_to_examination_board</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_submission_completeness</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_thesis_evaluation</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="examination_board_member" name="Examination Board Member">
+        <bpmn:flowNodeRef>evaluate_thesis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>decide_on_outcome</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>issue_grade_and_notify_student</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_rejection_notice_to_student</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_outcome_decision</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start" name="Start"/>
+    <bpmn:endEvent id="end" name="End"/>
+    <bpmn:userTask id="student_submits_thesis" name="Student submits thesis"/>
+    <bpmn:task id="check_submission_completeness" name="Check submission completeness"/>
+    <bpmn:task id="notify_student_missing_documents" name="Notify student of missing documents"/>
+    <bpmn:task id="forward_thesis_to_examination_board" name="Forward thesis to examination board"/>
+    <bpmn:task id="evaluate_thesis" name="Evaluate thesis"/>
+    <bpmn:task id="decide_on_outcome" name="Decide on outcome"/>
+    <bpmn:task id="issue_grade_and_notify_student" name="Issue grade and notify student"/>
+    <bpmn:task id="send_rejection_notice_to_student" name="Send rejection notice to student"/>
+    <bpmn:exclusiveGateway id="gateway_submission_completeness" name="Gateway submission completeness" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gateway_thesis_evaluation" name="Gateway thesis evaluation" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="gateway_outcome_decision" name="Gateway outcome decision" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf_student_submits_thesis_to_administration_officer" sourceRef="start" targetRef="student_submits_thesis"/>
+    <bpmn:sequenceFlow id="sf_administration_officer_checks_submission_completeness" sourceRef="student_submits_thesis" targetRef="check_submission_completeness"/>
+    <bpmn:sequenceFlow id="sf_administration_officer_notifies_student_missing_documents" sourceRef="check_submission_completeness" targetRef="notify_student_missing_documents"/>
+    <bpmn:sequenceFlow id="sf_administration_officer_ends_process_incomplete_submission" sourceRef="notify_student_missing_documents" targetRef="end"/>
+    <bpmn:sequenceFlow id="sf_administration_officer_forwards_thesis_to_examination_board" sourceRef="check_submission_completeness" targetRef="forward_thesis_to_examination_board"/>
+    <bpmn:sequenceFlow id="sf_examination_board_evaluates_thesis" sourceRef="forward_thesis_to_examination_board" targetRef="evaluate_thesis"/>
+    <bpmn:sequenceFlow id="sf_examination_board_decides_on_outcome" sourceRef="evaluate_thesis" targetRef="gateway_outcome_decision"/>
+    <bpmn:sequenceFlow id="sf_administration_officer_ends_process" sourceRef="gateway_submission_completeness" targetRef="end"/>
+    <bpmn:sequenceFlow id="sf_examination_board_ends_process" sourceRef="gateway_thesis_evaluation" targetRef="end"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_university_di" bpmnElement="actor_university" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1320" height="320"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="administration_officer_di" bpmnElement="administration_officer" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1290" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="examination_board_member_di" bpmnElement="examination_board_member" isHorizontal="true">
+        <dc:Bounds x="40" y="180" width="1290" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start">
+        <dc:Bounds x="132" y="42" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_submission_completeness_di" bpmnElement="gateway_submission_completeness" isMarkerVisible="true">
+        <dc:Bounds x="125" y="75" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_thesis_evaluation_di" bpmnElement="gateway_thesis_evaluation" isMarkerVisible="true">
+        <dc:Bounds x="125" y="115" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_di" bpmnElement="end">
+        <dc:Bounds x="892" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="student_submits_thesis_di" bpmnElement="student_submits_thesis">
+        <dc:Bounds x="290" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_submission_completeness_di" bpmnElement="check_submission_completeness">
+        <dc:Bounds x="480" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_student_missing_documents_di" bpmnElement="notify_student_missing_documents">
+        <dc:Bounds x="670" y="33" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="forward_thesis_to_examination_board_di" bpmnElement="forward_thesis_to_examination_board">
+        <dc:Bounds x="670" y="86" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="evaluate_thesis_di" bpmnElement="evaluate_thesis">
+        <dc:Bounds x="860" y="220" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="decide_on_outcome_di" bpmnElement="decide_on_outcome">
+        <dc:Bounds x="100" y="180" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="issue_grade_and_notify_student_di" bpmnElement="issue_grade_and_notify_student">
+        <dc:Bounds x="100" y="220" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_rejection_notice_to_student_di" bpmnElement="send_rejection_notice_to_student">
+        <dc:Bounds x="100" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_outcome_decision_di" bpmnElement="gateway_outcome_decision" isMarkerVisible="true">
+        <dc:Bounds x="1075" y="235" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf_student_submits_thesis_to_administration_officer_di" bpmnElement="sf_student_submits_thesis_to_administration_officer">
+        <di:waypoint x="168" y="60"/>
+        <di:waypoint x="229" y="60"/>
+        <di:waypoint x="229" y="100"/>
+        <di:waypoint x="290" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_administration_officer_checks_submission_completeness_di" bpmnElement="sf_administration_officer_checks_submission_completeness">
+        <di:waypoint x="390" y="100"/>
+        <di:waypoint x="480" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_administration_officer_notifies_student_missing_documents_di" bpmnElement="sf_administration_officer_notifies_student_missing_documents">
+        <di:waypoint x="580" y="100"/>
+        <di:waypoint x="625" y="100"/>
+        <di:waypoint x="625" y="73"/>
+        <di:waypoint x="670" y="73"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_administration_officer_ends_process_incomplete_submission_di" bpmnElement="sf_administration_officer_ends_process_incomplete_submission">
+        <di:waypoint x="770" y="73"/>
+        <di:waypoint x="831" y="73"/>
+        <di:waypoint x="831" y="100"/>
+        <di:waypoint x="892" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_administration_officer_forwards_thesis_to_examination_board_di" bpmnElement="sf_administration_officer_forwards_thesis_to_examination_board">
+        <di:waypoint x="580" y="100"/>
+        <di:waypoint x="625" y="100"/>
+        <di:waypoint x="625" y="126"/>
+        <di:waypoint x="670" y="126"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_examination_board_evaluates_thesis_di" bpmnElement="sf_examination_board_evaluates_thesis">
+        <di:waypoint x="770" y="126"/>
+        <di:waypoint x="815" y="126"/>
+        <di:waypoint x="815" y="260"/>
+        <di:waypoint x="860" y="260"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_examination_board_decides_on_outcome_di" bpmnElement="sf_examination_board_decides_on_outcome">
+        <di:waypoint x="960" y="260"/>
+        <di:waypoint x="1075" y="260"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_administration_officer_ends_process_di" bpmnElement="sf_administration_officer_ends_process">
+        <di:waypoint x="175" y="100"/>
+        <di:waypoint x="892" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf_examination_board_ends_process_di" bpmnElement="sf_examination_board_ends_process">
+        <di:waypoint x="175" y="140"/>
+        <di:waypoint x="533" y="140"/>
+        <di:waypoint x="533" y="100"/>
+        <di:waypoint x="892" y="100"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
