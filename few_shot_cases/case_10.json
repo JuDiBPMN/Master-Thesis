@@ -1,139 +1,43 @@
 {
-    "participants": [
-      {
-        "id": "finance",
-        "name": "Finance Department",
-        "type": "pool",
-        "lanes": [
-          {
-            "id": "lane_clerk",
-            "name": "Clerk"
-          },
-          {
-            "id": "lane_finance_manager",
-            "name": "Finance Manager"
-          }
-        ]
-      },
-      {
-        "id": "supplier",
-        "name": "Supplier",
-        "type": "pool"
-      }
-    ],
-    "tasks": [
-      {
-        "id": "verify_amount",
-        "name": "Verify Invoice Amount",
-        "type": "task",
-        "participant": "finance",
-        "lane": "lane_clerk"
-      },
-      {
-        "id": "check_purchase_order",
-        "name": "Check Purchase Order Match",
-        "type": "task",
-        "participant": "finance",
-        "lane": "lane_clerk"
-      },
-      {
-        "id": "book_invoice",
-        "name": "Book Invoice in Accounting System",
-        "type": "task",
-        "participant": "finance",
-        "lane": "lane_clerk"
-      },
-      {
-        "id": "pay_invoice",
-        "name": "Pay Invoice",
-        "type": "task",
-        "participant": "finance",
-        "lane": "lane_finance_manager"
-      },
-      {
-        "id": "notify_supplier",
-        "name": "Notify Supplier of Payment",
-        "type": "task",
-        "participant": "finance",
-        "lane": "lane_finance_manager"
-      },
-      {
-        "id": "receive_notification",
-        "name": "Receive Payment Notification",
-        "type": "task",
-        "participant": "supplier"
-      }
-    ],
-    "events": [
-      {
-        "id": "start_finance",
-        "name": "Invoice Received",
-        "type": "startEvent",
-        "participant": "finance",
-        "lane": "lane_clerk",
-        "eventDefinition": "none"
-      },
-      {
-        "id": "end_finance",
-        "name": "Payment Sent",
-        "type": "endEvent",
-        "participant": "finance",
-        "lane": "lane_finance_manager",
-        "eventDefinition": "none"
-      },
-      {
-        "id": "start_supplier",
-        "name": "Payment Notification Received",
-        "type": "startEvent",
-        "participant": "supplier",
-        "eventDefinition": "message"
-      },
-      {
-        "id": "end_supplier",
-        "name": "Payment Confirmed",
-        "type": "endEvent",
-        "participant": "supplier",
-        "eventDefinition": "none"
-      }
-    ],
-    "gateways": [
-      {
-        "id": "gateway_parallel_split",
-        "name": "Start Parallel Checks",
-        "type": "parallelGateway",
-        "participant": "finance",
-        "lane": "lane_clerk",
-        "gatewayDirection": "diverging"
-      },
-      {
-        "id": "gateway_parallel_join",
-        "name": "Both Checks Complete",
-        "type": "parallelGateway",
-        "participant": "finance",
-        "lane": "lane_clerk",
-        "gatewayDirection": "converging"
-      }
-    ],
-    "sequence_flows": [
-      { "id": "sf1", "from": "start_finance",          "to": "gateway_parallel_split" },
-      { "id": "sf2", "from": "gateway_parallel_split", "to": "verify_amount" },
-      { "id": "sf3", "from": "gateway_parallel_split", "to": "check_purchase_order" },
-      { "id": "sf4", "from": "verify_amount",          "to": "gateway_parallel_join" },
-      { "id": "sf5", "from": "check_purchase_order",   "to": "gateway_parallel_join" },
-      { "id": "sf6", "from": "gateway_parallel_join",  "to": "book_invoice" },
-      { "id": "sf7", "from": "book_invoice",           "to": "pay_invoice" },
-      { "id": "sf8", "from": "pay_invoice",            "to": "notify_supplier" },
-      { "id": "sf9", "from": "notify_supplier",        "to": "end_finance" },
-      { "id": "sf10","from": "start_supplier",         "to": "receive_notification" },
-      { "id": "sf11","from": "receive_notification",   "to": "end_supplier" }
-    ],
-    "message_flows": [
-      {
-        "id": "mf1",
-        "from": "notify_supplier",
-        "to": "start_supplier",
-        "name": "Payment Notification"
-      }
-    ],
-    "data": []
-  }
+  "pools": [
+    { "id": "thesis_pool", "name": "Thesis Writing Process" }
+  ],
+  "lanes": [
+    { "id": "student", "name": "Student", "pool": "thesis_pool" }
+  ],
+  "tasks": [
+    { "id": "choose_partner",       "name": "Choose Partner",              "type": "task", "lane": "student" },
+    { "id": "hand_in_preferences",  "name": "Hand in Topic Preferences",   "type": "task", "lane": "student" },
+    { "id": "receive_topic",        "name": "Receive Assigned Topic",      "type": "task", "lane": "student" },
+    { "id": "literature_review",    "name": "Perform Literature Review",   "type": "task", "lane": "student" },
+    { "id": "meet_supervisor",      "name": "Meet with Supervisor",        "type": "task", "lane": "student" },
+    { "id": "perform_research",     "name": "Perform Actual Research",     "type": "task", "lane": "student" },
+    { "id": "write_thesis",         "name": "Write Thesis",                "type": "task", "lane": "student" },
+    { "id": "present_thesis",       "name": "Present Thesis to Jury",      "type": "task", "lane": "student" }
+  ],
+  "events": [
+    { "id": "start",  "name": "Start", "type": "startEvent", "lane": "student", "eventDefinition": "none" },
+    { "id": "end",    "name": "End",   "type": "endEvent",   "lane": "student", "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "split_parallel", "name": "Start Parallel Activities", "type": "parallelGateway", "lane": "student", "gatewayDirection": "diverging" },
+    { "id": "join_parallel",  "name": "Both Activities Completed", "type": "parallelGateway", "lane": "student", "gatewayDirection": "converging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf1",  "from": "start",             "to": "choose_partner" },
+    { "id": "sf2",  "from": "choose_partner",    "to": "hand_in_preferences" },
+    { "id": "sf3",  "from": "hand_in_preferences","to": "receive_topic" },
+    { "id": "sf4",  "from": "receive_topic",     "to": "split_parallel" },
+    { "id": "sf5",  "from": "split_parallel",    "to": "literature_review" },
+    { "id": "sf6",  "from": "split_parallel",    "to": "meet_supervisor" },
+    { "id": "sf7",  "from": "literature_review", "to": "join_parallel" },
+    { "id": "sf8",  "from": "meet_supervisor",   "to": "join_parallel" },
+    { "id": "sf9",  "from": "join_parallel",     "to": "perform_research" },
+    { "id": "sf10", "from": "perform_research",  "to": "write_thesis" },
+    { "id": "sf11", "from": "write_thesis",      "to": "present_thesis" },
+    { "id": "sf12", "from": "present_thesis",    "to": "end" }
+  ],
+  "message_flows": [],
+  "data": [],
+  "data_associations": []
+}

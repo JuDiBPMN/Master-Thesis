@@ -238,189 +238,180 @@ def save_json_to_file(obj, path):
         json.dump(obj, f, indent=2, ensure_ascii=False)
 
 
+from collections import defaultdict
+
 def is_valid_bpmn(obj):
     """
-    Returns (is_fully_valid, errors, warnings) where:
-    - is_fully_valid: True only when both errors AND warnings are empty
-    - errors:   list of blocking problems (XML will be broken)
-    - warnings: list of structural problems (XML imports but diagram is incomplete)
+    Returns (is_fully_valid, errors, warnings).
+    - errors:   blocking problems
+    - warnings: structural problems (missing start/end events, cross-pool sequence flows)
     """
-    errors   = []
-    warnings = []
+    errors, warnings = [], []
 
     if not isinstance(obj, dict):
         return False, ["Output is not a JSON object"], []
 
-    if "nodes" in obj:
-        errors.append(
-            "Output contains a 'nodes' array. "
-            "Use three separate arrays: 'tasks', 'events', and 'gateways'."
-        )
-
-    for key in ("participants", "tasks", "events", "gateways", "sequence_flows"):
+    # ── Required top-level keys ───────────────────────────────────────────────
+    for key in ("pools", "lanes", "tasks", "events", "gateways", "sequence_flows", "message_flows"):
         if key not in obj:
-            errors.append(
-                f"Missing required top-level field: '{key}'. "
-                f"Required: participants, tasks, events, gateways, sequence_flows."
-            )
-
+            errors.append(f"Missing required field: '{key}'")
     if errors:
-        return False, errors, warnings
+        return False, errors, []
 
-    participants = obj.get("participants", [])
-    if not isinstance(participants, list) or len(participants) == 0:
-        return False, ["participants must be a non-empty array"], []
+    pools    = obj["pools"]
+    lanes    = obj["lanes"]
+    tasks    = obj["tasks"]
+    events   = obj["events"]
+    gateways = obj["gateways"]
+    seq      = obj["sequence_flows"]
+    mflows   = obj["message_flows"]
 
-    participant_ids = set()
-    for p in participants:
-        if not isinstance(p, dict):
-            errors.append("Each participant must be an object")
-            continue
-        if not p.get("id") or not p.get("name") or p.get("type") != "pool":
-            errors.append(f"Participant missing 'id', 'name', or type != 'pool': {p}")
-            continue
-        participant_ids.add(p["id"])
-        for lane in p.get("lanes", []):
-            if not isinstance(lane, dict) or not lane.get("id") or not lane.get("name"):
-                errors.append(f"Invalid lane in participant '{p['id']}'")
+    # ── Pools & lanes ─────────────────────────────────────────────────────────
+    pool_ids = set()
+    for p in pools:
+        if not p.get("id") or not p.get("name"):
+            errors.append(f"Pool missing 'id' or 'name': {p}")
+        else:
+            pool_ids.add(p["id"])
 
+    lane_ids = set()
+    for l in lanes:
+        if not l.get("id") or not l.get("name"):
+            errors.append(f"Lane missing 'id' or 'name': {l}")
+        elif l.get("pool") not in pool_ids:
+            errors.append(f"Lane '{l['id']}' references unknown pool '{l.get('pool')}'")
+        else:
+            lane_ids.add(l["id"])
+
+    # ── Node validation ───────────────────────────────────────────────────────
     VALID_TASK_TYPES    = {"task","userTask","serviceTask","scriptTask","manualTask","subProcess","callActivity"}
     VALID_EVENT_TYPES   = {"startEvent","endEvent","intermediateCatchEvent","intermediateThrowEvent"}
+    VALID_EVENT_DEFS    = {"none","message","timer","signal","error","escalation","conditional","link"}
     VALID_GATEWAY_TYPES = {"exclusiveGateway","parallelGateway","inclusiveGateway","eventBasedGateway"}
-    VALID_EVENT_DEFS    = {"none","message","timer","signal","conditional","error","escalation","link"}
+    VALID_GW_DIRS       = {"diverging","converging"}
 
-    node_ids    = set()
-    node_to_pool = {}
+    node_ids     = set()
+    node_to_lane = {}
 
-    def validate_nodes(nodes, valid_types, label):
-        for node in nodes:
-            if not isinstance(node, dict):
-                errors.append(f"Each {label} must be an object")
+    def validate_nodes(nodes, valid_types, label, extra_checks=None):
+        for n in nodes:
+            nid = n.get("id")
+            if not nid or not n.get("name") or not n.get("type") or not n.get("lane"):
+                errors.append(f"{label} missing 'id', 'name', 'type', or 'lane': {n}")
                 continue
-            nid         = node.get("id")
-            ntype       = node.get("type")
-            participant = node.get("participant")
-            if not nid or not ntype or not participant:
-                errors.append(f"{label} is missing 'id', 'type', or 'participant': {node}")
-                continue
-            if ntype not in valid_types:
-                errors.append(f"Invalid {label} type '{ntype}'. Must be one of: {sorted(valid_types)}")
-            if participant not in participant_ids:
-                errors.append(
-                    f"NODE '{nid}' has participant='{participant}' which is NOT declared in participants. "
-                    f"Declared participant ids are: {sorted(participant_ids)}. "
-                    f"Either add '{participant}' to the participants array, or change the participant field "
-                    f"to one of the declared ids."
-                )
-            lane_id = node.get("lane")
-            if lane_id:
-                parent   = next((p for p in participants if p["id"] == participant), None)
-                lane_ids = {l["id"] for l in parent.get("lanes", [])} if parent else set()
-                if lane_id not in lane_ids:
-                    errors.append(f"{label} '{nid}' references unknown lane '{lane_id}'")
-            if str(node.get("name", "")).strip() in ("...", "None", ""):
-                errors.append(f"{label} '{nid}' has a placeholder or empty name")
+            if n["type"] not in valid_types:
+                errors.append(f"{label} '{nid}': invalid type '{n['type']}'")
+            if n["lane"] not in lane_ids:
+                errors.append(f"{label} '{nid}': unknown lane '{n['lane']}'")
+            if nid in node_ids:
+                errors.append(f"Duplicate node id '{nid}'")
             node_ids.add(nid)
-            node_to_pool[nid] = participant
+            node_to_lane[nid] = n["lane"]
+            if extra_checks:
+                extra_checks(n)
 
-    tasks    = obj.get("tasks", [])
-    events   = obj.get("events", [])
-    gateways = obj.get("gateways", [])
+    def check_event(e):
+        ed = e.get("eventDefinition")
+        if not ed or ed not in VALID_EVENT_DEFS:
+            errors.append(f"Event '{e.get('id')}': invalid or missing eventDefinition '{ed}'")
 
-    if not isinstance(tasks, list) or len(tasks) == 0:
-        errors.append("tasks must be a non-empty array")
-    if not isinstance(events, list):
-        errors.append("events must be an array")
-    if not isinstance(gateways, list):
-        errors.append("gateways must be an array")
+    def check_gateway(g):
+        if g.get("gatewayDirection") not in VALID_GW_DIRS:
+            errors.append(f"Gateway '{g.get('id')}': invalid gatewayDirection '{g.get('gatewayDirection')}'")
 
-    if errors:
-        return False, errors, warnings
+    validate_nodes(tasks,    VALID_TASK_TYPES,    "Task")
+    validate_nodes(events,   VALID_EVENT_TYPES,   "Event",   check_event)
+    validate_nodes(gateways, VALID_GATEWAY_TYPES, "Gateway", check_gateway)
 
-    validate_nodes(tasks,    VALID_TASK_TYPES,    "task")
-    validate_nodes(events,   VALID_EVENT_TYPES,   "event")
-    validate_nodes(gateways, VALID_GATEWAY_TYPES, "gateway")
+    # ── Sequence flows ────────────────────────────────────────────────────────
+    incoming = defaultdict(int)
+    outgoing = defaultdict(int)
 
-    all_ids = [n["id"] for n in tasks + events + gateways if "id" in n]
-    if len(all_ids) != len(set(all_ids)):
-        errors.append("Duplicate node ids found across tasks, events, and gateways")
-
-    for event in events:
-        ed = event.get("eventDefinition")
-        if ed is not None and ed not in VALID_EVENT_DEFS:
-            errors.append(f"Invalid eventDefinition '{ed}'")
-
-    seq = obj.get("sequence_flows", [])
-    if not isinstance(seq, list):
-        errors.append("sequence_flows must be an array")
-    else:
-        for s in seq:
-            if not isinstance(s, dict):
-                errors.append("Each sequence_flow must be an object")
-                continue
-            if s.get("from") not in node_ids:
-                errors.append(
-                    f"sequence_flow 'from' id '{s.get('from')}' does not exist. "
-                    f"Every 'from' and 'to' in sequence_flows must exactly match a node id "
-                    f"declared in tasks, events, or gateways."
+    for sf in seq:
+        src, tgt = sf.get("from"), sf.get("to")
+        if src not in node_ids:
+            errors.append(f"sequence_flow '{sf.get('id')}': unknown 'from' node '{src}'")
+        if tgt not in node_ids:
+            errors.append(f"sequence_flow '{sf.get('id')}': unknown 'to' node '{tgt}'")
+        if src in node_ids and tgt in node_ids:
+            # Cross-lane within same pool is fine; cross-pool is not
+            src_pool = next((l["pool"] for l in lanes if l["id"] == node_to_lane.get(src)), None)
+            tgt_pool = next((l["pool"] for l in lanes if l["id"] == node_to_lane.get(tgt)), None)
+            if src_pool and tgt_pool and src_pool != tgt_pool:
+                warnings.append(
+                    f"sequence_flow '{sf.get('id')}' crosses pools ('{src_pool}' -> '{tgt_pool}'). "
+                    f"Use message_flows for inter-pool communication."
                 )
-            if s.get("to") not in node_ids:
-                errors.append(
-                    f"sequence_flow 'to' id '{s.get('to')}' does not exist. "
-                    f"Every 'from' and 'to' in sequence_flows must exactly match a node id "
-                    f"declared in tasks, events, or gateways."
-                )
+            outgoing[src] += 1
+            incoming[tgt] += 1
 
-    for mf in obj.get("message_flows", []):
-        if not isinstance(mf, dict):
-            errors.append("Each message_flow must be an object")
-            continue
-        if not mf.get("from") or not mf.get("to"):
-            errors.append("Each message_flow must have 'from' and 'to'")
-            continue
-        valid_refs = node_ids | participant_ids
-        if mf["from"] not in valid_refs or mf["to"] not in valid_refs:
-            errors.append(f"message_flow references unknown id: {mf}")
+    # ── Message flows ─────────────────────────────────────────────────────────
+    valid_refs = node_ids | pool_ids
+    for mf in mflows:
+        if mf.get("from") not in valid_refs or mf.get("to") not in valid_refs:
+            errors.append(f"message_flow '{mf.get('id')}': unknown 'from' or 'to' reference")
+        if not mf.get("name"):
+            errors.append(f"message_flow '{mf.get('id')}': missing 'name'")
 
-    # ── Warnings: structural completeness ─────────────────────────────────────
+    # ── Structural warnings ───────────────────────────────────────────────────
+    # Each pool needs at least one start and end event
+    lane_to_pool = {l["id"]: l["pool"] for l in lanes}
     pool_has_start = defaultdict(bool)
     pool_has_end   = defaultdict(bool)
-    for event in events:
-        pid = event.get("participant")
-        if event.get("type") == "startEvent":
-            pool_has_start[pid] = True
-        if event.get("type") == "endEvent":
-            pool_has_end[pid] = True
-
-    for pid in participant_ids:
+    for e in events:
+        pid = lane_to_pool.get(e.get("lane"))
+        if e.get("type") == "startEvent": pool_has_start[pid] = True
+        if e.get("type") == "endEvent":   pool_has_end[pid]   = True
+    for pid in pool_ids:
         if not pool_has_start[pid]:
-            warnings.append(
-                f"POOL '{pid}' has no startEvent. "
-                f"Every pool must have at least one startEvent. "
-                f"Add a startEvent with participant='{pid}' and eventDefinition='none' "
-                f"(or 'message' if it is triggered by another pool)."
-            )
+            warnings.append(f"Pool '{pid}' has no startEvent")
         if not pool_has_end[pid]:
-            warnings.append(
-                f"POOL '{pid}' has no endEvent. "
-                f"Every pool must have at least one endEvent. "
-                f"Add an endEvent with participant='{pid}' and eventDefinition='none', "
-                f"and connect it with a sequence_flow from the last node in that pool."
-            )
+            warnings.append(f"Pool '{pid}' has no endEvent")
 
-    # Cross-pool sequence flows (structural warning, auto-promoted but still wrong)
-    for s in seq:
-        src_pool = node_to_pool.get(s.get("from"))
-        tgt_pool = node_to_pool.get(s.get("to"))
-        if src_pool and tgt_pool and src_pool != tgt_pool:
-            warnings.append(
-                f"sequence_flow '{s.get('from')}' -> '{s.get('to')}' crosses pools "
-                f"('{src_pool}' -> '{tgt_pool}'). "
-                f"Move this to message_flows instead."
-            )
+    # Each task must have at least one incoming and one outgoing flow
+    for t in tasks:
+        tid = t.get("id")
+        if tid not in node_ids: continue
+        if incoming[tid] == 0:
+            warnings.append(f"Task '{tid}' has no incoming sequence flow")
+        if outgoing[tid] == 0:
+            warnings.append(f"Task '{tid}' has no outgoing sequence flow")
 
-    is_fully_valid = len(errors) == 0 and len(warnings) == 0
-    return is_fully_valid, errors, warnings
+    # Each gateway should have correct in/out counts
+    for g in gateways:
+        gid = g.get("id")
+        if gid not in node_ids: continue
+        direction = g.get("gatewayDirection")
+        if direction == "diverging" and incoming[gid] == 0:
+            warnings.append(f"Diverging gateway '{gid}' has no incoming flow")
+        if direction == "diverging" and outgoing[gid] < 2:
+            warnings.append(f"Diverging gateway '{gid}' has fewer than 2 outgoing flows")
+        if direction == "converging" and incoming[gid] < 2:
+            warnings.append(f"Converging gateway '{gid}' has fewer than 2 incoming flows")
+        if direction == "converging" and outgoing[gid] == 0:
+            warnings.append(f"Converging gateway '{gid}' has no outgoing flow")
+
+    # Start events should have no incoming, end events no outgoing
+    for e in events:
+        eid = e.get("id")
+        if eid not in node_ids: continue
+        if e.get("type") == "startEvent" and incoming[eid] > 0:
+            warnings.append(f"startEvent '{eid}' has incoming sequence flows")
+        if e.get("type") == "endEvent" and outgoing[eid] > 0:
+            warnings.append(f"endEvent '{eid}' has outgoing sequence flows")
+
+    return len(errors) == 0 and len(warnings) == 0, errors, warnings
+
+
+def _format_issues(errors, warnings):
+    lines = []
+    if errors:
+        lines.append("ERRORS:")
+        lines.extend(f"  - {e}" for e in errors)
+    if warnings:
+        lines.append("WARNINGS:")
+        lines.extend(f"  - {w}" for w in warnings)
+    return "\n".join(lines)
 
 
 def _format_issues(errors, warnings):
@@ -611,7 +602,7 @@ Output the complete corrected JSON. Do not omit any part of the model."""
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    case_name = "case_30" # <-- Just change this to run a different case with few-shot examples
+    case_name = "case_1" # <-- Just change this to run a different case with few-shot examples
 
     SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))

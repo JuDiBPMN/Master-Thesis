@@ -1,8 +1,6 @@
-The project approval process begins with the Project Manager submitting a project proposal document 
-to the Approval Committee. The proposal includes objectives, budget, timeline, and resource requirements. 
-After the proposal has been submitted, the Finance Department assesses the budget viability. 
-Concurrently the HR Department evaluates resource availability. 
-Upon receiving inputs from Finance and HR, the Approval Committee reviews the proposal in light 
-of financial constraints and human resource availability. If both assessments are positive, 
-the Approval Committee approves the project. If at least one assessment is negative, 
-the Approval Committee requests a revision of the proposal by the Project Manager. 
+An e-commerce company processes product returns from customers. The customer submits a return request. 
+The customer service team receives the request and verifies whether the item is eligible for return. 
+If the item is not eligible, the customer service team notifies the customer that the return is rejected and the process ends. 
+If the item is eligible, the warehouse team and the finance team begin working simultaneously:
+ the warehouse team arranges collection of the item, and the finance team initiates the refund process. 
+Once both the collection has been arranged and the refund has been initiated, the customer service team sends a confirmation to the customer and the process ends.

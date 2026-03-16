@@ -1,1 +1,15 @@
-A patient schedules an appointment and visits the doctor. The doctor examines the patient and decides whether lab tests are needed. If lab tests are needed, the doctor sends a test request to the lab. The lab processes the test request, performs the tests and sends the results back to the doctor. The doctor reviews the results and prescribes a treatment to the patient. The patient receives the treatment prescription and the process ends. If no lab tests are needed, the doctor directly prescribes a treatment to the patient. The patient receives the prescription and the process ends.
+Students register for an academic year at KU Leuven. 
+The course registration process integrates seamlessly with the ISP application in the KU Loket, 
+where students outline their curriculum for the academic year. 
+After registering as a student at KU Leuven, the course registration process can begin. 
+Students first log into KU Loket and can then select courses in the ISP. 
+Simultaneously, they must ensure their personal and contact information is updated for consistent 
+communication. After students have selected their courses and updated their information, 
+they are also tasked with choosing their examination moments, directly influencing their IER. 
+Then the student saves the chosen ISP and IER. 
+This dual responsibility ensures that students not only think about their immediate course choices 
+but also consider their exam schedules. 
+The student submits his ISP for review by designated ISP coordinators who can approve or 
+reject the choices based on program rules. If the ISP is rejected, 
+the student mails his coordinator for a meeting. 
+With the help of the coordinator, the student reviews his ISP. 

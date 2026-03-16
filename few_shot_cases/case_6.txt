@@ -1,8 +1,6 @@
-Platforms that link restaurants, delivery couriers, and hungry people – such as Uber Eats or Deliveroo 
-– have grown substantially in recent years. When a new order comes in at the platform, 
-the platform forwards the order to the restaurant in question and the kitchen staff at 
-the restaurant starts to prepare the food. While this is happening, the platform also reaches out 
-to their courier networks. If the distance between restaurant and customer is less than 5 kilometers, 
-a bike courier starts to ride to the restaurant. Otherwise a scooter courier drives to the restaurant. 
-When the courier arrives at the restaurant and the meal has been prepared, 
-the courier takes the meal to the customer, after which the order process is completed.
+The cook collects the ingredients. 
+He then heats a pan for his pasta sauce on the stove. He will cut the vegetables and 
+cook them in the heated sauce pan. In the meanwhile, he fills up a bowl with water, 
+salts the water and boils it on the stove. 
+The cook then cooks his pasta in the boiling water for the prescribed time. 
+When the pasta is cooked, he serves the pasta with sauce.

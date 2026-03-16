@@ -1,162 +1,58 @@
 {
-  "participants": [
-     {
-      "id": "Project_Manager_Approval",
-      "name": "Project Manager Approval",
-      "type": "pool"
-    },
-    {
-      "id": "project_manager",
-      "name": "Project Manager",
-      "type": "lane"
-    },
-    {
-      "id": "finance_department",
-      "name": "Finance Department",
-      "type": "lane"
-    },
-    {
-      "id": "hr_department",
-      "name": "HR Department",
-      "type": "lane"
-    },
-    {
-      "id": "approval_committee",
-      "name": "Approval Committee",
-      "type": "lane"
-    }
-  ],
-  "tasks": [
-    {
-      "id": "submit_proposal",
-      "name": "Submit Proposal",
-      "type": "task",
-      "participant": "project_manager"
-    },
-    {
-      "id": "assess_budget_viability",
-      "name": "Assess Budget Viability",
-      "type": "task",
-      "participant": "finance_department"
-    },
-    {
-      "id": "assess_resource_availability",
-      "name": "Assess Resource Availability",
-      "type": "task",
-      "participant": "hr_department"
-    },
-    {
-      "id": "review_proposal",
-      "name": "Review Proposal",
-      "type": "task",
-      "participant": "approval_committee"
-    },
-    {
-      "id": "request_revision",
-      "name": "Request Revision",
-      "type": "task",
-      "participant": "approval_committee"
-    },
-    {
-      "id": "approve_project",
-      "name": "Approve Project",
-      "type": "task",
-      "participant": "approval_committee"
-    }
-  ],
-  "events": [
-    {
-      "id": "start_project_manager",
-      "name": "Start",
-      "type": "startEvent",
-      "participant": "project_manager",
-      "eventDefinition": "none"
-    },
-    {
-      "id": "end_approval_committee",
-      "name": "End",
-      "type": "endEvent",
-      "participant": "approval_committee",
-      "eventDefinition": "none"
-    }
-  ],
-  "gateways": [
-    {
-      "id": "gateway_parallel_split",
-      "name": "Start Concurrent Assessments",
-      "type": "parallelGateway",
-      "participant": "hr_department",
-      "gatewayDirection": "diverging"
-    },
-    {
-      "id": "gateway_parallel_join",
-      "name": "Assessments Complete",
-      "type": "parallelGateway",
-      "participant": "hr_department",
-      "gatewayDirection": "converging"
-    },
-    {
-      "id": "gateway_assessment_split",
-      "name": "Assessment Outcome?",
-      "type": "exclusiveGateway",
-      "participant": "approval_committee",
-      "gatewayDirection": "diverging"
-    },
-    {
-      "id": "gateway_assessment_join",
-      "name": "Approval/Revision Complete",
-      "type": "exclusiveGateway",
-      "participant": "approval_committee",
-      "gatewayDirection": "converging"
-    }
-  ],
-  "sequence_flows": [
-    { "id": "sf1", "from": "start_project_manager", "to": "submit_proposal" },
-    { "id": "sf2", "from": "submit_proposal", "to": "gateway_parallel_split" },
-    { "id": "sf3", "from": "gateway_parallel_split", "to": "assess_budget_viability" },
-    { "id": "sf4", "from": "gateway_parallel_split", "to": "assess_resource_availability" },
-    { "id": "sf5", "from": "assess_budget_viability", "to": "gateway_parallel_join" },
-    { "id": "sf6", "from": "assess_resource_availability", "to": "gateway_parallel_join" },
-    { "id": "sf7", "from": "gateway_parallel_join", "to": "review_proposal" },
-    { "id": "sf8", "from": "review_proposal", "to": "gateway_assessment_split" },
-    { "id": "sf9", "from": "gateway_assessment_split", "to": "request_revision", "condition": "at least one assessment is negative" },
-    { "id": "sf10", "from": "gateway_assessment_split", "to": "approve_project", "condition": "both assessments are positive" },
-    { "id": "sf11", "from": "request_revision", "to": "gateway_assessment_join" },
-    { "id": "sf12", "from": "approve_project", "to": "gateway_assessment_join" },
-    { "id": "sf13", "from": "gateway_assessment_join", "to": "end_approval_committee" }
-  ],
-  "message_flows": [],
-  "data": [
-    {
-      "id": "project_proposal",
-      "name": "Project Proposal"
-    }
-  ],
-  "data_associations": [
-    {
-      "from": "submit_proposal",
-      "to": "project_proposal",
-      "type": "output"
-    },
-    {
-      "from": "project_proposal",
-      "to": "assess_budget_viability",
-      "type": "input"
-    },
-    {
-      "from": "project_proposal",
-      "to": "assess_resource_availability",
-      "type": "input"
-    },
-    {
-      "from": "project_proposal",
-      "to": "review_proposal",
-      "type": "input"
-    },
-    {
-      "from": "request_revision",
-      "to": "project_proposal",
-      "type": "output"
-    }
-  ]
-}
+    "pools": [
+      { "id": "customer_pool",  "name": "Customer" },
+      { "id": "ecommerce_pool", "name": "E-Commerce Company" }
+    ],
+    "lanes": [
+      { "id": "customer",         "name": "Customer",         "pool": "customer_pool" },
+      { "id": "customer_service", "name": "Customer Service", "pool": "ecommerce_pool" },
+      { "id": "warehouse",        "name": "Warehouse",        "pool": "ecommerce_pool" },
+      { "id": "finance",          "name": "Finance",          "pool": "ecommerce_pool" }
+    ],
+    "tasks": [
+      { "id": "submit_return",      "name": "Submit Return Request",        "type": "task", "lane": "customer" },
+      { "id": "verify_eligibility", "name": "Verify Return Eligibility",    "type": "task", "lane": "customer_service" },
+      { "id": "notify_rejected",    "name": "Notify Customer of Rejection", "type": "task", "lane": "customer_service" },
+      { "id": "send_confirmation",  "name": "Send Confirmation to Customer","type": "task", "lane": "customer_service" },
+      { "id": "arrange_collection", "name": "Arrange Item Collection",      "type": "task", "lane": "warehouse" },
+      { "id": "initiate_refund",    "name": "Initiate Refund Process",      "type": "task", "lane": "finance" }
+    ],
+    "events": [
+      { "id": "start_customer",  "name": "Start",                     "type": "startEvent",              "lane": "customer",         "eventDefinition": "none" },
+      { "id": "Event_0muyk3x",   "name": "Receive rejection",         "type": "intermediateCatchEvent",  "lane": "customer",         "eventDefinition": "message" },
+      { "id": "Event_0tpcr9s",   "name": "Receive confirmation",      "type": "intermediateCatchEvent",  "lane": "customer",         "eventDefinition": "message" },
+      { "id": "Event_0lnnv01",   "name": "Return Rejected",           "type": "endEvent",                "lane": "customer",         "eventDefinition": "none" },
+      { "id": "Event_1r6yhp5",   "name": "Return Confirmed",          "type": "endEvent",                "lane": "customer",         "eventDefinition": "none" },
+      { "id": "start_cs",        "name": "Return Request Received",   "type": "startEvent",              "lane": "customer_service", "eventDefinition": "message" },
+      { "id": "end_cs_rejected", "name": "Rejection Sent",            "type": "endEvent",                "lane": "customer_service", "eventDefinition": "none" },
+      { "id": "end_cs",          "name": "End",                       "type": "endEvent",                "lane": "customer_service", "eventDefinition": "none" }
+    ],
+    "gateways": [
+      { "id": "split_eligible", "name": "Item Eligible for Return?",  "type": "exclusiveGateway", "lane": "customer_service", "gatewayDirection": "diverging" },
+      { "id": "split_parallel", "name": "Start Parallel Processing",  "type": "parallelGateway",  "lane": "customer_service", "gatewayDirection": "diverging" },
+      { "id": "join_parallel",  "name": "Both Tasks Complete",        "type": "parallelGateway",  "lane": "customer_service", "gatewayDirection": "converging" }
+    ],
+    "sequence_flows": [
+      { "id": "Flow_1kd72rx", "from": "start_customer",    "to": "submit_return" },
+      { "id": "Flow_0vatbql", "from": "Event_0muyk3x",     "to": "Event_0lnnv01" },
+      { "id": "Flow_1kdv6t5", "from": "Event_0tpcr9s",     "to": "Event_1r6yhp5" },
+      { "id": "sf1",          "from": "start_cs",          "to": "verify_eligibility" },
+      { "id": "sf2",          "from": "verify_eligibility","to": "split_eligible" },
+      { "id": "sf3",          "from": "split_eligible",    "to": "notify_rejected",    "condition": "Not eligible" },
+      { "id": "sf4",          "from": "split_eligible",    "to": "split_parallel",     "condition": "Eligible" },
+      { "id": "sf5",          "from": "notify_rejected",   "to": "end_cs_rejected" },
+      { "id": "sf6",          "from": "split_parallel",    "to": "arrange_collection" },
+      { "id": "sf7",          "from": "split_parallel",    "to": "initiate_refund" },
+      { "id": "sf8",          "from": "arrange_collection","to": "join_parallel" },
+      { "id": "sf9",          "from": "initiate_refund",   "to": "join_parallel" },
+      { "id": "sf10",         "from": "join_parallel",     "to": "send_confirmation" },
+      { "id": "sf11",         "from": "send_confirmation", "to": "end_cs" }
+    ],
+    "message_flows": [
+      { "id": "mf1",          "from": "submit_return",    "to": "start_cs",        "name": "Return Request" },
+      { "id": "Flow_19rlkps", "from": "notify_rejected",  "to": "Event_0muyk3x",   "name": "Rejection Notice" },
+      { "id": "Flow_14qsqvk", "from": "send_confirmation","to": "Event_0tpcr9s",   "name": "Confirmation" }
+    ],
+    "data": [],
+    "data_associations": []
+  }

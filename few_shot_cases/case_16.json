@@ -1,115 +1,62 @@
 {
-  "participants": [
-    {
-      "id": "cook",
-      "name": "Cook",
-      "type": "pool"
-    }
-  ],
-  "tasks": [
-    {
-      "id": "collect_ingredients",
-      "name": "Collect Ingredients",
-      "type": "task",
-      "participant": "cook"
-    },
-    {
-      "id": "heat_sauce_pan",
-      "name": "Heat Sauce Pan",
-      "type": "task",
-      "participant": "cook"
-    },
-    {
-      "id": "cut_vegetables",
-      "name": "Cut Vegetables",
-      "type": "task",
-      "participant": "cook"
-    },
-    {
-      "id": "cook_vegetables",
-      "name": "Cook Vegetables",
-      "type": "task",
-      "participant": "cook"
-    },
-    {
-      "id": "fill_up_water_bowl",
-      "name": "Fill Up Water Bowl",
-      "type": "task",
-      "participant": "cook"
-    },
-    {
-      "id": "salt_water",
-      "name": "Salt Water",
-      "type": "task",
-      "participant": "cook"
-    },
-    {
-      "id": "boil_water",
-      "name": "Boil Water",
-      "type": "task",
-      "participant": "cook"
-    },
-    {
-      "id": "cook_pasta",
-      "name": "Cook Pasta",
-      "type": "task",
-      "participant": "cook"
-    },
-    {
-      "id": "serve_pasta",
-      "name": "Serve Pasta",
-      "type": "task",
-      "participant": "cook"
-    }
-  ],
-  "events": [
-    {
-      "id": "start_cook",
-      "name": "Start",
-      "type": "startEvent",
-      "participant": "cook",
-      "eventDefinition": "none"
-    },
-    {
-      "id": "end_cook",
-      "name": "End",
-      "type": "endEvent",
-      "participant": "cook",
-      "eventDefinition": "none"
-    }
-  ],
-  "gateways": [
-    {
-      "id": "gateway_parallel_split",
-      "name": "Start Concurrent Cooking",
-      "type": "parallelGateway",
-      "participant": "cook",
-      "gatewayDirection": "diverging"
-    },
-    {
-      "id": "gateway_parallel_join",
-      "name": "Concurrent Cooking Complete",
-      "type": "parallelGateway",
-      "participant": "cook",
-      "gatewayDirection": "converging"
-    }
-  ],
-  "sequence_flows": [
-    { "id": "sf1", "from": "start_cook", "to": "collect_ingredients" },
-    { "id": "sf2", "from": "collect_ingredients", "to": "heat_sauce_pan" },
-    { "id": "sf3", "from": "heat_sauce_pan", "to": "gateway_parallel_split" },
-    { "id": "sf4", "from": "gateway_parallel_split", "to": "cut_vegetables" },
-    { "id": "sf5", "from": "gateway_parallel_split", "to": "fill_up_water_bowl" },
-    { "id": "sf6", "from": "cut_vegetables", "to": "cook_vegetables" },
-    { "id": "sf7", "from": "fill_up_water_bowl", "to": "salt_water" },
-    { "id": "sf8", "from": "salt_water", "to": "boil_water" },
-    { "id": "sf9", "from": "cook_vegetables", "to": "gateway_parallel_join" },
-    { "id": "sf10", "from": "boil_water", "to": "gateway_parallel_join" },
-    { "id": "sf11", "from": "gateway_parallel_join", "to": "cook_pasta" },
-    { "id": "sf12", "from": "cook_pasta", "to": "serve_pasta" },
-    { "id": "sf13", "from": "serve_pasta", "to": "end_cook" }
-  ],
-  "message_flows": [],
-  "data": [],
-  "data_associations": []
-}
+    "pools": [
+      { "id": "retailer_pool",   "name": "Retailer" },
+      { "id": "logistics_pool",  "name": "Logistics Company" }
+    ],
+    "lanes": [
+      { "id": "retailer",           "name": "Retailer",            "pool": "retailer_pool" },
+      { "id": "logistics_coord",    "name": "Logistics Coordinator","pool": "logistics_pool" },
+      { "id": "warehouse",          "name": "Warehouse",           "pool": "logistics_pool" },
+      { "id": "transport_planning", "name": "Transport Planning",  "pool": "logistics_pool" },
+      { "id": "driver",             "name": "Driver",              "pool": "logistics_pool" }
+    ],
+    "tasks": [
+      { "id": "confirm_order",       "name": "Confirm New Order",              "type": "task", "lane": "retailer" },
+      { "id": "register_shipment",   "name": "Register Shipment",              "type": "task", "lane": "logistics_coord" },
+      { "id": "generate_label",      "name": "Generate Shipping Label",        "type": "task", "lane": "logistics_coord" },
+      { "id": "hand_to_driver",      "name": "Hand Parcel to Driver",          "type": "task", "lane": "logistics_coord" },
+      { "id": "pick_pack",           "name": "Pick and Pack Items",            "type": "task", "lane": "warehouse" },
+      { "id": "schedule_redelivery", "name": "Schedule Redelivery Attempt",    "type": "task", "lane": "warehouse" },
+      { "id": "assign_driver",       "name": "Assign Driver and Vehicle",      "type": "task", "lane": "transport_planning" },
+      { "id": "deliver_parcel",      "name": "Deliver Parcel to Customer",     "type": "task", "lane": "driver" },
+      { "id": "mark_delivered",      "name": "Mark Shipment as Delivered",     "type": "task", "lane": "driver" },
+      { "id": "return_parcel",       "name": "Return Parcel to Warehouse",     "type": "task", "lane": "driver" }
+    ],
+    "events": [
+      { "id": "start_retailer",   "name": "Start",               "type": "startEvent", "lane": "retailer",        "eventDefinition": "none" },
+      { "id": "end_retailer",     "name": "Order Shipped",        "type": "endEvent",   "lane": "retailer",        "eventDefinition": "none" },
+      { "id": "start_logistics",  "name": "Order Confirmed",      "type": "startEvent", "lane": "logistics_coord", "eventDefinition": "message" },
+      { "id": "end_delivered",    "name": "Shipment Delivered",   "type": "endEvent",   "lane": "driver",          "eventDefinition": "none" }
+    ],
+    "gateways": [
+      { "id": "split_parallel",    "name": "Start Parallel Tracks",    "type": "parallelGateway",  "lane": "logistics_coord", "gatewayDirection": "diverging" },
+      { "id": "join_parallel",     "name": "Both Tracks Complete",     "type": "parallelGateway",  "lane": "logistics_coord", "gatewayDirection": "converging" },
+      { "id": "split_delivery",    "name": "Delivery Successful?",     "type": "exclusiveGateway", "lane": "driver",          "gatewayDirection": "diverging" },
+      { "id": "join_retry",        "name": "Delivery Retry Join",      "type": "exclusiveGateway", "lane": "driver",          "gatewayDirection": "converging" }
+    ],
+    "sequence_flows": [
+      { "id": "sf1",  "from": "start_retailer",    "to": "confirm_order" },
+      { "id": "sf2",  "from": "start_logistics",   "to": "register_shipment" },
+      { "id": "sf3",  "from": "register_shipment", "to": "split_parallel" },
+      { "id": "sf4",  "from": "split_parallel",    "to": "pick_pack" },
+      { "id": "sf5",  "from": "split_parallel",    "to": "assign_driver" },
+      { "id": "sf6",  "from": "pick_pack",          "to": "join_parallel" },
+      { "id": "sf7",  "from": "assign_driver",      "to": "join_parallel" },
+      { "id": "sf8",  "from": "join_parallel",      "to": "generate_label" },
+      { "id": "sf9",  "from": "generate_label",     "to": "hand_to_driver" },
+      { "id": "sf10", "from": "hand_to_driver",     "to": "join_retry" },
+      { "id": "sf11", "from": "join_retry",         "to": "deliver_parcel" },
+      { "id": "sf12", "from": "deliver_parcel",     "to": "split_delivery" },
+      { "id": "sf13", "from": "split_delivery",     "to": "mark_delivered",      "condition": "Delivery successful" },
+      { "id": "sf14", "from": "split_delivery",     "to": "return_parcel",       "condition": "Customer unavailable" },
+      { "id": "sf15", "from": "mark_delivered",     "to": "end_delivered" },
+      { "id": "sf16", "from": "return_parcel",      "to": "schedule_redelivery" },
+      { "id": "sf17", "from": "schedule_redelivery","to": "join_retry" }
+    ],
+    "message_flows": [
+      { "id": "mf1", "from": "confirm_order",   "to": "start_logistics", "name": "Order Confirmation" },
+      { "id": "mf2", "from": "mark_delivered",  "to": "end_retailer",    "name": "Delivery Confirmation" }
+    ],
+    "data": [],
+    "data_associations": []
+  }

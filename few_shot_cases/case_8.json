@@ -1,85 +1,111 @@
 {
-    "lanes": [
-      {
-        "id": "bank_employee",
-        "name": "Bank Employee",
-        "pool": "bank"
-      }
-    ],
-    "pools": [
-      {
-        "id": "bank",
-        "name": "Bank"
-      }
-    ],
-    "tasks": [
-      {
-        "id": "check_credit_score",
-        "name": "Check Credit Score",
-        "type": "task",
-        "lane": "bank_employee"
-      },
-      {
-        "id": "approve",
-        "name": "Approve Loan Application",
-        "type": "task",
-        "lane": "bank_employee"
-      },
-      {
-        "id": "reject",
-        "name": "Reject Loan Application",
-        "type": "task",
-        "lane": "bank_employee"
-      },
-        {
-        "id": "notify_decision",
-        "name": "Notify Applicant of Decision",
-        "type": "task",
-        "lane": "bank_employee"
-      }
-    ],
-    "events": [
-      {
-        "id": "start_review",
-        "name": "Loan Application Received",
-        "type": "startEvent",
-        "lane": "bank_employee",
-        "eventDefinition": "none"
-      },
-      {
-        "id": "end_review",
-        "name": "Loan Review Complete",
-        "type": "endEvent",
-        "lane": "bank_employee",
-        "eventDefinition": "none"
-      }
-      
-    ],
-    "gateways": [
-      {
-        "id": "gateway_credit_split",
-        "name": "Credit Score Sufficient?",
-        "type": "exclusiveGateway",
-        "lane": "bank_employee",
-        "gatewayDirection": "diverging"
-      },
-      {
-        "id": "gateway_credit_join",
-        "name": "Credit Score Sufficient?",
-        "type": "exclusiveGateway",
-        "lane": "bank_employee",
-        "gatewayDirection": "diverging"
-      }
-    ],
-    "sequence_flows": [
-      { "id": "sf1", "from": "start_review",    "to": "check_credit_score" },
-      { "id": "sf2", "from": "check_credit_score", "to": "gateway_credit_split" },
-      { "id": "sf3", "from": "gateway_credit_split",  "to": "approve",  "condition": "Sufficient" },
-      { "id": "sf4", "from": "gateway_credit_split",  "to": "reject", "condition": "Insufficient" },
-      { "id": "sf5", "from": "approve",  "to": "gateway_credit_join"},
-      { "id": "sf6", "from": "reject",  "to": "gateway_credit_join"},
-      { "id": "sf7", "from": "notify_decision","to": "end_review" }
-    ],
-    "message_flows": [],
-    "data": []
-  }
+  "participants": [
+    {
+      "id": "production_facility_team",
+      "name": "Production Facility Team",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "process_order",
+      "name": "Process Order",
+      "type": "task",
+      "participant": "production_facility_team"
+    },
+    {
+      "id": "produce_fresh_product",
+      "name": "Produce Fresh Product",
+      "type": "task",
+      "participant": "production_facility_team"
+    },
+    {
+      "id": "use_stock_items",
+      "name": "Use Stock Items",
+      "type": "task",
+      "participant": "production_facility_team"
+    },
+    {
+      "id": "organize_shipment",
+      "name": "Organize Shipment",
+      "type": "task",
+      "participant": "production_facility_team"
+    },
+    {
+      "id": "package_ordered_products",
+      "name": "Package Ordered Products",
+      "type": "task",
+      "participant": "production_facility_team"
+    },
+    {
+      "id": "ship_order",
+      "name": "Ship Order",
+      "type": "task",
+      "participant": "production_facility_team"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_production",
+      "name": "Order Received",
+      "type": "startEvent",
+      "participant": "production_facility_team",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_production",
+      "name": "End",
+      "type": "endEvent",
+      "participant": "production_facility_team",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_order_split",
+      "name": "Order Value?",
+      "type": "exclusiveGateway",
+      "participant": "production_facility_team",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_order_join",
+      "name": "Product Ready",
+      "type": "exclusiveGateway",
+      "participant": "production_facility_team",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_parallel_split",
+      "name": "Start Concurrent Fulfillment",
+      "type": "parallelGateway",
+      "participant": "production_facility_team",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Fulfillment Complete",
+      "type": "parallelGateway",
+      "participant": "production_facility_team",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    { "id": "sf1", "from": "start_production", "to": "process_order" },
+    { "id": "sf2", "from": "process_order", "to": "gateway_order_split" },
+    { "id": "sf3", "from": "gateway_order_split", "to": "produce_fresh_product", "condition": "order 25.000 EUR and higher" },
+    { "id": "sf4", "from": "gateway_order_split", "to": "use_stock_items", "condition": "order below 25.000 EUR" },
+    { "id": "sf5", "from": "produce_fresh_product", "to": "gateway_order_join" },
+    { "id": "sf6", "from": "use_stock_items", "to": "gateway_order_join" },
+    { "id": "sf7", "from": "gateway_order_join", "to": "gateway_parallel_split" },
+    { "id": "sf8", "from": "gateway_parallel_split", "to": "organize_shipment" },
+    { "id": "sf9", "from": "gateway_parallel_split", "to": "package_ordered_products" },
+    { "id": "sf10", "from": "organize_shipment", "to": "gateway_parallel_join" },
+    { "id": "sf11", "from": "package_ordered_products", "to": "gateway_parallel_join" },
+    { "id": "sf12", "from": "gateway_parallel_join", "to": "ship_order" },
+    { "id": "sf13", "from": "ship_order", "to": "end_production" }
+  ],
+  "message_flows": [],
+  "data": [],
+  "data_associations": []
+}

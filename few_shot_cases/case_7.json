@@ -1,194 +1,108 @@
 {
   "participants": [
     {
-      "id": "rotterdam_sweater_shop",
-      "name": "Rotterdam Sweater Shop",
-      "type": "pool",
-      "lanes": [
-        { "id": "jan", "name": "Jan" },
-        { "id": "anouk", "name": "Anouk" }
-      ]
+      "id": "marketing_team",
+      "name": "Marketing Team",
+      "type": "pool"
     }
   ],
   "tasks": [
     {
-      "id": "pick_out_sweaters",
-      "name": "Pick out sweaters",
+      "id": "convene_briefing",
+      "name": "Convene at 6:30AM for Briefing",
       "type": "task",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "anouk"
+      "participant": "marketing_team"
     },
     {
-      "id": "collect_packaging_material",
-      "name": "Collect package material",
+      "id": "launch_daily_ad_campaign",
+      "name": "Launch Daily Ad Campaign",
       "type": "task",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "jan"
+      "participant": "marketing_team"
     },
     {
-      "id": "assemble_package",
-      "name": "Assemble package",
+      "id": "review_latest_analytics",
+      "name": "Review Latest Analytics",
       "type": "task",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "anouk"
+      "participant": "marketing_team"
     },
     {
-      "id": "email_invoice",
-      "name": "Email invoice",
+      "id": "finalize_presentation",
+      "name": "Finalize Presentation",
       "type": "task",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "anouk"
-    },
-
-    {
-      "id": "ride_bike_to_customer",
-      "name": "Ride bike to customer",
-      "type": "task",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "jan"
+      "participant": "marketing_team"
     },
     {
-      "id": "deliver_package",
-      "name": "Deliver package",
+      "id": "drive_to_clients_office",
+      "name": "Drive to Clients Office in Namur",
       "type": "task",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "jan"
-    },
-
-    {
-      "id": "ride_bike_to_postnl_store",
-      "name": "Ride bike to PostNL store",
-      "type": "task",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "jan"
+      "participant": "marketing_team"
     },
     {
-      "id": "send_package_via_postnl",
-      "name": "Send package via PostNL",
+      "id": "discuss_campaign_strategy",
+      "name": "Discuss Campaign Strategy",
       "type": "task",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "jan"
-    },
-
-    {
-      "id": "ride_bike_to_dhl_store",
-      "name": "Ride bike to DHL store",
-      "type": "task",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "jan"
+      "participant": "marketing_team"
     },
     {
-      "id": "send_package_via_dhl",
-      "name": "Send package via DHL",
+      "id": "deliver_pitch",
+      "name": "Deliver Pitch",
       "type": "task",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "jan"
+      "participant": "marketing_team"
+    },
+    {
+      "id": "return_to_office",
+      "name": "Return to Office",
+      "type": "task",
+      "participant": "marketing_team"
     }
   ],
   "events": [
     {
-      "id": "order_received",
-      "name": "Order received",
+      "id": "start_marketing",
+      "name": "Start",
       "type": "startEvent",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "anouk",
-      "eventDefinition": "start"
-    },
-    {
-      "id": "package_complete",
-      "name": "Package complete",
-      "type": "intermediateCatchEvent",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "jan",
+      "participant": "marketing_team",
       "eventDefinition": "none"
     },
     {
-      "id": "order_completed",
-      "name": "Order completed",
+      "id": "end_marketing",
+      "name": "End",
       "type": "endEvent",
-      "participant": "rotterdam_sweater_shop",
-      "lane": "anouk",
-      "eventDefinition": "end"
+      "participant": "marketing_team",
+      "eventDefinition": "none"
     }
   ],
   "gateways": [
     {
-      "id": "pg_split_prepare",
-      "name": "",
+      "id": "gateway_parallel_split",
+      "name": "Start Concurrent Tasks",
       "type": "parallelGateway",
-      "participant": "rotterdam_sweater_shop",
+      "participant": "marketing_team",
       "gatewayDirection": "diverging"
     },
     {
-      "id": "pg_join_prepare",
-      "name": "",
+      "id": "gateway_parallel_join",
+      "name": "Concurrent Tasks Complete",
       "type": "parallelGateway",
-      "participant": "rotterdam_sweater_shop",
-      "gatewayDirection": "converging"
-    },
-    {
-      "id": "pg_split_invoice_delivery",
-      "name": "",
-      "type": "parallelGateway",
-      "participant": "rotterdam_sweater_shop",
-      "gatewayDirection": "diverging"
-    },
-    {
-      "id": "xg_deliver_to",
-      "name": "Deliver to:",
-      "type": "exclusiveGateway",
-      "participant": "rotterdam_sweater_shop",
-      "gatewayDirection": "diverging"
-    },
-    {
-      "id": "xg_delivery_done_merge",
-      "name": "",
-      "type": "exclusiveGateway",
-      "participant": "rotterdam_sweater_shop",
-      "gatewayDirection": "converging"
-    },
-    {
-      "id": "pg_join_finish",
-      "name": "",
-      "type": "parallelGateway",
-      "participant": "rotterdam_sweater_shop",
+      "participant": "marketing_team",
       "gatewayDirection": "converging"
     }
   ],
   "sequence_flows": [
-    { "id": "sf1", "from": "order_received", "to": "pg_split_prepare" },
-
-    { "id": "sf2", "from": "pg_split_prepare", "to": "pick_out_sweaters" },
-    { "id": "sf3", "from": "pg_split_prepare", "to": "collect_packaging_material" },
-
-    { "id": "sf4", "from": "pick_out_sweaters", "to": "pg_join_prepare" },
-    { "id": "sf5",   "from": "collect_packaging_material", "to": "pg_join_prepare" },
-
-    { "id": "sf6", "from": "pg_join_prepare", "to": "assemble_package" },
-    { "id": "sf7", "from": "assemble_package", "to": "package_complete" },
-
-    { "id": "sf8", "from": "package_complete", "to": "pg_split_invoice_delivery" },
-
-    { "id": "sf9", "from": "pg_split_invoice_delivery", "to": "email_invoice" },
-    { "id": "sf10", "from": "pg_split_invoice_delivery", "to": "xg_deliver_to" },
-
-    { "id": "sf11", "from": "xg_deliver_to", "to": "ride_bike_to_customer", "condition": "Rotterdam" },
-    { "id": "sf12", "from": "ride_bike_to_customer", "to": "deliver_package" },
-    { "id": "sf13",  "from": "deliver_package", "to": "xg_delivery_done_merge" },
-
-    { "id": "sf14", "from": "xg_deliver_to", "to": "ride_bike_to_postnl_store", "condition": "NL" },
-    { "id": "sf15", "from": "ride_bike_to_postnl_store", "to": "send_package_via_postnl" },
-    { "id": "sf16", "from": "send_package_via_postnl", "to": "xg_delivery_done_merge" },
-
-    { "id": "sf17", "from": "xg_deliver_to", "to": "ride_bike_to_dhl_store", "condition": "International" },
-    { "id": "sf18", "from": "ride_bike_to_dhl_store", "to": "send_package_via_dhl" },
-    { "id": "sf19", "from": "send_package_via_dhl", "to": "xg_delivery_done_merge" },
-
-    { "id": "sf20", "from": "email_invoice", "to": "pg_join_finish" },
-    { "id": "sf21", "from": "xg_delivery_done_merge", "to": "pg_join_finish" },
-
-    { "id": "sf22", "from": "pg_join_finish", "to": "order_completed" }
+    { "id": "sf1", "from": "start_marketing", "to": "convene_briefing" },
+    { "id": "sf2", "from": "convene_briefing", "to": "launch_daily_ad_campaign" },
+    { "id": "sf3", "from": "launch_daily_ad_campaign", "to": "review_latest_analytics" },
+    { "id": "sf4", "from": "review_latest_analytics", "to": "finalize_presentation" },
+    { "id": "sf5", "from": "finalize_presentation", "to": "gateway_parallel_split" },
+    { "id": "sf6", "from": "gateway_parallel_split", "to": "drive_to_clients_office" },
+    { "id": "sf7", "from": "gateway_parallel_split", "to": "discuss_campaign_strategy" },
+    { "id": "sf8", "from": "drive_to_clients_office", "to": "gateway_parallel_join" },
+    { "id": "sf9", "from": "discuss_campaign_strategy", "to": "gateway_parallel_join" },
+    { "id": "sf10", "from": "gateway_parallel_join", "to": "deliver_pitch" },
+    { "id": "sf11", "from": "deliver_pitch", "to": "return_to_office" },
+    { "id": "sf12", "from": "return_to_office", "to": "end_marketing" }
   ],
   "message_flows": [],
-  "data": []
+  "data": [],
+  "data_associations": []
 }

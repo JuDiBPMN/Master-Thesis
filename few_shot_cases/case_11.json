@@ -1,137 +1,51 @@
 {
-    "participants": [
-      {
-        "id": "customer",
-        "name": "Customer",
-        "type": "pool"
-      },
-      {
-        "id": "warehouse",
-        "name": "Warehouse",
-        "type": "pool"
-      }
+    "pools": [
+      { "id": "marketing_agency", "name": "Marketing Agency" }
+    ],
+    "lanes": [
+      { "id": "creative_director",   "name": "Creative Director",   "pool": "marketing_agency" },
+      { "id": "copywriter",          "name": "Copywriter",          "pool": "marketing_agency" },
+      { "id": "graphic_designer",    "name": "Graphic Designer",    "pool": "marketing_agency" },
+      { "id": "social_media_manager","name": "Social Media Manager","pool": "marketing_agency" },
+      { "id": "project_manager",     "name": "Project Manager",     "pool": "marketing_agency" }
     ],
     "tasks": [
-      {
-        "id": "place_order",
-        "name": "Place Order",
-        "type": "task",
-        "participant": "customer"
-      },
-      {
-        "id": "receive_shipment",
-        "name": "Receive Shipment",
-        "type": "task",
-        "participant": "customer"
-      },
-      {
-        "id": "receive_order_cancellation",
-        "name": "Receive Order Cancellation",
-        "type": "task",
-        "participant": "customer"
-      },
-      {
-        "id": "check_stock",
-        "name": "Check Stock",
-        "type": "task",
-        "participant": "warehouse"
-      },
-      {
-        "id": "ship_order",
-        "name": "Ship Order",
-        "type": "task",
-        "participant": "warehouse"
-      },
-      {
-        "id": "notify_cancellation",
-        "name": "Notify Customer of Cancellation",
-        "type": "task",
-        "participant": "warehouse"
-      }
+      { "id": "assign_project",       "name": "Assign Project",              "type": "task", "lane": "creative_director" },
+      { "id": "draft_text",           "name": "Draft Campaign Text",         "type": "task", "lane": "copywriter" },
+      { "id": "create_visuals",       "name": "Create Visual Assets",        "type": "task", "lane": "graphic_designer" },
+      { "id": "define_schedule",      "name": "Define Posting Schedule",     "type": "task", "lane": "social_media_manager" },
+      { "id": "review_package",       "name": "Review Combined Package",     "type": "task", "lane": "project_manager" },
+      { "id": "publish_campaign",     "name": "Publish Campaign",            "type": "task", "lane": "project_manager" },
+      { "id": "reassign_tasks",       "name": "Reassign Relevant Tasks",     "type": "task", "lane": "creative_director" }
     ],
     "events": [
-      {
-        "id": "start_customer",
-        "name": "Start",
-        "type": "startEvent",
-        "participant": "customer",
-        "eventDefinition": "none"
-      },
-      {
-        "id": "end_customer_shipped",
-        "name": "Shipment Received",
-        "type": "endEvent",
-        "participant": "customer",
-        "eventDefinition": "none"
-      },
-      {
-        "id": "end_customer_cancelled",
-        "name": "Order Cancelled",
-        "type": "endEvent",
-        "participant": "customer",
-        "eventDefinition": "none"
-      },
-      {
-        "id": "start_warehouse",
-        "name": "Order Received",
-        "type": "startEvent",
-        "participant": "warehouse",
-        "eventDefinition": "message"
-      },
-      {
-        "id": "end_warehouse_shipped",
-        "name": "Order Shipped",
-        "type": "endEvent",
-        "participant": "warehouse",
-        "eventDefinition": "none"
-      },
-      {
-        "id": "end_warehouse_cancelled",
-        "name": "Cancellation Sent",
-        "type": "endEvent",
-        "participant": "warehouse",
-        "eventDefinition": "none"
-      }
+      { "id": "start",               "name": "Campaign Request Received",   "type": "startEvent",  "lane": "creative_director",   "eventDefinition": "none" },
+      { "id": "end_published",       "name": "Campaign Published",          "type": "endEvent",    "lane": "project_manager",     "eventDefinition": "none" }
     ],
     "gateways": [
-      {
-        "id": "gateway_stock",
-        "name": "Item in Stock?",
-        "type": "exclusiveGateway",
-        "participant": "warehouse",
-        "gatewayDirection": "diverging"
-      }
+      { "id": "split_parallel",      "name": "Split Work into Tracks",      "type": "parallelGateway",  "lane": "creative_director",   "gatewayDirection": "diverging" },
+      { "id": "join_parallel",       "name": "All Tracks Complete",         "type": "parallelGateway",  "lane": "project_manager",     "gatewayDirection": "converging" },
+      { "id": "split_approval",      "name": "Client Approved?",            "type": "exclusiveGateway", "lane": "project_manager",     "gatewayDirection": "diverging" },
+      { "id": "join_revision",       "name": "Revision Loop Join",          "type": "exclusiveGateway", "lane": "creative_director",   "gatewayDirection": "converging" }
     ],
     "sequence_flows": [
-      { "id": "sf1", "from": "start_customer",             "to": "place_order" },
-      { "id": "sf2", "from": "receive_shipment",           "to": "end_customer_shipped" },
-      { "id": "sf3", "from": "receive_order_cancellation", "to": "end_customer_cancelled" },
-      { "id": "sf4", "from": "start_warehouse",            "to": "check_stock" },
-      { "id": "sf5", "from": "check_stock",                "to": "gateway_stock" },
-      { "id": "sf6", "from": "gateway_stock",              "to": "ship_order",          "condition": "In Stock" },
-      { "id": "sf7", "from": "gateway_stock",              "to": "notify_cancellation", "condition": "Out of Stock" },
-      { "id": "sf8", "from": "ship_order",                 "to": "end_warehouse_shipped" },
-      { "id": "sf9", "from": "notify_cancellation",        "to": "end_warehouse_cancelled" }
+      { "id": "sf1",  "from": "start",           "to": "assign_project" },
+      { "id": "sf2",  "from": "assign_project",  "to": "join_revision" },
+      { "id": "sf3",  "from": "join_revision",   "to": "split_parallel" },
+      { "id": "sf4",  "from": "split_parallel",  "to": "draft_text" },
+      { "id": "sf5",  "from": "split_parallel",  "to": "create_visuals" },
+      { "id": "sf6",  "from": "split_parallel",  "to": "define_schedule" },
+      { "id": "sf7",  "from": "draft_text",       "to": "join_parallel" },
+      { "id": "sf8",  "from": "create_visuals",   "to": "join_parallel" },
+      { "id": "sf9",  "from": "define_schedule",  "to": "join_parallel" },
+      { "id": "sf10", "from": "join_parallel",    "to": "review_package" },
+      { "id": "sf11", "from": "review_package",   "to": "split_approval" },
+      { "id": "sf12", "from": "split_approval",   "to": "publish_campaign", "condition": "Client approves" },
+      { "id": "sf13", "from": "split_approval",   "to": "reassign_tasks",   "condition": "Client requests revisions" },
+      { "id": "sf14", "from": "reassign_tasks",   "to": "join_revision" },
+      { "id": "sf15", "from": "publish_campaign", "to": "end_published" }
     ],
-    "message_flows": [
-      {
-        "id": "mf1",
-        "from": "place_order",
-        "to": "start_warehouse",
-        "name": "Order"
-      },
-      {
-        "id": "mf2",
-        "from": "ship_order",
-        "to": "receive_shipment",
-        "name": "Shipment Notification"
-      },
-      {
-        "id": "mf3",
-        "from": "notify_cancellation",
-        "to": "receive_order_cancellation",
-        "name": "Cancellation Notice"
-      }
-    ],
-    "data": []
+    "message_flows": [],
+    "data": [],
+    "data_associations": []
   }
