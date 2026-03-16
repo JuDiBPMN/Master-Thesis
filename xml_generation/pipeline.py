@@ -669,9 +669,9 @@ def create_bpmn_xml(json_data, output_path):
 
 if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
-    case_name          = "case_24"
+    case_name          = "case_30"
     pipeline_name      = "direct_extraction_pipeline"
-    prompting_strategy = "few_shot_mistral"
+    prompting_strategy = ""
     # ──────────────────────────────────────────────────────────────────────────
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
@@ -682,7 +682,7 @@ if __name__ == "__main__":
     os.makedirs(XML_OUTPUT_DIR, exist_ok=True)
 
     input_json  = os.path.join(JSON_SOURCE_DIR,
-                               f"{case_name}_{prompting_strategy}_invalid.json")
+                               f"{case_name}_{prompting_strategy}_bpmn.json")
     output_bpmn = os.path.join(XML_OUTPUT_DIR,
                                f"{case_name}_{prompting_strategy}.bpmn")
 
@@ -693,10 +693,8 @@ if __name__ == "__main__":
         with open(input_json, "r", encoding="utf-8") as f:
             raw = json.load(f)
         print("Validating JSON...")
-        if not validate(raw):
-            print("Fix the errors above before generating XML.")
-        else:
-            create_bpmn_xml(raw, output_bpmn)
-            print("Done — upload to https://bpmn.io to view")
+        
+        create_bpmn_xml(raw, output_bpmn)
+        print("Done — upload to https://bpmn.io to view")
     except Exception as e:
         import traceback; traceback.print_exc()

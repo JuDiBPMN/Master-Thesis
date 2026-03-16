@@ -1,0 +1,67 @@
+{
+    "pools": [
+      { "id": "client_pool",    "name": "Client Company" },
+      { "id": "recruiter_pool", "name": "Recruitment Agency" }
+    ],
+    "lanes": [
+      { "id": "client",   "name": "Client Company", "pool": "client_pool" },
+      { "id": "recruiter","name": "Recruiter",       "pool": "recruiter_pool" }
+    ],
+    "tasks": [
+      { "id": "post_vacancy",            "name": "Post Job Vacancy",                         "type": "task", "lane": "client" },
+      { "id": "review_profiles",         "name": "Review Candidate Profiles",                "type": "task", "lane": "client" },
+      { "id": "conduct_interviews",      "name": "Conduct Interviews",                       "type": "task", "lane": "client" },
+      { "id": "receive_vacancy",         "name": "Receive Job Vacancy",                      "type": "task", "lane": "recruiter" },
+      { "id": "screen_database",         "name": "Screen Candidate Database",                "type": "task", "lane": "recruiter" },
+      { "id": "post_externally",         "name": "Post Vacancy Externally",                  "type": "task", "lane": "recruiter" },
+      { "id": "shortlist_candidates",    "name": "Shortlist Candidates",                     "type": "task", "lane": "recruiter" },
+      { "id": "submit_profiles",         "name": "Submit Candidate Profiles",                "type": "task", "lane": "recruiter" },
+      { "id": "schedule_interviews",     "name": "Schedule Interviews",                      "type": "task", "lane": "recruiter" },
+      { "id": "issue_confirmation",      "name": "Issue Placement Confirmation",             "type": "task", "lane": "recruiter" }
+    ],
+    "events": [
+      { "id": "start_client",            "name": "Start",                                    "type": "startEvent",             "lane": "client",   "eventDefinition": "none" },
+      { "id": "end_client",              "name": "Candidate Placed",                         "type": "endEvent",               "lane": "client",   "eventDefinition": "none" },
+      { "id": "start_recruiter",         "name": "Vacancy Received",                         "type": "startEvent",             "lane": "recruiter","eventDefinition": "message" },
+      { "id": "catch_profile_decision",  "name": "Profile Decision Received",                "type": "intermediateCatchEvent", "lane": "recruiter","eventDefinition": "message" },
+      { "id": "catch_hiring_decision",   "name": "Hiring Decision Received",                 "type": "intermediateCatchEvent", "lane": "recruiter","eventDefinition": "message" },
+      { "id": "end_recruiter",           "name": "Placement Confirmed",                      "type": "endEvent",               "lane": "recruiter","eventDefinition": "none" }
+    ],
+    "gateways": [
+      { "id": "split_candidates",    "name": "Suitable Candidates Found?",   "type": "exclusiveGateway", "lane": "recruiter", "gatewayDirection": "diverging" },
+      { "id": "join_shortlist",      "name": "Shortlist Ready",              "type": "exclusiveGateway", "lane": "recruiter", "gatewayDirection": "converging" },
+      { "id": "split_profile",       "name": "Profiles Accepted?",          "type": "exclusiveGateway", "lane": "recruiter", "gatewayDirection": "diverging" },
+      { "id": "join_new_search",     "name": "New Search Loop Join",        "type": "exclusiveGateway", "lane": "recruiter", "gatewayDirection": "converging" },
+      { "id": "split_hiring",        "name": "Candidate Selected?",         "type": "exclusiveGateway", "lane": "recruiter", "gatewayDirection": "diverging" }
+    ],
+    "sequence_flows": [
+      { "id": "sf1",  "from": "start_client",           "to": "post_vacancy" },
+      { "id": "sf2",  "from": "start_recruiter",        "to": "join_new_search" },
+      { "id": "sf3",  "from": "join_new_search",        "to": "receive_vacancy" },
+      { "id": "sf4",  "from": "receive_vacancy",        "to": "screen_database" },
+      { "id": "sf5",  "from": "screen_database",        "to": "split_candidates" },
+      { "id": "sf6",  "from": "split_candidates",       "to": "post_externally",        "condition": "No suitable candidates" },
+      { "id": "sf7",  "from": "split_candidates",       "to": "join_shortlist",         "condition": "Suitable candidates found" },
+      { "id": "sf8",  "from": "post_externally",        "to": "join_shortlist" },
+      { "id": "sf9",  "from": "join_shortlist",         "to": "shortlist_candidates" },
+      { "id": "sf10", "from": "shortlist_candidates",   "to": "submit_profiles" },
+      { "id": "sf11", "from": "catch_profile_decision", "to": "split_profile" },
+      { "id": "sf12", "from": "split_profile",          "to": "join_new_search",        "condition": "All profiles rejected" },
+      { "id": "sf13", "from": "split_profile",          "to": "schedule_interviews",    "condition": "Candidates selected for interview" },
+      { "id": "sf14", "from": "schedule_interviews",    "to": "catch_hiring_decision" },
+      { "id": "sf15", "from": "catch_hiring_decision",  "to": "split_hiring" },
+      { "id": "sf16", "from": "split_hiring",           "to": "join_new_search",        "condition": "No candidate selected" },
+      { "id": "sf17", "from": "split_hiring",           "to": "issue_confirmation",     "condition": "Candidate selected" },
+      { "id": "sf18", "from": "issue_confirmation",     "to": "end_recruiter" }
+    ],
+    "message_flows": [
+      { "id": "mf1", "from": "post_vacancy",       "to": "start_recruiter",         "name": "Job Vacancy" },
+      { "id": "mf2", "from": "submit_profiles",    "to": "review_profiles",         "name": "Candidate Profiles" },
+      { "id": "mf3", "from": "review_profiles",    "to": "catch_profile_decision",  "name": "Profile Decision" },
+      { "id": "mf4", "from": "schedule_interviews","to": "conduct_interviews",       "name": "Interview Schedule" },
+      { "id": "mf5", "from": "conduct_interviews", "to": "catch_hiring_decision",   "name": "Hiring Decision" },
+      { "id": "mf6", "from": "issue_confirmation", "to": "end_client",              "name": "Placement Confirmation" }
+    ],
+    "data": [],
+    "data_associations": []
+  }
