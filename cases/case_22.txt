@@ -1,0 +1,15 @@
+A company manages employee onboarding for new hires submitted by the HR department. 
+The HR officer submits a new hire request to the onboarding office. 
+The onboarding coordinator registers the request and checks whether all required documents 
+(e.g. signed contract, ID copy, tax forms) are included. If the documentation is incomplete, 
+the onboarding coordinator notifies the HR officer of the missing documents. 
+The HR officer collects the missing documents and resubmits them, after which the onboarding 
+coordinator checks completeness again. Once the documentation is confirmed complete, 
+the onboarding office simultaneously forwards the request to the IT department for system access 
+setup and to the facilities department for workspace preparation. 
+The IT department sets up the necessary system accounts and records their completion. 
+The facilities department prepares the workspace and records their completion. 
+Once both departments have recorded completion, the onboarding coordinator reviews the combined status. 
+If either department has flagged an issue, the onboarding coordinator initiates a rework task to 
+resolve the issue and then reviews the outcomes again. If both completions are confirmed, 
+the onboarding coordinator sends a ready-to-start confirmation to the HR officer and the process ends.

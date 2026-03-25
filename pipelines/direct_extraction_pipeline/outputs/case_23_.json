@@ -1,0 +1,80 @@
+{
+  "pools": [
+    { "id": "supplier_pool", "name": "Supplier" },
+    { "id": "company_pool",  "name": "Company" }
+  ],
+  "lanes": [
+    { "id": "supplier",         "name": "Supplier",                "pool": "supplier_pool" },
+    { "id": "accounts_payable", "name": "Accounts Payable",        "pool": "company_pool" },
+    { "id": "budget_control",   "name": "Budget Controller",       "pool": "company_pool" },
+    { "id": "line_manager",     "name": "Line Manager",            "pool": "company_pool" }
+  ],
+  "tasks": [
+    { "id": "submit_invoice",    "name": "Submit Invoice",                   "type": "task", "lane": "supplier" },
+    { "id": "register_invoice",  "name": "Register Invoice",                 "type": "task", "lane": "accounts_payable" },
+    { "id": "check_match",       "name": "Check Invoice Against PO",         "type": "task", "lane": "accounts_payable" },
+    { "id": "notify_discrepancy","name": "Notify Supplier of Discrepancy",   "type": "task", "lane": "accounts_payable" },
+    { "id": "review_outcomes",   "name": "Review Combined Verdicts",         "type": "task", "lane": "accounts_payable" },
+    { "id": "send_rejection",    "name": "Send Rejection Notice",            "type": "task", "lane": "accounts_payable" },
+    { "id": "process_payment",   "name": "Process Payment",                  "type": "task", "lane": "accounts_payable" },
+    { "id": "verify_budget",     "name": "Verify Budget Availability",       "type": "task", "lane": "budget_control" },
+    { "id": "record_budget",     "name": "Record Budget Verdict",            "type": "task", "lane": "budget_control" },
+    { "id": "approve_expenditure","name": "Review and Approve Expenditure",  "type": "task", "lane": "line_manager" },
+    { "id": "record_approval",   "name": "Record Approval Verdict",          "type": "task", "lane": "line_manager" }
+  ],
+  "events": [
+    { "id": "start_supplier",       "name": "Start",                    "type": "startEvent", "lane": "supplier",         "eventDefinition": "none" },
+    { "id": "end_supplier_rejected","name": "Invoice Rejected",         "type": "endEvent",   "lane": "supplier",         "eventDefinition": "none" },
+    { "id": "end_supplier_paid",    "name": "Payment Confirmed",        "type": "endEvent",   "lane": "supplier",         "eventDefinition": "none" },
+    { "id": "start_ap",             "name": "Invoice Received",         "type": "startEvent", "lane": "accounts_payable", "eventDefinition": "message" },
+    { "id": "end_discrepancy",      "name": "Supplier Notified",        "type": "endEvent",   "lane": "accounts_payable", "eventDefinition": "none" },
+    { "id": "end_rejected",         "name": "Rejection Sent",           "type": "endEvent",   "lane": "accounts_payable", "eventDefinition": "none" },
+    { "id": "end_paid",             "name": "Payment Processed",        "type": "endEvent",   "lane": "accounts_payable", "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "split_match",    "name": "Invoice Matches PO?",       "type": "exclusiveGateway", "lane": "accounts_payable", "gatewayDirection": "diverging" },
+    { "id": "split_parallel", "name": "Forward for Verification",  "type": "parallelGateway",  "lane": "accounts_payable", "gatewayDirection": "diverging" },
+    { "id": "join_parallel",  "name": "Both Verdicts Recorded",    "type": "parallelGateway",  "lane": "accounts_payable", "gatewayDirection": "converging" },
+    { "id": "split_outcome",  "name": "Both Verdicts Positive?",   "type": "exclusiveGateway", "lane": "accounts_payable", "gatewayDirection": "diverging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf1",  "from": "start_ap",            "to": "register_invoice" },
+    { "id": "sf2",  "from": "register_invoice",    "to": "check_match" },
+    { "id": "sf3",  "from": "check_match",         "to": "split_match" },
+    { "id": "sf4",  "from": "split_match",         "to": "notify_discrepancy", "condition": "No match" },
+    { "id": "sf5",  "from": "split_match",         "to": "split_parallel",     "condition": "Match confirmed" },
+    { "id": "sf6",  "from": "notify_discrepancy",  "to": "end_discrepancy" },
+    { "id": "sf7",  "from": "split_parallel",      "to": "verify_budget" },
+    { "id": "sf8",  "from": "split_parallel",      "to": "approve_expenditure" },
+    { "id": "sf9",  "from": "verify_budget",       "to": "record_budget" },
+    { "id": "sf10", "from": "record_budget",       "to": "join_parallel" },
+    { "id": "sf11", "from": "approve_expenditure", "to": "record_approval" },
+    { "id": "sf12", "from": "record_approval",     "to": "join_parallel" },
+    { "id": "sf13", "from": "join_parallel",       "to": "review_outcomes" },
+    { "id": "sf14", "from": "review_outcomes",     "to": "split_outcome" },
+    { "id": "sf15", "from": "split_outcome",       "to": "send_rejection",     "condition": "One or more verdicts negative" },
+    { "id": "sf16", "from": "split_outcome",       "to": "process_payment",    "condition": "Both verdicts positive" },
+    { "id": "sf17", "from": "send_rejection",      "to": "end_rejected" },
+    { "id": "sf18", "from": "process_payment",     "to": "end_paid" }
+  ],
+  "message_flows": [
+    { "id": "mf1", "from": "submit_invoice",    "to": "start_ap",              "name": "Invoice" },
+    { "id": "mf2", "from": "notify_discrepancy","to": "end_supplier_rejected", "name": "Discrepancy Notice" },
+    { "id": "mf3", "from": "send_rejection",    "to": "end_supplier_rejected", "name": "Rejection Notice" },
+    { "id": "mf4", "from": "process_payment",   "to": "end_supplier_paid",     "name": "Payment Confirmation" }
+  ],
+  "data": [
+    { "id": "invoice_record", "name": "Invoice Record", "type": "dataObject" },
+    { "id": "po_record",      "name": "Purchase Order",  "type": "dataObject" }
+  ],
+  "data_associations": [
+    { "id": "da1", "from": "register_invoice",    "to": "invoice_record",   "type": "output" },
+    { "id": "da2", "from": "invoice_record",      "to": "check_match",      "type": "input" },
+    { "id": "da3", "from": "po_record",           "to": "check_match",      "type": "input" },
+    { "id": "da4", "from": "invoice_record",      "to": "verify_budget",    "type": "input" },
+    { "id": "da5", "from": "record_budget",       "to": "invoice_record",   "type": "output" },
+    { "id": "da6", "from": "invoice_record",      "to": "approve_expenditure", "type": "input" },
+    { "id": "da7", "from": "record_approval",     "to": "invoice_record",   "type": "output" },
+    { "id": "da8", "from": "invoice_record",      "to": "review_outcomes",  "type": "input" }
+  ]
+}

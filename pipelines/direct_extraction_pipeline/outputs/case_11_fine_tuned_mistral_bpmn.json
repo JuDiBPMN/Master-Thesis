@@ -1,0 +1,160 @@
+{
+  "participants": [
+    {
+      "id": "marketing_agency",
+      "name": "Marketing Agency",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "assign_project",
+      "name": "Assign Project",
+      "type": "task",
+      "participant": "marketing_agency"
+    },
+    {
+      "id": "review_package",
+      "name": "Review Combined Package",
+      "type": "task",
+      "participant": "marketing_agency"
+    },
+    {
+      "id": "publish_campaign",
+      "name": "Publish Campaign",
+      "type": "task",
+      "participant": "marketing_agency"
+    },
+    {
+      "id": "reassign_tasks",
+      "name": "Reassign Relevant Tasks",
+      "type": "task",
+      "participant": "marketing_agency"
+    },
+    {
+      "id": "draft_text",
+      "name": "Draft Campaign Text",
+      "type": "task",
+      "participant": "marketing_agency"
+    },
+    {
+      "id": "create_visuals",
+      "name": "Create Visual Assets",
+      "type": "task",
+      "participant": "marketing_agency"
+    },
+    {
+      "id": "define_schedule",
+      "name": "Define Posting Schedule",
+      "type": "task",
+      "participant": "marketing_agency"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_marketing",
+      "name": "New Campaign Request Received",
+      "type": "startEvent",
+      "participant": "marketing_agency",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_marketing",
+      "name": "Campaign Published",
+      "type": "endEvent",
+      "participant": "marketing_agency",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_parallel_split",
+      "name": "Split Work into Tracks",
+      "type": "parallelGateway",
+      "participant": "marketing_agency",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "All Tracks Complete",
+      "type": "parallelGateway",
+      "participant": "marketing_agency",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_revision_split",
+      "name": "Revisions Received?",
+      "type": "exclusiveGateway",
+      "participant": "marketing_agency",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_revision_join",
+      "name": "Revision Cycle Complete",
+      "type": "exclusiveGateway",
+      "participant": "marketing_agency",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "start_marketing",
+      "to": "assign_project"
+    },
+    {
+      "from": "assign_project",
+      "to": "gateway_parallel_split"
+    },
+    {
+      "from": "gateway_parallel_split",
+      "to": "draft_text"
+    },
+    {
+      "from": "gateway_parallel_split",
+      "to": "create_visuals"
+    },
+    {
+      "from": "gateway_parallel_split",
+      "to": "define_schedule"
+    },
+    {
+      "from": "draft_text",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "from": "create_visuals",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "from": "define_schedule",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "from": "gateway_parallel_join",
+      "to": "review_package"
+    },
+    {
+      "from": "review_package",
+      "to": "gateway_revision_split"
+    },
+    {
+      "from": "gateway_revision_split",
+      "to": "publish_campaign",
+      "condition": "Client approves"
+    },
+    {
+      "from": "gateway_revision_split",
+      "to": "reassign_tasks",
+      "condition": "Client requests revisions"
+    },
+    {
+      "from": "reassign_tasks",
+      "to": "gateway_revision_join"
+    },
+    {
+      "from": "publish_campaign",
+      "to": "end_marketing"
+    }
+  ],
+  "message_flows": []
+}

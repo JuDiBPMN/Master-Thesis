@@ -1,0 +1,69 @@
+{
+  "pools": [
+    { "id": "hr_pool",         "name": "HR Department" },
+    { "id": "onboarding_pool", "name": "Onboarding Office" }
+  ],
+  "lanes": [
+    { "id": "hr_officer",    "name": "HR Officer",              "pool": "hr_pool" },
+    { "id": "coordinator",   "name": "Onboarding Coordinator",  "pool": "onboarding_pool" },
+    { "id": "it_dept",       "name": "IT Department",           "pool": "onboarding_pool" },
+    { "id": "facilities",    "name": "Facilities Department",   "pool": "onboarding_pool" }
+  ],
+  "tasks": [
+    { "id": "submit_request",    "name": "Submit New Hire Request",         "type": "task", "lane": "hr_officer" },
+    { "id": "collect_docs",      "name": "Collect Missing Documents",       "type": "task", "lane": "hr_officer" },
+    { "id": "register_request",  "name": "Register New Hire Request",       "type": "task", "lane": "coordinator" },
+    { "id": "check_docs",        "name": "Check Documentation Completeness","type": "task", "lane": "coordinator" },
+    { "id": "notify_incomplete", "name": "Notify HR of Missing Documents",  "type": "task", "lane": "coordinator" },
+    { "id": "review_outcomes",   "name": "Review Combined Completion Status","type": "task", "lane": "coordinator" },
+    { "id": "resolve_issue",     "name": "Resolve Flagged Issue",           "type": "task", "lane": "coordinator" },
+    { "id": "send_confirmation", "name": "Send Ready-to-Start Confirmation","type": "task", "lane": "coordinator" },
+    { "id": "setup_accounts",    "name": "Set Up System Accounts",          "type": "task", "lane": "it_dept" },
+    { "id": "record_it",         "name": "Record IT Completion",            "type": "task", "lane": "it_dept" },
+    { "id": "prepare_workspace", "name": "Prepare Workspace",               "type": "task", "lane": "facilities" },
+    { "id": "record_facilities", "name": "Record Facilities Completion",    "type": "task", "lane": "facilities" }
+  ],
+  "events": [
+    { "id": "start_hr",          "name": "Start",                    "type": "startEvent", "lane": "hr_officer",  "eventDefinition": "none" },
+    { "id": "end_hr_confirmed",  "name": "Confirmation Received",    "type": "endEvent",   "lane": "hr_officer",  "eventDefinition": "none" },
+    { "id": "start_onboarding",  "name": "New Hire Request Received","type": "startEvent", "lane": "coordinator", "eventDefinition": "message" },
+    { "id": "end_confirmed",     "name": "Confirmation Sent",        "type": "endEvent",   "lane": "coordinator", "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "split_complete",  "name": "Documentation Complete?",   "type": "exclusiveGateway", "lane": "coordinator", "gatewayDirection": "diverging" },
+    { "id": "join_rework",     "name": "Recheck Documentation",     "type": "exclusiveGateway", "lane": "coordinator", "gatewayDirection": "converging" },
+    { "id": "split_parallel",  "name": "Forward to Departments",    "type": "parallelGateway",  "lane": "coordinator", "gatewayDirection": "diverging" },
+    { "id": "join_parallel",   "name": "Both Completions Recorded", "type": "parallelGateway",  "lane": "coordinator", "gatewayDirection": "converging" },
+    { "id": "split_outcome",   "name": "Any Issues Flagged?",       "type": "exclusiveGateway", "lane": "coordinator", "gatewayDirection": "diverging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf1",  "from": "start_hr",          "to": "submit_request" },
+    { "id": "sf2",  "from": "start_onboarding",  "to": "register_request" },
+    { "id": "sf3",  "from": "register_request",  "to": "join_rework" },
+    { "id": "sf4",  "from": "join_rework",        "to": "check_docs" },
+    { "id": "sf5",  "from": "check_docs",         "to": "split_complete" },
+    { "id": "sf6",  "from": "split_complete",     "to": "notify_incomplete",  "condition": "Incomplete" },
+    { "id": "sf7",  "from": "split_complete",     "to": "split_parallel",     "condition": "Complete" },
+    { "id": "sf8",  "from": "notify_incomplete",  "to": "join_rework" },
+    { "id": "sf9",  "from": "split_parallel",     "to": "setup_accounts" },
+    { "id": "sf10", "from": "split_parallel",     "to": "prepare_workspace" },
+    { "id": "sf11", "from": "setup_accounts",     "to": "record_it" },
+    { "id": "sf12", "from": "record_it",          "to": "join_parallel" },
+    { "id": "sf13", "from": "prepare_workspace",  "to": "record_facilities" },
+    { "id": "sf14", "from": "record_facilities",  "to": "join_parallel" },
+    { "id": "sf15", "from": "join_parallel",      "to": "review_outcomes" },
+    { "id": "sf16", "from": "review_outcomes",    "to": "split_outcome" },
+    { "id": "sf17", "from": "split_outcome",      "to": "resolve_issue",      "condition": "One or more issues flagged" },
+    { "id": "sf18", "from": "split_outcome",      "to": "send_confirmation",  "condition": "All completions confirmed" },
+    { "id": "sf19", "from": "resolve_issue",      "to": "review_outcomes" },
+    { "id": "sf20", "from": "send_confirmation",  "to": "end_confirmed" }
+  ],
+  "message_flows": [
+    { "id": "mf1", "from": "submit_request",    "to": "start_onboarding",  "name": "New Hire Request" },
+    { "id": "mf2", "from": "notify_incomplete", "to": "collect_docs",      "name": "Incomplete Notice" },
+    { "id": "mf3", "from": "collect_docs",      "to": "join_rework",       "name": "Resubmitted Documents" },
+    { "id": "mf4", "from": "send_confirmation", "to": "end_hr_confirmed",  "name": "Ready-to-Start Confirmation" }
+  ],
+  "data": [],
+  "data_associations": []
+}

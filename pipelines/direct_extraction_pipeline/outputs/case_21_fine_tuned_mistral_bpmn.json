@@ -1,0 +1,321 @@
+{
+  "participants": [
+    {
+      "id": "GP",
+      "name": "General Practitioner",
+      "type": "pool"
+    },
+    {
+      "id": "admissions_office",
+      "name": "Admissions Office",
+      "type": "pool"
+    },
+    {
+      "id": "specialist_department",
+      "name": "Specialist Department",
+      "type": "pool"
+    },
+    {
+      "id": "insurance_office",
+      "name": "Insurance Office",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_referral",
+      "name": "Submit Referral Request",
+      "type": "task",
+      "participant": "GP"
+    },
+    {
+      "id": "register_referral",
+      "name": "Register Referral",
+      "type": "task",
+      "participant": "admissions_office"
+    },
+    {
+      "id": "check_documentation",
+      "name": "Check Documentation",
+      "type": "task",
+      "participant": "admissions_office"
+    },
+    {
+      "id": "notify_incomplete",
+      "name": "Notify GP of Missing Documents",
+      "type": "task",
+      "participant": "admissions_office"
+    },
+    {
+      "id": "review_outcomes",
+      "name": "Review Combined Outcomes",
+      "type": "task",
+      "participant": "admissions_office"
+    },
+    {
+      "id": "send_rejection",
+      "name": "Send Rejection Notice to GP",
+      "type": "task",
+      "participant": "admissions_office"
+    },
+    {
+      "id": "send_approval",
+      "name": "Send Treatment Approval to GP",
+      "type": "task",
+      "participant": "admissions_office"
+    },
+    {
+      "id": "assess_referral",
+      "name": "Conduct Medical Assessment",
+      "type": "task",
+      "participant": "specialist_department"
+    },
+    {
+      "id": "record_verdict",
+      "name": "Record Verdict",
+      "type": "task",
+      "participant": "specialist_department"
+    },
+    {
+      "id": "verify_coverage",
+      "name": "Verify Patient Coverage",
+      "type": "task",
+      "participant": "insurance_office"
+    },
+    {
+      "id": "record_coverage_verdict",
+      "name": "Record Coverage Verdict",
+      "type": "task",
+      "participant": "insurance_office"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_GP",
+      "name": "Referral Received",
+      "type": "startEvent",
+      "participant": "GP",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_GP_rejected",
+      "name": "Rejection Received",
+      "type": "endEvent",
+      "participant": "GP",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_GP_approved",
+      "name": "Treatment Approved",
+      "type": "endEvent",
+      "participant": "GP",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_admissions",
+      "name": "Referral Received",
+      "type": "startEvent",
+      "participant": "admissions_office",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_admissions_rejected",
+      "name": "Rejection Sent",
+      "type": "endEvent",
+      "participant": "admissions_office",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_admissions_approved",
+      "name": "Approval Sent",
+      "type": "endEvent",
+      "participant": "admissions_office",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_specialist",
+      "name": "Referral Forwarded",
+      "type": "startEvent",
+      "participant": "specialist_department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_specialist",
+      "name": "Verdict Recorded",
+      "type": "endEvent",
+      "participant": "specialist_department",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_insurance",
+      "name": "Referral Forwarded",
+      "type": "startEvent",
+      "participant": "insurance_office",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_insurance",
+      "name": "Verdict Recorded",
+      "type": "endEvent",
+      "participant": "insurance_office",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_documentation",
+      "name": "Documentation Complete?",
+      "type": "exclusiveGateway",
+      "participant": "admissions_office",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "split_parallel",
+      "name": "Forward for Assessment and Verification",
+      "type": "parallelGateway",
+      "participant": "admissions_office",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Both Verdicts Recorded",
+      "type": "parallelGateway",
+      "participant": "admissions_office",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "split_outcome",
+      "name": "Outcome?",
+      "type": "exclusiveGateway",
+      "participant": "admissions_office",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "start_GP",
+      "to": "submit_referral"
+    },
+    {
+      "from": "start_admissions",
+      "to": "register_referral"
+    },
+    {
+      "from": "register_referral",
+      "to": "check_documentation"
+    },
+    {
+      "from": "check_documentation",
+      "to": "split_documentation"
+    },
+    {
+      "from": "split_documentation",
+      "to": "notify_incomplete",
+      "condition": "Incomplete"
+    },
+    {
+      "from": "split_documentation",
+      "to": "join_parallel",
+      "condition": "Complete"
+    },
+    {
+      "from": "notify_incomplete",
+      "to": "split_documentation"
+    },
+    {
+      "from": "join_parallel",
+      "to": "split_parallel"
+    },
+    {
+      "from": "split_parallel",
+      "to": "assess_referral"
+    },
+    {
+      "from": "split_parallel",
+      "to": "verify_coverage"
+    },
+    {
+      "from": "assess_referral",
+      "to": "record_verdict"
+    },
+    {
+      "from": "record_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "from": "verify_coverage",
+      "to": "record_coverage_verdict"
+    },
+    {
+      "from": "record_coverage_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "from": "join_parallel",
+      "to": "review_outcomes"
+    },
+    {
+      "from": "review_outcomes",
+      "to": "split_outcome"
+    },
+    {
+      "from": "split_outcome",
+      "to": "send_rejection",
+      "condition": "Negative"
+    },
+    {
+      "from": "split_outcome",
+      "to": "send_approval",
+      "condition": "Positive"
+    },
+    {
+      "from": "start_specialist",
+      "to": "assess_referral"
+    },
+    {
+      "from": "start_insurance",
+      "to": "verify_coverage"
+    },
+    {
+      "from": "send_rejection",
+      "to": "end_admissions_rejected"
+    },
+    {
+      "from": "send_approval",
+      "to": "end_admissions_approved"
+    }
+  ],
+  "message_flows": [
+    {
+      "from": "submit_referral",
+      "to": "start_admissions",
+      "name": "Referral Request"
+    },
+    {
+      "from": "notify_incomplete",
+      "to": "submit_referral",
+      "name": "Incomplete Documentation Notice"
+    },
+    {
+      "from": "join_parallel",
+      "to": "specialist_department",
+      "name": "Referral for Assessment"
+    },
+    {
+      "from": "join_parallel",
+      "to": "insurance_office",
+      "name": "Referral for Coverage Verification"
+    },
+    {
+      "from": "record_verdict",
+      "to": "admissions_office",
+      "name": "Specialist Verdict"
+    },
+    {
+      "from": "record_coverage_verdict",
+      "to": "admissions_office",
+      "name": "Coverage Verdict"
+    }
+  ],
+  "data": []
+}

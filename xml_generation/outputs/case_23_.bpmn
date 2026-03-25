@@ -1,244 +1,292 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
   <bpmn:collaboration id="Collaboration_1">
-    <bpmn:participant id="actor_customer_pool" name="Customer" processRef="Process_customer_pool"/>
-    <bpmn:participant id="actor_ecommerce_pool" name="E-Commerce Company" processRef="Process_ecommerce_pool"/>
-    <bpmn:messageFlow id="mf1" name="Return Request" sourceRef="submit_return" targetRef="start_cs"/>
-    <bpmn:messageFlow id="Flow_19rlkps" name="Rejection Notice" sourceRef="notify_rejected" targetRef="Event_0muyk3x"/>
-    <bpmn:messageFlow id="Flow_14qsqvk" name="Confirmation" sourceRef="send_confirmation" targetRef="Event_0tpcr9s"/>
+    <bpmn:participant id="actor_supplier_pool" name="Supplier" processRef="Process_supplier_pool"/>
+    <bpmn:participant id="actor_company_pool" name="Company" processRef="Process_company_pool"/>
+    <bpmn:messageFlow id="mf1" name="Invoice" sourceRef="submit_invoice" targetRef="start_ap"/>
+    <bpmn:messageFlow id="mf2" name="Discrepancy Notice" sourceRef="notify_discrepancy" targetRef="end_supplier_rejected"/>
+    <bpmn:messageFlow id="mf3" name="Rejection Notice" sourceRef="send_rejection" targetRef="end_supplier_rejected"/>
+    <bpmn:messageFlow id="mf4" name="Payment Confirmation" sourceRef="process_payment" targetRef="end_supplier_paid"/>
   </bpmn:collaboration>
-  <bpmn:process id="Process_customer_pool" name="Customer" isExecutable="false">
-    <bpmn:laneSet id="LaneSet_customer_pool">
-      <bpmn:lane id="customer" name="Customer">
-        <bpmn:flowNodeRef>start_customer</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_0muyk3x</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_0tpcr9s</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_0lnnv01</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_1r6yhp5</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>submit_return</bpmn:flowNodeRef>
+  <bpmn:process id="Process_supplier_pool" name="Supplier" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_supplier_pool">
+      <bpmn:lane id="supplier" name="Supplier">
+        <bpmn:flowNodeRef>start_supplier</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_supplier_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_supplier_paid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>submit_invoice</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="start_customer" name="Start"/>
-    <bpmn:intermediateCatchEvent id="Event_0muyk3x" name="Receive rejection">
-      <bpmn:messageEventDefinition id="Event_0muyk3x_def"/>
-    </bpmn:intermediateCatchEvent>
-    <bpmn:intermediateCatchEvent id="Event_0tpcr9s" name="Receive confirmation">
-      <bpmn:messageEventDefinition id="Event_0tpcr9s_def"/>
-    </bpmn:intermediateCatchEvent>
-    <bpmn:endEvent id="Event_0lnnv01" name="Return Rejected"/>
-    <bpmn:endEvent id="Event_1r6yhp5" name="Return Confirmed"/>
-    <bpmn:task id="submit_return" name="Submit Return Request"/>
-    <bpmn:sequenceFlow id="Flow_1kd72rx" sourceRef="start_customer" targetRef="submit_return"/>
-    <bpmn:sequenceFlow id="Flow_0vatbql" sourceRef="Event_0muyk3x" targetRef="Event_0lnnv01"/>
-    <bpmn:sequenceFlow id="Flow_1kdv6t5" sourceRef="Event_0tpcr9s" targetRef="Event_1r6yhp5"/>
+    <bpmn:startEvent id="start_supplier" name="Start"/>
+    <bpmn:endEvent id="end_supplier_rejected" name="Invoice Rejected"/>
+    <bpmn:endEvent id="end_supplier_paid" name="Payment Confirmed"/>
+    <bpmn:task id="submit_invoice" name="Submit Invoice"/>
   </bpmn:process>
-  <bpmn:process id="Process_ecommerce_pool" name="E-Commerce Company" isExecutable="false">
-    <bpmn:laneSet id="LaneSet_ecommerce_pool">
-      <bpmn:lane id="customer_service" name="Customer Service">
-        <bpmn:flowNodeRef>start_cs</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_cs_rejected</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_cs</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>verify_eligibility</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>notify_rejected</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>send_confirmation</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>split_eligible</bpmn:flowNodeRef>
+  <bpmn:process id="Process_company_pool" name="Company" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_company_pool">
+      <bpmn:lane id="accounts_payable" name="Accounts Payable">
+        <bpmn:flowNodeRef>start_ap</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_discrepancy</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_paid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>register_invoice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_match</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>notify_discrepancy</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_outcomes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_rejection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>process_payment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_match</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>split_parallel</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>join_parallel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_outcome</bpmn:flowNodeRef>
       </bpmn:lane>
-      <bpmn:lane id="warehouse" name="Warehouse">
-        <bpmn:flowNodeRef>arrange_collection</bpmn:flowNodeRef>
+      <bpmn:lane id="budget_control" name="Budget Controller">
+        <bpmn:flowNodeRef>verify_budget</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_budget</bpmn:flowNodeRef>
       </bpmn:lane>
-      <bpmn:lane id="finance" name="Finance">
-        <bpmn:flowNodeRef>initiate_refund</bpmn:flowNodeRef>
+      <bpmn:lane id="line_manager" name="Line Manager">
+        <bpmn:flowNodeRef>approve_expenditure</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_approval</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="start_cs" name="Return Request Received">
-      <bpmn:messageEventDefinition id="start_cs_def"/>
+    <bpmn:startEvent id="start_ap" name="Invoice Received">
+      <bpmn:messageEventDefinition id="start_ap_def"/>
     </bpmn:startEvent>
-    <bpmn:endEvent id="end_cs_rejected" name="Rejection Sent"/>
-    <bpmn:endEvent id="end_cs" name="End"/>
-    <bpmn:task id="verify_eligibility" name="Verify Return Eligibility"/>
-    <bpmn:task id="notify_rejected" name="Notify Customer of Rejection"/>
-    <bpmn:task id="send_confirmation" name="Send Confirmation to Customer"/>
-    <bpmn:task id="arrange_collection" name="Arrange Item Collection"/>
-    <bpmn:task id="initiate_refund" name="Initiate Refund Process"/>
-    <bpmn:exclusiveGateway id="split_eligible" name="Item Eligible for Return?" gatewayDirection="diverging"/>
-    <bpmn:parallelGateway id="split_parallel" name="Start Parallel Processing" gatewayDirection="diverging"/>
-    <bpmn:parallelGateway id="join_parallel" name="Both Tasks Complete" gatewayDirection="converging"/>
-    <bpmn:sequenceFlow id="sf1" sourceRef="start_cs" targetRef="verify_eligibility"/>
-    <bpmn:sequenceFlow id="sf2" sourceRef="verify_eligibility" targetRef="split_eligible"/>
-    <bpmn:sequenceFlow id="sf3" sourceRef="split_eligible" targetRef="notify_rejected" name="Not eligible">
-      <bpmn:conditionExpression>Not eligible</bpmn:conditionExpression>
+    <bpmn:endEvent id="end_discrepancy" name="Supplier Notified"/>
+    <bpmn:endEvent id="end_rejected" name="Rejection Sent"/>
+    <bpmn:endEvent id="end_paid" name="Payment Processed"/>
+    <bpmn:task id="register_invoice" name="Register Invoice"/>
+    <bpmn:task id="check_match" name="Check Invoice Against PO"/>
+    <bpmn:task id="notify_discrepancy" name="Notify Supplier of Discrepancy"/>
+    <bpmn:task id="review_outcomes" name="Review Combined Verdicts"/>
+    <bpmn:task id="send_rejection" name="Send Rejection Notice"/>
+    <bpmn:task id="process_payment" name="Process Payment"/>
+    <bpmn:task id="verify_budget" name="Verify Budget Availability"/>
+    <bpmn:task id="record_budget" name="Record Budget Verdict"/>
+    <bpmn:task id="approve_expenditure" name="Review and Approve Expenditure"/>
+    <bpmn:task id="record_approval" name="Record Approval Verdict"/>
+    <bpmn:exclusiveGateway id="split_match" name="Invoice Matches PO?" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="split_parallel" name="Forward for Verification" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="join_parallel" name="Both Verdicts Recorded" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="split_outcome" name="Both Verdicts Positive?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_ap" targetRef="register_invoice"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="register_invoice" targetRef="check_match"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="check_match" targetRef="split_match"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="split_match" targetRef="notify_discrepancy" name="No match">
+      <bpmn:conditionExpression>No match</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf4" sourceRef="split_eligible" targetRef="split_parallel" name="Eligible">
-      <bpmn:conditionExpression>Eligible</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="sf5" sourceRef="split_match" targetRef="split_parallel" name="Match confirmed">
+      <bpmn:conditionExpression>Match confirmed</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf5" sourceRef="notify_rejected" targetRef="end_cs_rejected"/>
-    <bpmn:sequenceFlow id="sf6" sourceRef="split_parallel" targetRef="arrange_collection"/>
-    <bpmn:sequenceFlow id="sf7" sourceRef="split_parallel" targetRef="initiate_refund"/>
-    <bpmn:sequenceFlow id="sf8" sourceRef="arrange_collection" targetRef="join_parallel"/>
-    <bpmn:sequenceFlow id="sf9" sourceRef="initiate_refund" targetRef="join_parallel"/>
-    <bpmn:sequenceFlow id="sf10" sourceRef="join_parallel" targetRef="send_confirmation"/>
-    <bpmn:sequenceFlow id="sf11" sourceRef="send_confirmation" targetRef="end_cs"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="notify_discrepancy" targetRef="end_discrepancy"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="split_parallel" targetRef="verify_budget"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="split_parallel" targetRef="approve_expenditure"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="verify_budget" targetRef="record_budget"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="record_budget" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="approve_expenditure" targetRef="record_approval"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="record_approval" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="join_parallel" targetRef="review_outcomes"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="review_outcomes" targetRef="split_outcome"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="split_outcome" targetRef="send_rejection" name="One or more verdicts negative">
+      <bpmn:conditionExpression>One or more verdicts negative</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf16" sourceRef="split_outcome" targetRef="process_payment" name="Both verdicts positive">
+      <bpmn:conditionExpression>Both verdicts positive</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf17" sourceRef="send_rejection" targetRef="end_rejected"/>
+    <bpmn:sequenceFlow id="sf18" sourceRef="process_payment" targetRef="end_paid"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
-      <bpmndi:BPMNShape id="actor_customer_pool_di" bpmnElement="actor_customer_pool" isHorizontal="true">
-        <dc:Bounds x="10" y="20" width="560" height="160"/>
+      <bpmndi:BPMNShape id="actor_supplier_pool_di" bpmnElement="actor_supplier_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="2270" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="actor_ecommerce_pool_di" bpmnElement="actor_ecommerce_pool" isHorizontal="true">
-        <dc:Bounds x="10" y="220" width="1700" height="480"/>
+      <bpmndi:BPMNShape id="actor_company_pool_di" bpmnElement="actor_company_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="220" width="2460" height="480"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="customer_di" bpmnElement="customer" isHorizontal="true">
-        <dc:Bounds x="40" y="20" width="530" height="160"/>
+      <bpmndi:BPMNShape id="supplier_di" bpmnElement="supplier" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="2240" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="customer_service_di" bpmnElement="customer_service" isHorizontal="true">
-        <dc:Bounds x="40" y="220" width="1670" height="160"/>
+      <bpmndi:BPMNShape id="accounts_payable_di" bpmnElement="accounts_payable" isHorizontal="true">
+        <dc:Bounds x="40" y="220" width="2430" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="warehouse_di" bpmnElement="warehouse" isHorizontal="true">
-        <dc:Bounds x="40" y="380" width="1670" height="160"/>
+      <bpmndi:BPMNShape id="budget_control_di" bpmnElement="budget_control" isHorizontal="true">
+        <dc:Bounds x="40" y="380" width="2430" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="finance_di" bpmnElement="finance" isHorizontal="true">
-        <dc:Bounds x="40" y="540" width="1670" height="160"/>
+      <bpmndi:BPMNShape id="line_manager_di" bpmnElement="line_manager" isHorizontal="true">
+        <dc:Bounds x="40" y="540" width="2430" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="start_customer_di" bpmnElement="start_customer">
-        <dc:Bounds x="132" y="42" width="36" height="36"/>
+      <bpmndi:BPMNShape id="start_supplier_di" bpmnElement="start_supplier">
+        <dc:Bounds x="132" y="55" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0muyk3x_di" bpmnElement="Event_0muyk3x">
-        <dc:Bounds x="132" y="82" width="36" height="36"/>
+      <bpmndi:BPMNShape id="submit_invoice_di" bpmnElement="submit_invoice">
+        <dc:Bounds x="100" y="86" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0tpcr9s_di" bpmnElement="Event_0tpcr9s">
-        <dc:Bounds x="132" y="122" width="36" height="36"/>
+      <bpmndi:BPMNShape id="end_supplier_rejected_di" bpmnElement="end_supplier_rejected">
+        <dc:Bounds x="2032" y="55" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0lnnv01_di" bpmnElement="Event_0lnnv01">
-        <dc:Bounds x="322" y="42" width="36" height="36"/>
+      <bpmndi:BPMNShape id="end_supplier_paid_di" bpmnElement="end_supplier_paid">
+        <dc:Bounds x="2032" y="108" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1r6yhp5_di" bpmnElement="Event_1r6yhp5">
-        <dc:Bounds x="322" y="82" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="submit_return_di" bpmnElement="submit_return">
-        <dc:Bounds x="290" y="100" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="start_cs_di" bpmnElement="start_cs">
+      <bpmndi:BPMNShape id="start_ap_di" bpmnElement="start_ap">
         <dc:Bounds x="132" y="282" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_cs_rejected_di" bpmnElement="end_cs_rejected">
-        <dc:Bounds x="892" y="282" width="36" height="36"/>
+      <bpmndi:BPMNShape id="end_discrepancy_di" bpmnElement="end_discrepancy">
+        <dc:Bounds x="1082" y="282" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_cs_di" bpmnElement="end_cs">
-        <dc:Bounds x="1462" y="282" width="36" height="36"/>
+      <bpmndi:BPMNShape id="end_rejected_di" bpmnElement="end_rejected">
+        <dc:Bounds x="2222" y="255" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="verify_eligibility_di" bpmnElement="verify_eligibility">
+      <bpmndi:BPMNShape id="end_paid_di" bpmnElement="end_paid">
+        <dc:Bounds x="2222" y="308" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="register_invoice_di" bpmnElement="register_invoice">
         <dc:Bounds x="290" y="260" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="notify_rejected_di" bpmnElement="notify_rejected">
-        <dc:Bounds x="670" y="233" width="100" height="80"/>
+      <bpmndi:BPMNShape id="check_match_di" bpmnElement="check_match">
+        <dc:Bounds x="480" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_discrepancy_di" bpmnElement="notify_discrepancy">
+        <dc:Bounds x="860" y="233" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="split_parallel_di" bpmnElement="split_parallel" isMarkerVisible="true">
-        <dc:Bounds x="695" y="301" width="50" height="50"/>
+        <dc:Bounds x="885" y="301" width="50" height="50"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="send_confirmation_di" bpmnElement="send_confirmation">
-        <dc:Bounds x="1240" y="260" width="100" height="80"/>
+      <bpmndi:BPMNShape id="review_outcomes_di" bpmnElement="review_outcomes">
+        <dc:Bounds x="1620" y="260" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="split_eligible_di" bpmnElement="split_eligible" isMarkerVisible="true">
-        <dc:Bounds x="505" y="275" width="50" height="50"/>
+      <bpmndi:BPMNShape id="send_rejection_di" bpmnElement="send_rejection">
+        <dc:Bounds x="2000" y="233" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process_payment_di" bpmnElement="process_payment">
+        <dc:Bounds x="2000" y="286" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_match_di" bpmnElement="split_match" isMarkerVisible="true">
+        <dc:Bounds x="695" y="275" width="50" height="50"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="join_parallel_di" bpmnElement="join_parallel" isMarkerVisible="true">
-        <dc:Bounds x="1075" y="275" width="50" height="50"/>
+        <dc:Bounds x="1455" y="275" width="50" height="50"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="arrange_collection_di" bpmnElement="arrange_collection">
-        <dc:Bounds x="860" y="420" width="100" height="80"/>
+      <bpmndi:BPMNShape id="split_outcome_di" bpmnElement="split_outcome" isMarkerVisible="true">
+        <dc:Bounds x="1835" y="275" width="50" height="50"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="initiate_refund_di" bpmnElement="initiate_refund">
-        <dc:Bounds x="860" y="580" width="100" height="80"/>
+      <bpmndi:BPMNShape id="verify_budget_di" bpmnElement="verify_budget">
+        <dc:Bounds x="1050" y="420" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1kd72rx_di" bpmnElement="Flow_1kd72rx">
-        <di:waypoint x="168" y="60"/>
-        <di:waypoint x="229" y="60"/>
-        <di:waypoint x="229" y="140"/>
-        <di:waypoint x="290" y="140"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0vatbql_di" bpmnElement="Flow_0vatbql">
-        <di:waypoint x="168" y="100"/>
-        <di:waypoint x="245" y="100"/>
-        <di:waypoint x="245" y="60"/>
-        <di:waypoint x="322" y="60"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1kdv6t5_di" bpmnElement="Flow_1kdv6t5">
-        <di:waypoint x="168" y="140"/>
-        <di:waypoint x="245" y="140"/>
-        <di:waypoint x="245" y="100"/>
-        <di:waypoint x="322" y="100"/>
-      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="record_budget_di" bpmnElement="record_budget">
+        <dc:Bounds x="1240" y="420" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="approve_expenditure_di" bpmnElement="approve_expenditure">
+        <dc:Bounds x="1050" y="580" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_approval_di" bpmnElement="record_approval">
+        <dc:Bounds x="1240" y="580" width="100" height="80"/>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
         <di:waypoint x="168" y="300"/>
         <di:waypoint x="290" y="300"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
         <di:waypoint x="390" y="300"/>
-        <di:waypoint x="505" y="300"/>
+        <di:waypoint x="480" y="300"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
-        <di:waypoint x="555" y="300"/>
-        <di:waypoint x="612" y="300"/>
-        <di:waypoint x="612" y="273"/>
-        <di:waypoint x="670" y="273"/>
+        <di:waypoint x="580" y="300"/>
+        <di:waypoint x="695" y="300"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
-        <di:waypoint x="555" y="300"/>
-        <di:waypoint x="625" y="300"/>
-        <di:waypoint x="625" y="326"/>
-        <di:waypoint x="695" y="326"/>
+        <di:waypoint x="745" y="300"/>
+        <di:waypoint x="802" y="300"/>
+        <di:waypoint x="802" y="273"/>
+        <di:waypoint x="860" y="273"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
-        <di:waypoint x="770" y="273"/>
-        <di:waypoint x="831" y="273"/>
-        <di:waypoint x="831" y="300"/>
-        <di:waypoint x="892" y="300"/>
+        <di:waypoint x="745" y="300"/>
+        <di:waypoint x="815" y="300"/>
+        <di:waypoint x="815" y="326"/>
+        <di:waypoint x="885" y="326"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
-        <di:waypoint x="745" y="326"/>
-        <di:waypoint x="802" y="326"/>
-        <di:waypoint x="802" y="460"/>
-        <di:waypoint x="860" y="460"/>
+        <di:waypoint x="960" y="273"/>
+        <di:waypoint x="1021" y="273"/>
+        <di:waypoint x="1021" y="300"/>
+        <di:waypoint x="1082" y="300"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
-        <di:waypoint x="745" y="326"/>
-        <di:waypoint x="802" y="326"/>
-        <di:waypoint x="802" y="620"/>
-        <di:waypoint x="860" y="620"/>
+        <di:waypoint x="935" y="326"/>
+        <di:waypoint x="992" y="326"/>
+        <di:waypoint x="992" y="460"/>
+        <di:waypoint x="1050" y="460"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
-        <di:waypoint x="960" y="460"/>
-        <di:waypoint x="1017" y="460"/>
-        <di:waypoint x="1017" y="300"/>
-        <di:waypoint x="1075" y="300"/>
+        <di:waypoint x="935" y="326"/>
+        <di:waypoint x="992" y="326"/>
+        <di:waypoint x="992" y="620"/>
+        <di:waypoint x="1050" y="620"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
-        <di:waypoint x="960" y="620"/>
-        <di:waypoint x="1017" y="620"/>
-        <di:waypoint x="1017" y="300"/>
-        <di:waypoint x="1075" y="300"/>
+        <di:waypoint x="1150" y="460"/>
+        <di:waypoint x="1240" y="460"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
-        <di:waypoint x="1125" y="300"/>
-        <di:waypoint x="1240" y="300"/>
+        <di:waypoint x="1340" y="460"/>
+        <di:waypoint x="1397" y="460"/>
+        <di:waypoint x="1397" y="300"/>
+        <di:waypoint x="1455" y="300"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
-        <di:waypoint x="1340" y="300"/>
-        <di:waypoint x="1462" y="300"/>
+        <di:waypoint x="1150" y="620"/>
+        <di:waypoint x="1240" y="620"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="1340" y="620"/>
+        <di:waypoint x="1397" y="620"/>
+        <di:waypoint x="1397" y="300"/>
+        <di:waypoint x="1455" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="1505" y="300"/>
+        <di:waypoint x="1620" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="1720" y="300"/>
+        <di:waypoint x="1835" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="1885" y="300"/>
+        <di:waypoint x="1942" y="300"/>
+        <di:waypoint x="1942" y="273"/>
+        <di:waypoint x="2000" y="273"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf16_di" bpmnElement="sf16">
+        <di:waypoint x="1885" y="300"/>
+        <di:waypoint x="1942" y="300"/>
+        <di:waypoint x="1942" y="326"/>
+        <di:waypoint x="2000" y="326"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf17_di" bpmnElement="sf17">
+        <di:waypoint x="2100" y="273"/>
+        <di:waypoint x="2222" y="273"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf18_di" bpmnElement="sf18">
+        <di:waypoint x="2100" y="326"/>
+        <di:waypoint x="2222" y="326"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
-        <di:waypoint x="340" y="180"/>
+        <di:waypoint x="150" y="166"/>
         <di:waypoint x="150" y="282"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_19rlkps_di" bpmnElement="Flow_19rlkps">
-        <di:waypoint x="720" y="233"/>
-        <di:waypoint x="150" y="118"/>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="910" y="233"/>
+        <di:waypoint x="2050" y="91"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_14qsqvk_di" bpmnElement="Flow_14qsqvk">
-        <di:waypoint x="1290" y="260"/>
-        <di:waypoint x="150" y="158"/>
+      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
+        <di:waypoint x="2050" y="233"/>
+        <di:waypoint x="2050" y="91"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf4_di" bpmnElement="mf4">
+        <di:waypoint x="2050" y="286"/>
+        <di:waypoint x="2050" y="144"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

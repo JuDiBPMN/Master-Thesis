@@ -31,8 +31,8 @@ def load_model():
 
         llm = Llama(
             model_path=model_path,
-            n_ctx=2048,
-            n_gpu_layers=0,
+            n_ctx=8192,
+            n_gpu_layers=1,
             verbose=False
         )
     return llm
@@ -442,7 +442,7 @@ def _call_model(model, prompt):
         ],
         response_format={"type": "json_object", "schema": BPMN_SCHEMA},
         temperature=0.0,
-        max_tokens=2048
+        max_tokens=8192
     )
     if isinstance(result, dict) and "choices" in result:
         return result["choices"][0]["message"]["content"]
@@ -500,7 +500,7 @@ def extract_bpmn_fine_tuned(process_description, case_name, output_file=None):
 
 if __name__ == "__main__":
     # --- CONFIGURATION ---
-    case_name = "case_11"
+    case_name = "case_21"
     # ---------------------
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
@@ -510,7 +510,7 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_mistral_fine_tuned_bpmn.json")
+    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_fine_tuned_mistral_bpmn.json")
 
     print("--- Fine-Tuned Pipeline Started ---")
     print(f"Case:          {case_name}")

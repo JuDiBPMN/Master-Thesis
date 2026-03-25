@@ -1,151 +1,188 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
   <bpmn:collaboration id="Collaboration_1">
-    <bpmn:participant id="actor_student_pool" name="Student" processRef="Process_student_pool"/>
-    <bpmn:participant id="actor_university_pool" name="University Administration" processRef="Process_university_pool"/>
-    <bpmn:messageFlow id="mf1" name="Thesis Submission" sourceRef="submit_thesis" targetRef="start_admin"/>
+    <bpmn:participant id="actor_hr_pool" name="HR Department" processRef="Process_hr_pool"/>
+    <bpmn:participant id="actor_onboarding_pool" name="Onboarding Office" processRef="Process_onboarding_pool"/>
+    <bpmn:messageFlow id="mf1" name="New Hire Request" sourceRef="submit_request" targetRef="start_onboarding"/>
+    <bpmn:messageFlow id="mf2" name="Incomplete Notice" sourceRef="notify_incomplete" targetRef="collect_docs"/>
+    <bpmn:messageFlow id="mf3" name="Resubmitted Documents" sourceRef="collect_docs" targetRef="join_rework"/>
+    <bpmn:messageFlow id="mf4" name="Ready-to-Start Confirmation" sourceRef="send_confirmation" targetRef="end_hr_confirmed"/>
   </bpmn:collaboration>
-  <bpmn:process id="Process_student_pool" name="Student" isExecutable="false">
-    <bpmn:laneSet id="LaneSet_student_pool">
-      <bpmn:lane id="student" name="Student">
-        <bpmn:flowNodeRef>start_student</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>submit_thesis</bpmn:flowNodeRef>
+  <bpmn:process id="Process_hr_pool" name="HR Department" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_hr_pool">
+      <bpmn:lane id="hr_officer" name="HR Officer">
+        <bpmn:flowNodeRef>start_hr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_hr_confirmed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>submit_request</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>collect_docs</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="start_student" name="Start"/>
-    <bpmn:task id="submit_thesis" name="Submit Thesis"/>
-    <bpmn:sequenceFlow id="sf1" sourceRef="start_student" targetRef="submit_thesis"/>
+    <bpmn:startEvent id="start_hr" name="Start"/>
+    <bpmn:endEvent id="end_hr_confirmed" name="Confirmation Received"/>
+    <bpmn:task id="submit_request" name="Submit New Hire Request"/>
+    <bpmn:task id="collect_docs" name="Collect Missing Documents"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_hr" targetRef="submit_request"/>
   </bpmn:process>
-  <bpmn:process id="Process_university_pool" name="University Administration" isExecutable="false">
-    <bpmn:laneSet id="LaneSet_university_pool">
-      <bpmn:lane id="admin_office" name="Administration Office">
-        <bpmn:flowNodeRef>start_admin</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_14lh997</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_0nlwrzi</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>check_completeness</bpmn:flowNodeRef>
+  <bpmn:process id="Process_onboarding_pool" name="Onboarding Office" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_onboarding_pool">
+      <bpmn:lane id="coordinator" name="Onboarding Coordinator">
+        <bpmn:flowNodeRef>start_onboarding</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_confirmed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>register_request</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_docs</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>notify_incomplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_outcomes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>resolve_issue</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_confirmation</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>split_complete</bpmn:flowNodeRef>
-      </bpmn:lane>
-      <bpmn:lane id="exam_board" name="Examination Board">
-        <bpmn:flowNodeRef>Event_1dopi8a</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_exam_pass</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_exam_fail</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>evaluate_thesis</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>issue_grade</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>notify_pass</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>send_rejection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>join_rework</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_parallel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>join_parallel</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>split_outcome</bpmn:flowNodeRef>
       </bpmn:lane>
+      <bpmn:lane id="it_dept" name="IT Department">
+        <bpmn:flowNodeRef>setup_accounts</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_it</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="facilities" name="Facilities Department">
+        <bpmn:flowNodeRef>prepare_workspace</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_facilities</bpmn:flowNodeRef>
+      </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="start_admin" name="Thesis Received">
-      <bpmn:messageEventDefinition id="start_admin_def"/>
+    <bpmn:startEvent id="start_onboarding" name="New Hire Request Received">
+      <bpmn:messageEventDefinition id="start_onboarding_def"/>
     </bpmn:startEvent>
-    <bpmn:endEvent id="Event_14lh997" name="student notified"/>
-    <bpmn:intermediateThrowEvent id="Event_0nlwrzi" name="Forward Thesis to Examination Board">
-      <bpmn:messageEventDefinition id="Event_0nlwrzi_def"/>
-    </bpmn:intermediateThrowEvent>
-    <bpmn:intermediateCatchEvent id="Event_1dopi8a" name="Thesis received">
-      <bpmn:messageEventDefinition id="Event_1dopi8a_def"/>
-    </bpmn:intermediateCatchEvent>
-    <bpmn:endEvent id="end_exam_pass" name="Grade Issued"/>
-    <bpmn:endEvent id="end_exam_fail" name="Rejection Sent"/>
-    <bpmn:task id="check_completeness" name="Check Submission Completeness"/>
-    <bpmn:task id="notify_incomplete" name="Notify Student of Missing Documents"/>
-    <bpmn:task id="evaluate_thesis" name="Evaluate Thesis"/>
-    <bpmn:task id="issue_grade" name="Issue Grade"/>
-    <bpmn:task id="notify_pass" name="Notify Student of Pass"/>
-    <bpmn:task id="send_rejection" name="Send Rejection Notice to Student"/>
-    <bpmn:exclusiveGateway id="split_complete" name="Submission Complete?" gatewayDirection="diverging"/>
-    <bpmn:exclusiveGateway id="split_outcome" name="Thesis Outcome?" gatewayDirection="diverging"/>
-    <bpmn:sequenceFlow id="sf2" sourceRef="start_admin" targetRef="check_completeness"/>
-    <bpmn:sequenceFlow id="sf3" sourceRef="check_completeness" targetRef="split_complete"/>
-    <bpmn:sequenceFlow id="sf4" sourceRef="split_complete" targetRef="notify_incomplete" name="Incomplete">
+    <bpmn:endEvent id="end_confirmed" name="Confirmation Sent"/>
+    <bpmn:task id="register_request" name="Register New Hire Request"/>
+    <bpmn:task id="check_docs" name="Check Documentation Completeness"/>
+    <bpmn:task id="notify_incomplete" name="Notify HR of Missing Documents"/>
+    <bpmn:task id="review_outcomes" name="Review Combined Completion Status"/>
+    <bpmn:task id="resolve_issue" name="Resolve Flagged Issue"/>
+    <bpmn:task id="send_confirmation" name="Send Ready-to-Start Confirmation"/>
+    <bpmn:task id="setup_accounts" name="Set Up System Accounts"/>
+    <bpmn:task id="record_it" name="Record IT Completion"/>
+    <bpmn:task id="prepare_workspace" name="Prepare Workspace"/>
+    <bpmn:task id="record_facilities" name="Record Facilities Completion"/>
+    <bpmn:exclusiveGateway id="split_complete" name="Documentation Complete?" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="join_rework" name="Recheck Documentation" gatewayDirection="converging"/>
+    <bpmn:parallelGateway id="split_parallel" name="Forward to Departments" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="join_parallel" name="Both Completions Recorded" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="split_outcome" name="Any Issues Flagged?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="start_onboarding" targetRef="register_request"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="register_request" targetRef="join_rework"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="join_rework" targetRef="check_docs"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="check_docs" targetRef="split_complete"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="split_complete" targetRef="notify_incomplete" name="Incomplete">
       <bpmn:conditionExpression>Incomplete</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf5" sourceRef="split_complete" targetRef="Event_0nlwrzi" name="Complete">
+    <bpmn:sequenceFlow id="sf7" sourceRef="split_complete" targetRef="split_parallel" name="Complete">
       <bpmn:conditionExpression>Complete</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0ow98o8" sourceRef="notify_incomplete" targetRef="Event_14lh997"/>
-    <bpmn:sequenceFlow id="Flow_0d47nm4" sourceRef="Event_0nlwrzi" targetRef="Event_1dopi8a"/>
-    <bpmn:sequenceFlow id="Flow_0z1tv02" sourceRef="Event_1dopi8a" targetRef="evaluate_thesis"/>
-    <bpmn:sequenceFlow id="sf9" sourceRef="evaluate_thesis" targetRef="split_outcome"/>
-    <bpmn:sequenceFlow id="sf10" sourceRef="split_outcome" targetRef="issue_grade" name="Pass">
-      <bpmn:conditionExpression>Pass</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="sf8" sourceRef="notify_incomplete" targetRef="join_rework"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="split_parallel" targetRef="setup_accounts"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="split_parallel" targetRef="prepare_workspace"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="setup_accounts" targetRef="record_it"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="record_it" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="prepare_workspace" targetRef="record_facilities"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="record_facilities" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="join_parallel" targetRef="review_outcomes"/>
+    <bpmn:sequenceFlow id="sf16" sourceRef="review_outcomes" targetRef="split_outcome"/>
+    <bpmn:sequenceFlow id="sf17" sourceRef="split_outcome" targetRef="resolve_issue" name="One or more issues flagged">
+      <bpmn:conditionExpression>One or more issues flagged</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf11" sourceRef="split_outcome" targetRef="send_rejection" name="Fail">
-      <bpmn:conditionExpression>Fail</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="sf18" sourceRef="split_outcome" targetRef="send_confirmation" name="All completions confirmed">
+      <bpmn:conditionExpression>All completions confirmed</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf12" sourceRef="issue_grade" targetRef="notify_pass"/>
-    <bpmn:sequenceFlow id="sf13" sourceRef="notify_pass" targetRef="end_exam_pass"/>
-    <bpmn:sequenceFlow id="sf14" sourceRef="send_rejection" targetRef="end_exam_fail"/>
+    <bpmn:sequenceFlow id="sf19" sourceRef="resolve_issue" targetRef="review_outcomes"/>
+    <bpmn:sequenceFlow id="sf20" sourceRef="send_confirmation" targetRef="end_confirmed"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
-      <bpmndi:BPMNShape id="actor_student_pool_di" bpmnElement="actor_student_pool" isHorizontal="true">
+      <bpmndi:BPMNShape id="actor_hr_pool_di" bpmnElement="actor_hr_pool" isHorizontal="true">
         <dc:Bounds x="10" y="20" width="560" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="actor_university_pool_di" bpmnElement="actor_university_pool" isHorizontal="true">
-        <dc:Bounds x="10" y="220" width="2080" height="320"/>
+      <bpmndi:BPMNShape id="actor_onboarding_pool_di" bpmnElement="actor_onboarding_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="220" width="2650" height="480"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="student_di" bpmnElement="student" isHorizontal="true">
+      <bpmndi:BPMNShape id="hr_officer_di" bpmnElement="hr_officer" isHorizontal="true">
         <dc:Bounds x="40" y="20" width="530" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="admin_office_di" bpmnElement="admin_office" isHorizontal="true">
-        <dc:Bounds x="40" y="220" width="2050" height="160"/>
+      <bpmndi:BPMNShape id="coordinator_di" bpmnElement="coordinator" isHorizontal="true">
+        <dc:Bounds x="40" y="220" width="2620" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="exam_board_di" bpmnElement="exam_board" isHorizontal="true">
-        <dc:Bounds x="40" y="380" width="2050" height="160"/>
+      <bpmndi:BPMNShape id="it_dept_di" bpmnElement="it_dept" isHorizontal="true">
+        <dc:Bounds x="40" y="380" width="2620" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="start_student_di" bpmnElement="start_student">
+      <bpmndi:BPMNShape id="facilities_di" bpmnElement="facilities" isHorizontal="true">
+        <dc:Bounds x="40" y="540" width="2620" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_hr_di" bpmnElement="start_hr">
+        <dc:Bounds x="132" y="42" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_hr_confirmed_di" bpmnElement="end_hr_confirmed">
         <dc:Bounds x="132" y="82" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="submit_thesis_di" bpmnElement="submit_thesis">
+      <bpmndi:BPMNShape id="collect_docs_di" bpmnElement="collect_docs">
+        <dc:Bounds x="100" y="100" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_request_di" bpmnElement="submit_request">
         <dc:Bounds x="290" y="60" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="start_admin_di" bpmnElement="start_admin">
+      <bpmndi:BPMNShape id="start_onboarding_di" bpmnElement="start_onboarding">
         <dc:Bounds x="132" y="282" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_14lh997_di" bpmnElement="Event_14lh997">
-        <dc:Bounds x="892" y="282" width="36" height="36"/>
+      <bpmndi:BPMNShape id="end_confirmed_di" bpmnElement="end_confirmed">
+        <dc:Bounds x="2412" y="282" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0nlwrzi_di" bpmnElement="Event_0nlwrzi">
-        <dc:Bounds x="702" y="255" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="notify_incomplete_di" bpmnElement="notify_incomplete">
-        <dc:Bounds x="670" y="286" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="check_completeness_di" bpmnElement="check_completeness">
+      <bpmndi:BPMNShape id="register_request_di" bpmnElement="register_request">
         <dc:Bounds x="290" y="260" width="100" height="80"/>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_docs_di" bpmnElement="check_docs">
+        <dc:Bounds x="670" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_incomplete_di" bpmnElement="notify_incomplete">
+        <dc:Bounds x="1050" y="233" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_parallel_di" bpmnElement="split_parallel" isMarkerVisible="true">
+        <dc:Bounds x="1075" y="301" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_outcomes_di" bpmnElement="review_outcomes">
+        <dc:Bounds x="1810" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="resolve_issue_di" bpmnElement="resolve_issue">
+        <dc:Bounds x="2190" y="233" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_confirmation_di" bpmnElement="send_confirmation">
+        <dc:Bounds x="2190" y="286" width="100" height="80"/>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="split_complete_di" bpmnElement="split_complete" isMarkerVisible="true">
+        <dc:Bounds x="885" y="275" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="join_rework_di" bpmnElement="join_rework" isMarkerVisible="true">
         <dc:Bounds x="505" y="275" width="50" height="50"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1dopi8a_di" bpmnElement="Event_1dopi8a">
-        <dc:Bounds x="892" y="442" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_exam_pass_di" bpmnElement="end_exam_pass">
-        <dc:Bounds x="1842" y="442" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_exam_fail_di" bpmnElement="end_exam_fail">
-        <dc:Bounds x="1652" y="415" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="notify_pass_di" bpmnElement="notify_pass">
-        <dc:Bounds x="1620" y="446" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="evaluate_thesis_di" bpmnElement="evaluate_thesis">
-        <dc:Bounds x="1050" y="420" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="issue_grade_di" bpmnElement="issue_grade">
-        <dc:Bounds x="1430" y="393" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="send_rejection_di" bpmnElement="send_rejection">
-        <dc:Bounds x="1430" y="446" width="100" height="80"/>
+      <bpmndi:BPMNShape id="join_parallel_di" bpmnElement="join_parallel" isMarkerVisible="true">
+        <dc:Bounds x="1645" y="275" width="50" height="50"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="split_outcome_di" bpmnElement="split_outcome" isMarkerVisible="true">
-        <dc:Bounds x="1265" y="435" width="50" height="50"/>
+        <dc:Bounds x="2025" y="275" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="setup_accounts_di" bpmnElement="setup_accounts">
+        <dc:Bounds x="1240" y="420" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_it_di" bpmnElement="record_it">
+        <dc:Bounds x="1430" y="420" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="prepare_workspace_di" bpmnElement="prepare_workspace">
+        <dc:Bounds x="1240" y="580" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_facilities_di" bpmnElement="record_facilities">
+        <dc:Bounds x="1430" y="580" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
-        <di:waypoint x="168" y="100"/>
+        <di:waypoint x="168" y="60"/>
+        <di:waypoint x="229" y="60"/>
+        <di:waypoint x="229" y="100"/>
         <di:waypoint x="290" y="100"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
@@ -158,69 +195,109 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
         <di:waypoint x="555" y="300"/>
-        <di:waypoint x="612" y="300"/>
-        <di:waypoint x="612" y="326"/>
-        <di:waypoint x="670" y="326"/>
+        <di:waypoint x="670" y="300"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
-        <di:waypoint x="555" y="300"/>
-        <di:waypoint x="628" y="300"/>
-        <di:waypoint x="628" y="273"/>
-        <di:waypoint x="702" y="273"/>
+        <di:waypoint x="770" y="300"/>
+        <di:waypoint x="885" y="300"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ow98o8_di" bpmnElement="Flow_0ow98o8">
-        <di:waypoint x="770" y="326"/>
-        <di:waypoint x="831" y="326"/>
-        <di:waypoint x="831" y="300"/>
-        <di:waypoint x="892" y="300"/>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="935" y="300"/>
+        <di:waypoint x="992" y="300"/>
+        <di:waypoint x="992" y="273"/>
+        <di:waypoint x="1050" y="273"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0d47nm4_di" bpmnElement="Flow_0d47nm4">
-        <di:waypoint x="738" y="273"/>
-        <di:waypoint x="815" y="273"/>
-        <di:waypoint x="815" y="460"/>
-        <di:waypoint x="892" y="460"/>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="935" y="300"/>
+        <di:waypoint x="1005" y="300"/>
+        <di:waypoint x="1005" y="326"/>
+        <di:waypoint x="1075" y="326"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0z1tv02_di" bpmnElement="Flow_0z1tv02">
-        <di:waypoint x="928" y="460"/>
-        <di:waypoint x="1050" y="460"/>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="1100" y="233"/>
+        <di:waypoint x="1100" y="193"/>
+        <di:waypoint x="530" y="193"/>
+        <di:waypoint x="530" y="275"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
-        <di:waypoint x="1150" y="460"/>
-        <di:waypoint x="1265" y="460"/>
+        <di:waypoint x="1125" y="326"/>
+        <di:waypoint x="1182" y="326"/>
+        <di:waypoint x="1182" y="460"/>
+        <di:waypoint x="1240" y="460"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
-        <di:waypoint x="1315" y="460"/>
-        <di:waypoint x="1372" y="460"/>
-        <di:waypoint x="1372" y="433"/>
-        <di:waypoint x="1430" y="433"/>
+        <di:waypoint x="1125" y="326"/>
+        <di:waypoint x="1182" y="326"/>
+        <di:waypoint x="1182" y="620"/>
+        <di:waypoint x="1240" y="620"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
-        <di:waypoint x="1315" y="460"/>
-        <di:waypoint x="1372" y="460"/>
-        <di:waypoint x="1372" y="486"/>
-        <di:waypoint x="1430" y="486"/>
+        <di:waypoint x="1340" y="460"/>
+        <di:waypoint x="1430" y="460"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
-        <di:waypoint x="1530" y="433"/>
-        <di:waypoint x="1575" y="433"/>
-        <di:waypoint x="1575" y="486"/>
-        <di:waypoint x="1620" y="486"/>
+        <di:waypoint x="1530" y="460"/>
+        <di:waypoint x="1587" y="460"/>
+        <di:waypoint x="1587" y="300"/>
+        <di:waypoint x="1645" y="300"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
-        <di:waypoint x="1720" y="486"/>
-        <di:waypoint x="1781" y="486"/>
-        <di:waypoint x="1781" y="460"/>
-        <di:waypoint x="1842" y="460"/>
+        <di:waypoint x="1340" y="620"/>
+        <di:waypoint x="1430" y="620"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
-        <di:waypoint x="1530" y="486"/>
-        <di:waypoint x="1591" y="486"/>
-        <di:waypoint x="1591" y="433"/>
-        <di:waypoint x="1652" y="433"/>
+        <di:waypoint x="1530" y="620"/>
+        <di:waypoint x="1587" y="620"/>
+        <di:waypoint x="1587" y="300"/>
+        <di:waypoint x="1645" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="1695" y="300"/>
+        <di:waypoint x="1810" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf16_di" bpmnElement="sf16">
+        <di:waypoint x="1910" y="300"/>
+        <di:waypoint x="2025" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf17_di" bpmnElement="sf17">
+        <di:waypoint x="2075" y="300"/>
+        <di:waypoint x="2132" y="300"/>
+        <di:waypoint x="2132" y="273"/>
+        <di:waypoint x="2190" y="273"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf18_di" bpmnElement="sf18">
+        <di:waypoint x="2075" y="300"/>
+        <di:waypoint x="2132" y="300"/>
+        <di:waypoint x="2132" y="326"/>
+        <di:waypoint x="2190" y="326"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf19_di" bpmnElement="sf19">
+        <di:waypoint x="2240" y="233"/>
+        <di:waypoint x="2240" y="193"/>
+        <di:waypoint x="1860" y="193"/>
+        <di:waypoint x="1860" y="260"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf20_di" bpmnElement="sf20">
+        <di:waypoint x="2290" y="326"/>
+        <di:waypoint x="2351" y="326"/>
+        <di:waypoint x="2351" y="300"/>
+        <di:waypoint x="2412" y="300"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
         <di:waypoint x="340" y="140"/>
         <di:waypoint x="150" y="282"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="1100" y="233"/>
+        <di:waypoint x="150" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
+        <di:waypoint x="150" y="180"/>
+        <di:waypoint x="530" y="275"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf4_di" bpmnElement="mf4">
+        <di:waypoint x="2240" y="286"/>
+        <di:waypoint x="150" y="118"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
