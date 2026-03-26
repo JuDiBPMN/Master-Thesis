@@ -471,53 +471,106 @@ def extract_bpmn_few_shot(process_description, case_name, few_shot_dir, output_f
 Here are {len(cases)} example(s) showing process descriptions and their correct BPMN JSON outputs:
 
 {few_shot_block}
---- NOW EXTRACT ---
-Process description: {process_description}
 
-### Rules
-1. Each distinct action by a single lane = one task. Never merge actions.
-2. Decision points (if/else, approved/rejected) = EXCLUSIVE gateway (XOR). Add a gateway node, not just branching flows.
-3. Simultaneous/parallel actions ("at the same time", "simultaneously", "while") = PARALLEL gateway (AND). Add both a split and a join gateway.
-4. Every pool must have exactly one startEvent and one endEvent.
-5. Gateway IDs must appear in sequence_flows; tasks that are "behind" a gateway connect TO the gateway, not directly to each other.
-6. NEVER leave gateways empty if the process has decisions or parallelism.
+Your goal is NOT to simplify the process, but to faithfully model ALL BPMN elements:
+- pools
+- lanes
+- tasks
+- events
+- gateways
+- sequence flows
+- message flows
 
-## Signal words → gateway type
-- "if", "approved", "rejected", "otherwise", "either" → exclusive (XOR)
-- "simultaneously", "at the same time", "in parallel", "while" → parallel (AND)
-- "one of", "any of" → inclusive (OR)
+--- CORE MODELING PRINCIPLES ---
 
-- A parallel gateway ALWAYS comes in pairs: one split (1 in, many out) AND one join (many in, 1 out)
-- An exclusive split (if/else) must have exactly 2 outgoing flows with conditions, one per outcome
-- Never use an exclusive gateway to join parallel branches — use a parallel gateway join
-- For each out exclusive split there must be an exclusive join, and for each parallel split there must be a parallel join.
-- Give the gateway a meaningfull name like "gateway_approved_split" or "gateway_approved_join" to make it clear which split and join belong together and what the gateway represents. Never name them "gateway1", "gateway2", etc.
+1. MODEL THE FULL PROCESS (NO SIMPLIFICATION)
+Do not omit steps. Do not merge tasks. Do not reduce structure.
 
-- If a task produces a document or artifact mentioned in the description, add it to "data" and create a data_association with type "output"
-- For sequence flow: A task should have one incoming sequence flow and one outgoing sequence flow, except for the start and end event in the pool. 
-- Task "name" should be a short verb phrase only (e.g. "Assess request"). Never include the lane's name in the task name.
-- If a task consumes a document, add a data_association with type "input"
-- Common signals for data objects: "record X", "submit a X", "send a X", "initiate a X", 
-  "receives a X", "notified of X" → these produce or consume data objects- An exclusive gateway splits AFTER the decision task. The gateway's "from" is the task that makes 
-  the decision, "to" lists the outcome branches. Never leave "from" empty.
-- data_association "from"/"to" values must exactly match an id already defined in the "tasks" or 
-  "data" arrays. Never invent new ids.
+2. POOLS AND LANES (CRITICAL)
+- Each organisation = one pool
+- Each role/actor = one lane inside its organisation
+- Cross-organisation interaction MUST use message flows
+- NEVER connect sequence flows across pools
 
-  ## Pools vs Lanes
-- A pool = an organisation. A lane = a role/person within that organisation.
-- If actors work for the same organisation → ONE pool, each actor is a lane.
-- Never create one pool per role or person. Pool names are organisations, not roles.
+3. MESSAGE FLOWS VS TASKS (VERY IMPORTANT)
+- If information is sent between pools → use message flows
+- Do NOT model communication as tasks
+- Use:
+  - intermediateThrowEvent for sending
+  - intermediateCatchEvent for receiving
 
-## Example:
-""pools": [ "id": "company", "name": "Company" ],
-"lanes": [
-  "id": "employee", "name": "Employee", "pool": "company",
-   "id": "manager",  "name": "Manager",  "pool": "company" ]
-## Wrong example (never do this):
-"pools": [ "id": "employee_pool", "name": "Employee Pool" ,  "id": "manager_pool", "name": "Manager Pool" ]
+4. EVENTS ARE REQUIRED
+Each pool MUST contain:
+- at least one startEvent
+- at least one endEvent
+
+Use message events when communication occurs.
+
+5. GATEWAYS (STRICT RULES)
+- Decisions → exclusiveGateway (XOR)
+- Parallel work → parallelGateway (AND)
+
+CRITICAL:
+- Parallel always has BOTH:
+  - a split (diverging)
+  - a join (converging)
+
+- If two branches must finish before continuing → you MUST use a parallel join
+
+6. SEQUENCE FLOW STRUCTURE (CRITICAL)
+- Tasks must NOT be isolated
+- Each task must be part of a continuous flow
+- Typical structure:
+  startEvent → tasks → gateways → tasks → endEvent
+
+- A task should:
+  - have 1 incoming flow
+  - have 1 outgoing flow
+  (except when directly after startEvent or before endEvent)
+
+7. CORRECT FLOW BEFORE DECISIONS
+- Do NOT decide before all required inputs are available
+- If multiple evaluations happen (e.g. medical + insurance):
+  → first split in parallel
+  → then join
+  → THEN make decision
+
+8. NO FAKE STRUCTURE
+- Do NOT invent flows just to satisfy constraints
+- Structure must reflect real process logic
+
+When one pool sends information to another pool, model this as:
+(1) an intermediateThrowEvent in the sending pool,
+(2) a message_flow to an intermediateCatchEvent or startEvent in the receiving pool,
+(3) separate sequence_flows inside each pool.
+After a sending event, the sending pool may end locally. Never connect a sequence_flow to a node in another pool.
+
+Do not connect a notification task or event directly to an endEvent in another pool. The sender must end in its own pool, while the receiver catches the message in the other pool and continues or ends there.
+
+--- FINAL SELF-CHECK (MANDATORY) ---
+
+Before outputting JSON, verify:
+
+- Are there multiple pools if multiple organisations exist?
+- Are all cross-pool interactions modeled as message flows (NOT sequence flows)?
+- Does each pool have a startEvent AND endEvent?
+- Are parallel branches correctly split AND joined?
+- Are decisions only made AFTER required information is available?
+- Are tasks connected in a continuous flow (no isolated tasks)?
+- Are message events used instead of tasks for communication?
+
+If ANY of these are violated, fix the model before output.
+
+---
+
+Return ONLY valid JSON matching the schema.
+Do not explain anything.
 ## Process description
 {process_description}
 
+Before returning, verify: does every task have an incoming AND outgoing sequence_flow entry? If not, add the missing flows now.
+Message flows may only connect nodes that belong to different pools. Never use a message flow between two nodes in the same pool. Communication within the same pool must be modeled with sequence flows.
+Sequence flows may never cross pool boundaries. Cross-pool communication must be modeled with message flows between a sending node in one pool and a receiving event in another pool.
 Return a JSON object matching the schema exactly. Do not merge tasks. Do not skip gateways."""
     
     
@@ -602,7 +655,7 @@ Output the complete corrected JSON. Do not omit any part of the model."""
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    case_name = "case_12" # <-- Just change this to run a different case with few-shot examples
+    case_name = "case_21" # <-- Just change this to run a different case with few-shot examples
 
     SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -633,7 +686,7 @@ if __name__ == "__main__":
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
             retries=0,
-            case_ids=[11, 13, 14] # choose cases for few-shot examples
+            case_ids=[17, 13, 14] # choose cases for few-shot examples
         )
 
         if bpmn_json:

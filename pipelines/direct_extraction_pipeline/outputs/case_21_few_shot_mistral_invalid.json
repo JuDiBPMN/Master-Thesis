@@ -1,0 +1,289 @@
+{
+  "pools": [
+    {
+      "id": "gp_pool",
+      "name": "GP"
+    },
+    {
+      "id": "hospital_pool",
+      "name": "Hospital"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "gp",
+      "name": "GP",
+      "pool": "gp_pool"
+    },
+    {
+      "id": "admissions_clerk",
+      "name": "Admissions Clerk",
+      "pool": "hospital_pool"
+    },
+    {
+      "id": "specialist",
+      "name": "Specialist",
+      "pool": "hospital_pool"
+    },
+    {
+      "id": "insurance_officer",
+      "name": "Insurance Officer",
+      "pool": "hospital_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_referral",
+      "name": "Submit Referral Request",
+      "type": "task",
+      "lane": "gp"
+    },
+    {
+      "id": "register_referral",
+      "name": "Register Referral",
+      "type": "task",
+      "lane": "admissions_clerk"
+    },
+    {
+      "id": "check_documentation",
+      "name": "Check Documentation",
+      "type": "task",
+      "lane": "admissions_clerk"
+    },
+    {
+      "id": "notify_missing_docs",
+      "name": "Notify GP of Missing Docs",
+      "type": "task",
+      "lane": "admissions_clerk"
+    },
+    {
+      "id": "forward_referral",
+      "name": "Forward Referral to Specialist and Insurance",
+      "type": "task",
+      "lane": "admissions_clerk"
+    },
+    {
+      "id": "conduct_assessment",
+      "name": "Conduct Medical Assessment",
+      "type": "task",
+      "lane": "specialist"
+    },
+    {
+      "id": "record_verdict",
+      "name": "Record Verdict",
+      "type": "task",
+      "lane": "specialist"
+    },
+    {
+      "id": "verify_coverage",
+      "name": "Verify Coverage",
+      "type": "task",
+      "lane": "insurance_officer"
+    },
+    {
+      "id": "record_coverage_verdict",
+      "name": "Record Coverage Verdict",
+      "type": "task",
+      "lane": "insurance_officer"
+    },
+    {
+      "id": "review_verdicts",
+      "name": "Review Verdicts",
+      "type": "task",
+      "lane": "admissions_clerk"
+    },
+    {
+      "id": "send_rejection_notice",
+      "name": "Send Rejection Notice to GP",
+      "type": "task",
+      "lane": "admissions_clerk"
+    },
+    {
+      "id": "send_treatment_approval",
+      "name": "Send Treatment Approval to GP",
+      "type": "task",
+      "lane": "admissions_clerk"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_gp",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "gp",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_gp_rejected",
+      "name": "Rejection Sent",
+      "type": "endEvent",
+      "lane": "gp",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_hospital",
+      "name": "Referral Received",
+      "type": "startEvent",
+      "lane": "admissions_clerk",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_hospital_rejected",
+      "name": "Rejection Sent",
+      "type": "endEvent",
+      "lane": "admissions_clerk",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_hospital_approved",
+      "name": "Approval Sent",
+      "type": "endEvent",
+      "lane": "admissions_clerk",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_specialist",
+      "name": "Referral Received",
+      "type": "startEvent",
+      "lane": "specialist",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "start_insurance",
+      "name": "Referral Received",
+      "type": "startEvent",
+      "lane": "insurance_officer",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_docs",
+      "name": "Documentation Complete?",
+      "type": "exclusiveGateway",
+      "lane": "admissions_clerk",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_verdicts",
+      "name": "Both Verdicts Received",
+      "type": "parallelGateway",
+      "lane": "admissions_clerk",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_gp",
+      "to": "submit_referral"
+    },
+    {
+      "id": "sf2",
+      "from": "submit_referral",
+      "to": "register_referral"
+    },
+    {
+      "id": "sf3",
+      "from": "register_referral",
+      "to": "check_documentation"
+    },
+    {
+      "id": "sf4",
+      "from": "check_documentation",
+      "to": "split_docs"
+    },
+    {
+      "id": "sf5",
+      "from": "split_docs",
+      "to": "notify_missing_docs",
+      "condition": "Documentation incomplete"
+    },
+    {
+      "id": "sf6",
+      "from": "split_docs",
+      "to": "forward_referral",
+      "condition": "Documentation complete"
+    },
+    {
+      "id": "sf7",
+      "from": "notify_missing_docs",
+      "to": "end_gp_rejected"
+    },
+    {
+      "id": "sf8",
+      "from": "forward_referral",
+      "to": "conduct_assessment"
+    },
+    {
+      "id": "sf9",
+      "from": "conduct_assessment",
+      "to": "record_verdict"
+    },
+    {
+      "id": "sf10",
+      "from": "record_verdict",
+      "to": "join_verdicts"
+    },
+    {
+      "id": "sf11",
+      "from": "verify_coverage",
+      "to": "join_verdicts"
+    },
+    {
+      "id": "sf12",
+      "from": "join_verdicts",
+      "to": "review_verdicts"
+    },
+    {
+      "id": "sf13",
+      "from": "review_verdicts",
+      "to": "send_rejection_notice",
+      "condition": "Negative verdict"
+    },
+    {
+      "id": "sf14",
+      "from": "review_verdicts",
+      "to": "send_treatment_approval",
+      "condition": "Positive verdicts"
+    },
+    {
+      "id": "sf15",
+      "from": "send_rejection_notice",
+      "to": "end_hospital_rejected"
+    },
+    {
+      "id": "sf16",
+      "from": "send_treatment_approval",
+      "to": "end_hospital_approved"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "forward_referral",
+      "to": "start_specialist",
+      "name": "Referral Package"
+    },
+    {
+      "id": "mf2",
+      "from": "forward_referral",
+      "to": "start_insurance",
+      "name": "Referral Package"
+    },
+    {
+      "id": "mf3",
+      "from": "review_verdicts",
+      "to": "end_hospital_approved",
+      "name": "Approval Verdicts"
+    },
+    {
+      "id": "mf4",
+      "from": "review_verdicts",
+      "to": "end_hospital_rejected",
+      "name": "Rejection Verdicts"
+    }
+  ],
+  "data": [],
+  "data_associations": []
+}

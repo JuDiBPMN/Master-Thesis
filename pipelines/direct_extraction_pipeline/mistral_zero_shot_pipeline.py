@@ -18,8 +18,8 @@ def load_model():
         llm = Llama.from_pretrained(
             repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
             filename="mistral-7b-instruct-v0.2.Q5_K_M.gguf",
-            n_ctx=10000,
-            n_gpu_layers=1,
+            n_ctx=8192,
+            n_gpu_layers=-1,
             verbose=False
         )
     return llm
@@ -454,7 +454,7 @@ Provide concrete names for all tasks and actors based on the process description
                 "schema": BPMN_SCHEMA
             },
             temperature=0.0,
-            max_tokens=10000
+            max_tokens=8192
         )
         
         if isinstance(result, dict) and 'choices' in result:
@@ -499,7 +499,7 @@ import sys
 if __name__ == "__main__":
     # ---------------------------------------------------------
     # CONFIGURATION: Hier gewoon case namen invullen 
-    case_name = "case_12" 
+    case_name = "case_21" 
     # ---------------------------------------------------------
 
     # 1. Path Discovery (Stays Partner-Proof & Subfolder-Aware)
