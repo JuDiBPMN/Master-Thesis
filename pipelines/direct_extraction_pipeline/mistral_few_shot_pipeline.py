@@ -125,10 +125,9 @@ BPMN_SCHEMA = {
                     "id":   {"type": "string"},
                     "from": {"type": "string"},
                     "to":   {"type": "string"},
-                    "from_pool": {"type": "string", "description": "The pool id of the sending node."},
-                    "to_pool":   {"type": "string", "description": "The pool id of the receiving node."}
+                    "name": {"type": "string"}
                 },
-                "required": ["id", "from", "to", "from_pool", "to_pool"],
+                "required": ["id", "from", "to", "name"],
                 "additionalProperties": False
             }
         },
@@ -500,11 +499,9 @@ Do not omit steps. Do not merge tasks. Do not reduce structure.
 3. MESSAGE FLOWS VS TASKS (VERY IMPORTANT)
 - If information is sent between pools → use message flows
 - Do NOT model communication as tasks
-- from_pool and to_pool in message_flows cannot have the same name (even if they are the same pool) — if communication happens within the same pool, use sequence flows instead
 - Use:
   - intermediateThrowEvent for sending
   - intermediateCatchEvent for receiving
-
 
 
 4. EVENTS ARE REQUIRED
@@ -541,7 +538,6 @@ CRITICAL:
   - have 1 incoming flow
   - have 1 outgoing flow
 
-
 7. CORRECT FLOW BEFORE DECISIONS
 - Do NOT decide before all required inputs are available
 - If multiple evaluations happen (e.g. medical + insurance):
@@ -565,7 +561,6 @@ Before outputting JSON, verify:
 - Are all cross-pool interactions modeled as message flows (NOT sequence flows)?
 - Are there any message flows within the same pool? If so, change them to sequence flows.
 - Are parallel branches correctly split AND joined?
-- Does each pool have at least one endEvent?
 - Are decisions only made AFTER required information is available?
 - Are tasks connected in a continuous flow (no isolated tasks)?
 - Are message events used instead of tasks for communication?
@@ -701,7 +696,7 @@ if __name__ == "__main__":
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
             retries=0,
-            case_ids=[13, 14] # choose cases for few-shot examples
+            case_ids=[17, 13, 14] # choose cases for few-shot examples
         )
 
         if bpmn_json:

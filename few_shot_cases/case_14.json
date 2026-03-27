@@ -60,12 +60,12 @@
       { "id": "sf13",         "from": "notify_support",     "to": "end_dev_fixed" }
     ],
     "message_flows": [
-      { "id": "mf1",          "from": "submit_bug",        "to": "start_support",    "from_pool": "client_pool",         "to_pool": "support_pool" },
-      { "id": "mf2",          "from": "escalate_bug",      "to": "start_dev",       "from_pool": "support_pool",        "to_pool": "dev_pool" },
-      { "id": "Flow_0bb41et", "from": "notify_future",     "to": "Event_1u7kzps",   "from_pool": "support_pool",        "to_pool": "client_pool" },
-      { "id": "Flow_1dokfny", "from": "confirm_resolution","to": "Event_1h5fzi2",   "from_pool": "support_pool",        "to_pool": "client_pool" },
-      { "id": "Flow_1jkbq1y", "from": "close_report",      "to": "Event_1pftiba",   "from_pool": "dev_pool",            "to_pool": "support_pool" },
-      { "id": "Flow_0cector", "from": "notify_support",    "to": "Event_1pftiba",   "from_pool": "dev_pool",            "to_pool": "support_pool" }
+      { "id": "mf1",          "from": "submit_bug",        "to": "start_support",   "name": "Bug Report" },
+      { "id": "mf2",          "from": "escalate_bug",      "to": "start_dev",       "name": "Escalated Bug Report" },
+      { "id": "Flow_0bb41et", "from": "notify_future",     "to": "Event_1u7kzps",   "name": "Future Fix Notification" },
+      { "id": "Flow_1dokfny", "from": "confirm_resolution","to": "Event_1h5fzi2",   "name": "Resolution Confirmation" },
+      { "id": "Flow_1jkbq1y", "from": "close_report",      "to": "Event_1pftiba",   "name": "Closure Notification" },
+      { "id": "Flow_0cector", "from": "notify_support",    "to": "Event_1pftiba",   "name": "Fix Notification" }
     ],
     "data": [],
     "data_associations": []

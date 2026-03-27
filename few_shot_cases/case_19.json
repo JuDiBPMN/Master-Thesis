@@ -55,12 +55,12 @@
       { "id": "sf18", "from": "issue_confirmation",     "to": "end_recruiter" }
     ],
     "message_flows": [
-      { "id": "mf1", "from": "post_vacancy",       "to": "start_recruiter",         "from_pool": "client_pool",         "to_pool": "recruiter_pool" },
-      { "id": "mf2", "from": "submit_profiles",    "to": "review_profiles",         "from_pool": "recruiter_pool",      "to_pool": "client_pool" },
-      { "id": "mf3", "from": "review_profiles",    "to": "catch_profile_decision",  "from_pool": "client_pool",         "to_pool": "recruiter_pool" },
-      { "id": "mf4", "from": "schedule_interviews","to": "conduct_interviews",       "from_pool": "recruiter_pool",      "to_pool": "client_pool" },
-      { "id": "mf5", "from": "conduct_interviews", "to": "catch_hiring_decision",   "from_pool": "client_pool",         "to_pool": "recruiter_pool" },
-      { "id": "mf6", "from": "issue_confirmation", "to": "end_client",              "from_pool": "recruiter_pool",      "to_pool": "client_pool" }
+      { "id": "mf1", "from": "post_vacancy",       "to": "start_recruiter",         "name": "Job Vacancy" },
+      { "id": "mf2", "from": "submit_profiles",    "to": "review_profiles",         "name": "Candidate Profiles" },
+      { "id": "mf3", "from": "review_profiles",    "to": "catch_profile_decision",  "name": "Profile Decision" },
+      { "id": "mf4", "from": "schedule_interviews","to": "conduct_interviews",       "name": "Interview Schedule" },
+      { "id": "mf5", "from": "conduct_interviews", "to": "catch_hiring_decision",   "name": "Hiring Decision" },
+      { "id": "mf6", "from": "issue_confirmation", "to": "end_client",              "name": "Placement Confirmation" }
     ],
     "data": [],
     "data_associations": []

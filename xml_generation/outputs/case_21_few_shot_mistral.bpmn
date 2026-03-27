@@ -2,307 +2,274 @@
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
   <bpmn:collaboration id="Collaboration_1">
     <bpmn:participant id="actor_gp_pool" name="GP" processRef="Process_gp_pool"/>
-    <bpmn:participant id="actor_hospital_pool" name="Hospital" processRef="Process_hospital_pool"/>
-    <bpmn:messageFlow id="mf1" name="Referral Request" sourceRef="submit_referral" targetRef="start_hospital"/>
-    <bpmn:messageFlow id="mf2" name="Rejection Notice" sourceRef="notify_missing_docs" targetRef="end_gp_rejected"/>
-    <bpmn:messageFlow id="mf3" name="Referral Package" sourceRef="forward_referral" targetRef="start_specialist"/>
-    <bpmn:messageFlow id="mf4" name="Referral Package" sourceRef="forward_referral" targetRef="start_insurance"/>
-    <bpmn:messageFlow id="mf5" name="Specialist Verdict" sourceRef="end_specialist_verdict" targetRef="join_verdicts"/>
-    <bpmn:messageFlow id="mf6" name="Insurance Verdict" sourceRef="end_insurance_verdict" targetRef="join_verdicts"/>
+    <bpmn:participant id="actor_admissions_pool" name="Admissions Office" processRef="Process_admissions_pool"/>
+    <bpmn:participant id="actor_specialist_pool" name="Specialist Department" processRef="Process_specialist_pool"/>
+    <bpmn:participant id="actor_insurance_pool" name="Insurance Office" processRef="Process_insurance_pool"/>
+    <bpmn:messageFlow id="mf1" name="" sourceRef="submit_referral" targetRef="start_admissions"/>
+    <bpmn:messageFlow id="Flow_1j3jx33" name="" sourceRef="notify_missing_docs" targetRef="Event_1q3jx2t"/>
+    <bpmn:messageFlow id="Flow_1j3jx34" name="" sourceRef="send_rejection" targetRef="Event_1q3jx2p"/>
+    <bpmn:messageFlow id="Flow_1j3jx35" name="" sourceRef="send_approval" targetRef="Event_0q3jx2r"/>
+    <bpmn:messageFlow id="Flow_1j3jx36" name="" sourceRef="send_approval" targetRef="Event_0q3jx2q"/>
     <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="submit_referral" targetRef="register_referral"/>
-    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="notify_missing_docs" targetRef="end_gp_rejected"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_gp_pool" name="GP" isExecutable="false">
     <bpmn:laneSet id="LaneSet_gp_pool">
       <bpmn:lane id="gp" name="GP">
         <bpmn:flowNodeRef>start_gp</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_gp_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1q3jx2s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0q3jx2s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1q3jx2t</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>submit_referral</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:startEvent id="start_gp" name="Start"/>
-    <bpmn:endEvent id="end_gp_rejected" name="Rejection Sent"/>
+    <bpmn:endEvent id="Event_1q3jx2s" name="Receive Rejection"/>
+    <bpmn:endEvent id="Event_0q3jx2s" name="Receive Approval"/>
+    <bpmn:intermediateCatchEvent id="Event_1q3jx2t" name="Receive Missing Docs Notification">
+      <bpmn:messageEventDefinition id="Event_1q3jx2t_def"/>
+    </bpmn:intermediateCatchEvent>
     <bpmn:task id="submit_referral" name="Submit Referral Request"/>
-    <bpmn:sequenceFlow id="sf1" sourceRef="start_gp" targetRef="submit_referral"/>
+    <bpmn:sequenceFlow id="Flow_1j3jx2s" sourceRef="start_gp" targetRef="submit_referral"/>
+    <bpmn:sequenceFlow id="Flow_1j3jx2t" sourceRef="submit_referral" targetRef="Event_1q3jx2s"/>
   </bpmn:process>
-  <bpmn:process id="Process_hospital_pool" name="Hospital" isExecutable="false">
-    <bpmn:laneSet id="LaneSet_hospital_pool">
+  <bpmn:process id="Process_admissions_pool" name="Admissions Office" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_admissions_pool">
       <bpmn:lane id="admissions_clerk" name="Admissions Clerk">
-        <bpmn:flowNodeRef>start_hospital</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_hospital_rejected</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_hospital_approved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0q3jx2r</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0q3jx2q</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1q3jx2p</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1q3jx2o</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>start_admissions</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_admissions_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_admissions</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>register_referral</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>check_documentation</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>notify_missing_docs</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>forward_referral</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>review_verdicts</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>send_rejection_notice</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>send_approval_notice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_rejection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_approval</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>split_verdicts</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>join_verdicts</bpmn:flowNodeRef>
       </bpmn:lane>
-      <bpmn:lane id="specialist" name="Specialist">
-        <bpmn:flowNodeRef>start_specialist</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_specialist_verdict</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>conduct_assessment</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>record_verdict</bpmn:flowNodeRef>
-      </bpmn:lane>
-      <bpmn:lane id="insurance_officer" name="Insurance Officer">
-        <bpmn:flowNodeRef>start_insurance</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_insurance_verdict</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>verify_coverage</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>record_coverage_verdict</bpmn:flowNodeRef>
-      </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="start_hospital" name="Referral Received">
-      <bpmn:messageEventDefinition id="start_hospital_def"/>
+    <bpmn:intermediateCatchEvent id="Event_0q3jx2r" name="Receive Approval Verdict">
+      <bpmn:messageEventDefinition id="Event_0q3jx2r_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_0q3jx2q" name="Receive Coverage Verdict">
+      <bpmn:messageEventDefinition id="Event_0q3jx2q_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="Event_1q3jx2p" name="Receive Negative Verdict"/>
+    <bpmn:endEvent id="Event_1q3jx2o" name="Receive Positive Verdict"/>
+    <bpmn:startEvent id="start_admissions" name="Referral Received">
+      <bpmn:messageEventDefinition id="start_admissions_def"/>
     </bpmn:startEvent>
-    <bpmn:endEvent id="end_hospital_rejected" name="Rejection Sent"/>
-    <bpmn:endEvent id="end_hospital_approved" name="Approval Sent"/>
-    <bpmn:startEvent id="start_specialist" name="Referral Received">
-      <bpmn:messageEventDefinition id="start_specialist_def"/>
-    </bpmn:startEvent>
-    <bpmn:startEvent id="start_insurance" name="Referral Received">
-      <bpmn:messageEventDefinition id="start_insurance_def"/>
-    </bpmn:startEvent>
-    <bpmn:endEvent id="end_specialist_verdict" name="Verdict Recorded"/>
-    <bpmn:endEvent id="end_insurance_verdict" name="Coverage Verdict Recorded"/>
+    <bpmn:endEvent id="end_admissions_rejected" name="Rejection Sent"/>
+    <bpmn:endEvent id="end_admissions" name="End"/>
     <bpmn:task id="register_referral" name="Register Referral"/>
     <bpmn:task id="check_documentation" name="Check Documentation"/>
     <bpmn:task id="notify_missing_docs" name="Notify GP of Missing Docs"/>
-    <bpmn:task id="forward_referral" name="Forward Referral to Specialist and Insurance"/>
-    <bpmn:task id="conduct_assessment" name="Conduct Medical Assessment"/>
-    <bpmn:task id="record_verdict" name="Record Verdict"/>
-    <bpmn:task id="verify_coverage" name="Verify Coverage"/>
-    <bpmn:task id="record_coverage_verdict" name="Record Coverage Verdict"/>
+    <bpmn:task id="forward_referral" name="Forward Referral"/>
     <bpmn:task id="review_verdicts" name="Review Verdicts"/>
-    <bpmn:task id="send_rejection_notice" name="Send Rejection Notice to GP"/>
-    <bpmn:task id="send_approval_notice" name="Send Approval Notice to GP"/>
+    <bpmn:task id="send_rejection" name="Send Rejection Notice"/>
+    <bpmn:task id="send_approval" name="Send Treatment Approval"/>
     <bpmn:parallelGateway id="split_verdicts" name="Split Verdicts" gatewayDirection="diverging"/>
     <bpmn:parallelGateway id="join_verdicts" name="Join Verdicts" gatewayDirection="converging"/>
-    <bpmn:sequenceFlow id="sf3" sourceRef="register_referral" targetRef="check_documentation"/>
-    <bpmn:sequenceFlow id="sf4" sourceRef="check_documentation" targetRef="split_verdicts"/>
-    <bpmn:sequenceFlow id="sf5" sourceRef="split_verdicts" targetRef="notify_missing_docs" name="Missing Docs">
-      <bpmn:conditionExpression>Missing Docs</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_1j3jx2v" sourceRef="register_referral" targetRef="check_documentation"/>
+    <bpmn:sequenceFlow id="Flow_1j3jx2w" sourceRef="check_documentation" targetRef="split_verdicts"/>
+    <bpmn:sequenceFlow id="Flow_1j3jx2x" sourceRef="split_verdicts" targetRef="send_rejection" name="Negative verdict">
+      <bpmn:conditionExpression>Negative verdict</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf6" sourceRef="split_verdicts" targetRef="forward_referral" name="Docs Complete">
-      <bpmn:conditionExpression>Docs Complete</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf8" sourceRef="forward_referral" targetRef="start_specialist"/>
-    <bpmn:sequenceFlow id="sf9" sourceRef="start_specialist" targetRef="conduct_assessment"/>
-    <bpmn:sequenceFlow id="sf10" sourceRef="conduct_assessment" targetRef="record_verdict"/>
-    <bpmn:sequenceFlow id="sf11" sourceRef="record_verdict" targetRef="join_verdicts"/>
-    <bpmn:sequenceFlow id="sf12" sourceRef="join_verdicts" targetRef="review_verdicts"/>
-    <bpmn:sequenceFlow id="sf13" sourceRef="review_verdicts" targetRef="send_rejection_notice" name="Negative Verdict">
-      <bpmn:conditionExpression>Negative Verdict</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf14" sourceRef="review_verdicts" targetRef="send_approval_notice" name="Positive Verdict">
-      <bpmn:conditionExpression>Positive Verdict</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf15" sourceRef="start_insurance" targetRef="verify_coverage"/>
-    <bpmn:sequenceFlow id="sf16" sourceRef="verify_coverage" targetRef="record_coverage_verdict"/>
-    <bpmn:sequenceFlow id="sf17" sourceRef="record_coverage_verdict" targetRef="join_verdicts"/>
+    <bpmn:sequenceFlow id="Flow_1j3jx2y" sourceRef="split_verdicts" targetRef="join_verdicts"/>
+    <bpmn:sequenceFlow id="Flow_1j3jx2z" sourceRef="join_verdicts" targetRef="review_verdicts"/>
+    <bpmn:sequenceFlow id="Flow_1j3jx30" sourceRef="review_verdicts" targetRef="send_approval"/>
+    <bpmn:sequenceFlow id="Flow_1j3jx31" sourceRef="send_approval" targetRef="end_admissions"/>
+    <bpmn:sequenceFlow id="Flow_1j3jx32" sourceRef="send_rejection" targetRef="end_admissions_rejected"/>
+  </bpmn:process>
+  <bpmn:process id="Process_specialist_pool" name="Specialist Department" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_specialist_pool">
+      <bpmn:lane id="specialist" name="Specialist">
+        <bpmn:flowNodeRef>conduct_assessment</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:task id="conduct_assessment" name="Conduct Medical Assessment"/>
+  </bpmn:process>
+  <bpmn:process id="Process_insurance_pool" name="Insurance Office" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_insurance_pool">
+      <bpmn:lane id="insurance_officer" name="Insurance Officer">
+        <bpmn:flowNodeRef>verify_coverage</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:task id="verify_coverage" name="Verify Coverage"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
       <bpmndi:BPMNShape id="actor_gp_pool_di" bpmnElement="actor_gp_pool" isHorizontal="true">
-        <dc:Bounds x="10" y="20" width="560" height="160"/>
+        <dc:Bounds x="10" y="20" width="750" height="160"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="actor_hospital_pool_di" bpmnElement="actor_hospital_pool" isHorizontal="true">
-        <dc:Bounds x="10" y="220" width="2080" height="480"/>
+      <bpmndi:BPMNShape id="actor_admissions_pool_di" bpmnElement="actor_admissions_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="220" width="1510" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_specialist_pool_di" bpmnElement="actor_specialist_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="420" width="500" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_insurance_pool_di" bpmnElement="actor_insurance_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="620" width="500" height="160"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="gp_di" bpmnElement="gp" isHorizontal="true">
-        <dc:Bounds x="40" y="20" width="530" height="160"/>
+        <dc:Bounds x="40" y="20" width="720" height="160"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="admissions_clerk_di" bpmnElement="admissions_clerk" isHorizontal="true">
-        <dc:Bounds x="40" y="220" width="2050" height="160"/>
+        <dc:Bounds x="40" y="220" width="1480" height="160"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="specialist_di" bpmnElement="specialist" isHorizontal="true">
-        <dc:Bounds x="40" y="380" width="2050" height="160"/>
+        <dc:Bounds x="40" y="420" width="470" height="160"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="insurance_officer_di" bpmnElement="insurance_officer" isHorizontal="true">
-        <dc:Bounds x="40" y="540" width="2050" height="160"/>
+        <dc:Bounds x="40" y="620" width="470" height="160"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="start_gp_di" bpmnElement="start_gp">
-        <dc:Bounds x="132" y="55" width="36" height="36"/>
+        <dc:Bounds x="132" y="42" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_gp_rejected_di" bpmnElement="end_gp_rejected">
-        <dc:Bounds x="132" y="108" width="36" height="36"/>
+      <bpmndi:BPMNShape id="Event_0q3jx2s_di" bpmnElement="Event_0q3jx2s">
+        <dc:Bounds x="132" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1q3jx2t_di" bpmnElement="Event_1q3jx2t">
+        <dc:Bounds x="132" y="122" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1q3jx2s_di" bpmnElement="Event_1q3jx2s">
+        <dc:Bounds x="512" y="82" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="submit_referral_di" bpmnElement="submit_referral">
         <dc:Bounds x="290" y="60" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="start_hospital_di" bpmnElement="start_hospital">
-        <dc:Bounds x="132" y="234" width="36" height="36"/>
+      <bpmndi:BPMNShape id="Event_0q3jx2r_di" bpmnElement="Event_0q3jx2r">
+        <dc:Bounds x="132" y="219" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_hospital_rejected_di" bpmnElement="end_hospital_rejected">
-        <dc:Bounds x="132" y="266" width="36" height="36"/>
+      <bpmndi:BPMNShape id="Event_0q3jx2q_di" bpmnElement="Event_0q3jx2q">
+        <dc:Bounds x="132" y="237" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_hospital_approved_di" bpmnElement="end_hospital_approved">
-        <dc:Bounds x="132" y="298" width="36" height="36"/>
+      <bpmndi:BPMNShape id="Event_1q3jx2p_di" bpmnElement="Event_1q3jx2p">
+        <dc:Bounds x="132" y="255" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1q3jx2o_di" bpmnElement="Event_1q3jx2o">
+        <dc:Bounds x="132" y="273" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_admissions_di" bpmnElement="start_admissions">
+        <dc:Bounds x="132" y="290" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="register_referral_di" bpmnElement="register_referral">
-        <dc:Bounds x="100" y="308" width="100" height="80"/>
+        <dc:Bounds x="100" y="286" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_missing_docs_di" bpmnElement="notify_missing_docs">
+        <dc:Bounds x="100" y="304" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="forward_referral_di" bpmnElement="forward_referral">
+        <dc:Bounds x="100" y="322" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_admissions_rejected_di" bpmnElement="end_admissions_rejected">
+        <dc:Bounds x="892" y="255" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_verdicts_di" bpmnElement="review_verdicts">
+        <dc:Bounds x="860" y="286" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_admissions_di" bpmnElement="end_admissions">
+        <dc:Bounds x="1272" y="282" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="check_documentation_di" bpmnElement="check_documentation">
         <dc:Bounds x="290" y="260" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="notify_missing_docs_di" bpmnElement="notify_missing_docs">
+      <bpmndi:BPMNShape id="send_rejection_di" bpmnElement="send_rejection">
         <dc:Bounds x="670" y="233" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="forward_referral_di" bpmnElement="forward_referral">
-        <dc:Bounds x="670" y="286" width="100" height="80"/>
+      <bpmndi:BPMNShape id="join_verdicts_di" bpmnElement="join_verdicts" isMarkerVisible="true">
+        <dc:Bounds x="695" y="301" width="50" height="50"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="review_verdicts_di" bpmnElement="review_verdicts">
-        <dc:Bounds x="1620" y="260" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="send_rejection_notice_di" bpmnElement="send_rejection_notice">
-        <dc:Bounds x="1810" y="233" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="send_approval_notice_di" bpmnElement="send_approval_notice">
-        <dc:Bounds x="1810" y="286" width="100" height="80"/>
+      <bpmndi:BPMNShape id="send_approval_di" bpmnElement="send_approval">
+        <dc:Bounds x="1050" y="260" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="split_verdicts_di" bpmnElement="split_verdicts" isMarkerVisible="true">
         <dc:Bounds x="505" y="275" width="50" height="50"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="join_verdicts_di" bpmnElement="join_verdicts" isMarkerVisible="true">
-        <dc:Bounds x="1455" y="275" width="50" height="50"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="start_specialist_di" bpmnElement="start_specialist">
-        <dc:Bounds x="892" y="442" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_specialist_verdict_di" bpmnElement="end_specialist_verdict">
-        <dc:Bounds x="132" y="442" width="36" height="36"/>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="conduct_assessment_di" bpmnElement="conduct_assessment">
-        <dc:Bounds x="1050" y="420" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="record_verdict_di" bpmnElement="record_verdict">
-        <dc:Bounds x="1240" y="420" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="start_insurance_di" bpmnElement="start_insurance">
-        <dc:Bounds x="132" y="575" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_insurance_verdict_di" bpmnElement="end_insurance_verdict">
-        <dc:Bounds x="132" y="628" width="36" height="36"/>
+        <dc:Bounds x="100" y="460" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="verify_coverage_di" bpmnElement="verify_coverage">
-        <dc:Bounds x="290" y="580" width="100" height="80"/>
+        <dc:Bounds x="100" y="660" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="record_coverage_verdict_di" bpmnElement="record_coverage_verdict">
-        <dc:Bounds x="480" y="580" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
-        <di:waypoint x="168" y="73"/>
-        <di:waypoint x="229" y="73"/>
+      <bpmndi:BPMNEdge id="Flow_1j3jx2s_di" bpmnElement="Flow_1j3jx2s">
+        <di:waypoint x="168" y="60"/>
+        <di:waypoint x="229" y="60"/>
         <di:waypoint x="229" y="100"/>
         <di:waypoint x="290" y="100"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
-        <di:waypoint x="200" y="348"/>
-        <di:waypoint x="245" y="348"/>
+      <bpmndi:BPMNEdge id="Flow_1j3jx2t_di" bpmnElement="Flow_1j3jx2t">
+        <di:waypoint x="390" y="100"/>
+        <di:waypoint x="512" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1j3jx2v_di" bpmnElement="Flow_1j3jx2v">
+        <di:waypoint x="200" y="326"/>
+        <di:waypoint x="245" y="326"/>
         <di:waypoint x="245" y="300"/>
         <di:waypoint x="290" y="300"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+      <bpmndi:BPMNEdge id="Flow_1j3jx2w_di" bpmnElement="Flow_1j3jx2w">
         <di:waypoint x="390" y="300"/>
         <di:waypoint x="505" y="300"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+      <bpmndi:BPMNEdge id="Flow_1j3jx2x_di" bpmnElement="Flow_1j3jx2x">
         <di:waypoint x="555" y="300"/>
         <di:waypoint x="612" y="300"/>
         <di:waypoint x="612" y="273"/>
         <di:waypoint x="670" y="273"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+      <bpmndi:BPMNEdge id="Flow_1j3jx2y_di" bpmnElement="Flow_1j3jx2y">
         <di:waypoint x="555" y="300"/>
-        <di:waypoint x="612" y="300"/>
-        <di:waypoint x="612" y="326"/>
-        <di:waypoint x="670" y="326"/>
+        <di:waypoint x="625" y="300"/>
+        <di:waypoint x="625" y="326"/>
+        <di:waypoint x="695" y="326"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
-        <di:waypoint x="770" y="326"/>
-        <di:waypoint x="831" y="326"/>
-        <di:waypoint x="831" y="460"/>
-        <di:waypoint x="892" y="460"/>
+      <bpmndi:BPMNEdge id="Flow_1j3jx2z_di" bpmnElement="Flow_1j3jx2z">
+        <di:waypoint x="745" y="326"/>
+        <di:waypoint x="860" y="326"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
-        <di:waypoint x="928" y="460"/>
-        <di:waypoint x="1050" y="460"/>
+      <bpmndi:BPMNEdge id="Flow_1j3jx30_di" bpmnElement="Flow_1j3jx30">
+        <di:waypoint x="960" y="326"/>
+        <di:waypoint x="1005" y="326"/>
+        <di:waypoint x="1005" y="300"/>
+        <di:waypoint x="1050" y="300"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
-        <di:waypoint x="1150" y="460"/>
-        <di:waypoint x="1240" y="460"/>
+      <bpmndi:BPMNEdge id="Flow_1j3jx31_di" bpmnElement="Flow_1j3jx31">
+        <di:waypoint x="1150" y="300"/>
+        <di:waypoint x="1272" y="300"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
-        <di:waypoint x="1340" y="460"/>
-        <di:waypoint x="1397" y="460"/>
-        <di:waypoint x="1397" y="300"/>
-        <di:waypoint x="1455" y="300"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
-        <di:waypoint x="1505" y="300"/>
-        <di:waypoint x="1620" y="300"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
-        <di:waypoint x="1720" y="300"/>
-        <di:waypoint x="1765" y="300"/>
-        <di:waypoint x="1765" y="273"/>
-        <di:waypoint x="1810" y="273"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
-        <di:waypoint x="1720" y="300"/>
-        <di:waypoint x="1765" y="300"/>
-        <di:waypoint x="1765" y="326"/>
-        <di:waypoint x="1810" y="326"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
-        <di:waypoint x="168" y="593"/>
-        <di:waypoint x="229" y="593"/>
-        <di:waypoint x="229" y="620"/>
-        <di:waypoint x="290" y="620"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf16_di" bpmnElement="sf16">
-        <di:waypoint x="390" y="620"/>
-        <di:waypoint x="480" y="620"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf17_di" bpmnElement="sf17">
-        <di:waypoint x="580" y="620"/>
-        <di:waypoint x="1017" y="620"/>
-        <di:waypoint x="1017" y="300"/>
-        <di:waypoint x="1455" y="300"/>
+      <bpmndi:BPMNEdge id="Flow_1j3jx32_di" bpmnElement="Flow_1j3jx32">
+        <di:waypoint x="770" y="273"/>
+        <di:waypoint x="892" y="273"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
         <di:waypoint x="340" y="140"/>
-        <di:waypoint x="150" y="234"/>
+        <di:waypoint x="150" y="290"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+      <bpmndi:BPMNEdge id="Flow_1j3jx33_di" bpmnElement="Flow_1j3jx33">
+        <di:waypoint x="150" y="304"/>
+        <di:waypoint x="150" y="158"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1j3jx34_di" bpmnElement="Flow_1j3jx34">
         <di:waypoint x="720" y="233"/>
-        <di:waypoint x="150" y="144"/>
+        <di:waypoint x="150" y="291"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
-        <di:waypoint x="720" y="286"/>
-        <di:waypoint x="910" y="478"/>
+      <bpmndi:BPMNEdge id="Flow_1j3jx35_di" bpmnElement="Flow_1j3jx35">
+        <di:waypoint x="1100" y="260"/>
+        <di:waypoint x="150" y="255"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="mf4_di" bpmnElement="mf4">
-        <di:waypoint x="720" y="286"/>
-        <di:waypoint x="150" y="611"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="mf5_di" bpmnElement="mf5">
-        <di:waypoint x="150" y="442"/>
-        <di:waypoint x="1480" y="325"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="mf6_di" bpmnElement="mf6">
-        <di:waypoint x="150" y="628"/>
-        <di:waypoint x="1480" y="325"/>
+      <bpmndi:BPMNEdge id="Flow_1j3jx36_di" bpmnElement="Flow_1j3jx36">
+        <di:waypoint x="1100" y="260"/>
+        <di:waypoint x="150" y="273"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
         <di:waypoint x="340" y="140"/>
-        <di:waypoint x="150" y="308"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
-        <di:waypoint x="720" y="233"/>
-        <di:waypoint x="150" y="144"/>
+        <di:waypoint x="150" y="286"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
