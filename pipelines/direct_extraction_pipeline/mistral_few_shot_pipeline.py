@@ -500,9 +500,11 @@ Do not omit steps. Do not merge tasks. Do not reduce structure.
 3. MESSAGE FLOWS VS TASKS (VERY IMPORTANT)
 - If information is sent between pools → use message flows
 - Do NOT model communication as tasks
+- from_pool and to_pool in message_flows cannot have the same name (even if they are the same pool) — if communication happens within the same pool, use sequence flows instead
 - Use:
   - intermediateThrowEvent for sending
   - intermediateCatchEvent for receiving
+
 
 
 4. EVENTS ARE REQUIRED
@@ -699,7 +701,7 @@ if __name__ == "__main__":
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
             retries=0,
-            case_ids=[17, 13, 14] # choose cases for few-shot examples
+            case_ids=[13, 14] # choose cases for few-shot examples
         )
 
         if bpmn_json:
