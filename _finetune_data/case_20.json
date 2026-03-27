@@ -1,0 +1,69 @@
+{
+    "pools": [
+      { "id": "applicant_pool",   "name": "Applicant" },
+      { "id": "council_pool",     "name": "City Council" }
+    ],
+    "lanes": [
+      { "id": "applicant",        "name": "Applicant",          "pool": "applicant_pool" },
+      { "id": "permits_office",   "name": "Permits Office",     "pool": "council_pool" },
+      { "id": "urban_planning",   "name": "Urban Planning",     "pool": "council_pool" },
+      { "id": "safety_inspection","name": "Safety Inspection",  "pool": "council_pool" }
+    ],
+    "tasks": [
+      { "id": "submit_application",  "name": "Submit Permit Application",          "type": "task", "lane": "applicant" },
+      { "id": "register_application","name": "Register Application",               "type": "task", "lane": "permits_office" },
+      { "id": "check_completeness",  "name": "Check Application Completeness",    "type": "task", "lane": "permits_office" },
+      { "id": "notify_incomplete",   "name": "Notify Applicant of Missing Info",  "type": "task", "lane": "permits_office" },
+      { "id": "review_outcomes",     "name": "Review Combined Verdicts",          "type": "task", "lane": "permits_office" },
+      { "id": "issue_rejection",     "name": "Issue Rejection Notice",            "type": "task", "lane": "permits_office" },
+      { "id": "issue_permit",        "name": "Issue Building Permit",             "type": "task", "lane": "permits_office" },
+      { "id": "zoning_check",        "name": "Assess Zoning Compliance",          "type": "task", "lane": "urban_planning" },
+      { "id": "record_zoning",       "name": "Record Zoning Verdict",             "type": "task", "lane": "urban_planning" },
+      { "id": "safety_review",       "name": "Conduct Structural Safety Review",  "type": "task", "lane": "safety_inspection" },
+      { "id": "record_safety",       "name": "Record Safety Verdict",             "type": "task", "lane": "safety_inspection" }
+    ],
+    "events": [
+      { "id": "start_applicant",     "name": "Start",                     "type": "startEvent", "lane": "applicant",      "eventDefinition": "none" },
+      { "id": "end_applicant_reject","name": "Application Rejected",      "type": "endEvent",   "lane": "applicant",      "eventDefinition": "none" },
+      { "id": "end_applicant_permit","name": "Permit Received",           "type": "endEvent",   "lane": "applicant",      "eventDefinition": "none" },
+      { "id": "start_council",       "name": "Application Received",      "type": "startEvent", "lane": "permits_office", "eventDefinition": "message" },
+      { "id": "end_incomplete",      "name": "Applicant Notified",        "type": "endEvent",   "lane": "permits_office", "eventDefinition": "none" },
+      { "id": "end_rejected",        "name": "Rejection Issued",          "type": "endEvent",   "lane": "permits_office", "eventDefinition": "none" },
+      { "id": "end_permitted",       "name": "Permit Issued",             "type": "endEvent",   "lane": "permits_office", "eventDefinition": "none" }
+    ],
+    "gateways": [
+      { "id": "split_complete",  "name": "Application Complete?",    "type": "exclusiveGateway", "lane": "permits_office", "gatewayDirection": "diverging" },
+      { "id": "split_parallel",  "name": "Forward for Review",       "type": "parallelGateway",  "lane": "permits_office", "gatewayDirection": "diverging" },
+      { "id": "join_parallel",   "name": "Both Verdicts Recorded",   "type": "parallelGateway",  "lane": "permits_office", "gatewayDirection": "converging" },
+      { "id": "split_outcome",   "name": "Both Verdicts Positive?",  "type": "exclusiveGateway", "lane": "permits_office", "gatewayDirection": "diverging" }
+    ],
+    "sequence_flows": [
+      { "id": "sf1",  "from": "start_applicant",     "to": "submit_application" },
+      { "id": "sf2",  "from": "start_council",       "to": "register_application" },
+      { "id": "sf3",  "from": "register_application","to": "check_completeness" },
+      { "id": "sf4",  "from": "check_completeness",  "to": "split_complete" },
+      { "id": "sf5",  "from": "split_complete",      "to": "notify_incomplete",  "condition": "Incomplete" },
+      { "id": "sf6",  "from": "split_complete",      "to": "split_parallel",     "condition": "Complete" },
+      { "id": "sf7",  "from": "notify_incomplete",   "to": "end_incomplete" },
+      { "id": "sf8",  "from": "split_parallel",      "to": "zoning_check" },
+      { "id": "sf9",  "from": "split_parallel",      "to": "safety_review" },
+      { "id": "sf10", "from": "zoning_check",        "to": "record_zoning" },
+      { "id": "sf11", "from": "record_zoning",       "to": "join_parallel" },
+      { "id": "sf12", "from": "safety_review",       "to": "record_safety" },
+      { "id": "sf13", "from": "record_safety",       "to": "join_parallel" },
+      { "id": "sf14", "from": "join_parallel",       "to": "review_outcomes" },
+      { "id": "sf15", "from": "review_outcomes",     "to": "split_outcome" },
+      { "id": "sf16", "from": "split_outcome",       "to": "issue_rejection",    "condition": "One or more verdicts negative" },
+      { "id": "sf17", "from": "split_outcome",       "to": "issue_permit",       "condition": "Both verdicts positive" },
+      { "id": "sf18", "from": "issue_rejection",     "to": "end_rejected" },
+      { "id": "sf19", "from": "issue_permit",        "to": "end_permitted" }
+    ],
+    "message_flows": [
+      { "id": "mf1", "from": "submit_application", "to": "start_council",        "name": "Permit Application" },
+      { "id": "mf2", "from": "notify_incomplete",  "to": "end_applicant_reject",  "name": "Incomplete Notice" },
+      { "id": "mf3", "from": "issue_rejection",    "to": "end_applicant_reject",  "name": "Rejection Notice" },
+      { "id": "mf4", "from": "issue_permit",       "to": "end_applicant_permit",  "name": "Building Permit" }
+    ],
+    "data": [],
+    "data_associations": []
+  }

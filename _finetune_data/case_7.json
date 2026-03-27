@@ -1,0 +1,112 @@
+{
+  "pools": [
+    {
+      "id": "marketing_team",
+      "name": "Marketing Team"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "marketing_lane",
+      "name": "Marketing Lane",
+      "pool": "marketing_team"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "convene_briefing",
+      "name": "Convene at 6:30AM for Briefing",
+      "type": "task",
+      "lane": "marketing_lane"
+    },
+    {
+      "id": "launch_daily_ad_campaign",
+      "name": "Launch Daily Ad Campaign",
+      "type": "task",
+      "lane": "marketing_lane"
+    },
+    {
+      "id": "review_latest_analytics",
+      "name": "Review Latest Analytics",
+      "type": "task",
+      "lane": "marketing_lane"
+    },
+    {
+      "id": "finalize_presentation",
+      "name": "Finalize Presentation",
+      "type": "task",
+      "lane": "marketing_lane"
+    },
+    {
+      "id": "drive_to_clients_office",
+      "name": "Drive to Clients Office in Namur",
+      "type": "task",
+      "lane": "marketing_lane"
+    },
+    {
+      "id": "discuss_campaign_strategy",
+      "name": "Discuss Campaign Strategy",
+      "type": "task",
+      "lane": "marketing_lane"
+    },
+    {
+      "id": "deliver_pitch",
+      "name": "Deliver Pitch",
+      "type": "task",
+      "lane": "marketing_lane"
+    },
+    {
+      "id": "return_to_office",
+      "name": "Return to Office",
+      "type": "task",
+      "lane": "marketing_lane"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_marketing",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "marketing_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_marketing",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "marketing_lane",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_parallel_split",
+      "name": "Start Concurrent Tasks",
+      "type": "parallelGateway",
+      "lane": "marketing_lane",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Concurrent Tasks Complete",
+      "type": "parallelGateway",
+      "lane": "marketing_lane",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    { "id": "sf1", "from": "start_marketing", "to": "convene_briefing" },
+    { "id": "sf2", "from": "convene_briefing", "to": "launch_daily_ad_campaign" },
+    { "id": "sf3", "from": "launch_daily_ad_campaign", "to": "review_latest_analytics" },
+    { "id": "sf4", "from": "review_latest_analytics", "to": "finalize_presentation" },
+    { "id": "sf5", "from": "finalize_presentation", "to": "gateway_parallel_split" },
+    { "id": "sf6", "from": "gateway_parallel_split", "to": "drive_to_clients_office" },
+    { "id": "sf7", "from": "gateway_parallel_split", "to": "discuss_campaign_strategy" },
+    { "id": "sf8", "from": "drive_to_clients_office", "to": "gateway_parallel_join" },
+    { "id": "sf9", "from": "discuss_campaign_strategy", "to": "gateway_parallel_join" },
+    { "id": "sf10", "from": "gateway_parallel_join", "to": "deliver_pitch" },
+    { "id": "sf11", "from": "deliver_pitch", "to": "return_to_office" },
+    { "id": "sf12", "from": "return_to_office", "to": "end_marketing" }
+  ],
+  "message_flows": []
+}

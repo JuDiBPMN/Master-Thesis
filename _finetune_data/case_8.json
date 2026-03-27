@@ -1,0 +1,116 @@
+{
+  "pools": [
+    {
+      "id": "production_facility_team",
+      "name": "Production Facility Team"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "production_lane",
+      "name": "Production Lane",
+      "pool": "production_facility_team"
+    }
+  ],
+
+  "tasks": [
+    {
+      "id": "process_order",
+      "name": "Process Order",
+      "type": "task",
+      "lane": "production_lane"
+    },
+    {
+      "id": "produce_fresh_product",
+      "name": "Produce Fresh Product",
+      "type": "task",
+      "lane": "production_lane"
+    },
+    {
+      "id": "use_stock_items",
+      "name": "Use Stock Items",
+      "type": "task",
+      "lane": "production_lane"
+    },
+    {
+      "id": "organize_shipment",
+      "name": "Organize Shipment",
+      "type": "task",
+      "lane": "production_lane"
+    },
+    {
+      "id": "package_ordered_products",
+      "name": "Package Ordered Products",
+      "type": "task",
+      "lane": "production_lane"
+    },
+    {
+      "id": "ship_order",
+      "name": "Ship Order",
+      "type": "task",
+      "lane": "production_lane"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_production",
+      "name": "Order Received",
+      "type": "startEvent",
+      "lane": "production_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_production",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "production_lane",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_order_split",
+      "name": "Order Value?",
+      "type": "exclusiveGateway",
+      "lane": "production_lane",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_order_join",
+      "name": "Product Ready",
+      "type": "exclusiveGateway",
+      "lane": "production_lane",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_parallel_split",
+      "name": "Start Concurrent Fulfillment",
+      "type": "parallelGateway",
+      "lane": "production_lane",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Fulfillment Complete",
+      "type": "parallelGateway",
+      "lane": "production_lane",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    { "id": "sf1", "from": "start_production", "to": "process_order" },
+    { "id": "sf2", "from": "process_order", "to": "gateway_order_split" },
+    { "id": "sf3", "from": "gateway_order_split", "to": "produce_fresh_product", "condition": "order 25.000 EUR and higher" },
+    { "id": "sf4", "from": "gateway_order_split", "to": "use_stock_items", "condition": "order below 25.000 EUR" },
+    { "id": "sf5", "from": "produce_fresh_product", "to": "gateway_order_join" },
+    { "id": "sf6", "from": "use_stock_items", "to": "gateway_order_join" },
+    { "id": "sf7", "from": "gateway_order_join", "to": "gateway_parallel_split" },
+    { "id": "sf8", "from": "gateway_parallel_split", "to": "organize_shipment" },
+    { "id": "sf9", "from": "gateway_parallel_split", "to": "package_ordered_products" },
+    { "id": "sf10", "from": "organize_shipment", "to": "gateway_parallel_join" },
+    { "id": "sf11", "from": "package_ordered_products", "to": "gateway_parallel_join" },
+    { "id": "sf12", "from": "gateway_parallel_join", "to": "ship_order" },
+    { "id": "sf13", "from": "ship_order", "to": "end_production" }
+  ],
+  "message_flows": []
+}
