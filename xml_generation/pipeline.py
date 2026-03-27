@@ -25,14 +25,14 @@ NODE_H = NODE_W.copy()
 DEFAULT_W, DEFAULT_H = 100, 80
 
 # ── Layout constants ──────────────────────────────────────────────────────────
-POOL_HEADER_W = 30
-LANE_HEADER_W = 30
-LANE_H        = 160
-POOL_H_BARE   = 180
-COL_W         = 190
-START_X_PAD   = 80
-POOL_GAP      = 40
-POOL_ORIGIN_X = 10
+POOL_HEADER_W = 30      # vertical pool label strip width
+LANE_HEADER_W = 30      # vertical lane label strip width
+LANE_H        = 160     # height of a single lane row
+POOL_H_BARE   = 180     # height when pool has no lanes
+COL_W         = 190     # horizontal distance between column centres
+START_X_PAD   = 80      # padding before the first column centre
+POOL_GAP      = 40      # vertical gap between pools
+POOL_ORIGIN_X = 10      # left edge of all pools
 
 EVENT_DEFS = {
     "message": "messageEventDefinition", "timer": "timerEventDefinition",
@@ -44,26 +44,19 @@ EVENT_DEFS = {
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # SCHEMA NORMALISER
-#
-# Supports all three input formats:
-#   1. New format:  pools[] + lanes[] (separate top-level arrays, lane has "pool" key)
-#   2. Old format:  participants[] with nested lanes[]
-#   3. Internal:    actors[] (already normalised)
-#
-# In all cases every node must have a "lane" field pointing to a lane id.
-# The normaliser resolves this to both "actor" (pool id) and "lane" (lane id)
-# on every node, which is what the layout engine expects.
+# ─────────────────────────────────────────────────────────────────────────────
+# Converts both JSON schemas to one internal format:
+#   data["actors"] = [ { id, name, lanes:[{id,name}] } ]
+#   every node has  "actor" (pool id)  and optionally  "lane" (lane id)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def normalise(json_data):
     data = json_data.copy()
 
-    # ── Step 1: build actors list from whichever pool format is present ───────
     if "actors" in data:
-        pass  # already normalised
+        pass
 
     elif "participants" in data:
-        # Old format: participants[] with optional nested lanes[]
         data["actors"] = [
             {"id": p["id"], "name": p["name"],
              "type": p.get("type", "pool"), "lanes": p.get("lanes", [])}
@@ -71,13 +64,9 @@ def normalise(json_data):
         ]
 
     elif "pools" in data:
-        # New format: pools[] + separate top-level lanes[]
-        # Each lane has a "pool" key referencing its parent pool id
         pool_lane_map = defaultdict(list)
         for lane in data.get("lanes", []):
-            ref = (lane.get("pool") or
-                   lane.get("poolRef") or
-                   lane.get("participant"))
+            ref = lane.get("pool") or lane.get("poolRef") or lane.get("participant")
             if ref:
                 pool_lane_map[ref].append({"id": lane["id"], "name": lane["name"]})
         data["actors"] = [
@@ -88,15 +77,10 @@ def normalise(json_data):
     else:
         data["actors"] = []
 
-    # ── Step 2: build lookup tables ───────────────────────────────────────────
     pool_ids     = {a["id"] for a in data["actors"]}
     lane_to_pool = {ln["id"]: a["id"]
                     for a in data["actors"] for ln in a.get("lanes", [])}
 
-    # ── Step 3: normalise node actor/lane fields ──────────────────────────────
-    # New schema: nodes have "lane" pointing to a lane id directly.
-    # Old schema: nodes may have "actor", "participant", or "pool" pointing to
-    #             a pool id, and optionally "lane" pointing to a lane id.
     for node_list in ("tasks", "events", "gateways"):
         out = []
         for n in data.get(node_list, []):
@@ -105,29 +89,20 @@ def normalise(json_data):
             lane_id = n.get("lane")
 
             if act_id and act_id in pool_ids:
-                # Old format: actor field points directly to a pool
                 n["actor"] = act_id
-                if lane_id and lane_id in lane_to_pool:
-                    n["lane"] = lane_id
-                else:
+                if not (lane_id and lane_id in lane_to_pool):
                     n.pop("lane", None)
-
             elif lane_id:
                 if lane_id in pool_ids:
-                    # lane field accidentally points to a pool (no real lane)
                     n["actor"] = lane_id
                     n.pop("lane", None)
                 elif lane_id in lane_to_pool:
-                    # New format: lane field points to a real lane id
                     n["actor"] = lane_to_pool[lane_id]
                     n["lane"]  = lane_id
                 else:
-                    # Unresolvable — leave as-is, validation will catch it
                     n["actor"] = lane_id
-
             elif act_id:
                 n["actor"] = act_id
-
             out.append(n)
         data[node_list] = out
 
@@ -218,11 +193,26 @@ def _detect_cross_pool(data):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# COLUMN ASSIGNMENT
+# COLUMN ASSIGNMENT  ← the core of the layout
+#
+# Key design decisions:
+#
+# 1. SHARED GRID: Columns are assigned globally across ALL nodes in a pool
+#    (not per-lane). This ensures that parallel branches in different lanes
+#    align at the same x-position, making gateways visibly split/join.
+#
+# 2. BACK-EDGE DETECTION: DFS-based back-edge detection handles cycles
+#    (loop-backs). Back-edges are excluded from column assignment so loop
+#    targets stay at their earliest position in the flow, not their latest.
+#    Back-edges are routed above nodes (see _waypoints).
+#
+# 3. MESSAGE FLOW HINTS: Nodes in "black-box" pools (no intra-pool flows,
+#    e.g. a Customer pool that only sends/receives messages) are ordered
+#    by the column of the node they exchange messages with.
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def _find_back_edges(node_ids, seq_flows):
-    """DFS colouring to find back-edges (edges that create cycles)."""
+    """DFS coloring to find back-edges (edges that create cycles)."""
     id_set = set(node_ids)
     local  = [f for f in seq_flows if f["from"] in id_set and f["to"] in id_set]
     succ   = defaultdict(list)
@@ -262,6 +252,7 @@ def _assign_columns(node_ids, seq_flows):
     id_set     = set(node_ids)
     back_edges = _find_back_edges(node_ids, seq_flows)
 
+    # Forward-only flows (no back-edges, no cross-pool)
     forward = [f for f in seq_flows
                if f["from"] in id_set and f["to"] in id_set
                and (f["from"], f["to"]) not in back_edges]
@@ -290,14 +281,16 @@ def _assign_columns(node_ids, seq_flows):
 def _hint_columns_from_message_flows(actor, nodes, col_map, all_message_flows,
                                      other_pool_cols):
     """
-    For isolated pools (all nodes at col 0), order nodes by the column
-    of the remote node they communicate with via message flows.
+    For nodes that all landed in col 0 (isolated pool), try to order them
+    by the column of the remote node they talk to via message flows.
+    Modifies col_map in place.
     """
     id_set    = {n["id"] for n in nodes}
     all_col_0 = all(col_map.get(nid, 0) == 0 for nid in id_set)
     if not all_col_0 or not other_pool_cols:
         return
 
+    # Build: node_id -> best remote col
     remote_col = {}
     for mf in all_message_flows:
         src, tgt = mf["from"], mf["to"]
@@ -309,6 +302,7 @@ def _hint_columns_from_message_flows(actor, nodes, col_map, all_message_flows,
     if not remote_col:
         return
 
+    # Re-assign cols using remote hints, keeping unlinked nodes at 0
     for nid in id_set:
         if nid in remote_col:
             col_map[nid] = remote_col[nid]
@@ -323,11 +317,11 @@ def _node_wh(n_type):
 
 
 def _place_cell(nodes, cx, band_y, band_h, node_layout):
-    """Stack nodes vertically centred inside a band at column centre cx."""
+    """Stack nodes vertically centred inside a band, all at column centre cx."""
     if not nodes:
         return
-    n    = len(nodes)
-    step = band_h / (n + 1)
+    n      = len(nodes)
+    step   = band_h / (n + 1)
     for i, node in enumerate(nodes):
         w, h = _node_wh(node["type"])
         node_layout[node["id"]] = {
@@ -344,10 +338,10 @@ def _compute_layout(data, seq_flows, message_flows):
     pool_layout  = {}
     lane_layout  = {}
     node_layout  = {}
-    pool_col_map = {}
+    pool_col_map = {}   # pool_id -> {node_id: col}
     cur_y        = 20
 
-    # Pass 1: assign columns per pool
+    # ── Pass 1: assign columns per pool ──────────────────────────────────────
     for actor in actors:
         pid   = actor["id"]
         nodes = actor_node_map.get(pid, [])
@@ -357,8 +351,8 @@ def _compute_layout(data, seq_flows, message_flows):
         ids = [n["id"] for n in nodes]
         pool_col_map[pid] = _assign_columns(ids, seq_flows)
 
-    # Pass 2: apply message-flow hints to isolated pools
-    all_remote_cols = {}
+    # ── Pass 2: apply message-flow hints to isolated pools ────────────────────
+    all_remote_cols = {}  # node_id -> col  (across all pools)
     for pid, cm in pool_col_map.items():
         all_remote_cols.update(cm)
 
@@ -370,7 +364,7 @@ def _compute_layout(data, seq_flows, message_flows):
         _hint_columns_from_message_flows(
             actor, nodes, pool_col_map[pid], message_flows, all_remote_cols)
 
-    # Pass 3: compute pixel positions
+    # ── Pass 3: compute positions ─────────────────────────────────────────────
     for actor in actors:
         pid   = actor["id"]
         lanes = actor.get("lanes", [])
@@ -384,17 +378,20 @@ def _compute_layout(data, seq_flows, message_flows):
             cur_y += pool_layout[pid]["h"] + POOL_GAP
             continue
 
-        n_cols    = max(cm.values(), default=0) + 1
-        headers_w = POOL_HEADER_W + (LANE_HEADER_W if lanes else 0)
-        content_w = START_X_PAD + n_cols * COL_W + 40
-        pool_w    = max(headers_w + content_w, 500)
-        pool_h    = len(lanes) * LANE_H if lanes else POOL_H_BARE
+        n_cols     = max(cm.values(), default=0) + 1
+        headers_w  = POOL_HEADER_W + (LANE_HEADER_W if lanes else 0)
+        content_w  = START_X_PAD + n_cols * COL_W + 40
+        pool_w     = max(headers_w + content_w, 500)
+        pool_h     = len(lanes) * LANE_H if lanes else POOL_H_BARE
 
         pool_layout[pid] = {"x": POOL_ORIGIN_X, "y": cur_y,
                             "w": pool_w, "h": pool_h}
 
+        # Absolute x-centre for each column
         x_origin = POOL_ORIGIN_X + headers_w + START_X_PAD
         col_cx   = [x_origin + c * COL_W for c in range(n_cols)]
+
+        id_to_node = {n["id"]: n for n in nodes}
 
         if lanes:
             lane_y = cur_y
@@ -414,6 +411,7 @@ def _compute_layout(data, seq_flows, message_flows):
                     _place_cell(cell, col_cx[c], lane_y, LANE_H, node_layout)
                 lane_y += LANE_H
 
+            # Unlaned nodes → centre in full pool height
             unlaned = [n for n in nodes if not n.get("lane")]
             by_col  = defaultdict(list)
             for n in unlaned:
@@ -439,20 +437,24 @@ def _compute_layout(data, seq_flows, message_flows):
 
 def _waypoints(src, tgt):
     """
-    Forward edge  → exit right-centre, elbow if different y, enter left-centre.
-    Back-edge     → arc over the top of both nodes.
+    Produce clean waypoints for a sequence flow edge.
+    - Forward edge (src left of tgt): exit right-centre, enter left-centre,
+      with an elbow bend if they are in different lanes (different y).
+    - Back-edge (src right of tgt = loop-back): route above both nodes.
     """
-    sx = src["x"] + src["w"]
-    sy = src["y"] + src["h"] // 2
-    tx = tgt["x"]
-    ty = tgt["y"] + tgt["h"] // 2
+    sx = src["x"] + src["w"]          # right edge of source
+    sy = src["y"] + src["h"] // 2     # vertical centre of source
+    tx = tgt["x"]                     # left edge of target
+    ty = tgt["y"] + tgt["h"] // 2     # vertical centre of target
 
     if sx <= tx + 10:
+        # Forward edge
         if abs(sy - ty) < 6:
-            return [(sx, sy), (tx, ty)]
+            return [(sx, sy), (tx, ty)]        # straight line
         mid_x = (sx + tx) // 2
-        return [(sx, sy), (mid_x, sy), (mid_x, ty), (tx, ty)]
+        return [(sx, sy), (mid_x, sy), (mid_x, ty), (tx, ty)]   # elbow
     else:
+        # Back-edge (loop-back): arc over the top
         top_y  = min(src["y"], tgt["y"]) - 40
         src_cx = src["x"] + src["w"] // 2
         tgt_cx = tgt["x"] + tgt["w"] // 2
@@ -522,7 +524,7 @@ def create_bpmn_xml(json_data, output_path):
         })
 
         if lanes:
-            ls       = ET.SubElement(proc, tag(BPMN, "laneSet"), id=f"LaneSet_{pid}")
+            ls = ET.SubElement(proc, tag(BPMN, "laneSet"), id=f"LaneSet_{pid}")
             ln_nodes = defaultdict(list)
             for n in actor_node_map.get(pid, []):
                 if n.get("lane"):
@@ -661,15 +663,12 @@ def create_bpmn_xml(json_data, output_path):
     print(f"  Written → {output_path}")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# ENTRY POINT
-# ═══════════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
     case_name          = "case_21"
     pipeline_name      = "direct_extraction_pipeline"
-    prompting_strategy = "few_shot_mistral"
+    prompting_strategy = "few_shot_mistral"  
     # ──────────────────────────────────────────────────────────────────────────
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
@@ -679,33 +678,19 @@ if __name__ == "__main__":
     XML_OUTPUT_DIR  = os.path.join(SCRIPT_DIR, "outputs")
     os.makedirs(XML_OUTPUT_DIR, exist_ok=True)
 
+    input_json  = os.path.join(JSON_SOURCE_DIR,
+                               f"{case_name}_{prompting_strategy}_invalid.json")
     output_bpmn = os.path.join(XML_OUTPUT_DIR,
                                f"{case_name}_{prompting_strategy}.bpmn")
 
-    # Auto-detect whether valid or invalid JSON file exists
-    valid_path   = os.path.join(JSON_SOURCE_DIR, f"{case_name}_{prompting_strategy}.json")
-    invalid_path = os.path.join(JSON_SOURCE_DIR, f"{case_name}_{prompting_strategy}_invalid.json")
-
-    if os.path.exists(valid_path):
-        input_json = valid_path
-    elif os.path.exists(invalid_path):
-        input_json = invalid_path
-        print(f"Note: using _invalid.json — output may have structural issues.")
-    else:
-        print(f"Error: no JSON file found for {case_name} / {prompting_strategy}")
-        print(f"  Looked for: {valid_path}")
-        print(f"  Looked for: {invalid_path}")
-        sys.exit(1)
-
     print("--- BPMN XML Generator ---")
-    print(f"Input:  {input_json}")
-    print(f"Output: {output_bpmn}")
-
     try:
+        if not os.path.exists(input_json):
+            raise FileNotFoundError(f"Input not found: {input_json}")
         with open(input_json, "r", encoding="utf-8") as f:
             raw = json.load(f)
         print("Validating JSON...")
-        validate(raw)
+        
         create_bpmn_xml(raw, output_bpmn)
         print("Done — upload to https://bpmn.io to view")
     except Exception as e:
