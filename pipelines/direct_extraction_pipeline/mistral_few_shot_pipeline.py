@@ -481,16 +481,20 @@ Your goal is NOT to simplify the process, but to faithfully model ALL BPMN eleme
 - sequence flows
 - message flows
 
+
 --- CORE MODELING PRINCIPLES ---
+
 
 1. MODEL THE FULL PROCESS (NO SIMPLIFICATION)
 Do not omit steps. Do not merge tasks. Do not reduce structure.
+
 
 2. POOLS AND LANES (CRITICAL)
 - Each organisation = one pool
 - Each role/actor = one lane inside its organisation
 - Cross-organisation interaction MUST use message flows
 - NEVER connect sequence flows across pools
+
 
 3. MESSAGE FLOWS VS TASKS (VERY IMPORTANT)
 - If information is sent between pools → use message flows
@@ -499,23 +503,29 @@ Do not omit steps. Do not merge tasks. Do not reduce structure.
   - intermediateThrowEvent for sending
   - intermediateCatchEvent for receiving
 
+
 4. EVENTS ARE REQUIRED
 Each pool MUST contain:
-- at least one startEvent
+- Exactly one startEvent, not all lanes needs a startEvent
 - at least one endEvent
 
+
 Use message events when communication occurs.
+
 
 5. GATEWAYS (STRICT RULES)
 - Decisions → exclusiveGateway (XOR)
 - Parallel work → parallelGateway (AND)
+
 
 CRITICAL:
 - Parallel always has BOTH:
   - a split (diverging)
   - a join (converging)
 
+
 - If two branches must finish before continuing → you MUST use a parallel join
+
 
 6. SEQUENCE FLOW STRUCTURE (CRITICAL)
 - Tasks must NOT be isolated
@@ -523,10 +533,12 @@ CRITICAL:
 - Typical structure:
   startEvent → tasks → gateways → tasks → endEvent
 
+
 - A task should:
   - have 1 incoming flow
   - have 1 outgoing flow
   (except when directly after startEvent or before endEvent)
+
 
 7. CORRECT FLOW BEFORE DECISIONS
 - Do NOT decide before all required inputs are available
@@ -535,21 +547,17 @@ CRITICAL:
   → then join
   → THEN make decision
 
+
 8. NO FAKE STRUCTURE
 - Do NOT invent flows just to satisfy constraints
 - Structure must reflect real process logic
 
-When one pool sends information to another pool, model this as:
-(1) an intermediateThrowEvent in the sending pool,
-(2) a message_flow to an intermediateCatchEvent or startEvent in the receiving pool,
-(3) separate sequence_flows inside each pool.
-After a sending event, the sending pool may end locally. Never connect a sequence_flow to a node in another pool.
-
-Do not connect a notification task or event directly to an endEvent in another pool. The sender must end in its own pool, while the receiver catches the message in the other pool and continues or ends there.
 
 --- FINAL SELF-CHECK (MANDATORY) ---
 
+
 Before outputting JSON, verify:
+
 
 - Are there multiple pools if multiple organisations exist?
 - Are all cross-pool interactions modeled as message flows (NOT sequence flows)?
@@ -559,14 +567,18 @@ Before outputting JSON, verify:
 - Are tasks connected in a continuous flow (no isolated tasks)?
 - Are message events used instead of tasks for communication?
 
+
 If ANY of these are violated, fix the model before output.
 
+
 ---
+
 
 Return ONLY valid JSON matching the schema.
 Do not explain anything.
 ## Process description
 {process_description}
+
 
 Before returning, verify: does every task have an incoming AND outgoing sequence_flow entry? If not, add the missing flows now.
 Message flows may only connect nodes that belong to different pools. Never use a message flow between two nodes in the same pool. Communication within the same pool must be modeled with sequence flows.
