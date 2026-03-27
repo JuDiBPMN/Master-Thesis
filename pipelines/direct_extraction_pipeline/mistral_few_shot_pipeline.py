@@ -125,9 +125,10 @@ BPMN_SCHEMA = {
                     "id":   {"type": "string"},
                     "from": {"type": "string"},
                     "to":   {"type": "string"},
-                    "name": {"type": "string"}
+                    "from_pool": {"type": "string", "description": "The pool id of the sending node."},
+                    "to_pool":   {"type": "string", "description": "The pool id of the receiving node."}
                 },
-                "required": ["id", "from", "to", "name"],
+                "required": ["id", "from", "to", "from_pool", "to_pool"],
                 "additionalProperties": False
             }
         },
@@ -534,10 +535,9 @@ CRITICAL:
   startEvent → tasks → gateways → tasks → endEvent
 
 
-- A task should:
+- A task must:
   - have 1 incoming flow
   - have 1 outgoing flow
-  (except when directly after startEvent or before endEvent)
 
 
 7. CORRECT FLOW BEFORE DECISIONS
@@ -561,8 +561,9 @@ Before outputting JSON, verify:
 
 - Are there multiple pools if multiple organisations exist?
 - Are all cross-pool interactions modeled as message flows (NOT sequence flows)?
-- Does each pool have a startEvent AND endEvent?
+- Are there any message flows within the same pool? If so, change them to sequence flows.
 - Are parallel branches correctly split AND joined?
+- Does each pool have at least one endEvent?
 - Are decisions only made AFTER required information is available?
 - Are tasks connected in a continuous flow (no isolated tasks)?
 - Are message events used instead of tasks for communication?

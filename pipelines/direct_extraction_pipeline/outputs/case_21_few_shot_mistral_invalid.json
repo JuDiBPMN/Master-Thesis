@@ -1,15 +1,20 @@
 {
   "pools": [
     {
-      "id": "hospital_pool",
-      "name": "Hospital"
-    },
-    {
       "id": "gp_pool",
       "name": "GP"
+    },
+    {
+      "id": "hospital_pool",
+      "name": "Hospital"
     }
   ],
   "lanes": [
+    {
+      "id": "gp",
+      "name": "GP",
+      "pool": "gp_pool"
+    },
     {
       "id": "admissions_clerk",
       "name": "Admissions Clerk",
@@ -24,11 +29,6 @@
       "id": "insurance_officer",
       "name": "Insurance Officer",
       "pool": "hospital_pool"
-    },
-    {
-      "id": "gp",
-      "name": "GP",
-      "pool": "gp_pool"
     }
   ],
   "tasks": [
@@ -58,7 +58,7 @@
     },
     {
       "id": "forward_referral",
-      "name": "Forward Referral",
+      "name": "Forward Referral to Specialist and Insurance",
       "type": "task",
       "lane": "admissions_clerk"
     },
@@ -87,12 +87,6 @@
       "lane": "insurance_officer"
     },
     {
-      "id": "send_verdicts_to_admissions",
-      "name": "Send Verdicts to Admissions Clerk",
-      "type": "task",
-      "lane": "specialist"
-    },
-    {
       "id": "review_verdicts",
       "name": "Review Verdicts",
       "type": "task",
@@ -100,13 +94,13 @@
     },
     {
       "id": "send_rejection_notice",
-      "name": "Send Rejection Notice",
+      "name": "Send Rejection Notice to GP",
       "type": "task",
       "lane": "admissions_clerk"
     },
     {
-      "id": "send_treatment_approval",
-      "name": "Send Treatment Approval",
+      "id": "send_approval_notice",
+      "name": "Send Approval Notice to GP",
       "type": "task",
       "lane": "admissions_clerk"
     }
@@ -120,8 +114,8 @@
       "eventDefinition": "none"
     },
     {
-      "id": "end_gp",
-      "name": "End",
+      "id": "end_gp_rejected",
+      "name": "Rejection Sent",
       "type": "endEvent",
       "lane": "gp",
       "eventDefinition": "none"
@@ -146,26 +140,47 @@
       "type": "endEvent",
       "lane": "admissions_clerk",
       "eventDefinition": "none"
+    },
+    {
+      "id": "start_specialist",
+      "name": "Referral Received",
+      "type": "startEvent",
+      "lane": "specialist",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "start_insurance",
+      "name": "Referral Received",
+      "type": "startEvent",
+      "lane": "insurance_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_specialist_verdict",
+      "name": "Verdict Recorded",
+      "type": "endEvent",
+      "lane": "specialist",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_insurance_verdict",
+      "name": "Coverage Verdict Recorded",
+      "type": "endEvent",
+      "lane": "insurance_officer",
+      "eventDefinition": "none"
     }
   ],
   "gateways": [
     {
-      "id": "split_missing_docs",
-      "name": "Missing Documents?",
-      "type": "exclusiveGateway",
-      "lane": "admissions_clerk",
-      "gatewayDirection": "diverging"
-    },
-    {
       "id": "split_verdicts",
-      "name": "Positive or Negative Verdicts?",
-      "type": "exclusiveGateway",
+      "name": "Split Verdicts",
+      "type": "parallelGateway",
       "lane": "admissions_clerk",
       "gatewayDirection": "diverging"
     },
     {
       "id": "join_verdicts",
-      "name": "Both Verdicts Received",
+      "name": "Join Verdicts",
       "type": "parallelGateway",
       "lane": "admissions_clerk",
       "gatewayDirection": "converging"
@@ -190,109 +205,116 @@
     {
       "id": "sf4",
       "from": "check_documentation",
-      "to": "split_missing_docs"
+      "to": "split_verdicts"
     },
     {
       "id": "sf5",
-      "from": "split_missing_docs",
+      "from": "split_verdicts",
       "to": "notify_missing_docs",
-      "condition": "Missing documents"
+      "condition": "Missing Docs"
     },
     {
       "id": "sf6",
-      "from": "split_missing_docs",
+      "from": "split_verdicts",
       "to": "forward_referral",
-      "condition": "Documentation complete"
+      "condition": "Docs Complete"
     },
     {
       "id": "sf7",
       "from": "notify_missing_docs",
-      "to": "end_gp"
+      "to": "end_gp_rejected"
     },
     {
       "id": "sf8",
       "from": "forward_referral",
-      "to": "conduct_assessment"
+      "to": "start_specialist"
     },
     {
       "id": "sf9",
+      "from": "start_specialist",
+      "to": "conduct_assessment"
+    },
+    {
+      "id": "sf10",
       "from": "conduct_assessment",
       "to": "record_verdict"
     },
     {
-      "id": "sf10",
-      "from": "record_verdict",
-      "to": "send_verdicts_to_admissions"
-    },
-    {
       "id": "sf11",
-      "from": "send_verdicts_to_admissions",
-      "to": "split_verdicts"
+      "from": "record_verdict",
+      "to": "join_verdicts"
     },
     {
       "id": "sf12",
-      "from": "split_verdicts",
-      "to": "send_rejection_notice",
-      "condition": "Negative verdict"
+      "from": "join_verdicts",
+      "to": "review_verdicts"
     },
     {
       "id": "sf13",
-      "from": "split_verdicts",
-      "to": "send_treatment_approval",
-      "condition": "Positive verdict"
+      "from": "review_verdicts",
+      "to": "send_rejection_notice",
+      "condition": "Negative Verdict"
     },
     {
       "id": "sf14",
-      "from": "send_rejection_notice",
-      "to": "end_hospital_rejected"
+      "from": "review_verdicts",
+      "to": "send_approval_notice",
+      "condition": "Positive Verdict"
     },
     {
       "id": "sf15",
-      "from": "send_treatment_approval",
-      "to": "end_hospital_approved"
+      "from": "start_insurance",
+      "to": "verify_coverage"
     },
     {
       "id": "sf16",
-      "from": "join_verdicts",
-      "to": "review_verdicts"
+      "from": "verify_coverage",
+      "to": "record_coverage_verdict"
+    },
+    {
+      "id": "sf17",
+      "from": "record_coverage_verdict",
+      "to": "join_verdicts"
     }
   ],
   "message_flows": [
     {
       "id": "mf1",
-      "from": "notify_missing_docs",
-      "to": "end_gp",
-      "name": "Missing Documents Notice"
+      "from": "submit_referral",
+      "to": "start_hospital",
+      "name": "Referral Request"
     },
     {
       "id": "mf2",
-      "from": "send_rejection_notice",
-      "to": "end_hospital_rejected",
+      "from": "notify_missing_docs",
+      "to": "end_gp_rejected",
       "name": "Rejection Notice"
     },
     {
       "id": "mf3",
-      "from": "send_treatment_approval",
-      "to": "end_hospital_approved",
-      "name": "Treatment Approval"
-    }
-  ],
-  "data": [
-    {
-      "id": "referral_documents",
-      "name": "Referral Documents"
-    }
-  ],
-  "data_associations": [
-    {
-      "from": "check_documentation",
-      "to": "referral_documents",
-      "type": "input"
+      "from": "forward_referral",
+      "to": "start_specialist",
+      "name": "Referral Package"
     },
     {
-      "from": "notify_missing_docs",
-      "to": "referral_documents",
-      "type": "output"
+      "id": "mf4",
+      "from": "forward_referral",
+      "to": "start_insurance",
+      "name": "Referral Package"
+    },
+    {
+      "id": "mf5",
+      "from": "end_specialist_verdict",
+      "to": "join_verdicts",
+      "name": "Specialist Verdict"
+    },
+    {
+      "id": "mf6",
+      "from": "end_insurance_verdict",
+      "to": "join_verdicts",
+      "name": "Insurance Verdict"
     }
-  ]
+  ],
+  "data": [],
+  "data_associations": []
 }
