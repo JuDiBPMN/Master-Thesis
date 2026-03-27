@@ -5,7 +5,8 @@ env/
 ENV/
 fine_tuned_llm/
 *.gguf
-
+.tmp.drivedownload/
+.tmp.driveupload/
 # Common build/cache folders
 __pycache__/
 *.py[cod]
