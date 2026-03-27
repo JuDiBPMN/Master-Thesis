@@ -44,16 +44,5 @@
     { "id": "sf15", "from": "review_isp",         "to": "join_outcome" },
     { "id": "sf16", "from": "join_outcome",       "to": "end" }
   ],
-  "message_flows": [],
-  "data": [
-    { "id": "isp_data", "name": "ISP" },
-    { "id": "ier_data", "name": "IER" }
-  ],
-  "data_associations": [
-    { "from": "select_courses",     "to": "isp_data", "type": "output" },
-    { "from": "choose_exam_moments","to": "ier_data",  "type": "output" },
-    { "from": "save_isp_ier",       "to": "isp_data", "type": "output" },
-    { "from": "save_isp_ier",       "to": "ier_data",  "type": "output" },
-    { "from": "review_isp",         "to": "isp_data", "type": "output" }
-  ]
+  "message_flows": []
 }

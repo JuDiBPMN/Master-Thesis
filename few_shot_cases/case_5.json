@@ -1,9 +1,14 @@
-{
-  "participants": [
+{ "pools": [
     {
       "id": "photographer",
-      "name": "Photographer",
-      "type": "pool"
+      "name": "Photographer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "photographer_lane",
+      "name": "Photographer_lane",
+      "pool": "photographer"
     }
   ],
   "tasks": [
@@ -11,37 +16,37 @@
       "id": "receive_pictures",
       "name": "Receive Pictures",
       "type": "task",
-      "participant": "photographer"
+      "lane": "photographer_lane"
     },
     {
       "id": "clean_pictures",
       "name": "Clean Pictures",
       "type": "task",
-      "participant": "photographer"
+      "lane": "photographer_lane"
     },
     {
       "id": "remove_imperfections",
       "name": "Remove Imperfections",
       "type": "task",
-      "participant": "photographer"
+      "lane": "photographer_lane"
     },
     {
       "id": "whiten_teeth",
       "name": "Whiten Teeth",
       "type": "task",
-      "participant": "photographer"
+      "lane": "photographer_lane"
     },
     {
       "id": "adjust_light_settings",
       "name": "Adjust Light Settings",
       "type": "task",
-      "participant": "photographer"
+      "lane": "photographer_lane  "
     },
     {
       "id": "organize_in_gallery",
       "name": "Organize in Gallery",
       "type": "task",
-      "participant": "photographer"
+      "lane": "photographer_lane"
     }
   ],
   "events": [
@@ -49,14 +54,14 @@
       "id": "start_photographer",
       "name": "Start",
       "type": "startEvent",
-      "participant": "photographer",
+      "lane": "photographer_lane",
       "eventDefinition": "none"
     },
     {
       "id": "end_photographer",
       "name": "End",
       "type": "endEvent",
-      "participant": "photographer",
+      "lane": "photographer_lane",
       "eventDefinition": "none"
     }
   ],
@@ -65,14 +70,14 @@
       "id": "gateway_parallel_split",
       "name": "Start Concurrent Editing",
       "type": "parallelGateway",
-      "participant": "photographer",
+      "lane": "photographer_lane",
       "gatewayDirection": "diverging"
     },
     {
       "id": "gateway_parallel_join",
       "name": "Editing Complete",
       "type": "parallelGateway",
-      "participant": "photographer",
+      "lane": "photographer_lane",
       "gatewayDirection": "converging"
     }
   ],
@@ -89,7 +94,5 @@
     { "id": "sf10", "from": "gateway_parallel_join", "to": "organize_in_gallery" },
     { "id": "sf11", "from": "organize_in_gallery", "to": "end_photographer" }
   ],
-  "message_flows": [],
-  "data": [],
-  "data_associations": []
+  "message_flows": []
 }

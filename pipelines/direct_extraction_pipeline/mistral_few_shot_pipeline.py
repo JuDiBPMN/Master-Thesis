@@ -131,31 +131,6 @@ BPMN_SCHEMA = {
                 "additionalProperties": False
             }
         },
-        "data": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id":   {"type": "string"},
-                    "name": {"type": "string"}
-                },
-                "required": ["id", "name"],
-                "additionalProperties": False
-            }
-        },
-        "data_associations": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "from": {"type": "string"},
-                    "to":   {"type": "string"},
-                    "type": {"type": "string", "enum": ["input", "output"]}
-                },
-                "required": ["from", "to", "type"],
-                "additionalProperties": False
-            }
-        }
     },
     "required": ["pools", "lanes", "tasks", "events", "gateways", "sequence_flows", "message_flows"]
 }
@@ -534,9 +509,11 @@ CRITICAL:
   startEvent → tasks → gateways → tasks → endEvent
 
 
-- A task must:
+- A task should:
   - have 1 incoming flow
   - have 1 outgoing flow
+  (except when directly after startEvent or before endEvent)
+
 
 7. CORRECT FLOW BEFORE DECISIONS
 - Do NOT decide before all required inputs are available
@@ -559,7 +536,7 @@ Before outputting JSON, verify:
 
 - Are there multiple pools if multiple organisations exist?
 - Are all cross-pool interactions modeled as message flows (NOT sequence flows)?
-- Are there any message flows within the same pool? If so, change them to sequence flows.
+- Does each pool have a startEvent AND endEvent?
 - Are parallel branches correctly split AND joined?
 - Are decisions only made AFTER required information is available?
 - Are tasks connected in a continuous flow (no isolated tasks)?

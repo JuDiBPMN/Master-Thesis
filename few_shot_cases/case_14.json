@@ -66,7 +66,5 @@
       { "id": "Flow_1dokfny", "from": "confirm_resolution","to": "Event_1h5fzi2",   "name": "Resolution Confirmation" },
       { "id": "Flow_1jkbq1y", "from": "close_report",      "to": "Event_1pftiba",   "name": "Closure Notification" },
       { "id": "Flow_0cector", "from": "notify_support",    "to": "Event_1pftiba",   "name": "Fix Notification" }
-    ],
-    "data": [],
-    "data_associations": []
+    ]
   }

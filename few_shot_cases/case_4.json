@@ -1,19 +1,20 @@
 {
-  "participants": [
+  "pools": [
      {
       "id": "procurement_process",
-      "name": "Procurement Process",
-      "type": "pool"
-    },
+      "name": "Procurement Process"
+    }
+  ],
+    "lanes": [  
     {
       "id": "product_manager",
       "name": "Product Manager",
-      "type": "lane"
+      "pool": "procurement_process"
     },
     {
       "id": "product_owner",
       "name": "Product Owner",
-      "type": "lane"
+      "pool": "procurement_process"
     }
   ],
   "tasks": [
@@ -21,31 +22,31 @@
       "id": "request_product_quotes",
       "name": "Request Product Quotes",
       "type": "task",
-      "participant": "product_manager"
+      "lane": "product_manager"
     },
     {
       "id": "receive_all_quotes",
       "name": "Receive All Quotes",
       "type": "task",
-      "participant": "product_manager"
+      "lane": "product_manager"
     },
     {
       "id": "evaluate_delivery_options",
       "name": "Evaluate Delivery Options",
       "type": "task",
-      "participant": "product_manager"
+      "lane": "product_manager"
     },
     {
       "id": "evaluate_quotes",
       "name": "Evaluate Quotes",
       "type": "task",
-      "participant": "product_owner"
+      "lane": "product_owner"
     },
     {
       "id": "sign_contract",
       "name": "Sign Contract",
       "type": "task",
-      "participant": "product_manager"
+      "lane": "product_manager"
     }
   ],
   "events": [
@@ -53,14 +54,14 @@
       "id": "start_product_manager",
       "name": "Start",
       "type": "startEvent",
-      "participant": "product_manager",
+      "lane": "product_manager",
       "eventDefinition": "none"
     },
     {
       "id": "end_product_manager",
       "name": "End",
       "type": "endEvent",
-      "participant": "product_manager",
+      "lane": "product_manager",
       "eventDefinition": "none"
     }
   ],
@@ -69,14 +70,14 @@
       "id": "gateway_parallel_split",
       "name": "Start Simultaneous Tasks",
       "type": "parallelGateway",
-      "participant": "product_manager",
+      "lane": "product_manager",
       "gatewayDirection": "diverging"
     },
     {
       "id": "gateway_parallel_join",
       "name": "Both Tasks Complete",
       "type": "parallelGateway",
-      "participant": "product_manager",
+      "lane": "product_manager",
       "gatewayDirection": "converging"
     }
   ],
@@ -91,23 +92,5 @@
     { "id": "sf8", "from": "evaluate_quotes", "to": "sign_contract" },
     { "id": "sf9", "from": "sign_contract", "to": "end_product_manager" }
   ],
-  "message_flows": [],
-  "data": [
-    {
-      "id": "quotes",
-      "name": "Quotes"
-    }
-  ],
-  "data_associations": [
-    {
-      "from": "receive_all_quotes",
-      "to": "quotes",
-      "type": "output"
-    },
-    {
-      "from": "quotes",
-      "to": "evaluate_quotes",
-      "type": "output"
-    }
-  ]
+  "message_flows": []
 }

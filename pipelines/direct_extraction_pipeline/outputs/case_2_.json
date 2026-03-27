@@ -152,5 +152,51 @@
     { "id": "sf19", "from": "start_project",  "to": "gateway_approved_join" },
     { "id": "sf20", "from": "gateway_approved_join",  "to": "end_manager" }
   ],
-  "message_flows": []
+  "message_flows": [],
+  "data": [{"id": "document_idea",
+          "name": "document of basic idea"
+          },
+          {"id": "request_for_approval",
+           "name": "request for approval"
+           },
+          {"id": "project_plan",
+           "name": "project plan"}
+          ],
+  "data_associations": [
+  {
+    "from": "record_idea",
+    "to": "document_idea",
+    "type": "output"
+  },
+  {
+    "from": "submit_request",
+    "to": "request_for_approval",
+    "type": "output"
+  },
+  {
+    "from": "assess_request",
+    "to": "request_for_approval",
+    "type": "output"
+  },
+  {
+    "from": "initiate_project_plan",
+    "to": "project_plan",
+    "type": "output"
+  },
+  {
+    "from": "lay_out_timeline",
+    "to": "project_plan",
+    "type": "output"
+  },
+  {
+    "from": "set_up_budget",
+    "to": "project_plan",
+    "type": "output"
+  },
+  {
+    "from": "state_resources",
+    "to": "project_plan",
+    "type": "output"
+  }
+  ]
 }

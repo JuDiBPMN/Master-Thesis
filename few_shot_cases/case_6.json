@@ -1,9 +1,15 @@
 {
-  "participants": [
+  "pools": [
     {
       "id": "cook",
-      "name": "Cook",
-      "type": "pool"
+      "name": "Cook"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "cook_lane",
+      "name": "Cook_lane",
+      "pool": "cook"
     }
   ],
   "tasks": [
@@ -11,55 +17,55 @@
       "id": "collect_ingredients",
       "name": "Collect Ingredients",
       "type": "task",
-      "participant": "cook"
+      "lane": "cook_lane"
     },
     {
       "id": "heat_sauce_pan",
       "name": "Heat Sauce Pan",
       "type": "task",
-      "participant": "cook"
+      "lane": "cook_lane"
     },
     {
       "id": "cut_vegetables",
       "name": "Cut Vegetables",
       "type": "task",
-      "participant": "cook"
+      "lane": "cook_lane"
     },
     {
       "id": "cook_vegetables",
       "name": "Cook Vegetables",
       "type": "task",
-      "participant": "cook"
+      "lane": "cook_lane"
     },
     {
       "id": "fill_up_water_bowl",
       "name": "Fill Up Water Bowl",
       "type": "task",
-      "participant": "cook"
+      "lane": "cook_lane"
     },
     {
       "id": "salt_water",
       "name": "Salt Water",
       "type": "task",
-      "participant": "cook"
+      "lane": "cook_lane"
     },
     {
       "id": "boil_water",
       "name": "Boil Water",
       "type": "task",
-      "participant": "cook"
+      "lane": "cook_lane"
     },
     {
       "id": "cook_pasta",
       "name": "Cook Pasta",
       "type": "task",
-      "participant": "cook"
+      "lane": "cook_lane"
     },
     {
       "id": "serve_pasta",
       "name": "Serve Pasta",
       "type": "task",
-      "participant": "cook"
+      "lane": "cook_lane"
     }
   ],
   "events": [
@@ -67,14 +73,14 @@
       "id": "start_cook",
       "name": "Start",
       "type": "startEvent",
-      "participant": "cook",
+      "lane": "cook_lane",
       "eventDefinition": "none"
     },
     {
       "id": "end_cook",
       "name": "End",
       "type": "endEvent",
-      "participant": "cook",
+      "lane": "cook_lane",
       "eventDefinition": "none"
     }
   ],
@@ -83,14 +89,14 @@
       "id": "gateway_parallel_split",
       "name": "Start Concurrent Cooking",
       "type": "parallelGateway",
-      "participant": "cook",
+      "lane": "cook_lane",
       "gatewayDirection": "diverging"
     },
     {
       "id": "gateway_parallel_join",
       "name": "Concurrent Cooking Complete",
       "type": "parallelGateway",
-      "participant": "cook",
+      "lane": "cook_lane",
       "gatewayDirection": "converging"
     }
   ],
@@ -109,7 +115,5 @@
     { "id": "sf12", "from": "cook_pasta", "to": "serve_pasta" },
     { "id": "sf13", "from": "serve_pasta", "to": "end_cook" }
   ],
-  "message_flows": [],
-  "data": [],
-  "data_associations": []
+  "message_flows": []
 }

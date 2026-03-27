@@ -52,7 +52,5 @@
       { "id": "mf1",          "from": "submit_return",    "to": "start_cs",        "name": "Return Request" },
       { "id": "Flow_19rlkps", "from": "notify_rejected",  "to": "Event_0muyk3x",   "name": "Rejection Notice" },
       { "id": "Flow_14qsqvk", "from": "send_confirmation","to": "Event_0tpcr9s",   "name": "Confirmation" }
-    ],
-    "data": [],
-    "data_associations": []
+    ]
   }

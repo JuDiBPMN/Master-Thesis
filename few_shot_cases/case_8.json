@@ -1,47 +1,54 @@
 {
-  "participants": [
+  "pools": [
     {
       "id": "production_facility_team",
-      "name": "Production Facility Team",
-      "type": "pool"
+      "name": "Production Facility Team"
     }
   ],
+  "lanes": [
+    {
+      "id": "production_lane",
+      "name": "Production Lane",
+      "pool": "production_facility_team"
+    }
+  ],
+
   "tasks": [
     {
       "id": "process_order",
       "name": "Process Order",
       "type": "task",
-      "participant": "production_facility_team"
+      "lane": "production_lane"
     },
     {
       "id": "produce_fresh_product",
       "name": "Produce Fresh Product",
       "type": "task",
-      "participant": "production_facility_team"
+      "lane": "production_lane"
     },
     {
       "id": "use_stock_items",
       "name": "Use Stock Items",
       "type": "task",
-      "participant": "production_facility_team"
+      "lane": "production_lane"
     },
     {
       "id": "organize_shipment",
       "name": "Organize Shipment",
       "type": "task",
-      "participant": "production_facility_team"
+      "lane": "production_lane"
     },
     {
       "id": "package_ordered_products",
       "name": "Package Ordered Products",
       "type": "task",
-      "participant": "production_facility_team"
+      "lane": "production_lane"
     },
     {
       "id": "ship_order",
       "name": "Ship Order",
       "type": "task",
-      "participant": "production_facility_team"
+      "lane": "production_lane"
     }
   ],
   "events": [
@@ -49,14 +56,14 @@
       "id": "start_production",
       "name": "Order Received",
       "type": "startEvent",
-      "participant": "production_facility_team",
+      "lane": "production_lane",
       "eventDefinition": "none"
     },
     {
       "id": "end_production",
       "name": "End",
       "type": "endEvent",
-      "participant": "production_facility_team",
+      "lane": "production_lane",
       "eventDefinition": "none"
     }
   ],
@@ -65,28 +72,28 @@
       "id": "gateway_order_split",
       "name": "Order Value?",
       "type": "exclusiveGateway",
-      "participant": "production_facility_team",
+      "lane": "production_lane",
       "gatewayDirection": "diverging"
     },
     {
       "id": "gateway_order_join",
       "name": "Product Ready",
       "type": "exclusiveGateway",
-      "participant": "production_facility_team",
+      "lane": "production_lane",
       "gatewayDirection": "converging"
     },
     {
       "id": "gateway_parallel_split",
       "name": "Start Concurrent Fulfillment",
       "type": "parallelGateway",
-      "participant": "production_facility_team",
+      "lane": "production_lane",
       "gatewayDirection": "diverging"
     },
     {
       "id": "gateway_parallel_join",
       "name": "Fulfillment Complete",
       "type": "parallelGateway",
-      "participant": "production_facility_team",
+      "lane": "production_lane",
       "gatewayDirection": "converging"
     }
   ],
@@ -105,7 +112,5 @@
     { "id": "sf12", "from": "gateway_parallel_join", "to": "ship_order" },
     { "id": "sf13", "from": "ship_order", "to": "end_production" }
   ],
-  "message_flows": [],
-  "data": [],
-  "data_associations": []
+  "message_flows": []
 }

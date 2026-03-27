@@ -1,9 +1,15 @@
 {
-  "participants": [
+  "pools": [
     {
       "id": "marketing_team",
-      "name": "Marketing Team",
-      "type": "pool"
+      "name": "Marketing Team"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "marketing_lane",
+      "name": "Marketing Lane",
+      "pool": "marketing_team"
     }
   ],
   "tasks": [
@@ -11,49 +17,49 @@
       "id": "convene_briefing",
       "name": "Convene at 6:30AM for Briefing",
       "type": "task",
-      "participant": "marketing_team"
+      "lane": "marketing_lane"
     },
     {
       "id": "launch_daily_ad_campaign",
       "name": "Launch Daily Ad Campaign",
       "type": "task",
-      "participant": "marketing_team"
+      "lane": "marketing_lane"
     },
     {
       "id": "review_latest_analytics",
       "name": "Review Latest Analytics",
       "type": "task",
-      "participant": "marketing_team"
+      "lane": "marketing_lane"
     },
     {
       "id": "finalize_presentation",
       "name": "Finalize Presentation",
       "type": "task",
-      "participant": "marketing_team"
+      "lane": "marketing_lane"
     },
     {
       "id": "drive_to_clients_office",
       "name": "Drive to Clients Office in Namur",
       "type": "task",
-      "participant": "marketing_team"
+      "lane": "marketing_lane"
     },
     {
       "id": "discuss_campaign_strategy",
       "name": "Discuss Campaign Strategy",
       "type": "task",
-      "participant": "marketing_team"
+      "lane": "marketing_lane"
     },
     {
       "id": "deliver_pitch",
       "name": "Deliver Pitch",
       "type": "task",
-      "participant": "marketing_team"
+      "lane": "marketing_lane"
     },
     {
       "id": "return_to_office",
       "name": "Return to Office",
       "type": "task",
-      "participant": "marketing_team"
+      "lane": "marketing_lane"
     }
   ],
   "events": [
@@ -61,14 +67,14 @@
       "id": "start_marketing",
       "name": "Start",
       "type": "startEvent",
-      "participant": "marketing_team",
+      "lane": "marketing_lane",
       "eventDefinition": "none"
     },
     {
       "id": "end_marketing",
       "name": "End",
       "type": "endEvent",
-      "participant": "marketing_team",
+      "lane": "marketing_lane",
       "eventDefinition": "none"
     }
   ],
@@ -77,14 +83,14 @@
       "id": "gateway_parallel_split",
       "name": "Start Concurrent Tasks",
       "type": "parallelGateway",
-      "participant": "marketing_team",
+      "lane": "marketing_lane",
       "gatewayDirection": "diverging"
     },
     {
       "id": "gateway_parallel_join",
       "name": "Concurrent Tasks Complete",
       "type": "parallelGateway",
-      "participant": "marketing_team",
+      "lane": "marketing_lane",
       "gatewayDirection": "converging"
     }
   ],
@@ -102,7 +108,5 @@
     { "id": "sf11", "from": "deliver_pitch", "to": "return_to_office" },
     { "id": "sf12", "from": "return_to_office", "to": "end_marketing" }
   ],
-  "message_flows": [],
-  "data": [],
-  "data_associations": []
+  "message_flows": []
 }

@@ -67,7 +67,5 @@
       { "id": "mf2", "from": "notify_no_slot",     "to": "end_gp_no_slot",    "name": "No Availability Notice" },
       { "id": "mf3", "from": "notify_gp_booked",   "to": "start_specialist",  "name": "Referral Package" },
       { "id": "mf4", "from": "notify_gp_discharge","to": "end_gp_discharged", "name": "Discharge Notice" }
-    ],
-    "data": [],
-    "data_associations": []
+    ]
   }
