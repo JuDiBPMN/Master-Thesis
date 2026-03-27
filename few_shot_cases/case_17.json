@@ -63,10 +63,10 @@
       { "id": "sf20", "from": "notify_gp_discharge","to": "end_specialist_disc" }
     ],
     "message_flows": [
-      { "id": "mf1", "from": "send_referral",      "to": "start_hospital",    "name": "Referral Request" },
-      { "id": "mf2", "from": "notify_no_slot",     "to": "end_gp_no_slot",    "name": "No Availability Notice" },
-      { "id": "mf3", "from": "notify_gp_booked",   "to": "start_specialist",  "name": "Referral Package" },
-      { "id": "mf4", "from": "notify_gp_discharge","to": "end_gp_discharged", "name": "Discharge Notice" }
+      { "id": "mf1", "from": "send_referral",      "to": "start_hospital",    "from_pool": "gp_pool",        "to_pool": "hospital_pool" },
+      { "id": "mf2", "from": "notify_no_slot",     "to": "end_gp_no_slot",    "from_pool": "hospital_pool",        "to_pool": "gp_pool" },
+      { "id": "mf3", "from": "notify_gp_booked",   "to": "start_specialist",  "from_pool": "hospital_pool",        "to_pool": "specialist_pool" },
+      { "id": "mf4", "from": "notify_gp_discharge","to": "end_gp_discharged", "from_pool": "specialist_pool",        "to_pool": "gp_pool" }
     ],
     "data": [],
     "data_associations": []
