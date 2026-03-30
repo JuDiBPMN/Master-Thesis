@@ -1,0 +1,60 @@
+{
+  "pools": [
+    { "id": "client_pool",         "name": "Client" },
+    { "id": "energy_company_pool", "name": "Energy Company" }
+  ],
+  "lanes": [
+    { "id": "client_lane",           "name": "Client",                     "pool": "client_pool" },
+    { "id": "customer_service_lane", "name": "Customer Service Department", "pool": "energy_company_pool" },
+    { "id": "invoicing_lane",        "name": "Invoicing Department",        "pool": "energy_company_pool" }
+  ],
+  "tasks": [
+    { "id": "write_complaint_email",         "name": "Write a complaint email",            "type": "task", "lane": "client_lane" },
+    { "id": "look_up_billing_info",          "name": "Look up client's billing information","type": "task", "lane": "customer_service_lane" },
+    { "id": "review_invoice",                "name": "Review invoice",                     "type": "task", "lane": "customer_service_lane" },
+    { "id": "write_explanation_email",       "name": "Write email with explanation",        "type": "task", "lane": "customer_service_lane" },
+    { "id": "create_ticket",                 "name": "Create ticket",                      "type": "task", "lane": "customer_service_lane" },
+    { "id": "assign_to_invoicing",           "name": "Assign to invoicing department",     "type": "task", "lane": "customer_service_lane" },
+    { "id": "investigate_invoicing_mistake", "name": "Investigate invoicing mistake",      "type": "task", "lane": "invoicing_lane" },
+    { "id": "make_necessary_correction",     "name": "Make necessary correction",          "type": "task", "lane": "invoicing_lane" }
+  ],
+  "events": [
+    { "id": "start_client",             "name": "Start",                               "type": "startEvent",             "lane": "client_lane",           "eventDefinition": "none" },
+    { "id": "forward_complaint",        "name": "Forward complaint to customer service","type": "intermediateThrowEvent", "lane": "client_lane",           "eventDefinition": "message" },
+    { "id": "receive_explanation",      "name": "Receive explanation",                 "type": "intermediateCatchEvent", "lane": "client_lane",           "eventDefinition": "message" },
+    { "id": "end_explanation_received", "name": "End",                                 "type": "endEvent",               "lane": "client_lane",           "eventDefinition": "none" },
+    { "id": "new_invoice_received",     "name": "New invoice received",                "type": "intermediateCatchEvent", "lane": "client_lane",           "eventDefinition": "message" },
+    { "id": "end_invoice_received",     "name": "End",                                 "type": "endEvent",               "lane": "client_lane",           "eventDefinition": "none" },
+    { "id": "complaint_received",       "name": "Complaint received",                  "type": "startEvent",             "lane": "customer_service_lane", "eventDefinition": "message" },
+    { "id": "send_explanation_email",   "name": "Send explanation email",              "type": "intermediateThrowEvent", "lane": "customer_service_lane", "eventDefinition": "message" },
+    { "id": "end_explanation_sent",     "name": "End",                                 "type": "endEvent",               "lane": "customer_service_lane", "eventDefinition": "none" },
+    { "id": "generate_new_invoice",     "name": "Generate new invoice",               "type": "intermediateThrowEvent", "lane": "invoicing_lane",        "eventDefinition": "message" },
+    { "id": "end_invoice_sent",         "name": "End",                                 "type": "endEvent",               "lane": "invoicing_lane",        "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "mistake_found", "name": "Mistake found?", "type": "exclusiveGateway", "lane": "customer_service_lane", "gatewayDirection": "diverging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf1",  "from": "start_client",                  "to": "write_complaint_email" },
+    { "id": "sf2",  "from": "write_complaint_email",         "to": "forward_complaint" },
+    { "id": "sf3",  "from": "receive_explanation",           "to": "end_explanation_received" },
+    { "id": "sf4",  "from": "new_invoice_received",          "to": "end_invoice_received" },
+    { "id": "sf5",  "from": "complaint_received",            "to": "look_up_billing_info" },
+    { "id": "sf6",  "from": "look_up_billing_info",          "to": "review_invoice" },
+    { "id": "sf7",  "from": "review_invoice",                "to": "mistake_found" },
+    { "id": "sf8",  "from": "mistake_found",                 "to": "write_explanation_email",       "condition": "No mistake made" },
+    { "id": "sf9",  "from": "mistake_found",                 "to": "create_ticket",                 "condition": "Mistake found" },
+    { "id": "sf10", "from": "write_explanation_email",       "to": "send_explanation_email" },
+    { "id": "sf11", "from": "send_explanation_email",        "to": "end_explanation_sent" },
+    { "id": "sf12", "from": "create_ticket",                 "to": "assign_to_invoicing" },
+    { "id": "sf13", "from": "assign_to_invoicing",           "to": "investigate_invoicing_mistake" },
+    { "id": "sf14", "from": "investigate_invoicing_mistake", "to": "make_necessary_correction" },
+    { "id": "sf15", "from": "make_necessary_correction",     "to": "generate_new_invoice" },
+    { "id": "sf16", "from": "generate_new_invoice",          "to": "end_invoice_sent" }
+  ],
+  "message_flows": [
+    { "id": "mf1", "from": "forward_complaint",      "to": "complaint_received",  "name": "Complaint" },
+    { "id": "mf2", "from": "send_explanation_email", "to": "receive_explanation", "name": "Explanation" },
+    { "id": "mf3", "from": "generate_new_invoice",   "to": "new_invoice_received","name": "New Invoice" }
+  ]
+}

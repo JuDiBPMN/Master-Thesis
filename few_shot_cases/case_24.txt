@@ -1,0 +1,4 @@
+A client of BrightWave Energy receives their monthly electricity bill and immediately sees that the billed amount is too high. The process starts with the client writing a complaint email after which it is sent to the customer service department.
+The customer service department receives the complaint. The employee first looks up the client's billing information and then reviews the invoice. Based on the review, the employee determines whether a mistake was actually made.
+If no mistake is found, the employee writes an email with a clear explanation and sends it to the client, after which the process ends.
+If a mistake is found, the employee creates a ticket in the internal system and assigns it to the invoicing department. The invoicing department investigates the invoicing mistake and then makes the necessary correction. A new invoice is then generated and sent to the client by email, after which the process ends.
