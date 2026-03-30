@@ -1,0 +1,48 @@
+{
+  "pools": [
+    { "id": "student_pool", "name": "KU Leuven Course Registration" }
+  ],
+  "lanes": [
+    { "id": "student", "name": "Student", "pool": "student_pool" }
+  ],
+  "tasks": [
+    { "id": "register_academic_year", "name": "Register for Academic Year",     "type": "task", "lane": "student" },
+    { "id": "log_into_kuloket",       "name": "Log into KU Loket",              "type": "task", "lane": "student" },
+    { "id": "select_courses",         "name": "Select Courses",                 "type": "task", "lane": "student" },
+    { "id": "update_personal_info",   "name": "Update Personal Info",           "type": "task", "lane": "student" },
+    { "id": "choose_exam_moments",    "name": "Choose Examination Moments",     "type": "task", "lane": "student" },
+    { "id": "save_isp_ier",           "name": "Save ISP and IER",               "type": "task", "lane": "student" },
+    { "id": "submit_isp",             "name": "Submit ISP for Review",          "type": "task", "lane": "student" },
+    { "id": "contact_coordinator",    "name": "Contact Coordinator",            "type": "task", "lane": "student" },
+    { "id": "review_isp",             "name": "Review ISP",                     "type": "task", "lane": "student" }
+  ],
+  "events": [
+    { "id": "start", "name": "Start", "type": "startEvent", "lane": "student", "eventDefinition": "none" },
+    { "id": "end",   "name": "End",   "type": "endEvent",   "lane": "student", "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "split_parallel", "name": "Start Parallel Activities",       "type": "parallelGateway",  "lane": "student", "gatewayDirection": "diverging" },
+    { "id": "join_parallel",  "name": "Both Activities Completed",       "type": "parallelGateway",  "lane": "student", "gatewayDirection": "converging" },
+    { "id": "split_outcome",  "name": "ISP Approved or Rejected?",       "type": "exclusiveGateway", "lane": "student", "gatewayDirection": "diverging" },
+    { "id": "join_outcome",   "name": "Merge After Review Decision",     "type": "exclusiveGateway", "lane": "student", "gatewayDirection": "converging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf1",  "from": "start",              "to": "register_academic_year" },
+    { "id": "sf2",  "from": "register_academic_year", "to": "log_into_kuloket" },
+    { "id": "sf3",  "from": "log_into_kuloket",   "to": "split_parallel" },
+    { "id": "sf4",  "from": "split_parallel",     "to": "select_courses" },
+    { "id": "sf5",  "from": "split_parallel",     "to": "update_personal_info" },
+    { "id": "sf6",  "from": "select_courses",     "to": "join_parallel" },
+    { "id": "sf7",  "from": "update_personal_info","to": "join_parallel" },
+    { "id": "sf8",  "from": "join_parallel",      "to": "choose_exam_moments" },
+    { "id": "sf9",  "from": "choose_exam_moments","to": "save_isp_ier" },
+    { "id": "sf10", "from": "save_isp_ier",       "to": "submit_isp" },
+    { "id": "sf11", "from": "submit_isp",         "to": "split_outcome" },
+    { "id": "sf12", "from": "split_outcome",      "to": "join_outcome",       "condition": "ISP approved" },
+    { "id": "sf13", "from": "split_outcome",      "to": "contact_coordinator","condition": "ISP rejected" },
+    { "id": "sf14", "from": "contact_coordinator","to": "review_isp" },
+    { "id": "sf15", "from": "review_isp",         "to": "join_outcome" },
+    { "id": "sf16", "from": "join_outcome",       "to": "end" }
+  ],
+  "message_flows": []
+}

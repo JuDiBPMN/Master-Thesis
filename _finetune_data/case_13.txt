@@ -1,0 +1,6 @@
+An e-commerce company processes product returns from customers. The customer submits a return request. 
+The customer service team receives the request and verifies whether the item is eligible for return. 
+If the item is not eligible, the customer service team notifies the customer that the return is rejected and the process ends. 
+If the item is eligible, the warehouse team and the finance team begin working simultaneously:
+ the warehouse team arranges collection of the item, and the finance team initiates the refund process. 
+Once both the collection has been arranged and the refund has been initiated, the customer service team sends a confirmation to the customer and the process ends.

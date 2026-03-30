@@ -1,6 +1,8 @@
 import os
 import sys
 import json
+import argparse
+import glob
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from collections import defaultdict, deque
@@ -663,25 +665,95 @@ def create_bpmn_xml(json_data, output_path):
     print(f"  Written → {output_path}")
 
 
+def _resolve_input_json(*, case_name, pipeline_name, prompting_strategy, input_json_override=None):
+    """
+    Resolve the single expected JSON input file.
+
+    IMPORTANT: No fallback searching/globbing. If the file doesn't exist,
+    raise FileNotFoundError("input not found") so interactive usage can
+    show the requested message.
+    """
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+    JSON_SOURCE_DIR = os.path.join(PROJECT_ROOT, "pipelines", pipeline_name, "outputs")
+
+    if input_json_override:
+        if not os.path.exists(input_json_override):
+            raise FileNotFoundError("input not found")
+        return input_json_override
+
+    # Match the original naming scheme used by the script:
+    #   f"{case_name}_{prompting_strategy}_bpmn.json"
+    # When prompting_strategy == "", this becomes `case_29__bpmn.json`.
+    input_json = os.path.join(
+        JSON_SOURCE_DIR,
+        f"{case_name}_{prompting_strategy}_bpmn.json",
+    )
+
+    if not os.path.exists(input_json):
+        raise FileNotFoundError("input not found")
+
+    return input_json
+
+
+def generate_case_bpmn_xml(
+    *,
+    case_name="case_29",
+    pipeline_name="direct_extraction_pipeline",
+    prompting_strategy="",
+    input_json=None,
+    output_bpmn=None,
+):
+    """
+    Interactive-friendly entry point.
+    Returns the generated output `.bpmn` file path.
+    """
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    XML_OUTPUT_DIR = os.path.join(SCRIPT_DIR, "outputs")
+    os.makedirs(XML_OUTPUT_DIR, exist_ok=True)
+
+    if output_bpmn is None:
+        output_bpmn = os.path.join(XML_OUTPUT_DIR, f"{case_name}_{prompting_strategy}.bpmn")
+
+    try:
+        input_json_path = _resolve_input_json(
+            case_name=case_name,
+            pipeline_name=pipeline_name,
+            prompting_strategy=prompting_strategy,
+            input_json_override=input_json,
+        )
+
+        with open(input_json_path, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+
+        print("--- BPMN XML Generator ---")
+        print(f"Input: {input_json_path}")
+        create_bpmn_xml(raw, output_bpmn)
+        print(f"Written output: {output_bpmn}")
+        return output_bpmn
+    except FileNotFoundError:
+        print("input not found")
+        return None
+
+
+
 
 if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
-    case_name          = "case_21"
-    pipeline_name      = "direct_extraction_pipeline"
-    prompting_strategy = "few_shot_mistral"  
+    case_name = "case_20"
+    pipeline_name = "direct_extraction_pipeline"
+    prompting_strategy = ""
     # ──────────────────────────────────────────────────────────────────────────
 
-    SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 
     JSON_SOURCE_DIR = os.path.join(PROJECT_ROOT, "pipelines", pipeline_name, "outputs")
-    XML_OUTPUT_DIR  = os.path.join(SCRIPT_DIR, "outputs")
+    XML_OUTPUT_DIR = os.path.join(SCRIPT_DIR, "outputs")
     os.makedirs(XML_OUTPUT_DIR, exist_ok=True)
 
-    input_json  = os.path.join(JSON_SOURCE_DIR,
-                               f"{case_name}_{prompting_strategy}_invalid.json")
-    output_bpmn = os.path.join(XML_OUTPUT_DIR,
-                               f"{case_name}_{prompting_strategy}.bpmn")
+    input_json = os.path.join(JSON_SOURCE_DIR, f"{case_name}_{prompting_strategy}.json")
+    output_bpmn = os.path.join(XML_OUTPUT_DIR, f"{case_name}_{prompting_strategy}.bpmn")
 
     print("--- BPMN XML Generator ---")
     try:
@@ -690,8 +762,10 @@ if __name__ == "__main__":
         with open(input_json, "r", encoding="utf-8") as f:
             raw = json.load(f)
         print("Validating JSON...")
-        
+
         create_bpmn_xml(raw, output_bpmn)
         print("Done — upload to https://bpmn.io to view")
-    except Exception as e:
-        import traceback; traceback.print_exc()
+    except Exception:
+        import traceback
+
+        traceback.print_exc()

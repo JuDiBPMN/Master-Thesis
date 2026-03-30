@@ -1,0 +1,6 @@
+The employee initiates an idea for a project. 
+He needs to record the basic idea in a document and express its value for the company. 
+He then needs to submit a request for approval to the manager of his team. The manager assesses the request for approval. 
+If the project is approved, he will initiate a project plan. 
+This involves simultaneously laying out a timeline, setting up a budget and stating the required resources. 
+When this is done, the project is started. If otherwise, he rejects the plan, he will communicate the rejection to his employee. 

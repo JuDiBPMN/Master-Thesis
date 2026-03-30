@@ -1,0 +1,56 @@
+{
+  "pools": [
+    { "id": "yamaha", "name": "Yamaha" },
+    { "id": "customer", "name": "Customer" }
+  ],
+  "lanes": [
+    { "id": "logistics_lane", "name": "Logistics", "pool": "yamaha" },
+    { "id": "sales_lane",     "name": "Sales",      "pool": "yamaha" },
+    { "id": "customer_lane",  "name": "Customer",   "pool": "customer" }
+  ],
+  "tasks": [
+    { "id": "check_stock",       "name": "Check Stock",         "type": "task", "lane": "logistics_lane" },
+    { "id": "ship_goods",        "name": "Ship Goods",          "type": "task", "lane": "logistics_lane" },
+    { "id": "Receive_Order",  "name": "Receive Order",       "type": "task", "lane": "sales_lane" },
+    { "id": "order_rejection",   "name": "Reject Order",        "type": "task", "lane": "sales_lane" },
+    { "id": "order_confirmation","name": "Confirm Order",       "type": "task", "lane": "sales_lane" },
+    { "id": "Reimburse_Customer",  "name": "Reimburse Customer",  "type": "task", "lane": "sales_lane" },
+    { "id": "send_invoice",      "name": "Send Invoice",        "type": "task", "lane": "sales_lane" },
+    { "id": "Order_Products",  "name": "Order Products",      "type": "task", "lane": "customer_lane" }
+  ],
+  "events": [
+    { "id": "start_yamaha",    "name": "Start Invoice", "type": "startEvent", "lane": "sales_lane",    "eventDefinition": "none" },
+    { "id": "end_order_confirmed", "name": "End",        "type": "endEvent",   "lane": "sales_lane",    "eventDefinition": "none" },
+    { "id": "start_customer",    "name": "Start",         "type": "startEvent", "lane": "customer_lane", "eventDefinition": "none" },
+    { "id": "end_customer",    "name": "End",           "type": "endEvent",   "lane": "customer_lane", "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "split_exclusive_stock",           "name": "Stock Available?",    "type": "exclusiveGateway", "lane": "sales_lane", "gatewayDirection": "diverging"  },
+    { "id": "split_shipment_invoice", "name": "Both Tasks Complete", "type": "parallelGateway",  "lane": "sales_lane", "gatewayDirection": "diverging"  },
+    { "id": "join_shipment_invoice",       "name": "join_shipment_invoice",                    "type": "parallelGateway",  "lane": "sales_lane", "gatewayDirection": "converging" },
+    { "id": "join_exclusive_stock",       "name": "join_exclusive_stock",                    "type": "exclusiveGateway", "lane": "sales_lane", "gatewayDirection": "converging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf1", "from": "start_yamaha",       "to": "Receive_Order"    },
+    { "id": "sf2", "from": "Receive_Order",    "to": "check_stock"         },
+    { "id": "sf3",          "from": "check_stock",          "to": "split_exclusive_stock"         },
+    { "id": "sf4", "from": "split_exclusive_stock",          "to": "order_rejection",    "condition": "No stock of products" },
+    { "id": "sf5", "from": "split_exclusive_stock",          "to": "order_confirmation", "condition": "Products available"   },
+    { "id": "sf6", "from": "order_rejection",      "to": "Reimburse_Customer"   },
+    { "id": "sf7", "from": "order_confirmation",   "to": "split_shipment_invoice" },
+    { "id": "sf8", "from": "split_shipment_invoice","to": "send_invoice"        },
+    { "id": "sf9", "from": "split_shipment_invoice","to": "ship_goods"          },
+    { "id": "sf10", "from": "ship_goods",           "to": "join_shipment_invoice"    },
+    { "id": "sf11", "from": "send_invoice",         "to": "join_shipment_invoice"    },
+    { "id": "sf12", "from": "join_shipment_invoice",      "to": "join_exclusive_stock"    },
+    { "id": "sf13", "from": "Reimburse_Customer",     "to": "join_exclusive_stock"    },
+    { "id": "sf14", "from": "join_exclusive_stock",      "to": "end_order_confirmed" },
+    { "id": "sf15", "from": "start_customer",        "to": "Order_Products"   },
+    { "id": "sf16", "from": "Order_Products",     "to": "end_customer"      }
+  ],
+  "message_flows": [
+    { "id": "mf1", "from": "Reimburse_Customer", "to": "actor_customer", "name": "Reimbursement" },
+    { "id": "mf2", "from": "send_invoice",     "to": "actor_customer", "name": "Invoice"       },
+    { "id": "mf3", "from": "Order_Products",   "to": "Receive_Order", "name": "Order"         }
+  ]
+}

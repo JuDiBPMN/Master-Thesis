@@ -1,0 +1,3 @@
+The product manager simultaneously requests product quotes and evaluates delivery options. 
+After receiving all quotes, they are evaluated by the product owner. 
+The product manager then signs a contract.

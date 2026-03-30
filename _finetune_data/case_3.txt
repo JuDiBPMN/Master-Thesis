@@ -1,0 +1,8 @@
+The project approval process begins with the Project Manager submitting a project proposal document 
+to the Approval Committee. The proposal includes objectives, budget, timeline, and resource requirements. 
+After the proposal has been submitted, the Finance Department assesses the budget viability. 
+Concurrently the HR Department evaluates resource availability. 
+Upon receiving inputs from Finance and HR, the Approval Committee reviews the proposal in light 
+of financial constraints and human resource availability. If both assessments are positive, 
+the Approval Committee approves the project. If at least one assessment is negative, 
+the Approval Committee requests a revision of the proposal by the Project Manager. 

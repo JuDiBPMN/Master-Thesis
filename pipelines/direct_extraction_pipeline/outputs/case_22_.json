@@ -1,69 +1,375 @@
 {
   "pools": [
-    { "id": "hr_pool",         "name": "HR Department" },
-    { "id": "onboarding_pool", "name": "Onboarding Office" }
+    {
+      "id": "actor_hr_pool",
+      "name": "HR Department"
+    },
+    {
+      "id": "actor_onboarding_pool",
+      "name": "Onboarding Office"
+    }
   ],
   "lanes": [
-    { "id": "hr_officer",    "name": "HR Officer",              "pool": "hr_pool" },
-    { "id": "coordinator",   "name": "Onboarding Coordinator",  "pool": "onboarding_pool" },
-    { "id": "it_dept",       "name": "IT Department",           "pool": "onboarding_pool" },
-    { "id": "facilities",    "name": "Facilities Department",   "pool": "onboarding_pool" }
+    {
+      "id": "hr_officer",
+      "name": "HR Officer",
+      "pool": "actor_hr_pool"
+    },
+    {
+      "id": "facilities",
+      "name": "Facilities Department",
+      "pool": "actor_onboarding_pool"
+    },
+    {
+      "id": "it_dept",
+      "name": "IT Department",
+      "pool": "actor_onboarding_pool"
+    },
+    {
+      "id": "coordinator",
+      "name": "Onboarding Coordinator",
+      "pool": "actor_onboarding_pool"
+    }
   ],
   "tasks": [
-    { "id": "submit_request",    "name": "Submit New Hire Request",         "type": "task", "lane": "hr_officer" },
-    { "id": "collect_docs",      "name": "Collect Missing Documents",       "type": "task", "lane": "hr_officer" },
-    { "id": "register_request",  "name": "Register New Hire Request",       "type": "task", "lane": "coordinator" },
-    { "id": "check_docs",        "name": "Check Documentation Completeness","type": "task", "lane": "coordinator" },
-    { "id": "notify_incomplete", "name": "Notify HR of Missing Documents",  "type": "task", "lane": "coordinator" },
-    { "id": "review_outcomes",   "name": "Review Combined Completion Status","type": "task", "lane": "coordinator" },
-    { "id": "resolve_issue",     "name": "Resolve Flagged Issue",           "type": "task", "lane": "coordinator" },
-    { "id": "send_confirmation", "name": "Send Ready-to-Start Confirmation","type": "task", "lane": "coordinator" },
-    { "id": "setup_accounts",    "name": "Set Up System Accounts",          "type": "task", "lane": "it_dept" },
-    { "id": "record_it",         "name": "Record IT Completion",            "type": "task", "lane": "it_dept" },
-    { "id": "prepare_workspace", "name": "Prepare Workspace",               "type": "task", "lane": "facilities" },
-    { "id": "record_facilities", "name": "Record Facilities Completion",    "type": "task", "lane": "facilities" }
+    {
+      "id": "collect_docs",
+      "name": "Collect Missing Documents",
+      "type": "task",
+      "lane": "hr_officer"
+    },
+    {
+      "id": "submit_request",
+      "name": "Submit New Hire Request",
+      "type": "task",
+      "lane": "hr_officer"
+    },
+    {
+      "id": "register_request",
+      "name": "Register New Hire Request",
+      "type": "task",
+      "lane": "coordinator"
+    },
+    {
+      "id": "check_docs",
+      "name": "Check Documentation Completeness",
+      "type": "task",
+      "lane": "coordinator"
+    },
+    {
+      "id": "review_outcomes",
+      "name": "Review Combined Completion Status",
+      "type": "task",
+      "lane": "coordinator"
+    },
+    {
+      "id": "setup_accounts",
+      "name": "Set Up System Accounts",
+      "type": "task",
+      "lane": "it_dept"
+    },
+    {
+      "id": "record_it",
+      "name": "Record IT Completion",
+      "type": "task",
+      "lane": "it_dept"
+    },
+    {
+      "id": "prepare_workspace",
+      "name": "Prepare Workspace",
+      "type": "task",
+      "lane": "facilities"
+    },
+    {
+      "id": "record_facilities",
+      "name": "Record Facilities Completion",
+      "type": "task",
+      "lane": "facilities"
+    },
+    {
+      "id": "send_confirmation",
+      "name": "Send Ready-to-Start Confirmation",
+      "type": "task",
+      "lane": "coordinator"
+    },
+    {
+      "id": "resolve_issue",
+      "name": "Resolve Flagged Issue",
+      "type": "task",
+      "lane": "coordinator"
+    }
   ],
   "events": [
-    { "id": "start_hr",          "name": "Start",                    "type": "startEvent", "lane": "hr_officer",  "eventDefinition": "none" },
-    { "id": "end_hr_confirmed",  "name": "Confirmation Received",    "type": "endEvent",   "lane": "hr_officer",  "eventDefinition": "none" },
-    { "id": "start_onboarding",  "name": "New Hire Request Received","type": "startEvent", "lane": "coordinator", "eventDefinition": "message" },
-    { "id": "end_confirmed",     "name": "Confirmation Sent",        "type": "endEvent",   "lane": "coordinator", "eventDefinition": "none" }
+    {
+      "id": "Event_1y39tnx",
+      "name": "Receive confirmation",
+      "type": "intermediateCatchEvent",
+      "lane": "hr_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_hr_confirmed",
+      "name": "Confirmation Received",
+      "type": "endEvent",
+      "lane": "hr_officer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0qiqcha",
+      "name": "Receive missing documents notice",
+      "type": "intermediateCatchEvent",
+      "lane": "hr_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "start_hr",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "hr_officer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_15v51ek",
+      "name": "Submit New Hire Request",
+      "type": "intermediateThrowEvent",
+      "lane": "hr_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0ymkax9",
+      "name": "Send missing documents",
+      "type": "intermediateThrowEvent",
+      "lane": "hr_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "start_onboarding",
+      "name": "New Hire Request Received",
+      "type": "startEvent",
+      "lane": "coordinator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_confirmed",
+      "name": "Confirmation Sent",
+      "type": "endEvent",
+      "lane": "coordinator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0jogi11",
+      "name": "Notify HR of Missing Documents",
+      "type": "intermediateThrowEvent",
+      "lane": "coordinator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0dg2wa7",
+      "name": "Receive missing documents",
+      "type": "intermediateCatchEvent",
+      "lane": "coordinator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1ws6i3x",
+      "name": "",
+      "type": "intermediateThrowEvent",
+      "lane": "coordinator",
+      "eventDefinition": "message"
+    }
   ],
   "gateways": [
-    { "id": "split_complete",  "name": "Documentation Complete?",   "type": "exclusiveGateway", "lane": "coordinator", "gatewayDirection": "diverging" },
-    { "id": "join_rework",     "name": "Recheck Documentation",     "type": "exclusiveGateway", "lane": "coordinator", "gatewayDirection": "converging" },
-    { "id": "split_parallel",  "name": "Forward to Departments",    "type": "parallelGateway",  "lane": "coordinator", "gatewayDirection": "diverging" },
-    { "id": "join_parallel",   "name": "Both Completions Recorded", "type": "parallelGateway",  "lane": "coordinator", "gatewayDirection": "converging" },
-    { "id": "split_outcome",   "name": "Any Issues Flagged?",       "type": "exclusiveGateway", "lane": "coordinator", "gatewayDirection": "diverging" }
+    {
+      "id": "split_complete",
+      "name": "Documentation Complete?",
+      "type": "exclusiveGateway",
+      "lane": "coordinator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_rework",
+      "name": "Recheck Documentation",
+      "type": "exclusiveGateway",
+      "lane": "coordinator",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "split_parallel",
+      "name": "Forward to Departments",
+      "type": "parallelGateway",
+      "lane": "coordinator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Both Completions Recorded",
+      "type": "parallelGateway",
+      "lane": "coordinator",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "split_outcome",
+      "name": "Any Issues Flagged?",
+      "type": "exclusiveGateway",
+      "lane": "coordinator",
+      "gatewayDirection": "diverging"
+    }
   ],
   "sequence_flows": [
-    { "id": "sf1",  "from": "start_hr",          "to": "submit_request" },
-    { "id": "sf2",  "from": "start_onboarding",  "to": "register_request" },
-    { "id": "sf3",  "from": "register_request",  "to": "join_rework" },
-    { "id": "sf4",  "from": "join_rework",        "to": "check_docs" },
-    { "id": "sf5",  "from": "check_docs",         "to": "split_complete" },
-    { "id": "sf6",  "from": "split_complete",     "to": "notify_incomplete",  "condition": "Incomplete" },
-    { "id": "sf7",  "from": "split_complete",     "to": "split_parallel",     "condition": "Complete" },
-    { "id": "sf8",  "from": "notify_incomplete",  "to": "join_rework" },
-    { "id": "sf9",  "from": "split_parallel",     "to": "setup_accounts" },
-    { "id": "sf10", "from": "split_parallel",     "to": "prepare_workspace" },
-    { "id": "sf11", "from": "setup_accounts",     "to": "record_it" },
-    { "id": "sf12", "from": "record_it",          "to": "join_parallel" },
-    { "id": "sf13", "from": "prepare_workspace",  "to": "record_facilities" },
-    { "id": "sf14", "from": "record_facilities",  "to": "join_parallel" },
-    { "id": "sf15", "from": "join_parallel",      "to": "review_outcomes" },
-    { "id": "sf16", "from": "review_outcomes",    "to": "split_outcome" },
-    { "id": "sf17", "from": "split_outcome",      "to": "resolve_issue",      "condition": "One or more issues flagged" },
-    { "id": "sf18", "from": "split_outcome",      "to": "send_confirmation",  "condition": "All completions confirmed" },
-    { "id": "sf19", "from": "resolve_issue",      "to": "review_outcomes" },
-    { "id": "sf20", "from": "send_confirmation",  "to": "end_confirmed" }
+    {
+      "id": "Flow_1n2b34n",
+      "from": "Event_1y39tnx",
+      "to": "end_hr_confirmed"
+    },
+    {
+      "id": "Flow_08s52pz",
+      "from": "Event_0qiqcha",
+      "to": "collect_docs"
+    },
+    {
+      "id": "Flow_0g18c0q",
+      "from": "collect_docs",
+      "to": "Event_0ymkax9"
+    },
+    {
+      "id": "sf1",
+      "from": "start_hr",
+      "to": "submit_request"
+    },
+    {
+      "id": "Flow_127lff3",
+      "from": "submit_request",
+      "to": "Event_15v51ek"
+    },
+    {
+      "id": "sf2",
+      "from": "start_onboarding",
+      "to": "register_request"
+    },
+    {
+      "id": "Flow_0xzrw5q",
+      "from": "Event_1ws6i3x",
+      "to": "end_confirmed"
+    },
+    {
+      "id": "sf3",
+      "from": "register_request",
+      "to": "join_rework"
+    },
+    {
+      "id": "sf4",
+      "from": "join_rework",
+      "to": "check_docs"
+    },
+    {
+      "id": "sf5",
+      "from": "check_docs",
+      "to": "split_complete"
+    },
+    {
+      "id": "sf15",
+      "from": "join_parallel",
+      "to": "review_outcomes"
+    },
+    {
+      "id": "sf19",
+      "from": "resolve_issue",
+      "to": "review_outcomes"
+    },
+    {
+      "id": "sf16",
+      "from": "review_outcomes",
+      "to": "split_outcome"
+    },
+    {
+      "id": "sf9",
+      "from": "split_parallel",
+      "to": "setup_accounts"
+    },
+    {
+      "id": "sf11",
+      "from": "setup_accounts",
+      "to": "record_it"
+    },
+    {
+      "id": "sf12",
+      "from": "record_it",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf10",
+      "from": "split_parallel",
+      "to": "prepare_workspace"
+    },
+    {
+      "id": "sf13",
+      "from": "prepare_workspace",
+      "to": "record_facilities"
+    },
+    {
+      "id": "sf14",
+      "from": "record_facilities",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf7",
+      "from": "split_complete",
+      "to": "split_parallel",
+      "condition": "Complete"
+    },
+    {
+      "id": "sf6",
+      "from": "split_complete",
+      "to": "Event_0jogi11",
+      "condition": "Incomplete"
+    },
+    {
+      "id": "Flow_0f34zru",
+      "from": "Event_0dg2wa7",
+      "to": "join_rework"
+    },
+    {
+      "id": "sf17",
+      "from": "split_outcome",
+      "to": "resolve_issue",
+      "condition": "One or more issues flagged"
+    },
+    {
+      "id": "sf18",
+      "from": "split_outcome",
+      "to": "send_confirmation",
+      "condition": "All completions confirmed"
+    },
+    {
+      "id": "sf20",
+      "from": "send_confirmation",
+      "to": "Event_1ws6i3x"
+    }
   ],
   "message_flows": [
-    { "id": "mf1", "from": "submit_request",    "to": "start_onboarding",  "name": "New Hire Request" },
-    { "id": "mf2", "from": "notify_incomplete", "to": "collect_docs",      "name": "Incomplete Notice" },
-    { "id": "mf3", "from": "collect_docs",      "to": "join_rework",       "name": "Resubmitted Documents" },
-    { "id": "mf4", "from": "send_confirmation", "to": "end_hr_confirmed",  "name": "Ready-to-Start Confirmation" }
-  ],
-  "data": [],
-  "data_associations": []
+    {
+      "id": "mf1",
+      "from": "Event_15v51ek",
+      "to": "start_onboarding",
+      "name": "New Hire Request"
+    },
+    {
+      "id": "Flow_07bkx6p",
+      "from": "Event_1ws6i3x",
+      "to": "Event_1y39tnx",
+      "name": "Confirmation Flow"
+    },
+    {
+      "id": "Flow_0b0n6fu",
+      "from": "Event_0jogi11",
+      "to": "Event_0qiqcha",
+      "name": "Missing Docs Notice"
+    },
+    {
+      "id": "Flow_0aogtb9",
+      "from": "Event_0ymkax9",
+      "to": "Event_0dg2wa7",
+      "name": "Document Submission"
+    }
+  ]
 }
