@@ -1,0 +1,13 @@
+A company manages recruitment processes for job vacancies posted by hiring managers.
+The hiring manager submits a vacancy request to the HR department.
+The HR recruiter registers the vacancy and posts the job advertisement.
+Candidates apply for the vacancy. The HR recruiter screens the received applications
+and selects a shortlist of candidates.
+For each shortlisted candidate, the HR department simultaneously schedules a technical interview
+with the hiring manager and sends a personality assessment to the candidate.
+The hiring manager conducts the technical interview and records their verdict.
+The candidate completes the personality assessment and submits it, after which the HR recruiter
+scores the assessment and records their verdict.
+Once both verdicts are recorded, the HR recruiter reviews the combined outcomes.
+If either verdict is negative, the HR recruiter sends a rejection email to the candidate and the process ends for that candidate.
+If both verdicts are positive, the HR recruiter sends a job offer to the candidate and the process ends for that candidate.

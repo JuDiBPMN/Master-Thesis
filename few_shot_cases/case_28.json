@@ -1,0 +1,93 @@
+{
+    "pools": [
+      { "id": "candidate_pool", "name": "Candidate" },
+      { "id": "company_pool",   "name": "Company" }
+    ],
+    "lanes": [
+      { "id": "candidate",      "name": "Candidate",        "pool": "candidate_pool" },
+      { "id": "hr_recruiter",   "name": "HR Recruiter",     "pool": "company_pool" },
+      { "id": "hiring_manager", "name": "Hiring Manager",   "pool": "company_pool" }
+    ],
+    "tasks": [
+      { "id": "apply_vacancy",         "name": "Apply for Vacancy",                "type": "task", "lane": "candidate" },
+      { "id": "complete_assessment",   "name": "Complete Personality Assessment",   "type": "task", "lane": "candidate" },
+      { "id": "submit_assessment",     "name": "Submit Personality Assessment",     "type": "task", "lane": "candidate" },
+      { "id": "register_vacancy",      "name": "Register Vacancy and Post Job Ad",  "type": "task", "lane": "hr_recruiter" },
+      { "id": "screen_applications",   "name": "Screen Applications and Shortlist", "type": "task", "lane": "hr_recruiter" },
+      { "id": "send_assessment",       "name": "Send Personality Assessment",       "type": "task", "lane": "hr_recruiter" },
+      { "id": "score_assessment",      "name": "Score Personality Assessment",      "type": "task", "lane": "hr_recruiter" },
+      { "id": "record_assessment",     "name": "Record Assessment Verdict",         "type": "task", "lane": "hr_recruiter" },
+      { "id": "review_outcomes",       "name": "Review Combined Verdicts",          "type": "task", "lane": "hr_recruiter" },
+      { "id": "send_rejection",        "name": "Send Rejection Email",              "type": "task", "lane": "hr_recruiter" },
+      { "id": "send_offer",            "name": "Send Job Offer",                    "type": "task", "lane": "hr_recruiter" },
+      { "id": "conduct_interview",     "name": "Conduct Technical Interview",       "type": "task", "lane": "hiring_manager" },
+      { "id": "record_interview",      "name": "Record Interview Verdict",          "type": "task", "lane": "hiring_manager" }
+    ],
+    "events": [
+      { "id": "start_candidate",       "name": "Start",                             "type": "startEvent",            "lane": "candidate",      "eventDefinition": "none" },
+      { "id": "catch_assessment",      "name": "Personality Assessment Received",   "type": "intermediateCatchEvent","lane": "candidate",      "eventDefinition": "message" },
+      { "id": "catch_rejection",       "name": "Rejection Email Received",          "type": "intermediateCatchEvent","lane": "candidate",      "eventDefinition": "message" },
+      { "id": "end_candidate_rejected","name": "Ended: Application Rejected",       "type": "endEvent",              "lane": "candidate",      "eventDefinition": "none" },
+      { "id": "catch_offer",           "name": "Job Offer Received",                "type": "intermediateCatchEvent","lane": "candidate",      "eventDefinition": "message" },
+      { "id": "end_candidate_offered", "name": "Ended: Job Offer Received",         "type": "endEvent",              "lane": "candidate",      "eventDefinition": "none" },
+      { "id": "start_hr",              "name": "Vacancy Request Received",          "type": "startEvent",            "lane": "hr_recruiter",   "eventDefinition": "message" },
+      { "id": "catch_submission",      "name": "Assessment Submission Received",    "type": "intermediateCatchEvent","lane": "hr_recruiter",   "eventDefinition": "message" },
+      { "id": "throw_rejection",       "name": "Send Rejection Email",              "type": "intermediateThrowEvent","lane": "hr_recruiter",   "eventDefinition": "message" },
+      { "id": "throw_offer",           "name": "Send Job Offer",                    "type": "intermediateThrowEvent","lane": "hr_recruiter",   "eventDefinition": "message" },
+      { "id": "end_hr",                "name": "Process Complete",                  "type": "endEvent",              "lane": "hr_recruiter",   "eventDefinition": "none" },
+      { "id": "start_vacancy",         "name": "Start",                             "type": "startEvent",            "lane": "hiring_manager", "eventDefinition": "none" }
+    ],
+    "gateways": [
+      { "id": "split_parallel", "name": "Forward for Evaluation",   "type": "parallelGateway",  "lane": "hr_recruiter", "gatewayDirection": "diverging" },
+      { "id": "join_parallel",  "name": "Both Verdicts Recorded",   "type": "parallelGateway",  "lane": "hr_recruiter", "gatewayDirection": "converging" },
+      { "id": "split_outcome",  "name": "Both Verdicts Positive?",  "type": "exclusiveGateway", "lane": "hr_recruiter", "gatewayDirection": "diverging" },
+      { "id": "join_outcome",   "name": "Merge Outcome Paths",      "type": "exclusiveGateway", "lane": "hr_recruiter", "gatewayDirection": "converging" }
+    ],
+    "sequence_flows": [
+      { "id": "sf1",  "from": "start_candidate",      "to": "apply_vacancy" },
+      { "id": "sf2",  "from": "catch_assessment",     "to": "complete_assessment" },
+      { "id": "sf3",  "from": "complete_assessment",  "to": "submit_assessment" },
+      { "id": "sf4",  "from": "catch_rejection",      "to": "end_candidate_rejected" },
+      { "id": "sf5",  "from": "catch_offer",          "to": "end_candidate_offered" },
+      { "id": "sf6",  "from": "start_vacancy",        "to": "conduct_interview" },
+      { "id": "sf7",  "from": "conduct_interview",    "to": "record_interview" },
+      { "id": "sf8",  "from": "record_interview",     "to": "join_parallel" },
+      { "id": "sf9",  "from": "start_hr",             "to": "register_vacancy" },
+      { "id": "sf10", "from": "register_vacancy",     "to": "screen_applications" },
+      { "id": "sf11", "from": "screen_applications",  "to": "split_parallel" },
+      { "id": "sf12", "from": "split_parallel",       "to": "send_assessment" },
+      { "id": "sf13", "from": "split_parallel",       "to": "conduct_interview" },
+      { "id": "sf14", "from": "send_assessment",      "to": "catch_submission" },
+      { "id": "sf15", "from": "catch_submission",     "to": "score_assessment" },
+      { "id": "sf16", "from": "score_assessment",     "to": "record_assessment" },
+      { "id": "sf17", "from": "record_assessment",    "to": "join_parallel" },
+      { "id": "sf18", "from": "join_parallel",        "to": "review_outcomes" },
+      { "id": "sf19", "from": "review_outcomes",      "to": "split_outcome" },
+      { "id": "sf20", "from": "split_outcome",        "to": "send_rejection",    "condition": "One or more verdicts negative" },
+      { "id": "sf21", "from": "split_outcome",        "to": "send_offer",        "condition": "Both verdicts positive" },
+      { "id": "sf22", "from": "send_rejection",       "to": "throw_rejection" },
+      { "id": "sf23", "from": "send_offer",           "to": "throw_offer" },
+      { "id": "sf24", "from": "throw_rejection",      "to": "join_outcome" },
+      { "id": "sf25", "from": "throw_offer",          "to": "join_outcome" },
+      { "id": "sf26", "from": "join_outcome",         "to": "end_hr" }
+    ],
+    "message_flows": [
+      { "id": "mf1", "from": "start_vacancy",      "to": "start_hr",          "name": "Vacancy Request" },
+      { "id": "mf2", "from": "apply_vacancy",      "to": "screen_applications","name": "Job Application" },
+      { "id": "mf3", "from": "send_assessment",    "to": "catch_assessment",  "name": "Personality Assessment" },
+      { "id": "mf4", "from": "submit_assessment",  "to": "catch_submission",  "name": "Completed Assessment" },
+      { "id": "mf5", "from": "throw_rejection",    "to": "catch_rejection",   "name": "Rejection Email" },
+      { "id": "mf6", "from": "throw_offer",        "to": "catch_offer",       "name": "Job Offer" }
+    ],
+    "data": [
+      { "id": "candidate_record", "name": "Candidate Record", "type": "dataObject" }
+    ],
+    "data_associations": [
+      { "id": "da1", "from": "screen_applications", "to": "candidate_record",   "type": "output" },
+      { "id": "da2", "from": "candidate_record",    "to": "conduct_interview",  "type": "input" },
+      { "id": "da3", "from": "record_interview",    "to": "candidate_record",   "type": "output" },
+      { "id": "da4", "from": "candidate_record",    "to": "score_assessment",   "type": "input" },
+      { "id": "da5", "from": "record_assessment",   "to": "candidate_record",   "type": "output" },
+      { "id": "da6", "from": "candidate_record",    "to": "review_outcomes",    "type": "input" }
+    ]
+  }

@@ -732,9 +732,9 @@ def generate_case_bpmn_xml(
 
 if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
-    case_name          = "case_23"
+    case_name          = "case_28"
     pipeline_name      = "direct_extraction_pipeline"
-    prompting_strategy = "fine_tuned_mistral"
+    prompting_strategy = ""
     # ──────────────────────────────────────────────────────────────────────────
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
@@ -744,7 +744,7 @@ if __name__ == "__main__":
     XML_OUTPUT_DIR  = os.path.join(SCRIPT_DIR, "outputs")
     os.makedirs(XML_OUTPUT_DIR, exist_ok=True)
 
-    input_json  = os.path.join(JSON_SOURCE_DIR, f"{case_name}_{prompting_strategy}_bpmn.json")
+    input_json  = os.path.join(JSON_SOURCE_DIR, f"{case_name}{prompting_strategy}.json")
     output_bpmn = os.path.join(XML_OUTPUT_DIR,  f"{case_name}_{prompting_strategy}.bpmn")
 
     print("--- BPMN XML Generator ---")
