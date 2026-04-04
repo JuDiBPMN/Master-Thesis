@@ -1,0 +1,240 @@
+{
+  "participants": [
+    {
+      "id": "supplier",
+      "name": "Supplier",
+      "type": "pool"
+    },
+    {
+      "id": "accounts_payable",
+      "name": "Accounts Payable",
+      "type": "pool"
+    },
+    {
+      "id": "budget_controller",
+      "name": "Budget Controller",
+      "type": "pool"
+    },
+    {
+      "id": "line_manager",
+      "name": "Line Manager",
+      "type": "pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_invoice",
+      "name": "Submit Invoice",
+      "type": "task",
+      "participant": "supplier"
+    },
+    {
+      "id": "register_invoice",
+      "name": "Register Invoice",
+      "type": "task",
+      "participant": "accounts_payable"
+    },
+    {
+      "id": "check_match",
+      "name": "Check Invoice Match",
+      "type": "task",
+      "participant": "accounts_payable"
+    },
+    {
+      "id": "notify_discrepancy",
+      "name": "Notify Supplier of Discrepancy",
+      "type": "task",
+      "participant": "accounts_payable"
+    },
+    {
+      "id": "review_expenditure",
+      "name": "Review Expenditure",
+      "type": "task",
+      "participant": "line_manager"
+    },
+    {
+      "id": "record_verdict",
+      "name": "Record Verdict",
+      "type": "task",
+      "participant": "budget_controller"
+    },
+    {
+      "id": "process_payment",
+      "name": "Process Payment",
+      "type": "task",
+      "participant": "accounts_payable"
+    },
+    {
+      "id": "send_confirmation",
+      "name": "Send Payment Confirmation",
+      "type": "task",
+      "participant": "accounts_payable"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_supplier",
+      "name": "Start",
+      "type": "startEvent",
+      "participant": "supplier",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_supplier",
+      "name": "Invoice Submitted",
+      "type": "endEvent",
+      "participant": "supplier",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_accounts_payable",
+      "name": "Invoice Received",
+      "type": "startEvent",
+      "participant": "accounts_payable",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_accounts_payable",
+      "name": "Payment Confirmed",
+      "type": "endEvent",
+      "participant": "accounts_payable",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "start_budget_controller",
+      "name": "Invoice Forwarded",
+      "type": "startEvent",
+      "participant": "budget_controller",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_budget_controller",
+      "name": "Verdict Recorded",
+      "type": "endEvent",
+      "participant": "budget_controller",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_line_manager",
+      "name": "Invoice Forwarded",
+      "type": "startEvent",
+      "participant": "line_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_line_manager",
+      "name": "Verdict Recorded",
+      "type": "endEvent",
+      "participant": "line_manager",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_parallel_split",
+      "name": "Forward to Budget Controller and Line Manager",
+      "type": "parallelGateway",
+      "participant": "accounts_payable",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Both Verdicts Recorded",
+      "type": "parallelGateway",
+      "participant": "accounts_payable",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_outcome_split",
+      "name": "Verdict Outcome?",
+      "type": "exclusiveGateway",
+      "participant": "accounts_payable",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_outcome_join",
+      "name": "Rejection Sent or Payment Processed",
+      "type": "exclusiveGateway",
+      "participant": "accounts_payable",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "from": "start_supplier",
+      "to": "submit_invoice"
+    },
+    {
+      "from": "submit_invoice",
+      "to": "end_supplier"
+    },
+    {
+      "from": "start_accounts_payable",
+      "to": "register_invoice"
+    },
+    {
+      "from": "register_invoice",
+      "to": "check_match"
+    },
+    {
+      "from": "check_match",
+      "to": "gateway_outcome_split"
+    },
+    {
+      "from": "gateway_outcome_split",
+      "to": "notify_discrepancy",
+      "condition": "Invoice does not match"
+    },
+    {
+      "from": "gateway_outcome_split",
+      "to": "gateway_parallel_split",
+      "condition": "Invoice matches"
+    },
+    {
+      "from": "notify_discrepancy",
+      "to": "gateway_outcome_join"
+    },
+    {
+      "from": "gateway_parallel_split",
+      "to": "review_expenditure"
+    },
+    {
+      "from": "gateway_parallel_split",
+      "to": "record_verdict"
+    },
+    {
+      "from": "review_expenditure",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "from": "record_verdict",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "from": "gateway_parallel_join",
+      "to": "gateway_outcome_split"
+    },
+    {
+      "from": "gateway_outcome_split",
+      "to": "process_payment",
+      "condition": "Both verdicts positive"
+    },
+    {
+      "from": "gateway_outcome_split",
+      "to": "send_rejection",
+      "condition": "Either verdict negative"
+    },
+    {
+      "from": "process_payment",
+      "to": "send_confirmation"
+    },
+    {
+      "from": "send_confirmation",
+      "to": "end_accounts_payable"
+    },
+    {
+      "from": "send_rejection",
+      "to": "end_accounts_payable"
+    }
+  ]
+}

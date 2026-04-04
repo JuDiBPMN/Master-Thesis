@@ -24,17 +24,17 @@ NODE_W = {
     "inclusiveGateway": 50, "eventBasedGateway": 50,
 }
 NODE_H = NODE_W.copy()
-DEFAULT_W, DEFAULT_H = 100, 80
+DEFAULT_W, DEFAULT_H = 120, 80
 
 # ── Layout constants ──────────────────────────────────────────────────────────
-POOL_HEADER_W = 30      # vertical pool label strip width
-LANE_HEADER_W = 30      # vertical lane label strip width
-LANE_H        = 160     # height of a single lane row
-POOL_H_BARE   = 180     # height when pool has no lanes
-COL_W         = 190     # horizontal distance between column centres
-START_X_PAD   = 80      # padding before the first column centre
-POOL_GAP      = 40      # vertical gap between pools
-POOL_ORIGIN_X = 10      # left edge of all pools
+POOL_HEADER_W = 30       # vertical pool label strip width
+LANE_HEADER_W = 30       # vertical lane label strip width
+LANE_H        = 220      # ↑ was 160 — more vertical room per lane
+POOL_H_BARE   = 250      # ↑ was 180 — taller bare pools
+COL_W         = 260      # ↑ was 190 — wider columns = more horizontal spacing
+START_X_PAD   = 120      # ↑ was 80  — more padding before first column
+POOL_GAP      = 60       # ↑ was 40  — more space between pools
+POOL_ORIGIN_X = 10       # left edge of all pools
 
 EVENT_DEFS = {
     "message": "messageEventDefinition", "timer": "timerEventDefinition",
@@ -47,9 +47,10 @@ EVENT_DEFS = {
 # ═══════════════════════════════════════════════════════════════════════════════
 # SCHEMA NORMALISER
 # ─────────────────────────────────────────────────────────────────────────────
-# Converts both JSON schemas to one internal format:
-#   data["actors"] = [ { id, name, lanes:[{id,name}] } ]
-#   every node has  "actor" (pool id)  and optionally  "lane" (lane id)
+# Supports three input formats:
+#   1. New format:  pools[] + lanes[] (separate top-level arrays)
+#   2. Old format:  participants[] with nested lanes[]
+#   3. Internal:    actors[] (already normalised)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def normalise(json_data):
@@ -195,26 +196,11 @@ def _detect_cross_pool(data):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# COLUMN ASSIGNMENT  ← the core of the layout
-#
-# Key design decisions:
-#
-# 1. SHARED GRID: Columns are assigned globally across ALL nodes in a pool
-#    (not per-lane). This ensures that parallel branches in different lanes
-#    align at the same x-position, making gateways visibly split/join.
-#
-# 2. BACK-EDGE DETECTION: DFS-based back-edge detection handles cycles
-#    (loop-backs). Back-edges are excluded from column assignment so loop
-#    targets stay at their earliest position in the flow, not their latest.
-#    Back-edges are routed above nodes (see _waypoints).
-#
-# 3. MESSAGE FLOW HINTS: Nodes in "black-box" pools (no intra-pool flows,
-#    e.g. a Customer pool that only sends/receives messages) are ordered
-#    by the column of the node they exchange messages with.
+# COLUMN ASSIGNMENT
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def _find_back_edges(node_ids, seq_flows):
-    """DFS coloring to find back-edges (edges that create cycles)."""
+    """DFS colouring to find back-edges (edges that create cycles)."""
     id_set = set(node_ids)
     local  = [f for f in seq_flows if f["from"] in id_set and f["to"] in id_set]
     succ   = defaultdict(list)
@@ -254,7 +240,6 @@ def _assign_columns(node_ids, seq_flows):
     id_set     = set(node_ids)
     back_edges = _find_back_edges(node_ids, seq_flows)
 
-    # Forward-only flows (no back-edges, no cross-pool)
     forward = [f for f in seq_flows
                if f["from"] in id_set and f["to"] in id_set
                and (f["from"], f["to"]) not in back_edges]
@@ -283,16 +268,14 @@ def _assign_columns(node_ids, seq_flows):
 def _hint_columns_from_message_flows(actor, nodes, col_map, all_message_flows,
                                      other_pool_cols):
     """
-    For nodes that all landed in col 0 (isolated pool), try to order them
-    by the column of the remote node they talk to via message flows.
-    Modifies col_map in place.
+    For isolated pools (all nodes at col 0), order nodes by the column
+    of the remote node they communicate with via message flows.
     """
     id_set    = {n["id"] for n in nodes}
     all_col_0 = all(col_map.get(nid, 0) == 0 for nid in id_set)
     if not all_col_0 or not other_pool_cols:
         return
 
-    # Build: node_id -> best remote col
     remote_col = {}
     for mf in all_message_flows:
         src, tgt = mf["from"], mf["to"]
@@ -304,7 +287,6 @@ def _hint_columns_from_message_flows(actor, nodes, col_map, all_message_flows,
     if not remote_col:
         return
 
-    # Re-assign cols using remote hints, keeping unlinked nodes at 0
     for nid in id_set:
         if nid in remote_col:
             col_map[nid] = remote_col[nid]
@@ -319,18 +301,31 @@ def _node_wh(n_type):
 
 
 def _place_cell(nodes, cx, band_y, band_h, node_layout):
-    """Stack nodes vertically centred inside a band, all at column centre cx."""
+    """
+    Stack nodes vertically inside a lane band, centred on column cx.
+    When multiple nodes share a column+lane cell they are distributed
+    evenly with guaranteed minimum gap between them.
+    """
     if not nodes:
         return
-    n      = len(nodes)
-    step   = band_h / (n + 1)
+
+    n        = len(nodes)
+    MIN_GAP  = 30   # minimum px gap between node edges
+    sizes    = [_node_wh(node["type"]) for node in nodes]
+    total_h  = sum(h for _, h in sizes) + MIN_GAP * (n - 1)
+
+    # Centre the whole stack vertically inside the band
+    start_y  = band_y + (band_h - total_h) / 2
+    cursor_y = start_y
+
     for i, node in enumerate(nodes):
-        w, h = _node_wh(node["type"])
+        w, h = sizes[i]
         node_layout[node["id"]] = {
             "x": int(cx - w / 2),
-            "y": int(band_y + step * (i + 1) - h / 2),
+            "y": int(cursor_y),
             "w": w, "h": h,
         }
+        cursor_y += h + MIN_GAP
 
 
 def _compute_layout(data, seq_flows, message_flows):
@@ -340,7 +335,7 @@ def _compute_layout(data, seq_flows, message_flows):
     pool_layout  = {}
     lane_layout  = {}
     node_layout  = {}
-    pool_col_map = {}   # pool_id -> {node_id: col}
+    pool_col_map = {}
     cur_y        = 20
 
     # ── Pass 1: assign columns per pool ──────────────────────────────────────
@@ -354,7 +349,7 @@ def _compute_layout(data, seq_flows, message_flows):
         pool_col_map[pid] = _assign_columns(ids, seq_flows)
 
     # ── Pass 2: apply message-flow hints to isolated pools ────────────────────
-    all_remote_cols = {}  # node_id -> col  (across all pools)
+    all_remote_cols = {}
     for pid, cm in pool_col_map.items():
         all_remote_cols.update(cm)
 
@@ -366,7 +361,7 @@ def _compute_layout(data, seq_flows, message_flows):
         _hint_columns_from_message_flows(
             actor, nodes, pool_col_map[pid], message_flows, all_remote_cols)
 
-    # ── Pass 3: compute positions ─────────────────────────────────────────────
+    # ── Pass 3: compute pixel positions ──────────────────────────────────────
     for actor in actors:
         pid   = actor["id"]
         lanes = actor.get("lanes", [])
@@ -374,26 +369,43 @@ def _compute_layout(data, seq_flows, message_flows):
         cm    = pool_col_map[pid]
 
         if not nodes:
-            pool_layout[pid] = {"x": POOL_ORIGIN_X, "y": cur_y,
-                                "w": 400,
-                                "h": len(lanes) * LANE_H if lanes else POOL_H_BARE}
+            pool_layout[pid] = {
+                "x": POOL_ORIGIN_X, "y": cur_y,
+                "w": 400,
+                "h": len(lanes) * LANE_H if lanes else POOL_H_BARE,
+            }
             cur_y += pool_layout[pid]["h"] + POOL_GAP
             continue
 
-        n_cols     = max(cm.values(), default=0) + 1
-        headers_w  = POOL_HEADER_W + (LANE_HEADER_W if lanes else 0)
-        content_w  = START_X_PAD + n_cols * COL_W + 40
-        pool_w     = max(headers_w + content_w, 500)
-        pool_h     = len(lanes) * LANE_H if lanes else POOL_H_BARE
+        n_cols    = max(cm.values(), default=0) + 1
+        headers_w = POOL_HEADER_W + (LANE_HEADER_W if lanes else 0)
 
-        pool_layout[pid] = {"x": POOL_ORIGIN_X, "y": cur_y,
-                            "w": pool_w, "h": pool_h}
+        # ── Dynamic lane height: grow lane if a column is overcrowded ─────────
+        # Find max number of nodes sharing a single (lane, col) cell
+        if lanes:
+            cell_counts = defaultdict(int)
+            for n in nodes:
+                lid = n.get("lane", "__no_lane__")
+                c   = cm.get(n["id"], 0)
+                cell_counts[(lid, c)] += 1
+            max_in_cell   = max(cell_counts.values(), default=1)
+            MIN_GAP       = 30
+            needed_h      = max_in_cell * DEFAULT_H + (max_in_cell - 1) * MIN_GAP + 60
+            effective_lane_h = max(LANE_H, needed_h)
+        else:
+            effective_lane_h = LANE_H
 
-        # Absolute x-centre for each column
+        content_w = START_X_PAD + n_cols * COL_W + 60
+        pool_w    = max(headers_w + content_w, 600)
+        pool_h    = len(lanes) * effective_lane_h if lanes else POOL_H_BARE
+
+        pool_layout[pid] = {
+            "x": POOL_ORIGIN_X, "y": cur_y,
+            "w": pool_w, "h": pool_h,
+        }
+
         x_origin = POOL_ORIGIN_X + headers_w + START_X_PAD
         col_cx   = [x_origin + c * COL_W for c in range(n_cols)]
-
-        id_to_node = {n["id"]: n for n in nodes}
 
         if lanes:
             lane_y = cur_y
@@ -403,15 +415,15 @@ def _compute_layout(data, seq_flows, message_flows):
                     "x": POOL_ORIGIN_X + POOL_HEADER_W,
                     "y": lane_y,
                     "w": pool_w - POOL_HEADER_W,
-                    "h": LANE_H,
+                    "h": effective_lane_h,
                 }
                 lane_nodes = [n for n in nodes if n.get("lane") == lid]
                 by_col     = defaultdict(list)
                 for n in lane_nodes:
                     by_col[cm[n["id"]]].append(n)
                 for c, cell in by_col.items():
-                    _place_cell(cell, col_cx[c], lane_y, LANE_H, node_layout)
-                lane_y += LANE_H
+                    _place_cell(cell, col_cx[c], lane_y, effective_lane_h, node_layout)
+                lane_y += effective_lane_h
 
             # Unlaned nodes → centre in full pool height
             unlaned = [n for n in nodes if not n.get("lane")]
@@ -439,25 +451,21 @@ def _compute_layout(data, seq_flows, message_flows):
 
 def _waypoints(src, tgt):
     """
-    Produce clean waypoints for a sequence flow edge.
-    - Forward edge (src left of tgt): exit right-centre, enter left-centre,
-      with an elbow bend if they are in different lanes (different y).
-    - Back-edge (src right of tgt = loop-back): route above both nodes.
+    Forward edge  → exit right-centre, elbow if different y, enter left-centre.
+    Back-edge     → arc over the top of both nodes.
     """
-    sx = src["x"] + src["w"]          # right edge of source
-    sy = src["y"] + src["h"] // 2     # vertical centre of source
-    tx = tgt["x"]                     # left edge of target
-    ty = tgt["y"] + tgt["h"] // 2     # vertical centre of target
+    sx = src["x"] + src["w"]
+    sy = src["y"] + src["h"] // 2
+    tx = tgt["x"]
+    ty = tgt["y"] + tgt["h"] // 2
 
     if sx <= tx + 10:
-        # Forward edge
         if abs(sy - ty) < 6:
-            return [(sx, sy), (tx, ty)]        # straight line
+            return [(sx, sy), (tx, ty)]
         mid_x = (sx + tx) // 2
-        return [(sx, sy), (mid_x, sy), (mid_x, ty), (tx, ty)]   # elbow
+        return [(sx, sy), (mid_x, sy), (mid_x, ty), (tx, ty)]
     else:
-        # Back-edge (loop-back): arc over the top
-        top_y  = min(src["y"], tgt["y"]) - 40
+        top_y  = min(src["y"], tgt["y"]) - 50   # arc clears nodes with extra room
         src_cx = src["x"] + src["w"] // 2
         tgt_cx = tgt["x"] + tgt["w"] // 2
         return [
@@ -526,7 +534,7 @@ def create_bpmn_xml(json_data, output_path):
         })
 
         if lanes:
-            ls = ET.SubElement(proc, tag(BPMN, "laneSet"), id=f"LaneSet_{pid}")
+            ls       = ET.SubElement(proc, tag(BPMN, "laneSet"), id=f"LaneSet_{pid}")
             ln_nodes = defaultdict(list)
             for n in actor_node_map.get(pid, []):
                 if n.get("lane"):
@@ -666,14 +674,7 @@ def create_bpmn_xml(json_data, output_path):
 
 
 def _resolve_input_json(*, case_name, pipeline_name, prompting_strategy, input_json_override=None):
-    """
-    Resolve the single expected JSON input file.
-
-    IMPORTANT: No fallback searching/globbing. If the file doesn't exist,
-    raise FileNotFoundError("input not found") so interactive usage can
-    show the requested message.
-    """
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
     JSON_SOURCE_DIR = os.path.join(PROJECT_ROOT, "pipelines", pipeline_name, "outputs")
 
@@ -682,9 +683,6 @@ def _resolve_input_json(*, case_name, pipeline_name, prompting_strategy, input_j
             raise FileNotFoundError("input not found")
         return input_json_override
 
-    # Match the original naming scheme used by the script:
-    #   f"{case_name}_{prompting_strategy}_bpmn.json"
-    # When prompting_strategy == "", this becomes `case_29__bpmn.json`.
     input_json = os.path.join(
         JSON_SOURCE_DIR,
         f"{case_name}_{prompting_strategy}_bpmn.json",
@@ -704,11 +702,7 @@ def generate_case_bpmn_xml(
     input_json=None,
     output_bpmn=None,
 ):
-    """
-    Interactive-friendly entry point.
-    Returns the generated output `.bpmn` file path.
-    """
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    SCRIPT_DIR     = os.path.dirname(os.path.abspath(__file__))
     XML_OUTPUT_DIR = os.path.join(SCRIPT_DIR, "outputs")
     os.makedirs(XML_OUTPUT_DIR, exist_ok=True)
 
@@ -736,24 +730,22 @@ def generate_case_bpmn_xml(
         return None
 
 
-
-
 if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
-    case_name = "case_20"
-    pipeline_name = "direct_extraction_pipeline"
-    prompting_strategy = ""
+    case_name          = "case_23"
+    pipeline_name      = "direct_extraction_pipeline"
+    prompting_strategy = "fine_tuned_mistral"
     # ──────────────────────────────────────────────────────────────────────────
 
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 
     JSON_SOURCE_DIR = os.path.join(PROJECT_ROOT, "pipelines", pipeline_name, "outputs")
-    XML_OUTPUT_DIR = os.path.join(SCRIPT_DIR, "outputs")
+    XML_OUTPUT_DIR  = os.path.join(SCRIPT_DIR, "outputs")
     os.makedirs(XML_OUTPUT_DIR, exist_ok=True)
 
-    input_json = os.path.join(JSON_SOURCE_DIR, f"{case_name}_{prompting_strategy}.json")
-    output_bpmn = os.path.join(XML_OUTPUT_DIR, f"{case_name}_{prompting_strategy}.bpmn")
+    input_json  = os.path.join(JSON_SOURCE_DIR, f"{case_name}_{prompting_strategy}_bpmn.json")
+    output_bpmn = os.path.join(XML_OUTPUT_DIR,  f"{case_name}_{prompting_strategy}.bpmn")
 
     print("--- BPMN XML Generator ---")
     try:
@@ -762,10 +754,8 @@ if __name__ == "__main__":
         with open(input_json, "r", encoding="utf-8") as f:
             raw = json.load(f)
         print("Validating JSON...")
-
         create_bpmn_xml(raw, output_bpmn)
         print("Done — upload to https://bpmn.io to view")
     except Exception:
         import traceback
-
         traceback.print_exc()
