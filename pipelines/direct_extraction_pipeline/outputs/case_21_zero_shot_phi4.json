@@ -1,0 +1,286 @@
+{
+  "pools": [
+    {
+      "id": "AdmissionsOffice",
+      "name": "Admissions Office"
+    },
+    {
+      "id": "SpecialistDepartment",
+      "name": "Specialist Department"
+    },
+    {
+      "id": "InsuranceOffice",
+      "name": "Insurance Office"
+    },
+    {
+      "id": "GeneralPractitioner",
+      "name": "General Practitioner"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "AdmissionsClerk",
+      "name": "Admissions Clerk",
+      "pool": "AdmissionsOffice"
+    },
+    {
+      "id": "Specialist",
+      "name": "Specialist",
+      "pool": "SpecialistDepartment"
+    },
+    {
+      "id": "InsuranceOfficer",
+      "name": "Insurance Officer",
+      "pool": "InsuranceOffice"
+    },
+    {
+      "id": "GP",
+      "name": "General Practitioner",
+      "pool": "GeneralPractitioner"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "SubmitReferral",
+      "name": "Submit Referral",
+      "type": "manualTask",
+      "lane": "GP"
+    },
+    {
+      "id": "RegisterReferral",
+      "name": "Register Referral",
+      "type": "manualTask",
+      "lane": "AdmissionsClerk"
+    },
+    {
+      "id": "CheckDocumentation",
+      "name": "Check Documentation",
+      "type": "manualTask",
+      "lane": "AdmissionsClerk"
+    },
+    {
+      "id": "NotifyGP",
+      "name": "Notify GP of Missing Documents",
+      "type": "manualTask",
+      "lane": "AdmissionsClerk"
+    },
+    {
+      "id": "ForwardToSpecialist",
+      "name": "Forward to Specialist",
+      "type": "manualTask",
+      "lane": "AdmissionsClerk"
+    },
+    {
+      "id": "ForwardToInsurance",
+      "name": "Forward to Insurance",
+      "type": "manualTask",
+      "lane": "AdmissionsClerk"
+    },
+    {
+      "id": "ConductAssessment",
+      "name": "Conduct Medical Assessment",
+      "type": "manualTask",
+      "lane": "Specialist"
+    },
+    {
+      "id": "RecordSpecialistVerdict",
+      "name": "Record Specialist Verdict",
+      "type": "manualTask",
+      "lane": "Specialist"
+    },
+    {
+      "id": "VerifyCoverage",
+      "name": "Verify Coverage",
+      "type": "manualTask",
+      "lane": "InsuranceOfficer"
+    },
+    {
+      "id": "RecordInsuranceVerdict",
+      "name": "Record Insurance Verdict",
+      "type": "manualTask",
+      "lane": "InsuranceOfficer"
+    },
+    {
+      "id": "SendVerdictsToClerk",
+      "name": "Send Verdicts to Clerk",
+      "type": "manualTask",
+      "lane": "Specialist"
+    },
+    {
+      "id": "SendVerdictsToClerkInsurance",
+      "name": "Send Verdicts to Clerk",
+      "type": "manualTask",
+      "lane": "InsuranceOfficer"
+    },
+    {
+      "id": "ReviewOutcomes",
+      "name": "Review Combined Outcomes",
+      "type": "manualTask",
+      "lane": "AdmissionsClerk"
+    },
+    {
+      "id": "SendRejectionNotice",
+      "name": "Send Rejection Notice",
+      "type": "manualTask",
+      "lane": "AdmissionsClerk"
+    },
+    {
+      "id": "SendApproval",
+      "name": "Send Treatment Approval",
+      "type": "manualTask",
+      "lane": "AdmissionsClerk"
+    }
+  ],
+  "events": [
+    {
+      "id": "StartEvent",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "GP",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "AdmissionsClerk",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEventRejection",
+      "name": "End Rejection",
+      "type": "endEvent",
+      "lane": "AdmissionsClerk",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEventApproval",
+      "name": "End Approval",
+      "type": "endEvent",
+      "lane": "AdmissionsClerk",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "CheckDocumentationGateway",
+      "name": "Check Documentation",
+      "type": "exclusiveGateway",
+      "lane": "AdmissionsClerk",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "ReviewOutcomesGateway",
+      "name": "Review Outcomes",
+      "type": "exclusiveGateway",
+      "lane": "AdmissionsClerk",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "SubmitToRegister",
+      "from": "StartEvent",
+      "to": "RegisterReferral"
+    },
+    {
+      "id": "RegisterToCheck",
+      "from": "RegisterReferral",
+      "to": "CheckDocumentation"
+    },
+    {
+      "id": "CheckToNotify",
+      "from": "CheckDocumentation",
+      "to": "NotifyGP",
+      "condition": "documentationIncomplete"
+    },
+    {
+      "id": "CheckToForward",
+      "from": "CheckDocumentation",
+      "to": "ForwardToSpecialist",
+      "condition": "documentationComplete"
+    },
+    {
+      "id": "ForwardToSpecialistToConductAssessment",
+      "from": "ForwardToSpecialist",
+      "to": "ConductAssessment"
+    },
+    {
+      "id": "ForwardToInsuranceToVerifyCoverage",
+      "from": "ForwardToInsurance",
+      "to": "VerifyCoverage"
+    },
+    {
+      "id": "ConductAssessmentToRecordSpecialistVerdict",
+      "from": "ConductAssessment",
+      "to": "RecordSpecialistVerdict"
+    },
+    {
+      "id": "VerifyCoverageToRecordInsuranceVerdict",
+      "from": "VerifyCoverage",
+      "to": "RecordInsuranceVerdict"
+    },
+    {
+      "id": "RecordSpecialistVerdictToSendVerdictsToClerk",
+      "from": "RecordSpecialistVerdict",
+      "to": "SendVerdictsToClerk"
+    },
+    {
+      "id": "RecordInsuranceVerdictToSendVerdictsToClerkInsurance",
+      "from": "RecordInsuranceVerdict",
+      "to": "SendVerdictsToClerkInsurance"
+    },
+    {
+      "id": "SendVerdictsToClerkToReviewOutcomes",
+      "from": "SendVerdictsToClerk",
+      "to": "ReviewOutcomes"
+    },
+    {
+      "id": "SendVerdictsToClerkInsuranceToReviewOutcomes",
+      "from": "SendVerdictsToClerkInsurance",
+      "to": "ReviewOutcomes"
+    },
+    {
+      "id": "ReviewOutcomesToRejection",
+      "from": "ReviewOutcomes",
+      "to": "SendRejectionNotice",
+      "condition": "eitherVerdictNegative"
+    },
+    {
+      "id": "ReviewOutcomesToApproval",
+      "from": "ReviewOutcomes",
+      "to": "SendApproval",
+      "condition": "bothVerdictsPositive"
+    },
+    {
+      "id": "SendRejectionNoticeToEndEventRejection",
+      "from": "SendRejectionNotice",
+      "to": "EndEventRejection"
+    },
+    {
+      "id": "SendApprovalToEndEventApproval",
+      "from": "SendApproval",
+      "to": "EndEventApproval"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "NotifyGPMessageFlow",
+      "from": "AdmissionsClerk",
+      "to": "GP",
+      "name": "Notify GP of Missing Documents"
+    },
+    {
+      "id": "SendRejectionNoticeMessageFlow",
+      "from": "AdmissionsClerk",
+      "to": "GP",
+      "name": "Send Rejection Notice"
+    },
+    {
+      "id": "SendApprovalMessageFlow",
+      "from": "AdmissionsClerk",
+      "to": "GP",
+      "name": "Send Treatment Approval"
+    }
+  ]
+}
