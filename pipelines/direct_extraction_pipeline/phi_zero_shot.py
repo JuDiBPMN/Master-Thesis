@@ -16,11 +16,12 @@ def load_model():
     if llm is None:
         if not _LLAMA_CPP_AVAILABLE:
             raise RuntimeError("llama-cpp-python is not installed.")
+        
         llm = Llama.from_pretrained(
             repo_id="unsloth/phi-4-GGUF",
-            filename="phi-4.Q4_K_M.gguf",
+            filename="phi-4-Q4_K_M.gguf", 
             n_ctx=8192,
-            n_gpu_layers=-1, # Set to -1 to offload all layers to GPU
+            n_gpu_layers=-1,
             verbose=False
         )
     return llm
@@ -336,7 +337,6 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    # CHANGED: Updated output filename to reflect Phi-4
     out_file = os.path.join(OUTPUT_DIR, f"{case_name}_zero_shot_phi4.json")
 
     try:
