@@ -740,9 +740,9 @@ def generate_case_bpmn_xml(
 
 if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
-    case_name = "case_20"
+    case_name = "case_21"
     pipeline_name = "direct_extraction_pipeline"
-    prompting_strategy = ""
+    prompting_strategy = "few_shot_mistral_invalid"
     # ──────────────────────────────────────────────────────────────────────────
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))

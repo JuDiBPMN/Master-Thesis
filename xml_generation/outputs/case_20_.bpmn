@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_applicant_pool" name="Applicant" processRef="Process_applicant_pool"/>
+    <bpmn:participant id="actor_council_pool" name="City Council" processRef="Process_council_pool"/>
+    <bpmn:messageFlow id="mf1" name="Permit Application" sourceRef="submit_application" targetRef="start_council"/>
+    <bpmn:messageFlow id="mf2" name="Incomplete Notice" sourceRef="notify_incomplete" targetRef="end_applicant_reject"/>
+    <bpmn:messageFlow id="mf3" name="Rejection Notice" sourceRef="issue_rejection" targetRef="end_applicant_reject"/>
+    <bpmn:messageFlow id="mf4" name="Building Permit" sourceRef="issue_permit" targetRef="end_applicant_permit"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_applicant_pool" name="Applicant" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_applicant_pool">
+      <bpmn:lane id="applicant" name="Applicant">
+        <bpmn:flowNodeRef>start_applicant</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_applicant_reject</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_applicant_permit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>submit_application</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_applicant" name="Start"/>
+    <bpmn:endEvent id="end_applicant_reject" name="Application Rejected"/>
+    <bpmn:endEvent id="end_applicant_permit" name="Permit Received"/>
+    <bpmn:task id="submit_application" name="Submit Permit Application"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_applicant" targetRef="submit_application"/>
+  </bpmn:process>
+  <bpmn:process id="Process_council_pool" name="City Council" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_council_pool">
+      <bpmn:lane id="permits_office" name="Permits Office">
+        <bpmn:flowNodeRef>start_council</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_incomplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_permitted</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>register_application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_completeness</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>notify_incomplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_outcomes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>issue_rejection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>issue_permit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_complete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_parallel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>join_parallel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_outcome</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="urban_planning" name="Urban Planning">
+        <bpmn:flowNodeRef>zoning_check</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_zoning</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="safety_inspection" name="Safety Inspection">
+        <bpmn:flowNodeRef>safety_review</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_safety</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_council" name="Application Received">
+      <bpmn:messageEventDefinition id="start_council_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_incomplete" name="Applicant Notified"/>
+    <bpmn:endEvent id="end_rejected" name="Rejection Issued"/>
+    <bpmn:endEvent id="end_permitted" name="Permit Issued"/>
+    <bpmn:task id="register_application" name="Register Application"/>
+    <bpmn:task id="check_completeness" name="Check Application Completeness"/>
+    <bpmn:task id="notify_incomplete" name="Notify Applicant of Missing Info"/>
+    <bpmn:task id="review_outcomes" name="Review Combined Verdicts"/>
+    <bpmn:task id="issue_rejection" name="Issue Rejection Notice"/>
+    <bpmn:task id="issue_permit" name="Issue Building Permit"/>
+    <bpmn:task id="zoning_check" name="Assess Zoning Compliance"/>
+    <bpmn:task id="record_zoning" name="Record Zoning Verdict"/>
+    <bpmn:task id="safety_review" name="Conduct Structural Safety Review"/>
+    <bpmn:task id="record_safety" name="Record Safety Verdict"/>
+    <bpmn:exclusiveGateway id="split_complete" name="Application Complete?" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="split_parallel" name="Forward for Review" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="join_parallel" name="Both Verdicts Recorded" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="split_outcome" name="Both Verdicts Positive?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="start_council" targetRef="register_application"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="register_application" targetRef="check_completeness"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="check_completeness" targetRef="split_complete"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="split_complete" targetRef="notify_incomplete" name="Incomplete">
+      <bpmn:conditionExpression>Incomplete</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf6" sourceRef="split_complete" targetRef="split_parallel" name="Complete">
+      <bpmn:conditionExpression>Complete</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf7" sourceRef="notify_incomplete" targetRef="end_incomplete"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="split_parallel" targetRef="zoning_check"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="split_parallel" targetRef="safety_review"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="zoning_check" targetRef="record_zoning"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="record_zoning" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="safety_review" targetRef="record_safety"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="record_safety" targetRef="join_parallel"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="join_parallel" targetRef="review_outcomes"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="review_outcomes" targetRef="split_outcome"/>
+    <bpmn:sequenceFlow id="sf16" sourceRef="split_outcome" targetRef="issue_rejection" name="One or more verdicts negative">
+      <bpmn:conditionExpression>One or more verdicts negative</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf17" sourceRef="split_outcome" targetRef="issue_permit" name="Both verdicts positive">
+      <bpmn:conditionExpression>Both verdicts positive</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf18" sourceRef="issue_rejection" targetRef="end_rejected"/>
+    <bpmn:sequenceFlow id="sf19" sourceRef="issue_permit" targetRef="end_permitted"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_applicant_pool_di" bpmnElement="actor_applicant_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="560" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_council_pool_di" bpmnElement="actor_council_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="220" width="2460" height="480"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="applicant_di" bpmnElement="applicant" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="530" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="permits_office_di" bpmnElement="permits_office" isHorizontal="true">
+        <dc:Bounds x="40" y="220" width="2430" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="urban_planning_di" bpmnElement="urban_planning" isHorizontal="true">
+        <dc:Bounds x="40" y="380" width="2430" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="safety_inspection_di" bpmnElement="safety_inspection" isHorizontal="true">
+        <dc:Bounds x="40" y="540" width="2430" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_applicant_di" bpmnElement="start_applicant">
+        <dc:Bounds x="132" y="42" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_applicant_reject_di" bpmnElement="end_applicant_reject">
+        <dc:Bounds x="132" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_applicant_permit_di" bpmnElement="end_applicant_permit">
+        <dc:Bounds x="132" y="122" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_application_di" bpmnElement="submit_application">
+        <dc:Bounds x="290" y="60" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_council_di" bpmnElement="start_council">
+        <dc:Bounds x="132" y="282" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_incomplete_di" bpmnElement="end_incomplete">
+        <dc:Bounds x="1082" y="282" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_rejected_di" bpmnElement="end_rejected">
+        <dc:Bounds x="2222" y="255" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_permitted_di" bpmnElement="end_permitted">
+        <dc:Bounds x="2222" y="308" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="register_application_di" bpmnElement="register_application">
+        <dc:Bounds x="290" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_completeness_di" bpmnElement="check_completeness">
+        <dc:Bounds x="480" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_incomplete_di" bpmnElement="notify_incomplete">
+        <dc:Bounds x="860" y="233" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_parallel_di" bpmnElement="split_parallel" isMarkerVisible="true">
+        <dc:Bounds x="885" y="301" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_outcomes_di" bpmnElement="review_outcomes">
+        <dc:Bounds x="1620" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="issue_rejection_di" bpmnElement="issue_rejection">
+        <dc:Bounds x="2000" y="233" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="issue_permit_di" bpmnElement="issue_permit">
+        <dc:Bounds x="2000" y="286" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_complete_di" bpmnElement="split_complete" isMarkerVisible="true">
+        <dc:Bounds x="695" y="275" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="join_parallel_di" bpmnElement="join_parallel" isMarkerVisible="true">
+        <dc:Bounds x="1455" y="275" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_outcome_di" bpmnElement="split_outcome" isMarkerVisible="true">
+        <dc:Bounds x="1835" y="275" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="zoning_check_di" bpmnElement="zoning_check">
+        <dc:Bounds x="1050" y="420" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_zoning_di" bpmnElement="record_zoning">
+        <dc:Bounds x="1240" y="420" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="safety_review_di" bpmnElement="safety_review">
+        <dc:Bounds x="1050" y="580" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_safety_di" bpmnElement="record_safety">
+        <dc:Bounds x="1240" y="580" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="168" y="60"/>
+        <di:waypoint x="229" y="60"/>
+        <di:waypoint x="229" y="100"/>
+        <di:waypoint x="290" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="168" y="300"/>
+        <di:waypoint x="290" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="390" y="300"/>
+        <di:waypoint x="480" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="580" y="300"/>
+        <di:waypoint x="695" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="745" y="300"/>
+        <di:waypoint x="802" y="300"/>
+        <di:waypoint x="802" y="273"/>
+        <di:waypoint x="860" y="273"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="745" y="300"/>
+        <di:waypoint x="815" y="300"/>
+        <di:waypoint x="815" y="326"/>
+        <di:waypoint x="885" y="326"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="960" y="273"/>
+        <di:waypoint x="1021" y="273"/>
+        <di:waypoint x="1021" y="300"/>
+        <di:waypoint x="1082" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="935" y="326"/>
+        <di:waypoint x="992" y="326"/>
+        <di:waypoint x="992" y="460"/>
+        <di:waypoint x="1050" y="460"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="935" y="326"/>
+        <di:waypoint x="992" y="326"/>
+        <di:waypoint x="992" y="620"/>
+        <di:waypoint x="1050" y="620"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="1150" y="460"/>
+        <di:waypoint x="1240" y="460"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="1340" y="460"/>
+        <di:waypoint x="1397" y="460"/>
+        <di:waypoint x="1397" y="300"/>
+        <di:waypoint x="1455" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="1150" y="620"/>
+        <di:waypoint x="1240" y="620"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="1340" y="620"/>
+        <di:waypoint x="1397" y="620"/>
+        <di:waypoint x="1397" y="300"/>
+        <di:waypoint x="1455" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="1505" y="300"/>
+        <di:waypoint x="1620" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="1720" y="300"/>
+        <di:waypoint x="1835" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf16_di" bpmnElement="sf16">
+        <di:waypoint x="1885" y="300"/>
+        <di:waypoint x="1942" y="300"/>
+        <di:waypoint x="1942" y="273"/>
+        <di:waypoint x="2000" y="273"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf17_di" bpmnElement="sf17">
+        <di:waypoint x="1885" y="300"/>
+        <di:waypoint x="1942" y="300"/>
+        <di:waypoint x="1942" y="326"/>
+        <di:waypoint x="2000" y="326"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf18_di" bpmnElement="sf18">
+        <di:waypoint x="2100" y="273"/>
+        <di:waypoint x="2222" y="273"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf19_di" bpmnElement="sf19">
+        <di:waypoint x="2100" y="326"/>
+        <di:waypoint x="2222" y="326"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="340" y="140"/>
+        <di:waypoint x="150" y="282"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="910" y="233"/>
+        <di:waypoint x="150" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
+        <di:waypoint x="2050" y="233"/>
+        <di:waypoint x="150" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf4_di" bpmnElement="mf4">
+        <di:waypoint x="2050" y="286"/>
+        <di:waypoint x="150" y="158"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -21,7 +21,7 @@ def load_model():
             repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
             filename="mistral-7b-instruct-v0.2.Q5_K_M.gguf",
             n_ctx=8192,
-            n_gpu_layers=1,
+            n_gpu_layers=0,
             verbose=False
         )
     return llm
