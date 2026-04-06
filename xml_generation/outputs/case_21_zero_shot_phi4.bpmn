@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_AdmissionsOffice" name="Admissions Office" processRef="Process_AdmissionsOffice"/>
+    <bpmn:participant id="actor_SpecialistDepartment" name="Specialist Department" processRef="Process_SpecialistDepartment"/>
+    <bpmn:participant id="actor_InsuranceOffice" name="Insurance Office" processRef="Process_InsuranceOffice"/>
+    <bpmn:participant id="actor_GeneralPractitioner" name="General Practitioner" processRef="Process_GeneralPractitioner"/>
+    <bpmn:messageFlow id="NotifyGPMessageFlow" name="Notify GP of Missing Documents" sourceRef="AdmissionsClerk" targetRef="GP"/>
+    <bpmn:messageFlow id="SendRejectionNoticeMessageFlow" name="Send Rejection Notice" sourceRef="AdmissionsClerk" targetRef="GP"/>
+    <bpmn:messageFlow id="SendApprovalMessageFlow" name="Send Treatment Approval" sourceRef="AdmissionsClerk" targetRef="GP"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="StartEvent" targetRef="RegisterReferral"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="ForwardToSpecialist" targetRef="ConductAssessment"/>
+    <bpmn:messageFlow id="MsgFlow_p2" name="" sourceRef="ForwardToInsurance" targetRef="VerifyCoverage"/>
+    <bpmn:messageFlow id="MsgFlow_p3" name="" sourceRef="SendVerdictsToClerk" targetRef="ReviewOutcomes"/>
+    <bpmn:messageFlow id="MsgFlow_p4" name="" sourceRef="SendVerdictsToClerkInsurance" targetRef="ReviewOutcomes"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_AdmissionsOffice" name="Admissions Office" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_AdmissionsOffice">
+      <bpmn:lane id="AdmissionsClerk" name="Admissions Clerk">
+        <bpmn:flowNodeRef>EndEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEventRejection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEventApproval</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RegisterReferral</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckDocumentation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>NotifyGP</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ForwardToSpecialist</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ForwardToInsurance</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ReviewOutcomes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SendRejectionNotice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SendApproval</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckDocumentationGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ReviewOutcomesGateway</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:endEvent id="EndEvent" name="End"/>
+    <bpmn:endEvent id="EndEventRejection" name="End Rejection"/>
+    <bpmn:endEvent id="EndEventApproval" name="End Approval"/>
+    <bpmn:manualTask id="RegisterReferral" name="Register Referral"/>
+    <bpmn:manualTask id="CheckDocumentation" name="Check Documentation"/>
+    <bpmn:manualTask id="NotifyGP" name="Notify GP of Missing Documents"/>
+    <bpmn:manualTask id="ForwardToSpecialist" name="Forward to Specialist"/>
+    <bpmn:manualTask id="ForwardToInsurance" name="Forward to Insurance"/>
+    <bpmn:manualTask id="ReviewOutcomes" name="Review Combined Outcomes"/>
+    <bpmn:manualTask id="SendRejectionNotice" name="Send Rejection Notice"/>
+    <bpmn:manualTask id="SendApproval" name="Send Treatment Approval"/>
+    <bpmn:exclusiveGateway id="CheckDocumentationGateway" name="Check Documentation" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="ReviewOutcomesGateway" name="Review Outcomes" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="RegisterToCheck" sourceRef="RegisterReferral" targetRef="CheckDocumentation"/>
+    <bpmn:sequenceFlow id="CheckToNotify" sourceRef="CheckDocumentation" targetRef="NotifyGP" name="documentationIncomplete">
+      <bpmn:conditionExpression>documentationIncomplete</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="CheckToForward" sourceRef="CheckDocumentation" targetRef="ForwardToSpecialist" name="documentationComplete">
+      <bpmn:conditionExpression>documentationComplete</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="ReviewOutcomesToRejection" sourceRef="ReviewOutcomes" targetRef="SendRejectionNotice" name="eitherVerdictNegative">
+      <bpmn:conditionExpression>eitherVerdictNegative</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="ReviewOutcomesToApproval" sourceRef="ReviewOutcomes" targetRef="SendApproval" name="bothVerdictsPositive">
+      <bpmn:conditionExpression>bothVerdictsPositive</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SendRejectionNoticeToEndEventRejection" sourceRef="SendRejectionNotice" targetRef="EndEventRejection"/>
+    <bpmn:sequenceFlow id="SendApprovalToEndEventApproval" sourceRef="SendApproval" targetRef="EndEventApproval"/>
+  </bpmn:process>
+  <bpmn:process id="Process_SpecialistDepartment" name="Specialist Department" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_SpecialistDepartment">
+      <bpmn:lane id="Specialist" name="Specialist">
+        <bpmn:flowNodeRef>ConductAssessment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RecordSpecialistVerdict</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SendVerdictsToClerk</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:manualTask id="ConductAssessment" name="Conduct Medical Assessment"/>
+    <bpmn:manualTask id="RecordSpecialistVerdict" name="Record Specialist Verdict"/>
+    <bpmn:manualTask id="SendVerdictsToClerk" name="Send Verdicts to Clerk"/>
+    <bpmn:sequenceFlow id="ConductAssessmentToRecordSpecialistVerdict" sourceRef="ConductAssessment" targetRef="RecordSpecialistVerdict"/>
+    <bpmn:sequenceFlow id="RecordSpecialistVerdictToSendVerdictsToClerk" sourceRef="RecordSpecialistVerdict" targetRef="SendVerdictsToClerk"/>
+  </bpmn:process>
+  <bpmn:process id="Process_InsuranceOffice" name="Insurance Office" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_InsuranceOffice">
+      <bpmn:lane id="InsuranceOfficer" name="Insurance Officer">
+        <bpmn:flowNodeRef>VerifyCoverage</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RecordInsuranceVerdict</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SendVerdictsToClerkInsurance</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:manualTask id="VerifyCoverage" name="Verify Coverage"/>
+    <bpmn:manualTask id="RecordInsuranceVerdict" name="Record Insurance Verdict"/>
+    <bpmn:manualTask id="SendVerdictsToClerkInsurance" name="Send Verdicts to Clerk"/>
+    <bpmn:sequenceFlow id="VerifyCoverageToRecordInsuranceVerdict" sourceRef="VerifyCoverage" targetRef="RecordInsuranceVerdict"/>
+    <bpmn:sequenceFlow id="RecordInsuranceVerdictToSendVerdictsToClerkInsurance" sourceRef="RecordInsuranceVerdict" targetRef="SendVerdictsToClerkInsurance"/>
+  </bpmn:process>
+  <bpmn:process id="Process_GeneralPractitioner" name="General Practitioner" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_GeneralPractitioner">
+      <bpmn:lane id="GP" name="General Practitioner">
+        <bpmn:flowNodeRef>StartEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SubmitReferral</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent" name="Start"/>
+    <bpmn:manualTask id="SubmitReferral" name="Submit Referral"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_AdmissionsOffice_di" bpmnElement="actor_AdmissionsOffice" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1020" height="690"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_SpecialistDepartment_di" bpmnElement="actor_SpecialistDepartment" isHorizontal="true">
+        <dc:Bounds x="10" y="770" width="1020" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_InsuranceOffice_di" bpmnElement="actor_InsuranceOffice" isHorizontal="true">
+        <dc:Bounds x="10" y="1050" width="1020" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_GeneralPractitioner_di" bpmnElement="actor_GeneralPractitioner" isHorizontal="true">
+        <dc:Bounds x="10" y="1330" width="600" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="AdmissionsClerk_di" bpmnElement="AdmissionsClerk" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="990" height="690"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Specialist_di" bpmnElement="Specialist" isHorizontal="true">
+        <dc:Bounds x="40" y="770" width="990" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="InsuranceOfficer_di" bpmnElement="InsuranceOfficer" isHorizontal="true">
+        <dc:Bounds x="40" y="1050" width="990" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GP_di" bpmnElement="GP" isHorizontal="true">
+        <dc:Bounds x="40" y="1330" width="570" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_di" bpmnElement="EndEvent">
+        <dc:Bounds x="172" y="102" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="RegisterReferral_di" bpmnElement="RegisterReferral">
+        <dc:Bounds x="130" y="168" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ForwardToInsurance_di" bpmnElement="ForwardToInsurance">
+        <dc:Bounds x="130" y="278" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReviewOutcomes_di" bpmnElement="ReviewOutcomes">
+        <dc:Bounds x="130" y="388" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckDocumentationGateway_di" bpmnElement="CheckDocumentationGateway" isMarkerVisible="true">
+        <dc:Bounds x="165" y="498" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReviewOutcomesGateway_di" bpmnElement="ReviewOutcomesGateway" isMarkerVisible="true">
+        <dc:Bounds x="165" y="578" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEventRejection_di" bpmnElement="EndEventRejection">
+        <dc:Bounds x="692" y="204" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEventApproval_di" bpmnElement="EndEventApproval">
+        <dc:Bounds x="692" y="270" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="NotifyGP_di" bpmnElement="NotifyGP">
+        <dc:Bounds x="650" y="336" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ForwardToSpecialist_di" bpmnElement="ForwardToSpecialist">
+        <dc:Bounds x="650" y="446" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckDocumentation_di" bpmnElement="CheckDocumentation">
+        <dc:Bounds x="390" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendRejectionNotice_di" bpmnElement="SendRejectionNotice">
+        <dc:Bounds x="390" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendApproval_di" bpmnElement="SendApproval">
+        <dc:Bounds x="390" y="435" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ConductAssessment_di" bpmnElement="ConductAssessment">
+        <dc:Bounds x="130" y="840" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="RecordSpecialistVerdict_di" bpmnElement="RecordSpecialistVerdict">
+        <dc:Bounds x="390" y="840" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendVerdictsToClerk_di" bpmnElement="SendVerdictsToClerk">
+        <dc:Bounds x="650" y="840" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="VerifyCoverage_di" bpmnElement="VerifyCoverage">
+        <dc:Bounds x="130" y="1120" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="RecordInsuranceVerdict_di" bpmnElement="RecordInsuranceVerdict">
+        <dc:Bounds x="390" y="1120" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendVerdictsToClerkInsurance_di" bpmnElement="SendVerdictsToClerkInsurance">
+        <dc:Bounds x="650" y="1120" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_di" bpmnElement="StartEvent">
+        <dc:Bounds x="172" y="1382" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubmitReferral_di" bpmnElement="SubmitReferral">
+        <dc:Bounds x="130" y="1448" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="RegisterToCheck_di" bpmnElement="RegisterToCheck">
+        <di:waypoint x="250" y="208"/>
+        <di:waypoint x="320" y="208"/>
+        <di:waypoint x="320" y="255"/>
+        <di:waypoint x="390" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckToNotify_di" bpmnElement="CheckToNotify">
+        <di:waypoint x="510" y="255"/>
+        <di:waypoint x="580" y="255"/>
+        <di:waypoint x="580" y="376"/>
+        <di:waypoint x="650" y="376"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckToForward_di" bpmnElement="CheckToForward">
+        <di:waypoint x="510" y="255"/>
+        <di:waypoint x="580" y="255"/>
+        <di:waypoint x="580" y="486"/>
+        <di:waypoint x="650" y="486"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ConductAssessmentToRecordSpecialistVerdict_di" bpmnElement="ConductAssessmentToRecordSpecialistVerdict">
+        <di:waypoint x="250" y="880"/>
+        <di:waypoint x="390" y="880"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="VerifyCoverageToRecordInsuranceVerdict_di" bpmnElement="VerifyCoverageToRecordInsuranceVerdict">
+        <di:waypoint x="250" y="1160"/>
+        <di:waypoint x="390" y="1160"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="RecordSpecialistVerdictToSendVerdictsToClerk_di" bpmnElement="RecordSpecialistVerdictToSendVerdictsToClerk">
+        <di:waypoint x="510" y="880"/>
+        <di:waypoint x="650" y="880"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="RecordInsuranceVerdictToSendVerdictsToClerkInsurance_di" bpmnElement="RecordInsuranceVerdictToSendVerdictsToClerkInsurance">
+        <di:waypoint x="510" y="1160"/>
+        <di:waypoint x="650" y="1160"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ReviewOutcomesToRejection_di" bpmnElement="ReviewOutcomesToRejection">
+        <di:waypoint x="250" y="428"/>
+        <di:waypoint x="320" y="428"/>
+        <di:waypoint x="320" y="365"/>
+        <di:waypoint x="390" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ReviewOutcomesToApproval_di" bpmnElement="ReviewOutcomesToApproval">
+        <di:waypoint x="250" y="428"/>
+        <di:waypoint x="320" y="428"/>
+        <di:waypoint x="320" y="475"/>
+        <di:waypoint x="390" y="475"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SendRejectionNoticeToEndEventRejection_di" bpmnElement="SendRejectionNoticeToEndEventRejection">
+        <di:waypoint x="510" y="365"/>
+        <di:waypoint x="601" y="365"/>
+        <di:waypoint x="601" y="222"/>
+        <di:waypoint x="692" y="222"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SendApprovalToEndEventApproval_di" bpmnElement="SendApprovalToEndEventApproval">
+        <di:waypoint x="510" y="475"/>
+        <di:waypoint x="601" y="475"/>
+        <di:waypoint x="601" y="288"/>
+        <di:waypoint x="692" y="288"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="190" y="1382"/>
+        <di:waypoint x="190" y="248"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="710" y="526"/>
+        <di:waypoint x="190" y="840"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p2_di" bpmnElement="MsgFlow_p2">
+        <di:waypoint x="190" y="358"/>
+        <di:waypoint x="190" y="1120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p3_di" bpmnElement="MsgFlow_p3">
+        <di:waypoint x="710" y="840"/>
+        <di:waypoint x="190" y="468"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p4_di" bpmnElement="MsgFlow_p4">
+        <di:waypoint x="710" y="1120"/>
+        <di:waypoint x="190" y="468"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

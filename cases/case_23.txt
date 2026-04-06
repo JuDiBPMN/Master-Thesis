@@ -1,0 +1,14 @@
+A company manages invoice processing for invoices submitted by suppliers. 
+The supplier submits an invoice to the accounts payable department. 
+The accounts payable clerk registers the invoice and creates an invoice record. 
+The clerk then checks whether the invoice matches the corresponding purchase order. 
+If the invoice does not match, the clerk notifies the supplier of the discrepancy 
+and the process ends for that submission. If the invoice matches, the accounts payable department 
+simultaneously forwards the invoice record to the budget controller for budget verification 
+and to the line manager for expenditure approval. The budget controller verifies whether 
+sufficient budget is available and records their verdict on the invoice record. 
+The line manager reviews the expenditure and records their verdict on the invoice record. 
+Once both verdicts are recorded, the accounts payable clerk reviews the combined outcomes. 
+If either verdict is negative, the clerk sends a rejection notice to the supplier and the process ends. 
+If both verdicts are positive, the clerk processes the payment and sends a payment confirmation to the 
+supplier and the process ends.

@@ -32,7 +32,7 @@ def load_model():
         llm = Llama(
             model_path=model_path,
             n_ctx=8192,
-            n_gpu_layers=1,
+            n_gpu_layers=-1,
             verbose=False
         )
     return llm
@@ -500,7 +500,7 @@ def extract_bpmn_fine_tuned(process_description, case_name, output_file=None):
 
 if __name__ == "__main__":
     # --- CONFIGURATION ---
-    case_name = "case_21"
+    case_name = "case_23"
     # ---------------------
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))

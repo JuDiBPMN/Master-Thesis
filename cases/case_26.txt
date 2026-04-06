@@ -1,0 +1,13 @@
+A retailer manages product return requests submitted by customers.
+The customer submits a return request to the customer service department.
+The customer service agent registers the return request and checks whether the request includes
+all required information (e.g. order number, proof of purchase, reason for return).
+If the information is incomplete, the agent notifies the customer of the missing information
+and the process ends for that submission.
+If the information is complete, the customer service department simultaneously forwards the return request
+to the warehouse team for a physical product inspection and to the finance department for a payment eligibility check.
+The warehouse inspector examines the returned product and records their verdict.
+The finance officer checks whether the transaction qualifies for a refund and records their verdict.
+Once both verdicts are recorded, the customer service agent reviews the combined outcomes.
+If either verdict is negative, the agent sends a return rejection notice to the customer and the process ends.
+If both verdicts are positive, the agent approves the return, processes the refund, and sends a refund confirmation to the customer and the process ends.

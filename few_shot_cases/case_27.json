@@ -1,0 +1,89 @@
+{
+  "pools": [
+    { "id": "actor_contractor_pool", "name": "Contractor" },
+    { "id": "actor_authority_pool",  "name": "Municipal Authority" }
+  ],
+  "lanes": [
+    { "id": "contractor",     "name": "Contractor",                 "pool": "actor_contractor_pool" },
+    { "id": "permits_clerk",  "name": "Permits Clerk",              "pool": "actor_authority_pool" },
+    { "id": "urban_planning", "name": "Urban Planning Department",  "pool": "actor_authority_pool" },
+    { "id": "building_safety","name": "Building Safety Department", "pool": "actor_authority_pool" }
+  ],
+  "tasks": [
+    { "id": "submit_application",  "name": "Submit Permit Application",        "type": "task", "lane": "contractor" },
+    { "id": "collect_docs",        "name": "Collect Missing Documents",         "type": "task", "lane": "contractor" },
+    { "id": "register_application","name": "Register Permit Application",        "type": "task", "lane": "permits_clerk" },
+    { "id": "check_docs",          "name": "Check Documentation Completeness",  "type": "task", "lane": "permits_clerk" },
+    { "id": "review_outcomes",     "name": "Review Combined Verdicts",          "type": "task", "lane": "permits_clerk" },
+    { "id": "send_refusal",        "name": "Send Permit Refusal Notice",        "type": "task", "lane": "permits_clerk" },
+    { "id": "issue_permit",        "name": "Issue Building Permit",             "type": "task", "lane": "permits_clerk" },
+    { "id": "zoning_review",       "name": "Review Zoning Compliance",          "type": "task", "lane": "urban_planning" },
+    { "id": "record_zoning",       "name": "Record Zoning Verdict",             "type": "task", "lane": "urban_planning" },
+    { "id": "safety_assessment",   "name": "Assess Structural Safety",          "type": "task", "lane": "building_safety" },
+    { "id": "record_safety",       "name": "Record Safety Verdict",             "type": "task", "lane": "building_safety" }
+  ],
+  "events": [
+    { "id": "start_contractor",       "name": "Start",                             "type": "startEvent",            "lane": "contractor",    "eventDefinition": "none" },
+    { "id": "Event_0aok0om",          "name": "Send Permit application",           "type": "intermediateThrowEvent","lane": "contractor",    "eventDefinition": "message" },
+    { "id": "catch_incomplete",       "name": "Missing Documents Notice Received", "type": "intermediateCatchEvent","lane": "contractor",    "eventDefinition": "message" },
+    { "id": "throw_resubmit",         "name": "Resubmit Documents",                "type": "intermediateThrowEvent","lane": "contractor",    "eventDefinition": "message" },
+    { "id": "catch_refusal",          "name": "Refusal Notice Received",           "type": "intermediateCatchEvent","lane": "contractor",    "eventDefinition": "message" },
+    { "id": "end_contractor_refused", "name": "Ended: Permit Refused",             "type": "endEvent",              "lane": "contractor",    "eventDefinition": "none" },
+    { "id": "catch_permit",           "name": "Building Permit Received",          "type": "intermediateCatchEvent","lane": "contractor",    "eventDefinition": "message" },
+    { "id": "end_contractor_approved","name": "Ended: Permit Issued",              "type": "endEvent",              "lane": "contractor",    "eventDefinition": "none" },
+    { "id": "start_permits",          "name": "Application Received",              "type": "startEvent",            "lane": "permits_clerk", "eventDefinition": "message" },
+    { "id": "throw_incomplete",       "name": "Notify Contractor of Missing Docs", "type": "intermediateThrowEvent","lane": "permits_clerk", "eventDefinition": "message" },
+    { "id": "catch_resubmission",     "name": "Receive Resubmitted Documents",     "type": "intermediateCatchEvent","lane": "permits_clerk", "eventDefinition": "message" },
+    { "id": "throw_refusal",          "name": "Send Permit Refusal Notice",        "type": "intermediateThrowEvent","lane": "permits_clerk", "eventDefinition": "message" },
+    { "id": "throw_permit",           "name": "Send Building Permit",              "type": "intermediateThrowEvent","lane": "permits_clerk", "eventDefinition": "message" },
+    { "id": "end_permits",            "name": "Process Complete",                  "type": "endEvent",              "lane": "permits_clerk", "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "join_rework",    "name": "Recheck Documentation",   "type": "exclusiveGateway", "lane": "permits_clerk", "gatewayDirection": "converging" },
+    { "id": "split_complete", "name": "Documentation Complete?", "type": "exclusiveGateway", "lane": "permits_clerk", "gatewayDirection": "diverging" },
+    { "id": "split_parallel", "name": "Forward for Review",      "type": "parallelGateway",  "lane": "permits_clerk", "gatewayDirection": "diverging" },
+    { "id": "join_parallel",  "name": "Both Verdicts Recorded",  "type": "parallelGateway",  "lane": "permits_clerk", "gatewayDirection": "converging" },
+    { "id": "split_outcome",  "name": "Both Verdicts Positive?", "type": "exclusiveGateway", "lane": "permits_clerk", "gatewayDirection": "diverging" },
+    { "id": "join_outcome",   "name": "Merge Outcome Paths",     "type": "exclusiveGateway", "lane": "permits_clerk", "gatewayDirection": "converging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf1",         "from": "start_contractor",     "to": "submit_application" },
+    { "id": "Flow_068b4zw","from": "submit_application",   "to": "Event_0aok0om" },
+    { "id": "sf2",         "from": "catch_incomplete",     "to": "collect_docs" },
+    { "id": "sf3",         "from": "collect_docs",         "to": "throw_resubmit" },
+    { "id": "sf4",         "from": "catch_refusal",        "to": "end_contractor_refused" },
+    { "id": "sf5",         "from": "catch_permit",         "to": "end_contractor_approved" },
+    { "id": "sf6",         "from": "start_permits",        "to": "register_application" },
+    { "id": "sf7",         "from": "register_application", "to": "join_rework" },
+    { "id": "sf8",         "from": "join_rework",          "to": "check_docs" },
+    { "id": "sf9",         "from": "check_docs",           "to": "split_complete" },
+    { "id": "sf10",        "from": "split_complete",       "to": "throw_incomplete",  "condition": "Incomplete" },
+    { "id": "sf11",        "from": "split_complete",       "to": "split_parallel",    "condition": "Complete" },
+    { "id": "sf12",        "from": "throw_incomplete",     "to": "catch_resubmission" },
+    { "id": "sf13",        "from": "catch_resubmission",   "to": "join_rework" },
+    { "id": "sf14",        "from": "split_parallel",       "to": "zoning_review" },
+    { "id": "sf15",        "from": "split_parallel",       "to": "safety_assessment" },
+    { "id": "sf16",        "from": "zoning_review",        "to": "record_zoning" },
+    { "id": "sf17",        "from": "record_zoning",        "to": "join_parallel" },
+    { "id": "sf18",        "from": "safety_assessment",    "to": "record_safety" },
+    { "id": "sf19",        "from": "record_safety",        "to": "join_parallel" },
+    { "id": "sf20",        "from": "join_parallel",        "to": "review_outcomes" },
+    { "id": "sf21",        "from": "review_outcomes",      "to": "split_outcome" },
+    { "id": "sf22",        "from": "split_outcome",        "to": "send_refusal",      "condition": "One or more verdicts negative" },
+    { "id": "sf23",        "from": "split_outcome",        "to": "issue_permit",      "condition": "Both verdicts positive" },
+    { "id": "sf24",        "from": "send_refusal",         "to": "throw_refusal" },
+    { "id": "sf25",        "from": "issue_permit",         "to": "throw_permit" },
+    { "id": "sf26",        "from": "throw_refusal",        "to": "join_outcome" },
+    { "id": "sf27",        "from": "throw_permit",         "to": "join_outcome" },
+    { "id": "sf28",        "from": "join_outcome",         "to": "end_permits" }
+  ],
+  "message_flows": [
+    { "id": "mf1", "from": "Event_0aok0om",   "to": "start_permits",     "name": "Permit Application" },
+    { "id": "mf2", "from": "throw_incomplete", "to": "catch_incomplete",  "name": "Missing Documents Notice" },
+    { "id": "mf3", "from": "throw_resubmit",  "to": "catch_resubmission", "name": "Resubmitted Documents" },
+    { "id": "mf4", "from": "throw_refusal",   "to": "catch_refusal",      "name": "Permit Refusal Notice" },
+    { "id": "mf5", "from": "throw_permit",    "to": "catch_permit",       "name": "Building Permit" }
+  ],
+  "data": [],
+  "data_associations": []
+}

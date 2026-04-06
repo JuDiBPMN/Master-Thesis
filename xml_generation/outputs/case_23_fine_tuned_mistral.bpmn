@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_supplier" name="Supplier" processRef="Process_supplier"/>
+    <bpmn:participant id="actor_accounts_payable" name="Accounts Payable" processRef="Process_accounts_payable"/>
+    <bpmn:participant id="actor_budget_controller" name="Budget Controller" processRef="Process_budget_controller"/>
+    <bpmn:participant id="actor_line_manager" name="Line Manager" processRef="Process_line_manager"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="gateway_parallel_split" targetRef="review_expenditure"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="gateway_parallel_split" targetRef="record_verdict"/>
+    <bpmn:messageFlow id="MsgFlow_p2" name="" sourceRef="review_expenditure" targetRef="gateway_parallel_join"/>
+    <bpmn:messageFlow id="MsgFlow_p3" name="" sourceRef="record_verdict" targetRef="gateway_parallel_join"/>
+    <bpmn:messageFlow id="MsgFlow_p4" name="Either verdict negative" sourceRef="gateway_outcome_split" targetRef="send_rejection"/>
+    <bpmn:messageFlow id="MsgFlow_p5" name="" sourceRef="send_rejection" targetRef="end_accounts_payable"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_supplier" name="Supplier" isExecutable="false">
+    <bpmn:startEvent id="start_supplier" name="Start"/>
+    <bpmn:endEvent id="end_supplier" name="Invoice Submitted"/>
+    <bpmn:task id="submit_invoice" name="Submit Invoice"/>
+    <bpmn:sequenceFlow id="Flow_0" sourceRef="start_supplier" targetRef="submit_invoice"/>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="submit_invoice" targetRef="end_supplier"/>
+  </bpmn:process>
+  <bpmn:process id="Process_accounts_payable" name="Accounts Payable" isExecutable="false">
+    <bpmn:startEvent id="start_accounts_payable" name="Invoice Received">
+      <bpmn:messageEventDefinition id="start_accounts_payable_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_accounts_payable" name="Payment Confirmed">
+      <bpmn:messageEventDefinition id="end_accounts_payable_def"/>
+    </bpmn:endEvent>
+    <bpmn:task id="register_invoice" name="Register Invoice"/>
+    <bpmn:task id="check_match" name="Check Invoice Match"/>
+    <bpmn:task id="notify_discrepancy" name="Notify Supplier of Discrepancy"/>
+    <bpmn:task id="process_payment" name="Process Payment"/>
+    <bpmn:task id="send_confirmation" name="Send Payment Confirmation"/>
+    <bpmn:parallelGateway id="gateway_parallel_split" name="Forward to Budget Controller and Line Manager" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gateway_parallel_join" name="Both Verdicts Recorded" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="gateway_outcome_split" name="Verdict Outcome?" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="gateway_outcome_join" name="Rejection Sent or Payment Processed" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="start_accounts_payable" targetRef="register_invoice"/>
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="register_invoice" targetRef="check_match"/>
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="check_match" targetRef="gateway_outcome_split"/>
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="gateway_outcome_split" targetRef="notify_discrepancy" name="Invoice does not match">
+      <bpmn:conditionExpression>Invoice does not match</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="gateway_outcome_split" targetRef="gateway_parallel_split" name="Invoice matches">
+      <bpmn:conditionExpression>Invoice matches</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="notify_discrepancy" targetRef="gateway_outcome_join"/>
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="gateway_parallel_join" targetRef="gateway_outcome_split"/>
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="gateway_outcome_split" targetRef="process_payment" name="Both verdicts positive">
+      <bpmn:conditionExpression>Both verdicts positive</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="process_payment" targetRef="send_confirmation"/>
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="send_confirmation" targetRef="end_accounts_payable"/>
+  </bpmn:process>
+  <bpmn:process id="Process_budget_controller" name="Budget Controller" isExecutable="false">
+    <bpmn:startEvent id="start_budget_controller" name="Invoice Forwarded">
+      <bpmn:messageEventDefinition id="start_budget_controller_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_budget_controller" name="Verdict Recorded"/>
+    <bpmn:task id="record_verdict" name="Record Verdict"/>
+  </bpmn:process>
+  <bpmn:process id="Process_line_manager" name="Line Manager" isExecutable="false">
+    <bpmn:startEvent id="start_line_manager" name="Invoice Forwarded">
+      <bpmn:messageEventDefinition id="start_line_manager_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_line_manager" name="Verdict Recorded"/>
+    <bpmn:task id="review_expenditure" name="Review Expenditure"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_supplier_di" bpmnElement="actor_supplier" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="990" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_accounts_payable_di" bpmnElement="actor_accounts_payable" isHorizontal="true">
+        <dc:Bounds x="10" y="330" width="2030" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_budget_controller_di" bpmnElement="actor_budget_controller" isHorizontal="true">
+        <dc:Bounds x="10" y="640" width="1510" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_line_manager_di" bpmnElement="actor_line_manager" isHorizontal="true">
+        <dc:Bounds x="10" y="950" width="1510" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_supplier_di" bpmnElement="start_supplier">
+        <dc:Bounds x="142" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_supplier_di" bpmnElement="end_supplier">
+        <dc:Bounds x="662" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_invoice_di" bpmnElement="submit_invoice">
+        <dc:Bounds x="360" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_accounts_payable_di" bpmnElement="start_accounts_payable">
+        <dc:Bounds x="142" y="397" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_parallel_join_di" bpmnElement="gateway_parallel_join" isMarkerVisible="true">
+        <dc:Bounds x="135" y="463" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_accounts_payable_di" bpmnElement="end_accounts_payable">
+        <dc:Bounds x="1702" y="437" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="register_invoice_di" bpmnElement="register_invoice">
+        <dc:Bounds x="360" y="415" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_match_di" bpmnElement="check_match">
+        <dc:Bounds x="620" y="415" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_discrepancy_di" bpmnElement="notify_discrepancy">
+        <dc:Bounds x="1140" y="320" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process_payment_di" bpmnElement="process_payment">
+        <dc:Bounds x="1140" y="430" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_parallel_split_di" bpmnElement="gateway_parallel_split" isMarkerVisible="true">
+        <dc:Bounds x="1175" y="540" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_confirmation_di" bpmnElement="send_confirmation">
+        <dc:Bounds x="1400" y="375" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_outcome_join_di" bpmnElement="gateway_outcome_join" isMarkerVisible="true">
+        <dc:Bounds x="1435" y="485" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_outcome_split_di" bpmnElement="gateway_outcome_split" isMarkerVisible="true">
+        <dc:Bounds x="915" y="430" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_budget_controller_di" bpmnElement="start_budget_controller">
+        <dc:Bounds x="142" y="714" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_budget_controller_di" bpmnElement="end_budget_controller">
+        <dc:Bounds x="142" y="780" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_verdict_di" bpmnElement="record_verdict">
+        <dc:Bounds x="1140" y="725" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_line_manager_di" bpmnElement="start_line_manager">
+        <dc:Bounds x="142" y="1024" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_line_manager_di" bpmnElement="end_line_manager">
+        <dc:Bounds x="142" y="1090" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_expenditure_di" bpmnElement="review_expenditure">
+        <dc:Bounds x="1140" y="1035" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0_di" bpmnElement="Flow_0">
+        <di:waypoint x="178" y="145"/>
+        <di:waypoint x="360" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="480" y="145"/>
+        <di:waypoint x="662" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="178" y="415"/>
+        <di:waypoint x="269" y="415"/>
+        <di:waypoint x="269" y="455"/>
+        <di:waypoint x="360" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="480" y="455"/>
+        <di:waypoint x="620" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="740" y="455"/>
+        <di:waypoint x="915" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="965" y="455"/>
+        <di:waypoint x="1052" y="455"/>
+        <di:waypoint x="1052" y="360"/>
+        <di:waypoint x="1140" y="360"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="965" y="455"/>
+        <di:waypoint x="1070" y="455"/>
+        <di:waypoint x="1070" y="565"/>
+        <di:waypoint x="1175" y="565"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="1260" y="360"/>
+        <di:waypoint x="1347" y="360"/>
+        <di:waypoint x="1347" y="510"/>
+        <di:waypoint x="1435" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="185" y="488"/>
+        <di:waypoint x="550" y="488"/>
+        <di:waypoint x="550" y="455"/>
+        <di:waypoint x="915" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
+        <di:waypoint x="965" y="455"/>
+        <di:waypoint x="1052" y="455"/>
+        <di:waypoint x="1052" y="470"/>
+        <di:waypoint x="1140" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
+        <di:waypoint x="1260" y="470"/>
+        <di:waypoint x="1330" y="470"/>
+        <di:waypoint x="1330" y="415"/>
+        <di:waypoint x="1400" y="415"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11">
+        <di:waypoint x="1520" y="415"/>
+        <di:waypoint x="1611" y="415"/>
+        <di:waypoint x="1611" y="455"/>
+        <di:waypoint x="1702" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="1200" y="590"/>
+        <di:waypoint x="1200" y="1035"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="1200" y="590"/>
+        <di:waypoint x="1200" y="725"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p2_di" bpmnElement="MsgFlow_p2">
+        <di:waypoint x="1200" y="1035"/>
+        <di:waypoint x="160" y="513"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p3_di" bpmnElement="MsgFlow_p3">
+        <di:waypoint x="1200" y="725"/>
+        <di:waypoint x="160" y="513"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
