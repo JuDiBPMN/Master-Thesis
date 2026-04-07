@@ -327,7 +327,7 @@ Return a JSON object matching the schema exactly."""
     return json_result
 
 if __name__ == "__main__":
-    case_name = "case_24" 
+    case_name = "case_21" 
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))

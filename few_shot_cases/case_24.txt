@@ -1,4 +1,16 @@
-A client of BrightWave Energy receives their monthly electricity bill and immediately sees that the billed amount is too high. The process starts with the client writing a complaint email after which it is sent to the customer service department.
-The customer service department receives the complaint. The employee first looks up the client's billing information and then reviews the invoice. Based on the review, the employee determines whether a mistake was actually made.
-If no mistake is found, the employee writes an email with a clear explanation and sends it to the client, after which the process ends.
-If a mistake is found, the employee creates a ticket in the internal system and assigns it to the invoicing department. The invoicing department investigates the invoicing mistake and then makes the necessary correction. A new invoice is then generated and sent to the client by email, after which the process ends.
+A government agency manages grant applications submitted by non-profit organisations.
+The applicant organisation submits a grant application to the grants office.
+The grants administrator registers the application and checks whether all required documents
+(e.g. project proposal, financial statements, organisational registration) are included.
+If the documentation is incomplete, the grants administrator notifies the applicant of the missing documents
+and requests resubmission. The applicant collects the missing documents and resubmits them,
+after which the grants administrator checks completeness again.
+Once the documentation is confirmed complete, the grants office simultaneously forwards the application
+to the technical review panel for a project feasibility assessment and to the finance department
+for a budget adequacy review.
+The technical reviewer assesses the project feasibility and records their verdict.
+The finance officer reviews the proposed budget and records their verdict.
+Once both verdicts are recorded, the grants administrator reviews the combined outcomes.
+If either verdict is negative, the grants administrator sends a rejection notice to the applicant and the process ends.
+If both verdicts are positive, the grants administrator issues a grant approval letter to the applicant and the process ends.
+ 
