@@ -20,7 +20,7 @@ def load_model():
         llm = Llama.from_pretrained(
             repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
             filename="mistral-7b-instruct-v0.2.Q5_K_M.gguf",
-            n_ctx=8192,
+            n_ctx=16384,
             n_gpu_layers=0,
             verbose=False
         )
@@ -410,9 +410,12 @@ SYSTEM_MSG = (
     "Extract structured BPMN models from process descriptions. "
     "Always output valid JSON matching the provided schema. "
     "Never use a 'nodes' array — always use separate 'tasks', 'events', and 'gateways' arrays. "
-    "Every node must belong to a declared participant. "
+    "Every node must belong to a declared lane, and every lane must belong to a declared pool. "
     "Every pool must have a startEvent and an endEvent. "
-    "Sequence flows stay within pools; cross-pool communication uses message_flows."
+    "Sequence flows stay within pools; cross-pool communication uses message_flows only. "
+    "A pool represents one organisation or external entity. "
+    "Roles and departments within the same organisation are LANES inside ONE pool, not separate pools. "
+    "External parties (customers, suppliers, third parties) are ALWAYS modeled as their own pool."
 )
 
 
@@ -424,7 +427,7 @@ def _call_model(model, prompt):
         ],
         response_format={"type": "json_object", "schema": BPMN_SCHEMA},
         temperature=0.0,
-        max_tokens=8196
+        max_tokens=4096
     )
     if isinstance(result, dict) and "choices" in result:
         return result["choices"][0]["message"]["content"]
@@ -447,118 +450,131 @@ Here are {len(cases)} example(s) showing process descriptions and their correct 
 
 {few_shot_block}
 
-Your goal is NOT to simplify the process, but to faithfully model ALL BPMN elements:
-- pools
-- lanes
-- tasks
-- events
-- gateways
-- sequence flows
-- message flows
+## STEP 1 — IDENTIFY POOLS (DO THIS FIRST)
+
+A pool = one organisation or external entity.
+Ask yourself: how many distinct organisations or external parties are involved?
+
+RULES:
+- External parties (customers, suppliers, government bodies) = their own pool
+- Internal departments or roles within the SAME organisation = lanes inside ONE pool
+- NEVER split one organisation into multiple pools just because it has multiple departments
+
+EXAMPLE (CORRECT):
+  Pool: "Retailer" → lanes: Customer Service, Warehouse, Finance
+  Pool: "Customer" → lanes: Customer
+
+EXAMPLE (WRONG):
+  Pool: "Customer Service"
+  Pool: "Warehouse"        ← these are lanes, not pools
+  Pool: "Finance"
 
 
---- CORE MODELING PRINCIPLES ---
+## STEP 2 — ASSIGN LANES
+
+Each role, department, or actor within a pool = one lane.
+Every task, event, and gateway must belong to exactly one lane.
 
 
-1. MODEL THE FULL PROCESS (NO SIMPLIFICATION)
-Do not omit steps. Do not merge tasks. Do not reduce structure.
+## STEP 3 — MODEL EACH POOL'S FLOW INDEPENDENTLY
+
+Each pool has its own internal sequence flow.
+Pools NEVER share gateways or sequence flows.
+A parallel gateway that splits work inside one pool CANNOT join work from another pool.
+
+If two departments in different pools both do work, and then results are combined:
+- Each pool finishes its own branch with a message throw event
+- The receiving pool uses a parallel SPLIT + parallel JOIN to wait for all messages
 
 
-2. POOLS AND LANES (CRITICAL)
-- Each organisation = one pool
-- Each role/actor = one lane inside its organisation
-- Cross-organisation interaction MUST use message flows
-- NEVER connect sequence flows across pools
+## STEP 4 — CROSS-POOL COMMUNICATION
+
+ONLY message_flows may cross pool boundaries.
+- Sending node: intermediateThrowEvent (message)
+- Receiving node: intermediateCatchEvent (message) or message startEvent
+- message_flow targets must be EVENTS or POOLS — NEVER lanes or tasks
+
+FORBIDDEN:
+  sequence_flow from pool A → pool B
+  message_flow "to": "some_lane_id"
+  message_flow "to": "some_task_id"
 
 
-3. MESSAGE FLOWS VS TASKS (VERY IMPORTANT)
-- If information is sent between pools → use message flows
-- Do NOT model communication as tasks
-- Use:
-  - intermediateThrowEvent for sending
-  - intermediateCatchEvent for receiving
+## STEP 5 — GATEWAYS
+
+Decisions (if/else) → exclusiveGateway
+Parallel work (do both simultaneously) → parallelGateway
+
+PARALLEL GATEWAY RULES (STRICT):
+- A parallel split (diverging) fans out to 2+ branches
+- A parallel join (converging) waits for ALL branches to finish
+- You MUST always have BOTH a split AND a join
+- The split AND join must be in the SAME pool
+- You cannot join work that happens in different pools using a gateway
 
 
-4. EVENTS ARE REQUIRED
-Each pool MUST contain:
-- Exactly one startEvent, not all lanes needs a startEvent
-- at least one endEvent
+## STEP 6 — COMPLETE FLOWS
+
+Every task must have:
+- exactly 1 incoming sequence flow
+- exactly 1 outgoing sequence flow
+
+Every pool must have:
+- exactly 1 startEvent
+- at least 1 endEvent
+
+Every decision (exclusiveGateway diverging) must eventually be merged by a corresponding exclusiveGateway (converging), unless branches end in separate endEvents.
+
+## STEP 7 — HOW TO CORRECTLY USE MESSAGE EVENTS IN A FLOW
+
+Message events are NOT floating annotations. They MUST be wired into the flow with the correct connection types.
+
+CORRECT wiring:
+
+  intermediateThrowEvent (send):
+    incoming: 1 sequence flow  (from previous node in same lane)
+    outgoing: 1 message flow   (to a catch event in a DIFFERENT pool)
+    NO outgoing sequence flow
+
+  intermediateCatchEvent (receive):
+    incoming: 1 message flow   (from a throw event in a DIFFERENT pool)
+    outgoing: 1 sequence flow  (to next node in same lane)
+    NO incoming sequence flow
+
+CORRECT pattern for cross-pool communication:
+
+  Pool A (sender lane):
+    ... → task_A → throw_event ──(message flow)──→ catch_event → task_B → ...
+                                                   (Pool B, receiver lane)
+
+FORBIDDEN:
+- A throw event with an outgoing sequence flow
+- A catch event with an incoming sequence flow
+- A message flow between two nodes in the SAME pool
+- One throw event sending to multiple targets — use separate throw events, one per message
+- Using a lane id or pool id as the source or target of a sequence flow
+
+Each lane's internal flow uses only sequence flows.
+Cross-pool communication uses only message flows, always from a throw event to a catch event.
 
 
-Use message events when communication occurs.
+## FINAL SELF-CHECK (MANDATORY — fix violations before output)
 
-
-5. GATEWAYS (STRICT RULES)
-- Decisions → exclusiveGateway (XOR)
-- Parallel work → parallelGateway (AND)
-
-
-CRITICAL:
-- Parallel always has BOTH:
-  - a split (diverging)
-  - a join (converging)
-
-
-- If two branches must finish before continuing → you MUST use a parallel join
-
-
-6. SEQUENCE FLOW STRUCTURE (CRITICAL)
-- Tasks must NOT be isolated
-- Each task must be part of a continuous flow
-- Typical structure:
-  startEvent → tasks → gateways → tasks → endEvent
-
-
-- A task should:
-  - have 1 incoming flow
-  - have 1 outgoing flow
-  (except when directly after startEvent or before endEvent)
-
-
-7. CORRECT FLOW BEFORE DECISIONS
-- Do NOT decide before all required inputs are available
-- If multiple evaluations happen (e.g. medical + insurance):
-  → first split in parallel
-  → then join
-  → THEN make decision
-
-
-8. NO FAKE STRUCTURE
-- Do NOT invent flows just to satisfy constraints
-- Structure must reflect real process logic
-
-
---- FINAL SELF-CHECK (MANDATORY) ---
-
-
-Before outputting JSON, verify:
-
-
-- Are there multiple pools if multiple organisations exist?
-- Are all cross-pool interactions modeled as message flows (NOT sequence flows)?
-- Does each pool have a startEvent AND endEvent?
-- Are parallel branches correctly split AND joined?
-- Are decisions only made AFTER required information is available?
-- Are tasks connected in a continuous flow (no isolated tasks)?
-- Are message events used instead of tasks for communication?
-
-
-If ANY of these are violated, fix the model before output.
-
+[ ] How many organisations/external parties are there? Does each have its own pool?
+[ ] Are departments/roles within the same organisation modeled as lanes (not pools)?
+[ ] Do any sequence flows cross pool boundaries? (If yes → convert to message flows)
+[ ] Do message flows point to events or pools only? (Never to lanes or tasks)
+[ ] Does every parallel split have a corresponding parallel join IN THE SAME pool?
+[ ] Does every diverging exclusiveGateway have a converging counterpart?
+[ ] Does every task have both an incoming and outgoing sequence flow?
+[ ] Does every pool have a startEvent and at least one endEvent?
 
 ---
 
+Return ONLY valid JSON matching the schema. Do not explain anything.
 
-Return ONLY valid JSON matching the schema.
-Do not explain anything.
 ## Process description
-{process_description}
-
-
-Before returning, verify: does every task have an incoming AND outgoing sequence_flow entry? If not, add the missing flows now.
-Message flows may only connect nodes that belong to different pools. Never use a message flow between two nodes in the same pool. Communication within the same pool must be modeled with sequence flows.
-Sequence flows may never cross pool boundaries. Cross-pool communication must be modeled with message flows between a sending node in one pool and a receiving event in another pool.
-Return a JSON object matching the schema exactly. Do not merge tasks. Do not skip gateways."""
+{process_description}"""
     
     
 

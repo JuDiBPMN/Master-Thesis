@@ -2,5 +2,6 @@
     "python.defaultInterpreterPath": "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3",
     "python.pythonPath": "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3",
     "jupyter.interactiveWindow.creationMode": "perFile",
-    "python.dataScience.sendSelectionToInteractiveWindow": false
+    "python.dataScience.sendSelectionToInteractiveWindow": false,
+    "files.enableAtomicSave": false
 }
