@@ -33,20 +33,20 @@
   ],
   "tasks": [
     {
-      "id": "submit_return_request",
+      "id": "submit_return",
       "name": "Submit Return Request",
       "type": "task",
       "lane": "customer"
     },
     {
-      "id": "register_return_request",
+      "id": "register_return",
       "name": "Register Return Request",
       "type": "task",
       "lane": "cs_agent"
     },
     {
-      "id": "check_return_info",
-      "name": "Check Return Information",
+      "id": "check_information",
+      "name": "Check Information Completeness",
       "type": "task",
       "lane": "cs_agent"
     },
@@ -78,122 +78,150 @@
       "eventDefinition": "none"
     },
     {
-      "id": "Event_01jg3jg",
-      "name": "Submit Return Request",
+      "id": "Event_01jgj3g",
+      "name": "Send return request",
       "type": "intermediateThrowEvent",
       "lane": "customer",
       "eventDefinition": "message"
     },
     {
-      "id": "Event_02q3q3q",
-      "name": "Receive Return Request",
+      "id": "Event_02q3q3h",
+      "name": "Receive missing information notice",
       "type": "intermediateCatchEvent",
-      "lane": "cs_agent",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "Event_03k4l4l",
-      "name": "Check Return Information",
-      "type": "intermediateThrowEvent",
-      "lane": "cs_agent",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "Event_04m5n5n",
-      "name": "Receive Missing Information",
-      "type": "intermediateCatchEvent",
-      "lane": "cs_agent",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "end_customer_missing_info",
-      "name": "Process Ends: Missing Information",
-      "type": "endEvent",
       "lane": "customer",
-      "eventDefinition": "none"
-    },
-    {
-      "id": "Event_05p6o6o",
-      "name": "Forward Return Request",
-      "type": "intermediateThrowEvent",
-      "lane": "cs_agent",
       "eventDefinition": "message"
     },
     {
-      "id": "Event_06r7p7p",
-      "name": "Receive Warehouse Verdict",
-      "type": "intermediateCatchEvent",
-      "lane": "cs_agent",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "Event_07s8q8q",
-      "name": "Receive Finance Verdict",
-      "type": "intermediateCatchEvent",
-      "lane": "cs_agent",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "Event_08t9r9r",
-      "name": "Review Verdicts",
-      "type": "intermediateThrowEvent",
-      "lane": "cs_agent",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "Event_09u0s0s",
-      "name": "Return Approved",
-      "type": "intermediateCatchEvent",
-      "lane": "cs_agent",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "Event_10v1t1t",
-      "name": "Process Refund",
-      "type": "intermediateThrowEvent",
-      "lane": "cs_agent",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "Event_11w2u2u",
-      "name": "Send Refund Confirmation",
-      "type": "intermediateThrowEvent",
-      "lane": "cs_agent",
-      "eventDefinition": "message"
-    },
-    {
-      "id": "end_cs_approved",
-      "name": "Process Ends: Approved",
-      "type": "endEvent",
-      "lane": "cs_agent",
-      "eventDefinition": "none"
-    },
-    {
-      "id": "Event_12x3v3v",
+      "id": "end_customer_rejected",
       "name": "Return Rejected",
+      "type": "endEvent",
+      "lane": "customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_03qjg3i",
+      "name": "Receive complete information",
+      "type": "intermediateCatchEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_04q3q3j",
+      "name": "Send return request",
       "type": "intermediateThrowEvent",
       "lane": "cs_agent",
       "eventDefinition": "message"
     },
     {
-      "id": "end_cs_rejected",
-      "name": "Process Ends: Rejected",
+      "id": "Event_05jgj3k",
+      "name": "Receive product inspection verdict",
+      "type": "intermediateCatchEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_06q3q3l",
+      "name": "Receive payment eligibility verdict",
+      "type": "intermediateCatchEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_07q3q3m",
+      "name": "Review verdicts",
+      "type": "intermediateThrowEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_08q3q3n",
+      "name": "Send return rejection notice",
+      "type": "intermediateThrowEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_09q3q3o",
+      "name": "Send approval and process refund",
+      "type": "intermediateThrowEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_cs_agent",
+      "name": "End",
       "type": "endEvent",
       "lane": "cs_agent",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_warehouse",
+      "name": "Return Request Received",
+      "type": "startEvent",
+      "lane": "warehouse_inspector",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_10jgj3p",
+      "name": "Receive return request",
+      "type": "intermediateCatchEvent",
+      "lane": "warehouse_inspector",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_11q3q3q",
+      "name": "Inspect product and record verdict",
+      "type": "intermediateThrowEvent",
+      "lane": "warehouse_inspector",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_warehouse_inspection",
+      "name": "Product Inspection Completed",
+      "type": "endEvent",
+      "lane": "warehouse_inspector",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_finance",
+      "name": "Return Request Received",
+      "type": "startEvent",
+      "lane": "finance_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_12jgj3r",
+      "name": "Receive return request",
+      "type": "intermediateCatchEvent",
+      "lane": "finance_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_13q3q3s",
+      "name": "Check payment eligibility and record verdict",
+      "type": "intermediateThrowEvent",
+      "lane": "finance_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_finance_eligibility",
+      "name": "Payment Eligibility Check Completed",
+      "type": "endEvent",
+      "lane": "finance_officer",
       "eventDefinition": "none"
     }
   ],
   "gateways": [
     {
       "id": "split_verdicts",
-      "name": "Split Verdicts",
-      "type": "parallelGateway",
+      "name": "Review Verdicts?",
+      "type": "exclusiveGateway",
       "lane": "cs_agent",
       "gatewayDirection": "diverging"
     },
     {
       "id": "join_verdicts",
-      "name": "Join Verdicts",
+      "name": "Both Verdicts Received?",
       "type": "parallelGateway",
       "lane": "cs_agent",
       "gatewayDirection": "converging"
@@ -201,74 +229,101 @@
   ],
   "sequence_flows": [
     {
-      "id": "Flow_01m2n2n",
+      "id": "Flow_01kd72rx",
       "from": "start_customer",
-      "to": "submit_return_request"
+      "to": "submit_return"
     },
     {
-      "id": "Flow_02o3p3p",
-      "from": "submit_return_request",
-      "to": "Event_01jg3jg"
+      "id": "Flow_02pjo55",
+      "from": "submit_return",
+      "to": "Event_03qjg3i"
     },
     {
-      "id": "Flow_03q4r4r",
-      "from": "Event_02q3q3q",
-      "to": "check_return_info"
+      "id": "Flow_03kd72rx",
+      "from": "Event_03qjg3i",
+      "to": "Event_04q3q3j"
     },
     {
-      "id": "Flow_04s5t5t",
-      "from": "check_return_info",
+      "id": "Flow_04pjo55",
+      "from": "Event_04q3q3j",
+      "to": "register_return"
+    },
+    {
+      "id": "Flow_05kd72rx",
+      "from": "register_return",
       "to": "split_verdicts"
     },
     {
-      "id": "Flow_05u6v6v",
+      "id": "Flow_06pjo55",
       "from": "split_verdicts",
-      "to": "inspect_product"
+      "to": "Event_08q3q3n",
+      "condition": "Negative verdict"
     },
     {
-      "id": "Flow_06w7x7x",
-      "from": "inspect_product",
-      "to": "check_payment_eligibility"
-    },
-    {
-      "id": "Flow_07y8z8z",
-      "from": "check_payment_eligibility",
+      "id": "Flow_07kd72rx",
+      "from": "split_verdicts",
       "to": "join_verdicts"
     },
     {
-      "id": "Flow_08abacbc",
+      "id": "Flow_08pjo55",
       "from": "join_verdicts",
-      "to": "Event_08t9r9r"
+      "to": "review_verdicts"
     },
     {
-      "id": "Flow_09cdeded",
-      "from": "Event_09u0s0s",
-      "to": "Event_11w2u2u"
+      "id": "Flow_09pjo55",
+      "from": "review_verdicts",
+      "to": "Event_09q3q3o",
+      "condition": "Positive verdicts"
     },
     {
-      "id": "Flow_10efegfg",
-      "from": "Event_12x3v3v",
-      "to": "end_cs_rejected"
+      "id": "Flow_10kd72rx",
+      "from": "Event_09q3q3o",
+      "to": "end_cs_agent"
+    },
+    {
+      "id": "Flow_11kd72rx",
+      "from": "start_warehouse",
+      "to": "inspect_product"
+    },
+    {
+      "id": "Flow_12pjo55",
+      "from": "inspect_product",
+      "to": "Event_11q3q3q"
+    },
+    {
+      "id": "Flow_13kd72rx",
+      "from": "start_finance",
+      "to": "check_payment_eligibility"
+    },
+    {
+      "id": "Flow_14pjo55",
+      "from": "check_payment_eligibility",
+      "to": "Event_13q3q3s"
+    },
+    {
+      "id": "Flow_15kd72rx",
+      "from": "Event_13q3q3s",
+      "to": "join_verdicts"
     }
   ],
   "message_flows": [
     {
       "id": "mf1",
-      "from": "Event_01jg3jg",
-      "to": "Event_02q3q3q",
-      "name": "Send Return Request"
+      "from": "Event_03qjg3i",
+      "to": "Event_04q3q3j",
+      "name": "Send return request"
     },
     {
-      "id": "Flow_02hikjkl",
-      "from": "Event_08t9r9r",
-      "to": "Event_09u0s0s",
-      "name": "Approve Return"
+      "id": "Flow_02tqif3",
+      "from": "Event_08q3q3n",
+      "to": "Event_01jgj3g",
+      "name": "Return Rejected"
     },
     {
-      "id": "Flow_03mnopqr",
-      "from": "Event_08t9r9r",
-      "to": "Event_12x3v3v",
-      "name": "Reject Return"
+      "id": "Flow_03nrpm8z",
+      "from": "Event_09q3q3o",
+      "to": "Event_03qjg3i",
+      "name": "Approval and Refund Confirmation"
     }
   ]
 }

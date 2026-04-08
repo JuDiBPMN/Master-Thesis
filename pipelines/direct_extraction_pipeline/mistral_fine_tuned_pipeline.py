@@ -39,162 +39,112 @@ def load_model():
 
 
 BPMN_SCHEMA = {
-  "type": "object",
-  "properties": {
-    "participants": {
-      "description": "Pools and optional lanes (swimlanes) that execute nodes.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "type": {"type": "string", "enum": ["pool"]},
-          "lanes": {
+    "type": "object",
+    "properties": {
+        "pools": {
+            "type": "array",
+            "description": "Top-level containers representing an organisation or external entity (e.g. 'Rotterdam Sweater Shop', 'Customer'). A pool groups lanes together. If only one lane exists with no subdivision, still create a pool with one lane.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":   {"type": "string"},
+                    "name": {"type": "string"}
+                },
+                "required": ["id", "name"],
+                "additionalProperties": False
+            }
+        },
+        "lanes": {
+            "type": "array",
+            "description": "The actors within a pool: people, roles, or departments (e.g. 'Anouk', 'Jan', 'Accountancy'). Every task/event/gateway is performed by a lane. Each lane belongs to exactly one pool.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":   {"type": "string"},
+                    "name": {"type": "string"},
+                    "pool": {"type": "string", "description": "The id of the parent pool this lane belongs to."}
+                },
+                "required": ["id", "name", "pool"],
+                "additionalProperties": False
+            }
+        },
+        "tasks": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {"type": "string"},
-                "name": {"type": "string"}
-              },
-              "required": ["id", "name"]
+                "type": "object",
+                "properties": {
+                    "id":   {"type": "string"},
+                    "name": {"type": "string"},
+                    "type": {"type": "string", "enum": ["task", "userTask", "serviceTask", "scriptTask", "manualTask", "subProcess", "callActivity"]},
+                    "lane": {"type": "string", "description": "The id of the lane responsible for this task."}
+                },
+                "required": ["id", "name", "type", "lane"],
+                "additionalProperties": False
             }
-          }
         },
-        "required": ["id", "name", "type"]
-      }
-    },
-    "tasks": {
-      "description": "BPMN task/activity nodes. Do NOT put events or gateways here.",
-      "type": "array",
-      "items": {
+        "events": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":              {"type": "string"},
+                    "name":            {"type": "string"},
+                    "type":            {"type": "string", "enum": ["startEvent", "endEvent", "intermediateCatchEvent", "intermediateThrowEvent"]},
+                    "lane":            {"type": "string", "description": "The id of the lane this event belongs to."},
+                    "eventDefinition": {"type": "string", "enum": ["none", "message", "timer", "signal", "error", "escalation", "conditional", "link"]}
+                },
+                "required": ["id", "name", "type", "lane", "eventDefinition"],
+                "additionalProperties": False
+            }
+        },
+        "gateways": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":               {"type": "string"},
+                    "name":             {"type": "string"},
+                    "type":             {"type": "string", "enum": ["exclusiveGateway", "parallelGateway", "inclusiveGateway", "eventBasedGateway"]},
+                    "lane":             {"type": "string", "description": "The id of the lane this gateway belongs to."},
+                    "gatewayDirection": {"type": "string", "enum": ["diverging", "converging"]}
+                },
+                "required": ["id", "name", "type", "lane", "gatewayDirection"],
+                "additionalProperties": False
+            }
+        },
+      "sequence_flows": {
+    "type": "array",
+    "items": {
         "type": "object",
         "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "type": {
-            "type": "string",
-            "enum": ["task", "userTask", "serviceTask", "scriptTask", "manualTask", "subProcess", "callActivity"]
-          },
-          "participant": {
-            "description": "Must exactly match an id declared in the participants array.",
-            "type": "string"
-          },
-          "lane": {
-            "description": "Must exactly match a lane id within the declared participant, if lanes are defined.",
-            "type": "string"
-          }
+            "id":        {"type": "string"},
+            "from":      {"type": "string"},
+            "to":        {"type": "string"},
+            "condition": {
+                "type": "string",
+                "description": "Only on flows leaving an exclusiveGateway or inclusiveGateway. Describes the condition under which this path is taken (e.g. 'order below 25.000 EUR' or 'approved')."
+            }
         },
-        "required": ["id", "name", "type", "participant"]
-      }
-    },
-    "events": {
-      "description": "BPMN event nodes only (start, end, intermediate). Do NOT put tasks or gateways here.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "type": {
-            "type": "string",
-            "enum": ["startEvent", "endEvent", "intermediateCatchEvent", "intermediateThrowEvent"]
-          },
-          "participant": {
-            "description": "Must exactly match an id declared in the participants array.",
-            "type": "string"
-          },
-          "lane": {
-            "description": "Must exactly match a lane id within the declared participant, if lanes are defined.",
-            "type": "string"
-          },
-          "eventDefinition": {
-            "description": "The trigger type of this event. Use 'none' for plain start/end events with no special trigger.",
-            "type": "string",
-            "enum": ["none", "message", "timer", "signal", "conditional", "error", "escalation", "link"]
-          }
-        },
-        "required": ["id", "name", "type", "participant", "eventDefinition"]
-      }
-    },
-    "gateways": {
-      "description": "BPMN gateway nodes only (splits and joins). Do NOT put tasks or events here.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "type": {
-            "type": "string",
-            "enum": ["exclusiveGateway", "parallelGateway", "inclusiveGateway", "eventBasedGateway"]
-          },
-          "participant": {
-            "description": "Must exactly match an id declared in the participants array.",
-            "type": "string"
-          },
-          "lane": {
-            "description": "Must exactly match a lane id within the declared participant, if lanes are defined.",
-            "type": "string"
-          },
-          "gatewayDirection": {
-            "description": "diverging = split (one incoming, multiple outgoing). converging = join (multiple incoming, one outgoing).",
-            "type": "string",
-            "enum": ["diverging", "converging"]
-          }
-        },
-        "required": ["id", "name", "type", "participant", "gatewayDirection"]
-      }
-    },
-    "sequence_flows": {
-      "description": "Control-flow edges. Both 'from' and 'to' must be node ids within the same pool.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "from": {"type": "string"},
-          "to": {"type": "string"},
-          "condition": {"type": "string"},
-          "isDefault": {"type": "boolean"},
-          "participant": {"type": "string"}
-        },
-        "required": ["from", "to"]
-      }
-    },
-    "message_flows": {
-      "description": "Communication edges between different pools.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "from": {"type": "string"},
-          "to": {"type": "string"},
-          "name": {"type": "string"}
-        },
-        "required": ["from", "to", "name"]
-      }
-    },
-    "data": {
-      "description": "Optional data objects referenced in conditions.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "dataType": {"type": "string", "enum": ["string", "number", "boolean", "object"]},
-          "description": {"type": "string"}
-        },
-        "required": ["id", "name", "dataType"]
-      }
+        "required": ["id", "from", "to"]
     }
-  },
-  "required": ["participants", "tasks", "events", "gateways", "sequence_flows"]
+},
+        "message_flows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id":   {"type": "string"},
+                    "from": {"type": "string"},
+                    "to":   {"type": "string"},
+                    "name": {"type": "string"}
+                },
+                "required": ["id", "from", "to", "name"],
+                "additionalProperties": False
+            }
+        },
+    },
+    "required": ["pools", "lanes", "tasks", "events", "gateways", "sequence_flows", "message_flows"]
 }
-
 
 # ── Validation ────────────────────────────────────────────────────────────────
 
@@ -452,11 +402,129 @@ def _call_model(model, prompt):
 # ── Main extraction function ───────────────────────────────────────────────────
 
 def extract_bpmn_fine_tuned(process_description, case_name, output_file=None):
-    """
-    Extract a BPMN JSON from process_description using the fine-tuned model.
-    No few-shot examples needed — the schema is baked into the model weights.
-    No retry logic — single-pass extraction only.
-    """
+    """ You are a BPMN 2.0 expert. Extract a structured BPMN model from the process description below.
+
+## STEP 1 — IDENTIFY POOLS (DO THIS FIRST)
+
+A pool = one organisation or external entity.
+Ask yourself: how many distinct organisations or external parties are involved?
+
+RULES:
+- External parties (customers, suppliers, government bodies) = their own pool
+- Internal departments or roles within the SAME organisation = lanes inside ONE pool
+- NEVER split one organisation into multiple pools just because it has multiple departments
+
+EXAMPLE (CORRECT):
+  Pools represent distinct organizations or external participants.
+  Each pool contains lanes that represent departments or roles within that organization.
+
+  Pool: "Company" → lanes: Customer Service, Operations, Finance
+  Pool: "Customer" → lanes: Customer
+
+EXAMPLE (WRONG):
+  Pool: "Customer Service"
+  Pool: "Operations"
+  Pool: "Finance"   ← these are departments/roles, not separate organizations (pools)
+
+
+## STEP 2 — ASSIGN LANES
+
+Each role, department, or actor within a pool = one lane.
+Every task, event, and gateway must belong to exactly one lane.
+
+
+## STEP 3 — MODEL EACH POOL'S FLOW INDEPENDENTLY
+
+Each pool has its own internal sequence flow.
+Pools NEVER share gateways or sequence flows.
+A parallel gateway that splits work inside one pool CANNOT join work from another pool.
+
+If two departments in different pools both do work, and then results are combined:
+- Each pool finishes its own branch with a message throw event
+- The receiving pool uses a parallel SPLIT + parallel JOIN to wait for all messages
+
+
+## STEP 4 — CROSS-POOL COMMUNICATION
+
+ONLY message_flows may cross pool boundaries.
+- Sending node: intermediateThrowEvent (message)
+- Receiving node: intermediateCatchEvent (message) or message startEvent
+- message_flow targets must be intermediateCatch EVENTS — NEVER tasks
+
+FORBIDDEN:
+  sequence_flow from pool A → pool B
+  message_flow "to": "some_task_id"
+
+
+## STEP 5 — GATEWAYS
+
+Decisions (if/else) → exclusiveGateway
+Parallel work (do both simultaneously) → parallelGateway
+
+PARALLEL GATEWAY RULES (STRICT):
+- A parallel split (diverging) fans out to 2+ branches
+- A parallel join (converging) waits for ALL branches to finish
+- You MUST always have BOTH a split AND a join, 
+- The split AND join must be in the SAME pool
+- You cannot join work that happens in different pools using a gateway
+
+XOR GATEWAY RULES:
+- An exclusive split (diverging) fans out to 2+ branches
+- An exclusive join (converging) waits for ONE branch to finish or has a clear end event for each branch 
+- The split AND join must be in the SAME pool or if branches end in separate endEvents, they must be in the same pool
+- You cannot join work that happens in different pools using a gateway
+
+## STEP 6 — COMPLETE FLOWS
+
+Every task must have (STRICT: CHECK THIS MUTLIPLE TIMES):
+- exactly 1 incoming sequence flow
+- exactly 1 outgoing sequence flow
+- NO MESSAGE FLOWS directly to or from tasks — use intermediate events aftet the task for messaging
+
+Every pool must have:
+- exactly 1 startEvent
+- at least 1 endEvent
+
+Every decision (exclusiveGateway diverging) must eventually be merged by a corresponding exclusiveGateway (converging), unless branches end in separate endEvents.
+
+## STEP 7 — HOW TO CORRECTLY USE INTERMEDIATE MESSAGE EVENTS IN A FLOW
+
+INTERMEDIATE Message events are NOT floating annotations. They MUST be connected into the flow with the correct connection types.
+
+CORRECT SEQUENCE OR MESSAGE FLOW PATTERNS FOR INTERMEDIATE EVENTS:
+
+  intermediateThrowEvent (send):
+    incoming: 1 sequence flow  (from previous TASK OR ExclusiveGateway in same lane)
+    outgoing: 1 message flow   (to a intermediateCatchEvent in a DIFFERENT pool)
+    NO outgoing sequence flow
+
+  intermediateCatchEvent (receive):
+    incoming: 1 message flow   (from a intermediateThrowEvent in a DIFFERENT pool)
+    outgoing: 1 sequence flow  (to next node in same lane)
+    NO incoming sequence flow
+
+CORRECT pattern for cross-pool communication:
+
+  Pool A (sender lane):
+    ... → task_A → intermediateThrowEvent ──(message flow)──→ intermediateCatchEvent → endEvent → (Pool B, receiver lane)
+
+
+## FINAL SELF-CHECK (MANDATORY — fix violations before output)
+
+[ ] How many organisations/external parties are there? Does each have its own pool?
+[ ] Are departments/roles within the same organisation modeled as lanes (not pools)?
+[ ] Do message flows point to events only? (Never to tasks)
+[ ] Does every parallel split have a corresponding parallel join IN THE SAME pool?
+[ ] Does every diverging exclusiveGateway have a converging counterpart or endEvents for each branch?
+[ ] Does every task have both an incoming and outgoing sequence flow (MOST IMPORTANT TO CHECK)?
+[ ] Does every pool have exactly one startEvent and at least one endEvent?
+
+---
+
+Return ONLY valid JSON matching the schema. Do not explain anything.
+
+## Process description
+{process_description}"""
     prompt = _build_prompt(process_description)
 
     try:

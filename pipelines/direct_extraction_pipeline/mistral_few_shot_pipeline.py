@@ -407,13 +407,12 @@ def _format_issues(errors, warnings):
 
 SYSTEM_MSG = (
     "You are a business process modeling expert. "
-    "Extract structured BPMN models from process descriptions. "
+    "Extract structured BPMN elements from process descriptions. "
     "Always output valid JSON matching the provided schema. "
     "Never use a 'nodes' array — always use separate 'tasks', 'events', and 'gateways' arrays. "
-    "Every node must belong to a declared lane, and every lane must belong to a declared pool. "
-    "Every pool must have a startEvent and an endEvent. "
-    "Sequence flows stay within pools; cross-pool communication uses message_flows only. "
-    "A pool represents one organisation or external entity. "
+    "Every task, event, and gateway must belong to a declared lane, and every lane must belong to a declared pool. "
+    "Every pool must have at most one startEvent and at least one endEvent. "
+    "A pool represents one organisation or external entity like a company with multiple departments or a customer as an external entity. "
     "Roles and departments within the same organisation are LANES inside ONE pool, not separate pools. "
     "External parties (customers, suppliers, third parties) are ALWAYS modeled as their own pool."
 )
@@ -461,13 +460,16 @@ RULES:
 - NEVER split one organisation into multiple pools just because it has multiple departments
 
 EXAMPLE (CORRECT):
-  Pool: "Retailer" → lanes: Customer Service, Warehouse, Finance
+  Pools represent distinct organizations or external participants.
+  Each pool contains lanes that represent departments or roles within that organization.
+
+  Pool: "Company" → lanes: Customer Service, Operations, Finance
   Pool: "Customer" → lanes: Customer
 
 EXAMPLE (WRONG):
   Pool: "Customer Service"
-  Pool: "Warehouse"        ← these are lanes, not pools
-  Pool: "Finance"
+  Pool: "Operations"
+  Pool: "Finance"   ← these are departments/roles, not separate organizations (pools)
 
 
 ## STEP 2 — ASSIGN LANES
@@ -492,11 +494,10 @@ If two departments in different pools both do work, and then results are combine
 ONLY message_flows may cross pool boundaries.
 - Sending node: intermediateThrowEvent (message)
 - Receiving node: intermediateCatchEvent (message) or message startEvent
-- message_flow targets must be EVENTS or POOLS — NEVER lanes or tasks
+- message_flow targets must be intermediateCatch EVENTS — NEVER tasks
 
 FORBIDDEN:
   sequence_flow from pool A → pool B
-  message_flow "to": "some_lane_id"
   message_flow "to": "some_task_id"
 
 
@@ -508,16 +509,22 @@ Parallel work (do both simultaneously) → parallelGateway
 PARALLEL GATEWAY RULES (STRICT):
 - A parallel split (diverging) fans out to 2+ branches
 - A parallel join (converging) waits for ALL branches to finish
-- You MUST always have BOTH a split AND a join
+- You MUST always have BOTH a split AND a join, 
 - The split AND join must be in the SAME pool
 - You cannot join work that happens in different pools using a gateway
 
+XOR GATEWAY RULES:
+- An exclusive split (diverging) fans out to 2+ branches
+- An exclusive join (converging) waits for ONE branch to finish or has a clear end event for each branch 
+- The split AND join must be in the SAME pool or if branches end in separate endEvents, they must be in the same pool
+- You cannot join work that happens in different pools using a gateway
 
 ## STEP 6 — COMPLETE FLOWS
 
-Every task must have:
+Every task must have (STRICT: CHECK THIS MUTLIPLE TIMES):
 - exactly 1 incoming sequence flow
 - exactly 1 outgoing sequence flow
+- NO MESSAGE FLOWS directly to or from tasks — use intermediate events aftet the task for messaging
 
 Every pool must have:
 - exactly 1 startEvent
@@ -525,49 +532,37 @@ Every pool must have:
 
 Every decision (exclusiveGateway diverging) must eventually be merged by a corresponding exclusiveGateway (converging), unless branches end in separate endEvents.
 
-## STEP 7 — HOW TO CORRECTLY USE MESSAGE EVENTS IN A FLOW
+## STEP 7 — HOW TO CORRECTLY USE INTERMEDIATE MESSAGE EVENTS IN A FLOW
 
-Message events are NOT floating annotations. They MUST be wired into the flow with the correct connection types.
+INTERMEDIATE Message events are NOT floating annotations. They MUST be connected into the flow with the correct connection types.
 
-CORRECT wiring:
+CORRECT SEQUENCE OR MESSAGE FLOW PATTERNS FOR INTERMEDIATE EVENTS:
 
   intermediateThrowEvent (send):
-    incoming: 1 sequence flow  (from previous node in same lane)
-    outgoing: 1 message flow   (to a catch event in a DIFFERENT pool)
+    incoming: 1 sequence flow  (from previous TASK OR ExclusiveGateway in same lane)
+    outgoing: 1 message flow   (to a intermediateCatchEvent in a DIFFERENT pool)
     NO outgoing sequence flow
 
   intermediateCatchEvent (receive):
-    incoming: 1 message flow   (from a throw event in a DIFFERENT pool)
+    incoming: 1 message flow   (from a intermediateThrowEvent in a DIFFERENT pool)
     outgoing: 1 sequence flow  (to next node in same lane)
     NO incoming sequence flow
 
 CORRECT pattern for cross-pool communication:
 
   Pool A (sender lane):
-    ... → task_A → throw_event ──(message flow)──→ catch_event → task_B → ...
-                                                   (Pool B, receiver lane)
-
-FORBIDDEN:
-- A throw event with an outgoing sequence flow
-- A catch event with an incoming sequence flow
-- A message flow between two nodes in the SAME pool
-- One throw event sending to multiple targets — use separate throw events, one per message
-- Using a lane id or pool id as the source or target of a sequence flow
-
-Each lane's internal flow uses only sequence flows.
-Cross-pool communication uses only message flows, always from a throw event to a catch event.
+    ... → task_A → intermediateThrowEvent ──(message flow)──→ intermediateCatchEvent → endEvent → (Pool B, receiver lane)
 
 
 ## FINAL SELF-CHECK (MANDATORY — fix violations before output)
 
 [ ] How many organisations/external parties are there? Does each have its own pool?
 [ ] Are departments/roles within the same organisation modeled as lanes (not pools)?
-[ ] Do any sequence flows cross pool boundaries? (If yes → convert to message flows)
-[ ] Do message flows point to events or pools only? (Never to lanes or tasks)
+[ ] Do message flows point to events only? (Never to tasks)
 [ ] Does every parallel split have a corresponding parallel join IN THE SAME pool?
-[ ] Does every diverging exclusiveGateway have a converging counterpart?
-[ ] Does every task have both an incoming and outgoing sequence flow?
-[ ] Does every pool have a startEvent and at least one endEvent?
+[ ] Does every diverging exclusiveGateway have a converging counterpart or endEvents for each branch?
+[ ] Does every task have both an incoming and outgoing sequence flow (MOST IMPORTANT TO CHECK)?
+[ ] Does every pool have exactly one startEvent and at least one endEvent?
 
 ---
 

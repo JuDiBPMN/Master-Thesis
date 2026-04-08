@@ -1,134 +1,120 @@
 {
   "pools": [
     {
-      "id": "AdmissionsOffice",
-      "name": "Admissions Office"
+      "id": "Retailer",
+      "name": "Retailer Company Pool"
     },
     {
-      "id": "SpecialistDepartment",
-      "name": "Specialist Department"
-    },
-    {
-      "id": "InsuranceOffice",
-      "name": "Insurance Office"
-    },
-    {
-      "id": "GeneralPractitioner",
-      "name": "General Practitioner"
+      "id": "Customer",
+      "name": "Customer Pool"
     }
   ],
   "lanes": [
     {
-      "id": "AdmissionsClerk",
-      "name": "Admissions Clerk",
-      "pool": "AdmissionsOffice"
+      "id": "CustomerService",
+      "name": "Customer Service",
+      "pool": "Retailer"
     },
     {
-      "id": "Specialist",
-      "name": "Specialist",
-      "pool": "SpecialistDepartment"
+      "id": "Warehouse",
+      "name": "Warehouse",
+      "pool": "Retailer"
     },
     {
-      "id": "InsuranceOfficer",
-      "name": "Insurance Officer",
-      "pool": "InsuranceOffice"
+      "id": "Finance",
+      "name": "Finance",
+      "pool": "Retailer"
     },
     {
-      "id": "GP",
-      "name": "General Practitioner",
-      "pool": "GeneralPractitioner"
+      "id": "Customer",
+      "name": "Customer",
+      "pool": "Customer"
     }
   ],
   "tasks": [
     {
-      "id": "SubmitReferral",
-      "name": "Submit Referral",
-      "type": "manualTask",
-      "lane": "GP"
+      "id": "RegisterReturnRequest",
+      "name": "Register Return Request",
+      "type": "userTask",
+      "lane": "CustomerService"
     },
     {
-      "id": "RegisterReferral",
-      "name": "Register Referral",
-      "type": "manualTask",
-      "lane": "AdmissionsClerk"
+      "id": "CheckInformation",
+      "name": "Check Information Completeness",
+      "type": "userTask",
+      "lane": "CustomerService"
     },
     {
-      "id": "CheckDocumentation",
-      "name": "Check Documentation",
-      "type": "manualTask",
-      "lane": "AdmissionsClerk"
+      "id": "NotifyCustomerMissingInfo",
+      "name": "Notify Customer of Missing Information",
+      "type": "userTask",
+      "lane": "CustomerService"
     },
     {
-      "id": "NotifyGP",
-      "name": "Notify GP of Missing Documents",
-      "type": "manualTask",
-      "lane": "AdmissionsClerk"
+      "id": "ForwardToWarehouse",
+      "name": "Forward to Warehouse",
+      "type": "userTask",
+      "lane": "CustomerService"
     },
     {
-      "id": "ForwardToSpecialist",
-      "name": "Forward to Specialist",
-      "type": "manualTask",
-      "lane": "AdmissionsClerk"
+      "id": "ForwardToFinance",
+      "name": "Forward to Finance",
+      "type": "userTask",
+      "lane": "CustomerService"
     },
     {
-      "id": "ForwardToInsurance",
-      "name": "Forward to Insurance",
-      "type": "manualTask",
-      "lane": "AdmissionsClerk"
+      "id": "InspectProduct",
+      "name": "Inspect Product",
+      "type": "userTask",
+      "lane": "Warehouse"
     },
     {
-      "id": "ConductAssessment",
-      "name": "Conduct Medical Assessment",
-      "type": "manualTask",
-      "lane": "Specialist"
+      "id": "RecordWarehouseVerdict",
+      "name": "Record Warehouse Verdict",
+      "type": "userTask",
+      "lane": "Warehouse"
     },
     {
-      "id": "RecordSpecialistVerdict",
-      "name": "Record Specialist Verdict",
-      "type": "manualTask",
-      "lane": "Specialist"
+      "id": "CheckPaymentEligibility",
+      "name": "Check Payment Eligibility",
+      "type": "userTask",
+      "lane": "Finance"
     },
     {
-      "id": "VerifyCoverage",
-      "name": "Verify Coverage",
-      "type": "manualTask",
-      "lane": "InsuranceOfficer"
-    },
-    {
-      "id": "RecordInsuranceVerdict",
-      "name": "Record Insurance Verdict",
-      "type": "manualTask",
-      "lane": "InsuranceOfficer"
-    },
-    {
-      "id": "SendVerdictsToClerk",
-      "name": "Send Verdicts to Clerk",
-      "type": "manualTask",
-      "lane": "Specialist"
-    },
-    {
-      "id": "SendVerdictsToClerkInsurance",
-      "name": "Send Verdicts to Clerk",
-      "type": "manualTask",
-      "lane": "InsuranceOfficer"
+      "id": "RecordFinanceVerdict",
+      "name": "Record Finance Verdict",
+      "type": "userTask",
+      "lane": "Finance"
     },
     {
       "id": "ReviewOutcomes",
-      "name": "Review Combined Outcomes",
-      "type": "manualTask",
-      "lane": "AdmissionsClerk"
+      "name": "Review Outcomes",
+      "type": "userTask",
+      "lane": "CustomerService"
     },
     {
       "id": "SendRejectionNotice",
-      "name": "Send Rejection Notice",
-      "type": "manualTask",
-      "lane": "AdmissionsClerk"
+      "name": "Send Return Rejection Notice",
+      "type": "userTask",
+      "lane": "CustomerService"
     },
     {
-      "id": "SendApproval",
-      "name": "Send Treatment Approval",
-      "type": "manualTask",
-      "lane": "AdmissionsClerk"
+      "id": "ApproveReturn",
+      "name": "Approve Return",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "ProcessRefund",
+      "name": "Process Refund",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "SendRefundConfirmation",
+      "name": "Send Refund Confirmation",
+      "type": "userTask",
+      "lane": "CustomerService"
     }
   ],
   "events": [
@@ -136,151 +122,265 @@
       "id": "StartEvent",
       "name": "Start",
       "type": "startEvent",
-      "lane": "GP",
+      "lane": "CustomerService",
       "eventDefinition": "none"
     },
     {
       "id": "EndEvent",
       "name": "End",
       "type": "endEvent",
-      "lane": "AdmissionsClerk",
+      "lane": "CustomerService",
       "eventDefinition": "none"
     },
     {
-      "id": "EndEventRejection",
-      "name": "End Rejection",
+      "id": "EndEvent_Warehouse",
+      "name": "End",
       "type": "endEvent",
-      "lane": "AdmissionsClerk",
+      "lane": "Warehouse",
       "eventDefinition": "none"
     },
     {
-      "id": "EndEventApproval",
-      "name": "End Approval",
+      "id": "EndEvent_Finance",
+      "name": "End",
       "type": "endEvent",
-      "lane": "AdmissionsClerk",
+      "lane": "Finance",
       "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent_Customer",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ThrowEvent_MissingInfo",
+      "name": "Notify Customer of Missing Information",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchEvent_MissingInfo",
+      "name": "Catch Missing Info Notification",
+      "type": "intermediateCatchEvent",
+      "lane": "Customer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ThrowEvent_Warehouse",
+      "name": "Forward to Warehouse",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchEvent_Warehouse",
+      "name": "Catch Warehouse Request",
+      "type": "intermediateCatchEvent",
+      "lane": "Warehouse",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ThrowEvent_Finance",
+      "name": "Forward to Finance",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchEvent_Finance",
+      "name": "Catch Finance Request",
+      "type": "intermediateCatchEvent",
+      "lane": "Finance",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ThrowEvent_RejectionNotice",
+      "name": "Send Return Rejection Notice",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchEvent_RejectionNotice",
+      "name": "Catch Rejection Notice",
+      "type": "intermediateCatchEvent",
+      "lane": "Customer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ThrowEvent_RefundConfirmation",
+      "name": "Send Refund Confirmation",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchEvent_RefundConfirmation",
+      "name": "Catch Refund Confirmation",
+      "type": "intermediateCatchEvent",
+      "lane": "Customer",
+      "eventDefinition": "message"
     }
   ],
   "gateways": [
     {
-      "id": "CheckDocumentationGateway",
-      "name": "Check Documentation",
+      "id": "ExclusiveGateway_CheckInfo",
+      "name": "Check Information Completeness",
       "type": "exclusiveGateway",
-      "lane": "AdmissionsClerk",
+      "lane": "CustomerService",
       "gatewayDirection": "diverging"
     },
     {
-      "id": "ReviewOutcomesGateway",
+      "id": "ParallelGateway_Forward",
+      "name": "Forward to Departments",
+      "type": "parallelGateway",
+      "lane": "CustomerService",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "ParallelGateway_WaitForVerdicts",
+      "name": "Wait for Verdicts",
+      "type": "parallelGateway",
+      "lane": "CustomerService",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "ExclusiveGateway_ReviewOutcomes",
       "name": "Review Outcomes",
       "type": "exclusiveGateway",
-      "lane": "AdmissionsClerk",
+      "lane": "CustomerService",
       "gatewayDirection": "diverging"
     }
   ],
   "sequence_flows": [
     {
-      "id": "SubmitToRegister",
+      "id": "StartToRegister",
       "from": "StartEvent",
-      "to": "RegisterReferral"
+      "to": "RegisterReturnRequest"
     },
     {
-      "id": "RegisterToCheck",
-      "from": "RegisterReferral",
-      "to": "CheckDocumentation"
+      "id": "RegisterToCheckInfo",
+      "from": "RegisterReturnRequest",
+      "to": "CheckInformation"
     },
     {
-      "id": "CheckToNotify",
-      "from": "CheckDocumentation",
-      "to": "NotifyGP",
-      "condition": "documentationIncomplete"
+      "id": "CheckInfoToNotify",
+      "from": "CheckInformation",
+      "to": "ExclusiveGateway_CheckInfo"
     },
     {
-      "id": "CheckToForward",
-      "from": "CheckDocumentation",
-      "to": "ForwardToSpecialist",
-      "condition": "documentationComplete"
+      "id": "CheckInfoToForward",
+      "from": "CheckInformation",
+      "to": "ParallelGateway_Forward"
     },
     {
-      "id": "ForwardToSpecialistToConductAssessment",
-      "from": "ForwardToSpecialist",
-      "to": "ConductAssessment"
+      "id": "NotifyToEnd",
+      "from": "NotifyCustomerMissingInfo",
+      "to": "EndEvent"
     },
     {
-      "id": "ForwardToInsuranceToVerifyCoverage",
-      "from": "ForwardToInsurance",
-      "to": "VerifyCoverage"
+      "id": "ForwardToWarehouse",
+      "from": "ParallelGateway_Forward",
+      "to": "ForwardToWarehouse"
     },
     {
-      "id": "ConductAssessmentToRecordSpecialistVerdict",
-      "from": "ConductAssessment",
-      "to": "RecordSpecialistVerdict"
+      "id": "ForwardToFinance",
+      "from": "ParallelGateway_Forward",
+      "to": "ForwardToFinance"
     },
     {
-      "id": "VerifyCoverageToRecordInsuranceVerdict",
-      "from": "VerifyCoverage",
-      "to": "RecordInsuranceVerdict"
+      "id": "WarehouseToRecord",
+      "from": "InspectProduct",
+      "to": "RecordWarehouseVerdict"
     },
     {
-      "id": "RecordSpecialistVerdictToSendVerdictsToClerk",
-      "from": "RecordSpecialistVerdict",
-      "to": "SendVerdictsToClerk"
+      "id": "FinanceToRecord",
+      "from": "CheckPaymentEligibility",
+      "to": "RecordFinanceVerdict"
     },
     {
-      "id": "RecordInsuranceVerdictToSendVerdictsToClerkInsurance",
-      "from": "RecordInsuranceVerdict",
-      "to": "SendVerdictsToClerkInsurance"
+      "id": "RecordToWait",
+      "from": "RecordWarehouseVerdict",
+      "to": "ParallelGateway_WaitForVerdicts"
     },
     {
-      "id": "SendVerdictsToClerkToReviewOutcomes",
-      "from": "SendVerdictsToClerk",
+      "id": "RecordToWait_Finance",
+      "from": "RecordFinanceVerdict",
+      "to": "ParallelGateway_WaitForVerdicts"
+    },
+    {
+      "id": "WaitToReview",
+      "from": "ParallelGateway_WaitForVerdicts",
       "to": "ReviewOutcomes"
     },
     {
-      "id": "SendVerdictsToClerkInsuranceToReviewOutcomes",
-      "from": "SendVerdictsToClerkInsurance",
-      "to": "ReviewOutcomes"
-    },
-    {
-      "id": "ReviewOutcomesToRejection",
+      "id": "ReviewToReject",
       "from": "ReviewOutcomes",
-      "to": "SendRejectionNotice",
-      "condition": "eitherVerdictNegative"
+      "to": "ExclusiveGateway_ReviewOutcomes"
     },
     {
-      "id": "ReviewOutcomesToApproval",
+      "id": "ReviewToApprove",
       "from": "ReviewOutcomes",
-      "to": "SendApproval",
-      "condition": "bothVerdictsPositive"
+      "to": "ExclusiveGateway_ReviewOutcomes"
     },
     {
-      "id": "SendRejectionNoticeToEndEventRejection",
+      "id": "RejectToRejectionNotice",
+      "from": "ExclusiveGateway_ReviewOutcomes",
+      "to": "SendRejectionNotice"
+    },
+    {
+      "id": "RejectToEnd",
       "from": "SendRejectionNotice",
-      "to": "EndEventRejection"
+      "to": "EndEvent"
     },
     {
-      "id": "SendApprovalToEndEventApproval",
-      "from": "SendApproval",
-      "to": "EndEventApproval"
+      "id": "ApproveToRefund",
+      "from": "ExclusiveGateway_ReviewOutcomes",
+      "to": "ApproveReturn"
+    },
+    {
+      "id": "RefundToEnd",
+      "from": "ProcessRefund",
+      "to": "SendRefundConfirmation"
+    },
+    {
+      "id": "RefundToEnd_Confirm",
+      "from": "SendRefundConfirmation",
+      "to": "EndEvent"
     }
   ],
   "message_flows": [
     {
-      "id": "NotifyGPMessageFlow",
-      "from": "AdmissionsClerk",
-      "to": "GP",
-      "name": "Notify GP of Missing Documents"
+      "id": "MissingInfoToCustomer",
+      "from": "ThrowEvent_MissingInfo",
+      "to": "CatchEvent_MissingInfo",
+      "name": "Notify Missing Info"
     },
     {
-      "id": "SendRejectionNoticeMessageFlow",
-      "from": "AdmissionsClerk",
-      "to": "GP",
-      "name": "Send Rejection Notice"
+      "id": "WarehouseRequest",
+      "from": "ThrowEvent_Warehouse",
+      "to": "CatchEvent_Warehouse",
+      "name": "Warehouse Request"
     },
     {
-      "id": "SendApprovalMessageFlow",
-      "from": "AdmissionsClerk",
-      "to": "GP",
-      "name": "Send Treatment Approval"
+      "id": "FinanceRequest",
+      "from": "ThrowEvent_Finance",
+      "to": "CatchEvent_Finance",
+      "name": "Finance Request"
+    },
+    {
+      "id": "RejectionNoticeToCustomer",
+      "from": "ThrowEvent_RejectionNotice",
+      "to": "CatchEvent_RejectionNotice",
+      "name": "Rejection Notice"
+    },
+    {
+      "id": "RefundConfirmationToCustomer",
+      "from": "ThrowEvent_RefundConfirmation",
+      "to": "CatchEvent_RefundConfirmation",
+      "name": "Refund Confirmation"
     }
   ]
 }
