@@ -1,0 +1,376 @@
+{
+  "pools": [
+    {
+      "id": "actor_applicant_pool",
+      "name": "Applicant Organisation"
+    },
+    {
+      "id": "actor_government_pool",
+      "name": "Government Agency"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "applicant",
+      "name": "Applicant Organisation",
+      "pool": "actor_applicant_pool"
+    },
+    {
+      "id": "grants_admin",
+      "name": "Grants Administrator",
+      "pool": "actor_government_pool"
+    },
+    {
+      "id": "technical_reviewer",
+      "name": "Technical Review Panel",
+      "pool": "actor_government_pool"
+    },
+    {
+      "id": "finance_officer",
+      "name": "Finance Department",
+      "pool": "actor_government_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_application",
+      "name": "Submit Grant Application",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "register_application",
+      "name": "Register Application",
+      "type": "task",
+      "lane": "grants_admin"
+    },
+    {
+      "id": "check_documents",
+      "name": "Check Documentation Completeness",
+      "type": "task",
+      "lane": "grants_admin"
+    },
+    {
+      "id": "collect_documents",
+      "name": "Collect Missing Documents",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "resubmit_documents",
+      "name": "Resubmit Documents",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "forward_application",
+      "name": "Forward Application",
+      "type": "task",
+      "lane": "grants_admin"
+    },
+    {
+      "id": "assess_feasibility",
+      "name": "Assess Project Feasibility",
+      "type": "task",
+      "lane": "technical_reviewer"
+    },
+    {
+      "id": "record_technical_verdict",
+      "name": "Record Technical Verdict",
+      "type": "task",
+      "lane": "technical_reviewer"
+    },
+    {
+      "id": "review_budget",
+      "name": "Review Proposed Budget",
+      "type": "task",
+      "lane": "finance_officer"
+    },
+    {
+      "id": "record_finance_verdict",
+      "name": "Record Finance Verdict",
+      "type": "task",
+      "lane": "finance_officer"
+    },
+    {
+      "id": "review_outcomes",
+      "name": "Review Combined Outcomes",
+      "type": "task",
+      "lane": "grants_admin"
+    },
+    {
+      "id": "send_rejection",
+      "name": "Send Rejection Notice",
+      "type": "task",
+      "lane": "grants_admin"
+    },
+    {
+      "id": "issue_approval",
+      "name": "Issue Grant Approval Letter",
+      "type": "task",
+      "lane": "grants_admin"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_applicant",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0jmcift",
+      "name": "Send Application",
+      "type": "intermediateThrowEvent",
+      "lane": "applicant",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0lhwnjv",
+      "name": "Receive Missing Documents Notification",
+      "type": "intermediateCatchEvent",
+      "lane": "applicant",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0a25ufi",
+      "name": "Receive Grant Approval",
+      "type": "intermediateCatchEvent",
+      "lane": "applicant",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0lnnv01",
+      "name": "Grant Rejected",
+      "type": "endEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1r6yhp5",
+      "name": "Grant Approved",
+      "type": "endEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_grants",
+      "name": "Application Received",
+      "type": "startEvent",
+      "lane": "grants_admin",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0dnvjd7",
+      "name": "Notify Missing Documents",
+      "type": "intermediateThrowEvent",
+      "lane": "grants_admin",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_grants_rejected",
+      "name": "Rejection Sent",
+      "type": "endEvent",
+      "lane": "grants_admin",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1k3bfa7",
+      "name": "Send Grant Approval",
+      "type": "intermediateThrowEvent",
+      "lane": "grants_admin",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_grants_approved",
+      "name": "Approval Sent",
+      "type": "endEvent",
+      "lane": "grants_admin",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_documents",
+      "name": "Documentation Complete?",
+      "type": "exclusiveGateway",
+      "lane": "grants_admin",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "split_verdicts",
+      "name": "Both Verdicts Positive?",
+      "type": "exclusiveGateway",
+      "lane": "grants_admin",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "split_parallel",
+      "name": "Start Parallel Processing",
+      "type": "parallelGateway",
+      "lane": "grants_admin",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Both Verdicts Recorded",
+      "type": "parallelGateway",
+      "lane": "grants_admin",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Flow_1kd72rx",
+      "from": "start_applicant",
+      "to": "submit_application"
+    },
+    {
+      "id": "Flow_0pujo55",
+      "from": "submit_application",
+      "to": "Event_0jmcift"
+    },
+    {
+      "id": "sf1",
+      "from": "start_grants",
+      "to": "register_application"
+    },
+    {
+      "id": "sf2",
+      "from": "register_application",
+      "to": "check_documents"
+    },
+    {
+      "id": "sf3",
+      "from": "check_documents",
+      "to": "split_documents"
+    },
+    {
+      "id": "sf4",
+      "from": "split_documents",
+      "to": "Event_0dnvjd7",
+      "condition": "Incomplete"
+    },
+    {
+      "id": "Flow_1rvyt90",
+      "from": "Event_0dnvjd7",
+      "to": "Event_0lhwnjv"
+    },
+    {
+      "id": "sf5",
+      "from": "split_documents",
+      "to": "forward_application",
+      "condition": "Complete"
+    },
+    {
+      "id": "sf6",
+      "from": "Event_0lhwnjv",
+      "to": "collect_documents"
+    },
+    {
+      "id": "sf7",
+      "from": "collect_documents",
+      "to": "resubmit_documents"
+    },
+    {
+      "id": "sf8",
+      "from": "resubmit_documents",
+      "to": "start_grants"
+    },
+    {
+      "id": "sf9",
+      "from": "forward_application",
+      "to": "split_parallel"
+    },
+    {
+      "id": "sf10",
+      "from": "split_parallel",
+      "to": "assess_feasibility"
+    },
+    {
+      "id": "sf11",
+      "from": "split_parallel",
+      "to": "review_budget"
+    },
+    {
+      "id": "sf12",
+      "from": "assess_feasibility",
+      "to": "record_technical_verdict"
+    },
+    {
+      "id": "sf13",
+      "from": "record_technical_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf14",
+      "from": "review_budget",
+      "to": "record_finance_verdict"
+    },
+    {
+      "id": "sf15",
+      "from": "record_finance_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "id": "Flow_05053kn",
+      "from": "join_parallel",
+      "to": "review_outcomes"
+    },
+    {
+      "id": "sf16",
+      "from": "review_outcomes",
+      "to": "split_verdicts"
+    },
+    {
+      "id": "sf17",
+      "from": "split_verdicts",
+      "to": "send_rejection",
+      "condition": "Negative Verdict"
+    },
+    {
+      "id": "Flow_057oclr",
+      "from": "send_rejection",
+      "to": "end_grants_rejected"
+    },
+    {
+      "id": "sf18",
+      "from": "split_verdicts",
+      "to": "Event_1k3bfa7",
+      "condition": "Positive Verdict"
+    },
+    {
+      "id": "Flow_1kdv6t5",
+      "from": "Event_1k3bfa7",
+      "to": "end_grants_approved"
+    },
+    {
+      "id": "Flow_0vatbql",
+      "from": "Event_0a25ufi",
+      "to": "Event_1r6yhp5"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Event_0jmcift",
+      "to": "start_grants",
+      "name": "Send Application"
+    },
+    {
+      "id": "Flow_1nrpm8z",
+      "from": "Event_1k3bfa7",
+      "to": "Event_0a25ufi",
+      "name": "Send Grant Approval"
+    },
+    {
+      "id": "Flow_0fx4d6n",
+      "from": "Event_0dnvjd7",
+      "to": "Event_0lhwnjv",
+      "name": "Notify Missing Documents"
+    }
+  ],
+  "data": [],
+  "data_associations": []
+}

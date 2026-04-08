@@ -609,7 +609,7 @@ Output the complete corrected JSON. Do not omit any part of the model."""
     return json_result
 
 if __name__ == "__main__":
-    case_name = "case_22"  # <-- change this to run a different case
+    case_name = "case_24"  # <-- change this to run a different case
 
     SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
