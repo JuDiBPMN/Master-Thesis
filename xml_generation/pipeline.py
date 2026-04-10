@@ -732,7 +732,7 @@ def generate_case_bpmn_xml(
 
 if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
-    case_name          = "case_21"
+    case_name          = "case_24"
     pipeline_name      = "direct_extraction_pipeline"
     prompting_strategy = "zero_shot_phi4"
     # ──────────────────────────────────────────────────────────────────────────

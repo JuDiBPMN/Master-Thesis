@@ -1,0 +1,217 @@
+{
+  "pools": [
+    {
+      "id": "CustomerServicePool",
+      "name": "Customer Service Department"
+    },
+    {
+      "id": "InvoicingPool",
+      "name": "Invoicing Department"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "CustomerServiceLane",
+      "name": "Customer Service",
+      "pool": "CustomerServicePool"
+    },
+    {
+      "id": "InvoicingLane",
+      "name": "Invoicing",
+      "pool": "InvoicingPool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "ReceiveComplaint",
+      "name": "Receive Complaint",
+      "type": "serviceTask",
+      "lane": "CustomerServiceLane"
+    },
+    {
+      "id": "LookupBillingInfo",
+      "name": "Lookup Billing Information",
+      "type": "serviceTask",
+      "lane": "CustomerServiceLane"
+    },
+    {
+      "id": "ReviewInvoice",
+      "name": "Review Invoice",
+      "type": "serviceTask",
+      "lane": "CustomerServiceLane"
+    },
+    {
+      "id": "DetermineMistake",
+      "name": "Determine Mistake",
+      "type": "serviceTask",
+      "lane": "CustomerServiceLane"
+    },
+    {
+      "id": "WriteExplanationEmail",
+      "name": "Write Explanation Email",
+      "type": "serviceTask",
+      "lane": "CustomerServiceLane"
+    },
+    {
+      "id": "SendExplanationEmail",
+      "name": "Send Explanation Email",
+      "type": "serviceTask",
+      "lane": "CustomerServiceLane"
+    },
+    {
+      "id": "CreateTicket",
+      "name": "Create Ticket",
+      "type": "serviceTask",
+      "lane": "CustomerServiceLane"
+    },
+    {
+      "id": "AssignTicket",
+      "name": "Assign Ticket",
+      "type": "serviceTask",
+      "lane": "CustomerServiceLane"
+    },
+    {
+      "id": "InvestigateMistake",
+      "name": "Investigate Mistake",
+      "type": "serviceTask",
+      "lane": "InvoicingLane"
+    },
+    {
+      "id": "CorrectInvoice",
+      "name": "Correct Invoice",
+      "type": "serviceTask",
+      "lane": "InvoicingLane"
+    },
+    {
+      "id": "GenerateNewInvoice",
+      "name": "Generate New Invoice",
+      "type": "serviceTask",
+      "lane": "InvoicingLane"
+    },
+    {
+      "id": "SendNewInvoice",
+      "name": "Send New Invoice",
+      "type": "serviceTask",
+      "lane": "InvoicingLane"
+    }
+  ],
+  "events": [
+    {
+      "id": "StartEvent",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "CustomerServiceLane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEventNoMistake",
+      "name": "End Process No Mistake",
+      "type": "endEvent",
+      "lane": "CustomerServiceLane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEventMistakeResolved",
+      "name": "End Process Mistake Resolved",
+      "type": "endEvent",
+      "lane": "InvoicingLane",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "MistakeFoundGateway",
+      "name": "Mistake Found?",
+      "type": "exclusiveGateway",
+      "lane": "CustomerServiceLane",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Flow1",
+      "from": "StartEvent",
+      "to": "ReceiveComplaint"
+    },
+    {
+      "id": "Flow2",
+      "from": "ReceiveComplaint",
+      "to": "LookupBillingInfo"
+    },
+    {
+      "id": "Flow3",
+      "from": "LookupBillingInfo",
+      "to": "ReviewInvoice"
+    },
+    {
+      "id": "Flow4",
+      "from": "ReviewInvoice",
+      "to": "DetermineMistake"
+    },
+    {
+      "id": "Flow5",
+      "from": "DetermineMistake",
+      "to": "MistakeFoundGateway"
+    },
+    {
+      "id": "Flow6",
+      "from": "MistakeFoundGateway",
+      "to": "WriteExplanationEmail",
+      "condition": "no mistake"
+    },
+    {
+      "id": "Flow7",
+      "from": "MistakeFoundGateway",
+      "to": "CreateTicket",
+      "condition": "mistake found"
+    },
+    {
+      "id": "Flow8",
+      "from": "WriteExplanationEmail",
+      "to": "SendExplanationEmail"
+    },
+    {
+      "id": "Flow9",
+      "from": "SendExplanationEmail",
+      "to": "EndEventNoMistake"
+    },
+    {
+      "id": "Flow10",
+      "from": "CreateTicket",
+      "to": "AssignTicket"
+    },
+    {
+      "id": "Flow11",
+      "from": "AssignTicket",
+      "to": "InvestigateMistake"
+    },
+    {
+      "id": "Flow12",
+      "from": "InvestigateMistake",
+      "to": "CorrectInvoice"
+    },
+    {
+      "id": "Flow13",
+      "from": "CorrectInvoice",
+      "to": "GenerateNewInvoice"
+    },
+    {
+      "id": "Flow14",
+      "from": "GenerateNewInvoice",
+      "to": "SendNewInvoice"
+    },
+    {
+      "id": "Flow15",
+      "from": "SendNewInvoice",
+      "to": "EndEventMistakeResolved"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "MessageFlow1",
+      "from": "CustomerServiceLane",
+      "to": "InvoicingLane",
+      "name": "Assign Ticket to Invoicing"
+    }
+  ]
+}
