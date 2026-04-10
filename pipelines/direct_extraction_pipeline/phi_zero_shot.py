@@ -132,31 +132,6 @@ BPMN_SCHEMA = {
                 "additionalProperties": False
             }
         },
-        "data": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id":   {"type": "string"},
-                    "name": {"type": "string"}
-                },
-                "required": ["id", "name"],
-                "additionalProperties": False
-            }
-        },
-        "data_associations": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "from": {"type": "string"},
-                    "to":   {"type": "string"},
-                    "type": {"type": "string", "enum": ["input", "output"]}
-                },
-                "required": ["from", "to", "type"],
-                "additionalProperties": False
-            }
-        }
     },
     "required": ["pools", "lanes", "tasks", "events", "gateways", "sequence_flows", "message_flows"]
 }
@@ -279,15 +254,129 @@ def is_valid_bpmn(obj):
 
 def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=2):
     # Prompt is left as defined in your original script
-    prompt = f"""You are a BPMN 2.0 expert. Extract a structured process model from the description below.
+    prompt = f""" You are a BPMN 2.0 expert. Extract a structured BPMN model from the process description below.
 
-### Rules
-... [omitted for brevity, same as script] ...
+## STEP 1 — IDENTIFY POOLS (DO THIS FIRST)
+
+A pool = one organisation or external entity.
+Ask yourself: how many distinct organisations or external parties are involved?
+
+RULES:
+- External parties (customers, suppliers, government bodies) = their own pool
+- Internal departments or roles within the SAME organisation = lanes inside ONE pool
+- NEVER split one organisation into multiple pools just because it has multiple departments
+
+EXAMPLE (CORRECT):
+  Pools represent distinct organizations or external participants.
+  Each pool contains lanes that represent departments or roles within that organization.
+
+  Pool: "Company" → lanes: Customer Service, Operations, Finance
+  Pool: "Customer" → lanes: Customer
+
+EXAMPLE (WRONG):
+  Pool: "Customer Service"
+  Pool: "Operations"
+  Pool: "Finance"   ← these are departments/roles, not separate organizations (pools)
+
+
+## STEP 2 — ASSIGN LANES
+
+Each role, department, or actor within a pool = one lane.
+Every task, event, and gateway must belong to exactly one lane.
+
+
+## STEP 3 — MODEL EACH POOL'S FLOW INDEPENDENTLY
+
+Each pool has its own internal sequence flow.
+Pools NEVER share gateways or sequence flows.
+A parallel gateway that splits work inside one pool CANNOT join work from another pool.
+
+If two departments in different pools both do work, and then results are combined:
+- Each pool finishes its own branch with a message throw event
+- The receiving pool uses a parallel SPLIT + parallel JOIN to wait for all messages
+
+
+## STEP 4 — CROSS-POOL COMMUNICATION
+
+ONLY message_flows may cross pool boundaries.
+- Sending node: intermediateThrowEvent (message)
+- Receiving node: intermediateCatchEvent (message) or message startEvent
+- message_flow targets must be intermediateCatch EVENTS — NEVER tasks
+
+FORBIDDEN:
+  sequence_flow from pool A → pool B
+  message_flow "to": "some_task_id"
+
+
+## STEP 5 — GATEWAYS
+
+Decisions (if/else) → exclusiveGateway
+Parallel work (do both simultaneously) → parallelGateway
+
+PARALLEL GATEWAY RULES (STRICT):
+- A parallel split (diverging) fans out to 2+ branches
+- A parallel join (converging) waits for ALL branches to finish
+- You MUST always have BOTH a split AND a join, 
+- The split AND join must be in the SAME pool
+- You cannot join work that happens in different pools using a gateway
+
+XOR GATEWAY RULES:
+- An exclusive split (diverging) fans out to 2+ branches
+- An exclusive join (converging) waits for ONE branch to finish or has a clear end event for each branch 
+- The split AND join must be in the SAME pool or if branches end in separate endEvents, they must be in the same pool
+- You cannot join work that happens in different pools using a gateway
+
+## STEP 6 — COMPLETE FLOWS
+
+Every task must have (STRICT: CHECK THIS MUTLIPLE TIMES):
+- exactly 1 incoming sequence flow
+- exactly 1 outgoing sequence flow
+- NO MESSAGE FLOWS directly to or from tasks — use intermediate events aftet the task for messaging
+
+Every pool must have:
+- exactly 1 startEvent
+- at least 1 endEvent
+
+Every decision (exclusiveGateway diverging) must eventually be merged by a corresponding exclusiveGateway (converging), unless branches end in separate endEvents.
+
+## STEP 7 — HOW TO CORRECTLY USE INTERMEDIATE MESSAGE EVENTS IN A FLOW
+
+INTERMEDIATE Message events are NOT floating annotations. They MUST be connected into the flow with the correct connection types.
+
+CORRECT SEQUENCE OR MESSAGE FLOW PATTERNS FOR INTERMEDIATE EVENTS:
+
+  intermediateThrowEvent (send):
+    incoming: 1 sequence flow  (from previous TASK OR ExclusiveGateway in same lane)
+    outgoing: 1 message flow   (to a intermediateCatchEvent in a DIFFERENT pool)
+    NO outgoing sequence flow
+
+  intermediateCatchEvent (receive):
+    incoming: 1 message flow   (from a intermediateThrowEvent in a DIFFERENT pool)
+    outgoing: 1 sequence flow  (to next node in same lane)
+    NO incoming sequence flow
+
+CORRECT pattern for cross-pool communication:
+
+  Pool A (sender lane):
+    ... → task_A → intermediateThrowEvent ──(message flow)──→ intermediateCatchEvent → endEvent → (Pool B, receiver lane)
+
+
+## FINAL SELF-CHECK (MANDATORY — fix violations before output)
+
+[ ] How many organisations/external parties are there? Does each have its own pool?
+[ ] Are departments/roles within the same organisation modeled as lanes (not pools)?
+[ ] Do message flows point to events only? (Never to tasks)
+[ ] Does every parallel split have a corresponding parallel join IN THE SAME pool?
+[ ] Does every diverging exclusiveGateway have a converging counterpart or endEvents for each branch?
+[ ] Does every task have both an incoming and outgoing sequence flow (MOST IMPORTANT TO CHECK)?
+[ ] Does every pool have exactly one startEvent and at least one endEvent?
+
+---
+
+Return ONLY valid JSON matching the schema. Do not explain anything.
 
 ## Process description
-{process_description}
-
-Return a JSON object matching the schema exactly."""
+{process_description}"""
     
     try:
         model = load_model()
@@ -298,7 +387,15 @@ Return a JSON object matching the schema exactly."""
     # Phi-4 follows standard chat completion API
     result = model.create_chat_completion(
         messages=[
-            {"role": "system", "content": "You are a business process modeling expert. Extract tasks and flows from process descriptions."},
+            {"role": "system", "content": "You are a business process modeling expert. "
+    "Extract structured BPMN elements from process descriptions. "
+    "Always output valid JSON matching the provided schema. "
+    "Never use a 'nodes' array — always use separate 'tasks', 'events', and 'gateways' arrays. "
+    "Every task, event, and gateway must belong to a declared lane, and every lane must belong to a declared pool. "
+    "Every pool must have at most one startEvent and at least one endEvent. "
+    "A pool represents one organisation or external entity like a company with multiple departments or a customer as an external entity. "
+    "Roles and departments within the same organisation are LANES inside ONE pool, not separate pools. "
+    "External parties (customers, suppliers, third parties) are ALWAYS modeled as their own pool."},
             {"role": "user", "content": prompt}
         ],
         response_format={
@@ -327,7 +424,7 @@ Return a JSON object matching the schema exactly."""
     return json_result
 
 if __name__ == "__main__":
-    case_name = "case_24" 
+    case_name = "case_21" 
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))

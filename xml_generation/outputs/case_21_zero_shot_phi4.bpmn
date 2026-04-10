@@ -1,270 +1,382 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
   <bpmn:collaboration id="Collaboration_1">
-    <bpmn:participant id="actor_AdmissionsOffice" name="Admissions Office" processRef="Process_AdmissionsOffice"/>
-    <bpmn:participant id="actor_SpecialistDepartment" name="Specialist Department" processRef="Process_SpecialistDepartment"/>
-    <bpmn:participant id="actor_InsuranceOffice" name="Insurance Office" processRef="Process_InsuranceOffice"/>
-    <bpmn:participant id="actor_GeneralPractitioner" name="General Practitioner" processRef="Process_GeneralPractitioner"/>
-    <bpmn:messageFlow id="NotifyGPMessageFlow" name="Notify GP of Missing Documents" sourceRef="AdmissionsClerk" targetRef="GP"/>
-    <bpmn:messageFlow id="SendRejectionNoticeMessageFlow" name="Send Rejection Notice" sourceRef="AdmissionsClerk" targetRef="GP"/>
-    <bpmn:messageFlow id="SendApprovalMessageFlow" name="Send Treatment Approval" sourceRef="AdmissionsClerk" targetRef="GP"/>
-    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="StartEvent" targetRef="RegisterReferral"/>
-    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="ForwardToSpecialist" targetRef="ConductAssessment"/>
-    <bpmn:messageFlow id="MsgFlow_p2" name="" sourceRef="ForwardToInsurance" targetRef="VerifyCoverage"/>
-    <bpmn:messageFlow id="MsgFlow_p3" name="" sourceRef="SendVerdictsToClerk" targetRef="ReviewOutcomes"/>
-    <bpmn:messageFlow id="MsgFlow_p4" name="" sourceRef="SendVerdictsToClerkInsurance" targetRef="ReviewOutcomes"/>
+    <bpmn:participant id="actor_Retailer" name="Retailer Company Pool" processRef="Process_Retailer"/>
+    <bpmn:participant id="actor_Customer" name="Customer Pool" processRef="Process_Customer"/>
+    <bpmn:messageFlow id="MissingInfoToCustomer" name="Notify Missing Info" sourceRef="ThrowEvent_MissingInfo" targetRef="CatchEvent_MissingInfo"/>
+    <bpmn:messageFlow id="WarehouseRequest" name="Warehouse Request" sourceRef="ThrowEvent_Warehouse" targetRef="CatchEvent_Warehouse"/>
+    <bpmn:messageFlow id="FinanceRequest" name="Finance Request" sourceRef="ThrowEvent_Finance" targetRef="CatchEvent_Finance"/>
+    <bpmn:messageFlow id="RejectionNoticeToCustomer" name="Rejection Notice" sourceRef="ThrowEvent_RejectionNotice" targetRef="CatchEvent_RejectionNotice"/>
+    <bpmn:messageFlow id="RefundConfirmationToCustomer" name="Refund Confirmation" sourceRef="ThrowEvent_RefundConfirmation" targetRef="CatchEvent_RefundConfirmation"/>
   </bpmn:collaboration>
-  <bpmn:process id="Process_AdmissionsOffice" name="Admissions Office" isExecutable="false">
-    <bpmn:laneSet id="LaneSet_AdmissionsOffice">
-      <bpmn:lane id="AdmissionsClerk" name="Admissions Clerk">
+  <bpmn:process id="Process_Retailer" name="Retailer Company Pool" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Retailer">
+      <bpmn:lane id="CustomerService" name="Customer Service">
+        <bpmn:flowNodeRef>StartEvent</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>EndEvent</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>EndEventRejection</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>EndEventApproval</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>RegisterReferral</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>CheckDocumentation</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>NotifyGP</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>ForwardToSpecialist</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>ForwardToInsurance</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ThrowEvent_MissingInfo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ThrowEvent_Warehouse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ThrowEvent_Finance</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ThrowEvent_RejectionNotice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ThrowEvent_RefundConfirmation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RegisterReturnRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckInformation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>NotifyCustomerMissingInfo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ForwardToWarehouse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ForwardToFinance</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>ReviewOutcomes</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>SendRejectionNotice</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>SendApproval</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>CheckDocumentationGateway</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>ReviewOutcomesGateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ApproveReturn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ProcessRefund</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SendRefundConfirmation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ExclusiveGateway_CheckInfo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ParallelGateway_Forward</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ParallelGateway_WaitForVerdicts</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ExclusiveGateway_ReviewOutcomes</bpmn:flowNodeRef>
       </bpmn:lane>
-    </bpmn:laneSet>
-    <bpmn:endEvent id="EndEvent" name="End"/>
-    <bpmn:endEvent id="EndEventRejection" name="End Rejection"/>
-    <bpmn:endEvent id="EndEventApproval" name="End Approval"/>
-    <bpmn:manualTask id="RegisterReferral" name="Register Referral"/>
-    <bpmn:manualTask id="CheckDocumentation" name="Check Documentation"/>
-    <bpmn:manualTask id="NotifyGP" name="Notify GP of Missing Documents"/>
-    <bpmn:manualTask id="ForwardToSpecialist" name="Forward to Specialist"/>
-    <bpmn:manualTask id="ForwardToInsurance" name="Forward to Insurance"/>
-    <bpmn:manualTask id="ReviewOutcomes" name="Review Combined Outcomes"/>
-    <bpmn:manualTask id="SendRejectionNotice" name="Send Rejection Notice"/>
-    <bpmn:manualTask id="SendApproval" name="Send Treatment Approval"/>
-    <bpmn:exclusiveGateway id="CheckDocumentationGateway" name="Check Documentation" gatewayDirection="diverging"/>
-    <bpmn:exclusiveGateway id="ReviewOutcomesGateway" name="Review Outcomes" gatewayDirection="diverging"/>
-    <bpmn:sequenceFlow id="RegisterToCheck" sourceRef="RegisterReferral" targetRef="CheckDocumentation"/>
-    <bpmn:sequenceFlow id="CheckToNotify" sourceRef="CheckDocumentation" targetRef="NotifyGP" name="documentationIncomplete">
-      <bpmn:conditionExpression>documentationIncomplete</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="CheckToForward" sourceRef="CheckDocumentation" targetRef="ForwardToSpecialist" name="documentationComplete">
-      <bpmn:conditionExpression>documentationComplete</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="ReviewOutcomesToRejection" sourceRef="ReviewOutcomes" targetRef="SendRejectionNotice" name="eitherVerdictNegative">
-      <bpmn:conditionExpression>eitherVerdictNegative</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="ReviewOutcomesToApproval" sourceRef="ReviewOutcomes" targetRef="SendApproval" name="bothVerdictsPositive">
-      <bpmn:conditionExpression>bothVerdictsPositive</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="SendRejectionNoticeToEndEventRejection" sourceRef="SendRejectionNotice" targetRef="EndEventRejection"/>
-    <bpmn:sequenceFlow id="SendApprovalToEndEventApproval" sourceRef="SendApproval" targetRef="EndEventApproval"/>
-  </bpmn:process>
-  <bpmn:process id="Process_SpecialistDepartment" name="Specialist Department" isExecutable="false">
-    <bpmn:laneSet id="LaneSet_SpecialistDepartment">
-      <bpmn:lane id="Specialist" name="Specialist">
-        <bpmn:flowNodeRef>ConductAssessment</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>RecordSpecialistVerdict</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>SendVerdictsToClerk</bpmn:flowNodeRef>
+      <bpmn:lane id="Warehouse" name="Warehouse">
+        <bpmn:flowNodeRef>EndEvent_Warehouse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CatchEvent_Warehouse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>InspectProduct</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RecordWarehouseVerdict</bpmn:flowNodeRef>
       </bpmn:lane>
-    </bpmn:laneSet>
-    <bpmn:manualTask id="ConductAssessment" name="Conduct Medical Assessment"/>
-    <bpmn:manualTask id="RecordSpecialistVerdict" name="Record Specialist Verdict"/>
-    <bpmn:manualTask id="SendVerdictsToClerk" name="Send Verdicts to Clerk"/>
-    <bpmn:sequenceFlow id="ConductAssessmentToRecordSpecialistVerdict" sourceRef="ConductAssessment" targetRef="RecordSpecialistVerdict"/>
-    <bpmn:sequenceFlow id="RecordSpecialistVerdictToSendVerdictsToClerk" sourceRef="RecordSpecialistVerdict" targetRef="SendVerdictsToClerk"/>
-  </bpmn:process>
-  <bpmn:process id="Process_InsuranceOffice" name="Insurance Office" isExecutable="false">
-    <bpmn:laneSet id="LaneSet_InsuranceOffice">
-      <bpmn:lane id="InsuranceOfficer" name="Insurance Officer">
-        <bpmn:flowNodeRef>VerifyCoverage</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>RecordInsuranceVerdict</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>SendVerdictsToClerkInsurance</bpmn:flowNodeRef>
-      </bpmn:lane>
-    </bpmn:laneSet>
-    <bpmn:manualTask id="VerifyCoverage" name="Verify Coverage"/>
-    <bpmn:manualTask id="RecordInsuranceVerdict" name="Record Insurance Verdict"/>
-    <bpmn:manualTask id="SendVerdictsToClerkInsurance" name="Send Verdicts to Clerk"/>
-    <bpmn:sequenceFlow id="VerifyCoverageToRecordInsuranceVerdict" sourceRef="VerifyCoverage" targetRef="RecordInsuranceVerdict"/>
-    <bpmn:sequenceFlow id="RecordInsuranceVerdictToSendVerdictsToClerkInsurance" sourceRef="RecordInsuranceVerdict" targetRef="SendVerdictsToClerkInsurance"/>
-  </bpmn:process>
-  <bpmn:process id="Process_GeneralPractitioner" name="General Practitioner" isExecutable="false">
-    <bpmn:laneSet id="LaneSet_GeneralPractitioner">
-      <bpmn:lane id="GP" name="General Practitioner">
-        <bpmn:flowNodeRef>StartEvent</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>SubmitReferral</bpmn:flowNodeRef>
+      <bpmn:lane id="Finance" name="Finance">
+        <bpmn:flowNodeRef>EndEvent_Finance</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CatchEvent_Finance</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckPaymentEligibility</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RecordFinanceVerdict</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:startEvent id="StartEvent" name="Start"/>
-    <bpmn:manualTask id="SubmitReferral" name="Submit Referral"/>
+    <bpmn:endEvent id="EndEvent" name="End"/>
+    <bpmn:endEvent id="EndEvent_Warehouse" name="End"/>
+    <bpmn:endEvent id="EndEvent_Finance" name="End"/>
+    <bpmn:intermediateThrowEvent id="ThrowEvent_MissingInfo" name="Notify Customer of Missing Information">
+      <bpmn:messageEventDefinition id="ThrowEvent_MissingInfo_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="ThrowEvent_Warehouse" name="Forward to Warehouse">
+      <bpmn:messageEventDefinition id="ThrowEvent_Warehouse_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="CatchEvent_Warehouse" name="Catch Warehouse Request">
+      <bpmn:messageEventDefinition id="CatchEvent_Warehouse_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="ThrowEvent_Finance" name="Forward to Finance">
+      <bpmn:messageEventDefinition id="ThrowEvent_Finance_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="CatchEvent_Finance" name="Catch Finance Request">
+      <bpmn:messageEventDefinition id="CatchEvent_Finance_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="ThrowEvent_RejectionNotice" name="Send Return Rejection Notice">
+      <bpmn:messageEventDefinition id="ThrowEvent_RejectionNotice_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="ThrowEvent_RefundConfirmation" name="Send Refund Confirmation">
+      <bpmn:messageEventDefinition id="ThrowEvent_RefundConfirmation_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:userTask id="RegisterReturnRequest" name="Register Return Request"/>
+    <bpmn:userTask id="CheckInformation" name="Check Information Completeness"/>
+    <bpmn:userTask id="NotifyCustomerMissingInfo" name="Notify Customer of Missing Information"/>
+    <bpmn:userTask id="ForwardToWarehouse" name="Forward to Warehouse"/>
+    <bpmn:userTask id="ForwardToFinance" name="Forward to Finance"/>
+    <bpmn:userTask id="InspectProduct" name="Inspect Product"/>
+    <bpmn:userTask id="RecordWarehouseVerdict" name="Record Warehouse Verdict"/>
+    <bpmn:userTask id="CheckPaymentEligibility" name="Check Payment Eligibility"/>
+    <bpmn:userTask id="RecordFinanceVerdict" name="Record Finance Verdict"/>
+    <bpmn:userTask id="ReviewOutcomes" name="Review Outcomes"/>
+    <bpmn:userTask id="SendRejectionNotice" name="Send Return Rejection Notice"/>
+    <bpmn:userTask id="ApproveReturn" name="Approve Return"/>
+    <bpmn:userTask id="ProcessRefund" name="Process Refund"/>
+    <bpmn:userTask id="SendRefundConfirmation" name="Send Refund Confirmation"/>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_CheckInfo" name="Check Information Completeness" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="ParallelGateway_Forward" name="Forward to Departments" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="ParallelGateway_WaitForVerdicts" name="Wait for Verdicts" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_ReviewOutcomes" name="Review Outcomes" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="StartToRegister" sourceRef="StartEvent" targetRef="RegisterReturnRequest"/>
+    <bpmn:sequenceFlow id="RegisterToCheckInfo" sourceRef="RegisterReturnRequest" targetRef="CheckInformation"/>
+    <bpmn:sequenceFlow id="CheckInfoToNotify" sourceRef="CheckInformation" targetRef="ExclusiveGateway_CheckInfo"/>
+    <bpmn:sequenceFlow id="CheckInfoToForward" sourceRef="CheckInformation" targetRef="ParallelGateway_Forward"/>
+    <bpmn:sequenceFlow id="NotifyToEnd" sourceRef="NotifyCustomerMissingInfo" targetRef="EndEvent"/>
+    <bpmn:sequenceFlow id="ForwardToWarehouse" sourceRef="ParallelGateway_Forward" targetRef="ForwardToWarehouse"/>
+    <bpmn:sequenceFlow id="ForwardToFinance" sourceRef="ParallelGateway_Forward" targetRef="ForwardToFinance"/>
+    <bpmn:sequenceFlow id="WarehouseToRecord" sourceRef="InspectProduct" targetRef="RecordWarehouseVerdict"/>
+    <bpmn:sequenceFlow id="FinanceToRecord" sourceRef="CheckPaymentEligibility" targetRef="RecordFinanceVerdict"/>
+    <bpmn:sequenceFlow id="RecordToWait" sourceRef="RecordWarehouseVerdict" targetRef="ParallelGateway_WaitForVerdicts"/>
+    <bpmn:sequenceFlow id="RecordToWait_Finance" sourceRef="RecordFinanceVerdict" targetRef="ParallelGateway_WaitForVerdicts"/>
+    <bpmn:sequenceFlow id="WaitToReview" sourceRef="ParallelGateway_WaitForVerdicts" targetRef="ReviewOutcomes"/>
+    <bpmn:sequenceFlow id="ReviewToReject" sourceRef="ReviewOutcomes" targetRef="ExclusiveGateway_ReviewOutcomes"/>
+    <bpmn:sequenceFlow id="ReviewToApprove" sourceRef="ReviewOutcomes" targetRef="ExclusiveGateway_ReviewOutcomes"/>
+    <bpmn:sequenceFlow id="RejectToRejectionNotice" sourceRef="ExclusiveGateway_ReviewOutcomes" targetRef="SendRejectionNotice"/>
+    <bpmn:sequenceFlow id="RejectToEnd" sourceRef="SendRejectionNotice" targetRef="EndEvent"/>
+    <bpmn:sequenceFlow id="ApproveToRefund" sourceRef="ExclusiveGateway_ReviewOutcomes" targetRef="ApproveReturn"/>
+    <bpmn:sequenceFlow id="RefundToEnd" sourceRef="ProcessRefund" targetRef="SendRefundConfirmation"/>
+    <bpmn:sequenceFlow id="RefundToEnd_Confirm" sourceRef="SendRefundConfirmation" targetRef="EndEvent"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Customer" name="Customer Pool" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Customer">
+      <bpmn:lane id="Customer" name="Customer"/>
+    </bpmn:laneSet>
+    <bpmn:endEvent id="EndEvent_Customer" name="End"/>
+    <bpmn:intermediateCatchEvent id="CatchEvent_MissingInfo" name="Catch Missing Info Notification">
+      <bpmn:messageEventDefinition id="CatchEvent_MissingInfo_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="CatchEvent_RejectionNotice" name="Catch Rejection Notice">
+      <bpmn:messageEventDefinition id="CatchEvent_RejectionNotice_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="CatchEvent_RefundConfirmation" name="Catch Refund Confirmation">
+      <bpmn:messageEventDefinition id="CatchEvent_RefundConfirmation_def"/>
+    </bpmn:intermediateCatchEvent>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
-      <bpmndi:BPMNShape id="actor_AdmissionsOffice_di" bpmnElement="actor_AdmissionsOffice" isHorizontal="true">
-        <dc:Bounds x="10" y="20" width="1020" height="690"/>
+      <bpmndi:BPMNShape id="actor_Retailer_di" bpmnElement="actor_Retailer" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="2060" height="2730"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="actor_SpecialistDepartment_di" bpmnElement="actor_SpecialistDepartment" isHorizontal="true">
-        <dc:Bounds x="10" y="770" width="1020" height="220"/>
+      <bpmndi:BPMNShape id="actor_Customer_di" bpmnElement="actor_Customer" isHorizontal="true">
+        <dc:Bounds x="10" y="2810" width="600" height="470"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="actor_InsuranceOffice_di" bpmnElement="actor_InsuranceOffice" isHorizontal="true">
-        <dc:Bounds x="10" y="1050" width="1020" height="220"/>
+      <bpmndi:BPMNShape id="CustomerService_di" bpmnElement="CustomerService" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="2030" height="910"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="actor_GeneralPractitioner_di" bpmnElement="actor_GeneralPractitioner" isHorizontal="true">
-        <dc:Bounds x="10" y="1330" width="600" height="250"/>
+      <bpmndi:BPMNShape id="Warehouse_di" bpmnElement="Warehouse" isHorizontal="true">
+        <dc:Bounds x="40" y="930" width="2030" height="910"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="AdmissionsClerk_di" bpmnElement="AdmissionsClerk" isHorizontal="true">
-        <dc:Bounds x="40" y="20" width="990" height="690"/>
+      <bpmndi:BPMNShape id="Finance_di" bpmnElement="Finance" isHorizontal="true">
+        <dc:Bounds x="40" y="1840" width="2030" height="910"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Specialist_di" bpmnElement="Specialist" isHorizontal="true">
-        <dc:Bounds x="40" y="770" width="990" height="220"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="InsuranceOfficer_di" bpmnElement="InsuranceOfficer" isHorizontal="true">
-        <dc:Bounds x="40" y="1050" width="990" height="220"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="GP_di" bpmnElement="GP" isHorizontal="true">
-        <dc:Bounds x="40" y="1330" width="570" height="250"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="EndEvent_di" bpmnElement="EndEvent">
-        <dc:Bounds x="172" y="102" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="RegisterReferral_di" bpmnElement="RegisterReferral">
-        <dc:Bounds x="130" y="168" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ForwardToInsurance_di" bpmnElement="ForwardToInsurance">
-        <dc:Bounds x="130" y="278" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ReviewOutcomes_di" bpmnElement="ReviewOutcomes">
-        <dc:Bounds x="130" y="388" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="CheckDocumentationGateway_di" bpmnElement="CheckDocumentationGateway" isMarkerVisible="true">
-        <dc:Bounds x="165" y="498" width="50" height="50"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ReviewOutcomesGateway_di" bpmnElement="ReviewOutcomesGateway" isMarkerVisible="true">
-        <dc:Bounds x="165" y="578" width="50" height="50"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="EndEventRejection_di" bpmnElement="EndEventRejection">
-        <dc:Bounds x="692" y="204" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="EndEventApproval_di" bpmnElement="EndEventApproval">
-        <dc:Bounds x="692" y="270" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="NotifyGP_di" bpmnElement="NotifyGP">
-        <dc:Bounds x="650" y="336" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ForwardToSpecialist_di" bpmnElement="ForwardToSpecialist">
-        <dc:Bounds x="650" y="446" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="CheckDocumentation_di" bpmnElement="CheckDocumentation">
-        <dc:Bounds x="390" y="215" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="SendRejectionNotice_di" bpmnElement="SendRejectionNotice">
-        <dc:Bounds x="390" y="325" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="SendApproval_di" bpmnElement="SendApproval">
-        <dc:Bounds x="390" y="435" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ConductAssessment_di" bpmnElement="ConductAssessment">
-        <dc:Bounds x="130" y="840" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="RecordSpecialistVerdict_di" bpmnElement="RecordSpecialistVerdict">
-        <dc:Bounds x="390" y="840" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="SendVerdictsToClerk_di" bpmnElement="SendVerdictsToClerk">
-        <dc:Bounds x="650" y="840" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="VerifyCoverage_di" bpmnElement="VerifyCoverage">
-        <dc:Bounds x="130" y="1120" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="RecordInsuranceVerdict_di" bpmnElement="RecordInsuranceVerdict">
-        <dc:Bounds x="390" y="1120" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="SendVerdictsToClerkInsurance_di" bpmnElement="SendVerdictsToClerkInsurance">
-        <dc:Bounds x="650" y="1120" width="120" height="80"/>
+      <bpmndi:BPMNShape id="Customer_di" bpmnElement="Customer" isHorizontal="true">
+        <dc:Bounds x="40" y="2810" width="570" height="470"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_di" bpmnElement="StartEvent">
-        <dc:Bounds x="172" y="1382" width="36" height="36"/>
+        <dc:Bounds x="172" y="182" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="SubmitReferral_di" bpmnElement="SubmitReferral">
-        <dc:Bounds x="130" y="1448" width="120" height="80"/>
+      <bpmndi:BPMNShape id="ThrowEvent_MissingInfo_di" bpmnElement="ThrowEvent_MissingInfo">
+        <dc:Bounds x="172" y="248" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="RegisterToCheck_di" bpmnElement="RegisterToCheck">
-        <di:waypoint x="250" y="208"/>
-        <di:waypoint x="320" y="208"/>
-        <di:waypoint x="320" y="255"/>
-        <di:waypoint x="390" y="255"/>
+      <bpmndi:BPMNShape id="ThrowEvent_Warehouse_di" bpmnElement="ThrowEvent_Warehouse">
+        <dc:Bounds x="172" y="314" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ThrowEvent_Finance_di" bpmnElement="ThrowEvent_Finance">
+        <dc:Bounds x="172" y="380" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ThrowEvent_RejectionNotice_di" bpmnElement="ThrowEvent_RejectionNotice">
+        <dc:Bounds x="172" y="446" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ThrowEvent_RefundConfirmation_di" bpmnElement="ThrowEvent_RefundConfirmation">
+        <dc:Bounds x="172" y="512" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="NotifyCustomerMissingInfo_di" bpmnElement="NotifyCustomerMissingInfo">
+        <dc:Bounds x="130" y="578" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ProcessRefund_di" bpmnElement="ProcessRefund">
+        <dc:Bounds x="130" y="688" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_di" bpmnElement="EndEvent">
+        <dc:Bounds x="1732" y="457" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="RegisterReturnRequest_di" bpmnElement="RegisterReturnRequest">
+        <dc:Bounds x="390" y="380" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendRefundConfirmation_di" bpmnElement="SendRefundConfirmation">
+        <dc:Bounds x="390" y="490" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckInformation_di" bpmnElement="CheckInformation">
+        <dc:Bounds x="650" y="395" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway_WaitForVerdicts_di" bpmnElement="ParallelGateway_WaitForVerdicts" isMarkerVisible="true">
+        <dc:Bounds x="685" y="505" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ForwardToWarehouse_di" bpmnElement="ForwardToWarehouse">
+        <dc:Bounds x="1170" y="340" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ForwardToFinance_di" bpmnElement="ForwardToFinance">
+        <dc:Bounds x="1170" y="450" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_ReviewOutcomes_di" bpmnElement="ExclusiveGateway_ReviewOutcomes" isMarkerVisible="true">
+        <dc:Bounds x="1205" y="560" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReviewOutcomes_di" bpmnElement="ReviewOutcomes">
+        <dc:Bounds x="910" y="355" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_CheckInfo_di" bpmnElement="ExclusiveGateway_CheckInfo" isMarkerVisible="true">
+        <dc:Bounds x="945" y="465" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway_Forward_di" bpmnElement="ParallelGateway_Forward" isMarkerVisible="true">
+        <dc:Bounds x="945" y="545" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendRejectionNotice_di" bpmnElement="SendRejectionNotice">
+        <dc:Bounds x="1430" y="380" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ApproveReturn_di" bpmnElement="ApproveReturn">
+        <dc:Bounds x="1430" y="490" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Warehouse_di" bpmnElement="EndEvent_Warehouse">
+        <dc:Bounds x="172" y="1279" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CatchEvent_Warehouse_di" bpmnElement="CatchEvent_Warehouse">
+        <dc:Bounds x="172" y="1345" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="InspectProduct_di" bpmnElement="InspectProduct">
+        <dc:Bounds x="130" y="1411" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="RecordWarehouseVerdict_di" bpmnElement="RecordWarehouseVerdict">
+        <dc:Bounds x="390" y="1345" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Finance_di" bpmnElement="EndEvent_Finance">
+        <dc:Bounds x="172" y="2189" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CatchEvent_Finance_di" bpmnElement="CatchEvent_Finance">
+        <dc:Bounds x="172" y="2255" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckPaymentEligibility_di" bpmnElement="CheckPaymentEligibility">
+        <dc:Bounds x="130" y="2321" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="RecordFinanceVerdict_di" bpmnElement="RecordFinanceVerdict">
+        <dc:Bounds x="390" y="2255" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Customer_di" bpmnElement="EndEvent_Customer">
+        <dc:Bounds x="172" y="2928" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CatchEvent_MissingInfo_di" bpmnElement="CatchEvent_MissingInfo">
+        <dc:Bounds x="172" y="2994" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CatchEvent_RejectionNotice_di" bpmnElement="CatchEvent_RejectionNotice">
+        <dc:Bounds x="172" y="3060" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CatchEvent_RefundConfirmation_di" bpmnElement="CatchEvent_RefundConfirmation">
+        <dc:Bounds x="172" y="3126" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="StartToRegister_di" bpmnElement="StartToRegister">
+        <di:waypoint x="208" y="200"/>
+        <di:waypoint x="299" y="200"/>
+        <di:waypoint x="299" y="420"/>
+        <di:waypoint x="390" y="420"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="CheckToNotify_di" bpmnElement="CheckToNotify">
-        <di:waypoint x="510" y="255"/>
-        <di:waypoint x="580" y="255"/>
-        <di:waypoint x="580" y="376"/>
-        <di:waypoint x="650" y="376"/>
+      <bpmndi:BPMNEdge id="RegisterToCheckInfo_di" bpmnElement="RegisterToCheckInfo">
+        <di:waypoint x="510" y="420"/>
+        <di:waypoint x="580" y="420"/>
+        <di:waypoint x="580" y="435"/>
+        <di:waypoint x="650" y="435"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="CheckToForward_di" bpmnElement="CheckToForward">
-        <di:waypoint x="510" y="255"/>
-        <di:waypoint x="580" y="255"/>
-        <di:waypoint x="580" y="486"/>
-        <di:waypoint x="650" y="486"/>
+      <bpmndi:BPMNEdge id="CheckInfoToNotify_di" bpmnElement="CheckInfoToNotify">
+        <di:waypoint x="770" y="435"/>
+        <di:waypoint x="857" y="435"/>
+        <di:waypoint x="857" y="490"/>
+        <di:waypoint x="945" y="490"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="ConductAssessmentToRecordSpecialistVerdict_di" bpmnElement="ConductAssessmentToRecordSpecialistVerdict">
-        <di:waypoint x="250" y="880"/>
-        <di:waypoint x="390" y="880"/>
+      <bpmndi:BPMNEdge id="CheckInfoToForward_di" bpmnElement="CheckInfoToForward">
+        <di:waypoint x="770" y="435"/>
+        <di:waypoint x="857" y="435"/>
+        <di:waypoint x="857" y="570"/>
+        <di:waypoint x="945" y="570"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="VerifyCoverageToRecordInsuranceVerdict_di" bpmnElement="VerifyCoverageToRecordInsuranceVerdict">
-        <di:waypoint x="250" y="1160"/>
-        <di:waypoint x="390" y="1160"/>
+      <bpmndi:BPMNEdge id="NotifyToEnd_di" bpmnElement="NotifyToEnd">
+        <di:waypoint x="250" y="618"/>
+        <di:waypoint x="991" y="618"/>
+        <di:waypoint x="991" y="475"/>
+        <di:waypoint x="1732" y="475"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="RecordSpecialistVerdictToSendVerdictsToClerk_di" bpmnElement="RecordSpecialistVerdictToSendVerdictsToClerk">
-        <di:waypoint x="510" y="880"/>
-        <di:waypoint x="650" y="880"/>
+      <bpmndi:BPMNEdge id="ForwardToWarehouse_di" bpmnElement="ForwardToWarehouse">
+        <di:waypoint x="995" y="570"/>
+        <di:waypoint x="1082" y="570"/>
+        <di:waypoint x="1082" y="380"/>
+        <di:waypoint x="1170" y="380"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="RecordInsuranceVerdictToSendVerdictsToClerkInsurance_di" bpmnElement="RecordInsuranceVerdictToSendVerdictsToClerkInsurance">
-        <di:waypoint x="510" y="1160"/>
-        <di:waypoint x="650" y="1160"/>
+      <bpmndi:BPMNEdge id="ForwardToFinance_di" bpmnElement="ForwardToFinance">
+        <di:waypoint x="995" y="570"/>
+        <di:waypoint x="1082" y="570"/>
+        <di:waypoint x="1082" y="490"/>
+        <di:waypoint x="1170" y="490"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="ReviewOutcomesToRejection_di" bpmnElement="ReviewOutcomesToRejection">
-        <di:waypoint x="250" y="428"/>
-        <di:waypoint x="320" y="428"/>
-        <di:waypoint x="320" y="365"/>
-        <di:waypoint x="390" y="365"/>
+      <bpmndi:BPMNEdge id="WarehouseToRecord_di" bpmnElement="WarehouseToRecord">
+        <di:waypoint x="250" y="1451"/>
+        <di:waypoint x="320" y="1451"/>
+        <di:waypoint x="320" y="1385"/>
+        <di:waypoint x="390" y="1385"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="ReviewOutcomesToApproval_di" bpmnElement="ReviewOutcomesToApproval">
-        <di:waypoint x="250" y="428"/>
-        <di:waypoint x="320" y="428"/>
-        <di:waypoint x="320" y="475"/>
-        <di:waypoint x="390" y="475"/>
+      <bpmndi:BPMNEdge id="FinanceToRecord_di" bpmnElement="FinanceToRecord">
+        <di:waypoint x="250" y="2361"/>
+        <di:waypoint x="320" y="2361"/>
+        <di:waypoint x="320" y="2295"/>
+        <di:waypoint x="390" y="2295"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SendRejectionNoticeToEndEventRejection_di" bpmnElement="SendRejectionNoticeToEndEventRejection">
-        <di:waypoint x="510" y="365"/>
-        <di:waypoint x="601" y="365"/>
-        <di:waypoint x="601" y="222"/>
-        <di:waypoint x="692" y="222"/>
+      <bpmndi:BPMNEdge id="RecordToWait_di" bpmnElement="RecordToWait">
+        <di:waypoint x="510" y="1385"/>
+        <di:waypoint x="597" y="1385"/>
+        <di:waypoint x="597" y="530"/>
+        <di:waypoint x="685" y="530"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SendApprovalToEndEventApproval_di" bpmnElement="SendApprovalToEndEventApproval">
-        <di:waypoint x="510" y="475"/>
-        <di:waypoint x="601" y="475"/>
-        <di:waypoint x="601" y="288"/>
-        <di:waypoint x="692" y="288"/>
+      <bpmndi:BPMNEdge id="RecordToWait_Finance_di" bpmnElement="RecordToWait_Finance">
+        <di:waypoint x="510" y="2295"/>
+        <di:waypoint x="597" y="2295"/>
+        <di:waypoint x="597" y="530"/>
+        <di:waypoint x="685" y="530"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
-        <di:waypoint x="190" y="1382"/>
-        <di:waypoint x="190" y="248"/>
+      <bpmndi:BPMNEdge id="WaitToReview_di" bpmnElement="WaitToReview">
+        <di:waypoint x="735" y="530"/>
+        <di:waypoint x="822" y="530"/>
+        <di:waypoint x="822" y="395"/>
+        <di:waypoint x="910" y="395"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
-        <di:waypoint x="710" y="526"/>
-        <di:waypoint x="190" y="840"/>
+      <bpmndi:BPMNEdge id="ReviewToReject_di" bpmnElement="ReviewToReject">
+        <di:waypoint x="1030" y="395"/>
+        <di:waypoint x="1117" y="395"/>
+        <di:waypoint x="1117" y="585"/>
+        <di:waypoint x="1205" y="585"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="MsgFlow_p2_di" bpmnElement="MsgFlow_p2">
-        <di:waypoint x="190" y="358"/>
-        <di:waypoint x="190" y="1120"/>
+      <bpmndi:BPMNEdge id="ReviewToApprove_di" bpmnElement="ReviewToApprove">
+        <di:waypoint x="1030" y="395"/>
+        <di:waypoint x="1117" y="395"/>
+        <di:waypoint x="1117" y="585"/>
+        <di:waypoint x="1205" y="585"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="MsgFlow_p3_di" bpmnElement="MsgFlow_p3">
-        <di:waypoint x="710" y="840"/>
-        <di:waypoint x="190" y="468"/>
+      <bpmndi:BPMNEdge id="RejectToRejectionNotice_di" bpmnElement="RejectToRejectionNotice">
+        <di:waypoint x="1255" y="585"/>
+        <di:waypoint x="1342" y="585"/>
+        <di:waypoint x="1342" y="420"/>
+        <di:waypoint x="1430" y="420"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="MsgFlow_p4_di" bpmnElement="MsgFlow_p4">
-        <di:waypoint x="710" y="1120"/>
-        <di:waypoint x="190" y="468"/>
+      <bpmndi:BPMNEdge id="RejectToEnd_di" bpmnElement="RejectToEnd">
+        <di:waypoint x="1550" y="420"/>
+        <di:waypoint x="1641" y="420"/>
+        <di:waypoint x="1641" y="475"/>
+        <di:waypoint x="1732" y="475"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ApproveToRefund_di" bpmnElement="ApproveToRefund">
+        <di:waypoint x="1255" y="585"/>
+        <di:waypoint x="1342" y="585"/>
+        <di:waypoint x="1342" y="530"/>
+        <di:waypoint x="1430" y="530"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="RefundToEnd_di" bpmnElement="RefundToEnd">
+        <di:waypoint x="250" y="728"/>
+        <di:waypoint x="320" y="728"/>
+        <di:waypoint x="320" y="530"/>
+        <di:waypoint x="390" y="530"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="RefundToEnd_Confirm_di" bpmnElement="RefundToEnd_Confirm">
+        <di:waypoint x="510" y="530"/>
+        <di:waypoint x="1121" y="530"/>
+        <di:waypoint x="1121" y="475"/>
+        <di:waypoint x="1732" y="475"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MissingInfoToCustomer_di" bpmnElement="MissingInfoToCustomer">
+        <di:waypoint x="190" y="284"/>
+        <di:waypoint x="190" y="2994"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="WarehouseRequest_di" bpmnElement="WarehouseRequest">
+        <di:waypoint x="190" y="314"/>
+        <di:waypoint x="190" y="1381"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="FinanceRequest_di" bpmnElement="FinanceRequest">
+        <di:waypoint x="190" y="380"/>
+        <di:waypoint x="190" y="2291"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="RejectionNoticeToCustomer_di" bpmnElement="RejectionNoticeToCustomer">
+        <di:waypoint x="190" y="482"/>
+        <di:waypoint x="190" y="3060"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="RefundConfirmationToCustomer_di" bpmnElement="RefundConfirmationToCustomer">
+        <di:waypoint x="190" y="548"/>
+        <di:waypoint x="190" y="3126"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

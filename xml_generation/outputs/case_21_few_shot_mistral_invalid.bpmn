@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_actor_customer_pool" name="Customer" processRef="Process_actor_customer_pool"/>
+    <bpmn:participant id="actor_actor_retailer_pool" name="Retailer" processRef="Process_actor_retailer_pool"/>
+    <bpmn:messageFlow id="mf1" name="Send return request" sourceRef="Event_03qjg3i" targetRef="Event_04q3q3j"/>
+    <bpmn:messageFlow id="Flow_02tqif3" name="Return Rejected" sourceRef="Event_08q3q3n" targetRef="Event_01jgj3g"/>
+    <bpmn:messageFlow id="Flow_03nrpm8z" name="Approval and Refund Confirmation" sourceRef="Event_09q3q3o" targetRef="Event_03qjg3i"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="submit_return" targetRef="Event_03qjg3i"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_actor_customer_pool" name="Customer" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_actor_customer_pool">
+      <bpmn:lane id="customer" name="Customer">
+        <bpmn:flowNodeRef>start_customer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_01jgj3g</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_02q3q3h</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_customer_rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>submit_return</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_customer" name="Start"/>
+    <bpmn:intermediateThrowEvent id="Event_01jgj3g" name="Send return request">
+      <bpmn:messageEventDefinition id="Event_01jgj3g_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Event_02q3q3h" name="Receive missing information notice">
+      <bpmn:messageEventDefinition id="Event_02q3q3h_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="end_customer_rejected" name="Return Rejected"/>
+    <bpmn:task id="submit_return" name="Submit Return Request"/>
+    <bpmn:sequenceFlow id="Flow_01kd72rx" sourceRef="start_customer" targetRef="submit_return"/>
+  </bpmn:process>
+  <bpmn:process id="Process_actor_retailer_pool" name="Retailer" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_actor_retailer_pool">
+      <bpmn:lane id="cs_agent" name="Customer Service Agent">
+        <bpmn:flowNodeRef>Event_03qjg3i</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_04q3q3j</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_05jgj3k</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_06q3q3l</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_07q3q3m</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_08q3q3n</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_09q3q3o</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_cs_agent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>register_return</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_information</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_verdicts</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_verdicts</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>join_verdicts</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="warehouse_inspector" name="Warehouse Inspector">
+        <bpmn:flowNodeRef>start_warehouse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_10jgj3p</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_11q3q3q</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_warehouse_inspection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>inspect_product</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="finance_officer" name="Finance Officer">
+        <bpmn:flowNodeRef>start_finance</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_12jgj3r</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_13q3q3s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_finance_eligibility</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_payment_eligibility</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:intermediateCatchEvent id="Event_03qjg3i" name="Receive complete information">
+      <bpmn:messageEventDefinition id="Event_03qjg3i_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="Event_04q3q3j" name="Send return request">
+      <bpmn:messageEventDefinition id="Event_04q3q3j_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Event_05jgj3k" name="Receive product inspection verdict">
+      <bpmn:messageEventDefinition id="Event_05jgj3k_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_06q3q3l" name="Receive payment eligibility verdict">
+      <bpmn:messageEventDefinition id="Event_06q3q3l_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="Event_07q3q3m" name="Review verdicts">
+      <bpmn:messageEventDefinition id="Event_07q3q3m_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="Event_08q3q3n" name="Send return rejection notice">
+      <bpmn:messageEventDefinition id="Event_08q3q3n_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="Event_09q3q3o" name="Send approval and process refund">
+      <bpmn:messageEventDefinition id="Event_09q3q3o_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="end_cs_agent" name="End"/>
+    <bpmn:startEvent id="start_warehouse" name="Return Request Received">
+      <bpmn:messageEventDefinition id="start_warehouse_def"/>
+    </bpmn:startEvent>
+    <bpmn:intermediateCatchEvent id="Event_10jgj3p" name="Receive return request">
+      <bpmn:messageEventDefinition id="Event_10jgj3p_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="Event_11q3q3q" name="Inspect product and record verdict">
+      <bpmn:messageEventDefinition id="Event_11q3q3q_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="end_warehouse_inspection" name="Product Inspection Completed"/>
+    <bpmn:startEvent id="start_finance" name="Return Request Received">
+      <bpmn:messageEventDefinition id="start_finance_def"/>
+    </bpmn:startEvent>
+    <bpmn:intermediateCatchEvent id="Event_12jgj3r" name="Receive return request">
+      <bpmn:messageEventDefinition id="Event_12jgj3r_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="Event_13q3q3s" name="Check payment eligibility and record verdict">
+      <bpmn:messageEventDefinition id="Event_13q3q3s_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="end_finance_eligibility" name="Payment Eligibility Check Completed"/>
+    <bpmn:task id="register_return" name="Register Return Request"/>
+    <bpmn:task id="check_information" name="Check Information Completeness"/>
+    <bpmn:task id="inspect_product" name="Inspect Product"/>
+    <bpmn:task id="check_payment_eligibility" name="Check Payment Eligibility"/>
+    <bpmn:task id="review_verdicts" name="Review Verdicts"/>
+    <bpmn:exclusiveGateway id="split_verdicts" name="Review Verdicts?" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="join_verdicts" name="Both Verdicts Received?" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="Flow_03kd72rx" sourceRef="Event_03qjg3i" targetRef="Event_04q3q3j"/>
+    <bpmn:sequenceFlow id="Flow_04pjo55" sourceRef="Event_04q3q3j" targetRef="register_return"/>
+    <bpmn:sequenceFlow id="Flow_05kd72rx" sourceRef="register_return" targetRef="split_verdicts"/>
+    <bpmn:sequenceFlow id="Flow_06pjo55" sourceRef="split_verdicts" targetRef="Event_08q3q3n" name="Negative verdict">
+      <bpmn:conditionExpression>Negative verdict</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_07kd72rx" sourceRef="split_verdicts" targetRef="join_verdicts"/>
+    <bpmn:sequenceFlow id="Flow_08pjo55" sourceRef="join_verdicts" targetRef="review_verdicts"/>
+    <bpmn:sequenceFlow id="Flow_09pjo55" sourceRef="review_verdicts" targetRef="Event_09q3q3o" name="Positive verdicts">
+      <bpmn:conditionExpression>Positive verdicts</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_10kd72rx" sourceRef="Event_09q3q3o" targetRef="end_cs_agent"/>
+    <bpmn:sequenceFlow id="Flow_11kd72rx" sourceRef="start_warehouse" targetRef="inspect_product"/>
+    <bpmn:sequenceFlow id="Flow_12pjo55" sourceRef="inspect_product" targetRef="Event_11q3q3q"/>
+    <bpmn:sequenceFlow id="Flow_13kd72rx" sourceRef="start_finance" targetRef="check_payment_eligibility"/>
+    <bpmn:sequenceFlow id="Flow_14pjo55" sourceRef="check_payment_eligibility" targetRef="Event_13q3q3s"/>
+    <bpmn:sequenceFlow id="Flow_15kd72rx" sourceRef="Event_13q3q3s" targetRef="join_verdicts"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_actor_customer_pool_di" bpmnElement="actor_actor_customer_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="760" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_actor_retailer_pool_di" bpmnElement="actor_actor_retailer_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="550" width="2320" height="1740"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="customer_di" bpmnElement="customer" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="730" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="cs_agent_di" bpmnElement="cs_agent" isHorizontal="true">
+        <dc:Bounds x="40" y="550" width="2290" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="warehouse_inspector_di" bpmnElement="warehouse_inspector" isHorizontal="true">
+        <dc:Bounds x="40" y="1130" width="2290" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="finance_officer_di" bpmnElement="finance_officer" isHorizontal="true">
+        <dc:Bounds x="40" y="1710" width="2290" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_customer_di" bpmnElement="start_customer">
+        <dc:Bounds x="172" y="138" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_01jgj3g_di" bpmnElement="Event_01jgj3g">
+        <dc:Bounds x="172" y="204" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_02q3q3h_di" bpmnElement="Event_02q3q3h">
+        <dc:Bounds x="172" y="270" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_customer_rejected_di" bpmnElement="end_customer_rejected">
+        <dc:Bounds x="172" y="336" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_return_di" bpmnElement="submit_return">
+        <dc:Bounds x="390" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_03qjg3i_di" bpmnElement="Event_03qjg3i">
+        <dc:Bounds x="172" y="668" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_05jgj3k_di" bpmnElement="Event_05jgj3k">
+        <dc:Bounds x="172" y="734" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_06q3q3l_di" bpmnElement="Event_06q3q3l">
+        <dc:Bounds x="172" y="800" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_07q3q3m_di" bpmnElement="Event_07q3q3m">
+        <dc:Bounds x="172" y="866" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_information_di" bpmnElement="check_information">
+        <dc:Bounds x="130" y="932" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_04q3q3j_di" bpmnElement="Event_04q3q3j">
+        <dc:Bounds x="432" y="822" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_08q3q3n_di" bpmnElement="Event_08q3q3n">
+        <dc:Bounds x="1212" y="782" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="join_verdicts_di" bpmnElement="join_verdicts" isMarkerVisible="true">
+        <dc:Bounds x="1205" y="848" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_09q3q3o_di" bpmnElement="Event_09q3q3o">
+        <dc:Bounds x="1732" y="822" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_cs_agent_di" bpmnElement="end_cs_agent">
+        <dc:Bounds x="1992" y="822" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="register_return_di" bpmnElement="register_return">
+        <dc:Bounds x="650" y="800" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_verdicts_di" bpmnElement="review_verdicts">
+        <dc:Bounds x="1430" y="800" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_verdicts_di" bpmnElement="split_verdicts" isMarkerVisible="true">
+        <dc:Bounds x="945" y="815" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_warehouse_di" bpmnElement="start_warehouse">
+        <dc:Bounds x="172" y="1336" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_10jgj3p_di" bpmnElement="Event_10jgj3p">
+        <dc:Bounds x="172" y="1402" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_warehouse_inspection_di" bpmnElement="end_warehouse_inspection">
+        <dc:Bounds x="172" y="1468" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_11q3q3q_di" bpmnElement="Event_11q3q3q">
+        <dc:Bounds x="692" y="1402" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="inspect_product_di" bpmnElement="inspect_product">
+        <dc:Bounds x="390" y="1380" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_finance_di" bpmnElement="start_finance">
+        <dc:Bounds x="172" y="1916" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_12jgj3r_di" bpmnElement="Event_12jgj3r">
+        <dc:Bounds x="172" y="1982" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_finance_eligibility_di" bpmnElement="end_finance_eligibility">
+        <dc:Bounds x="172" y="2048" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_13q3q3s_di" bpmnElement="Event_13q3q3s">
+        <dc:Bounds x="692" y="1982" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_payment_eligibility_di" bpmnElement="check_payment_eligibility">
+        <dc:Bounds x="390" y="1960" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_01kd72rx_di" bpmnElement="Flow_01kd72rx">
+        <di:waypoint x="208" y="156"/>
+        <di:waypoint x="299" y="156"/>
+        <di:waypoint x="299" y="255"/>
+        <di:waypoint x="390" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03kd72rx_di" bpmnElement="Flow_03kd72rx">
+        <di:waypoint x="208" y="686"/>
+        <di:waypoint x="320" y="686"/>
+        <di:waypoint x="320" y="840"/>
+        <di:waypoint x="432" y="840"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04pjo55_di" bpmnElement="Flow_04pjo55">
+        <di:waypoint x="468" y="840"/>
+        <di:waypoint x="650" y="840"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05kd72rx_di" bpmnElement="Flow_05kd72rx">
+        <di:waypoint x="770" y="840"/>
+        <di:waypoint x="945" y="840"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06pjo55_di" bpmnElement="Flow_06pjo55">
+        <di:waypoint x="995" y="840"/>
+        <di:waypoint x="1103" y="840"/>
+        <di:waypoint x="1103" y="800"/>
+        <di:waypoint x="1212" y="800"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07kd72rx_di" bpmnElement="Flow_07kd72rx">
+        <di:waypoint x="995" y="840"/>
+        <di:waypoint x="1100" y="840"/>
+        <di:waypoint x="1100" y="873"/>
+        <di:waypoint x="1205" y="873"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08pjo55_di" bpmnElement="Flow_08pjo55">
+        <di:waypoint x="1255" y="873"/>
+        <di:waypoint x="1342" y="873"/>
+        <di:waypoint x="1342" y="840"/>
+        <di:waypoint x="1430" y="840"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09pjo55_di" bpmnElement="Flow_09pjo55">
+        <di:waypoint x="1550" y="840"/>
+        <di:waypoint x="1732" y="840"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10kd72rx_di" bpmnElement="Flow_10kd72rx">
+        <di:waypoint x="1768" y="840"/>
+        <di:waypoint x="1992" y="840"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11kd72rx_di" bpmnElement="Flow_11kd72rx">
+        <di:waypoint x="208" y="1354"/>
+        <di:waypoint x="299" y="1354"/>
+        <di:waypoint x="299" y="1420"/>
+        <di:waypoint x="390" y="1420"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12pjo55_di" bpmnElement="Flow_12pjo55">
+        <di:waypoint x="510" y="1420"/>
+        <di:waypoint x="692" y="1420"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13kd72rx_di" bpmnElement="Flow_13kd72rx">
+        <di:waypoint x="208" y="1934"/>
+        <di:waypoint x="299" y="1934"/>
+        <di:waypoint x="299" y="2000"/>
+        <di:waypoint x="390" y="2000"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14pjo55_di" bpmnElement="Flow_14pjo55">
+        <di:waypoint x="510" y="2000"/>
+        <di:waypoint x="692" y="2000"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15kd72rx_di" bpmnElement="Flow_15kd72rx">
+        <di:waypoint x="728" y="2000"/>
+        <di:waypoint x="966" y="2000"/>
+        <di:waypoint x="966" y="873"/>
+        <di:waypoint x="1205" y="873"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="190" y="668"/>
+        <di:waypoint x="450" y="858"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02tqif3_di" bpmnElement="Flow_02tqif3">
+        <di:waypoint x="1230" y="782"/>
+        <di:waypoint x="190" y="240"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03nrpm8z_di" bpmnElement="Flow_03nrpm8z">
+        <di:waypoint x="1750" y="822"/>
+        <di:waypoint x="190" y="704"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="450" y="295"/>
+        <di:waypoint x="190" y="668"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

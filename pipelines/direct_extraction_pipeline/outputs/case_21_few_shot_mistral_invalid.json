@@ -1,272 +1,329 @@
 {
   "pools": [
     {
-      "id": "gp_pool",
-      "name": "GP"
+      "id": "actor_customer_pool",
+      "name": "Customer"
     },
     {
-      "id": "hospital_pool",
-      "name": "Hospital"
+      "id": "actor_retailer_pool",
+      "name": "Retailer"
     }
   ],
   "lanes": [
     {
-      "id": "gp",
-      "name": "GP",
-      "pool": "gp_pool"
+      "id": "customer",
+      "name": "Customer",
+      "pool": "actor_customer_pool"
     },
     {
-      "id": "admissions_clerk",
-      "name": "Admissions Clerk",
-      "pool": "hospital_pool"
+      "id": "cs_agent",
+      "name": "Customer Service Agent",
+      "pool": "actor_retailer_pool"
     },
     {
-      "id": "specialist",
-      "name": "Specialist",
-      "pool": "hospital_pool"
+      "id": "warehouse_inspector",
+      "name": "Warehouse Inspector",
+      "pool": "actor_retailer_pool"
     },
     {
-      "id": "insurance_officer",
-      "name": "Insurance Officer",
-      "pool": "hospital_pool"
+      "id": "finance_officer",
+      "name": "Finance Officer",
+      "pool": "actor_retailer_pool"
     }
   ],
   "tasks": [
     {
-      "id": "submit_referral",
-      "name": "Submit Referral Request",
+      "id": "submit_return",
+      "name": "Submit Return Request",
       "type": "task",
-      "lane": "gp"
+      "lane": "customer"
     },
     {
-      "id": "register_referral",
-      "name": "Register Referral",
+      "id": "register_return",
+      "name": "Register Return Request",
       "type": "task",
-      "lane": "admissions_clerk"
+      "lane": "cs_agent"
     },
     {
-      "id": "check_documentation",
-      "name": "Check Documentation",
+      "id": "check_information",
+      "name": "Check Information Completeness",
       "type": "task",
-      "lane": "admissions_clerk"
+      "lane": "cs_agent"
     },
     {
-      "id": "notify_missing_docs",
-      "name": "Notify GP of Missing Docs",
+      "id": "inspect_product",
+      "name": "Inspect Product",
       "type": "task",
-      "lane": "admissions_clerk"
+      "lane": "warehouse_inspector"
     },
     {
-      "id": "forward_referral",
-      "name": "Forward Referral to Specialist and Insurance",
+      "id": "check_payment_eligibility",
+      "name": "Check Payment Eligibility",
       "type": "task",
-      "lane": "admissions_clerk"
-    },
-    {
-      "id": "conduct_assessment",
-      "name": "Conduct Medical Assessment",
-      "type": "task",
-      "lane": "specialist"
-    },
-    {
-      "id": "record_verdict",
-      "name": "Record Verdict",
-      "type": "task",
-      "lane": "specialist"
-    },
-    {
-      "id": "verify_coverage",
-      "name": "Verify Coverage",
-      "type": "task",
-      "lane": "insurance_officer"
-    },
-    {
-      "id": "record_coverage_verdict",
-      "name": "Record Coverage Verdict",
-      "type": "task",
-      "lane": "insurance_officer"
+      "lane": "finance_officer"
     },
     {
       "id": "review_verdicts",
       "name": "Review Verdicts",
       "type": "task",
-      "lane": "admissions_clerk"
-    },
-    {
-      "id": "send_rejection_notice",
-      "name": "Send Rejection Notice to GP",
-      "type": "task",
-      "lane": "admissions_clerk"
-    },
-    {
-      "id": "send_approval_notice",
-      "name": "Send Approval Notice to GP",
-      "type": "task",
-      "lane": "admissions_clerk"
+      "lane": "cs_agent"
     }
   ],
   "events": [
     {
-      "id": "start_gp",
+      "id": "start_customer",
       "name": "Start",
       "type": "startEvent",
-      "lane": "gp",
+      "lane": "customer",
       "eventDefinition": "none"
     },
     {
-      "id": "end_gp",
-      "name": "End",
-      "type": "endEvent",
-      "lane": "gp",
-      "eventDefinition": "none"
-    },
-    {
-      "id": "start_hospital",
-      "name": "Referral Received",
-      "type": "startEvent",
-      "lane": "admissions_clerk",
+      "id": "Event_01jgj3g",
+      "name": "Send return request",
+      "type": "intermediateThrowEvent",
+      "lane": "customer",
       "eventDefinition": "message"
     },
     {
-      "id": "end_hospital_rejected",
-      "name": "Rejection Sent to GP",
+      "id": "Event_02q3q3h",
+      "name": "Receive missing information notice",
+      "type": "intermediateCatchEvent",
+      "lane": "customer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_customer_rejected",
+      "name": "Return Rejected",
       "type": "endEvent",
-      "lane": "admissions_clerk",
+      "lane": "customer",
       "eventDefinition": "none"
     },
     {
-      "id": "end_hospital_approved",
-      "name": "Approval Sent to GP",
+      "id": "Event_03qjg3i",
+      "name": "Receive complete information",
+      "type": "intermediateCatchEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_04q3q3j",
+      "name": "Send return request",
+      "type": "intermediateThrowEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_05jgj3k",
+      "name": "Receive product inspection verdict",
+      "type": "intermediateCatchEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_06q3q3l",
+      "name": "Receive payment eligibility verdict",
+      "type": "intermediateCatchEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_07q3q3m",
+      "name": "Review verdicts",
+      "type": "intermediateThrowEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_08q3q3n",
+      "name": "Send return rejection notice",
+      "type": "intermediateThrowEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_09q3q3o",
+      "name": "Send approval and process refund",
+      "type": "intermediateThrowEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_cs_agent",
+      "name": "End",
       "type": "endEvent",
-      "lane": "admissions_clerk",
+      "lane": "cs_agent",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_warehouse",
+      "name": "Return Request Received",
+      "type": "startEvent",
+      "lane": "warehouse_inspector",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_10jgj3p",
+      "name": "Receive return request",
+      "type": "intermediateCatchEvent",
+      "lane": "warehouse_inspector",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_11q3q3q",
+      "name": "Inspect product and record verdict",
+      "type": "intermediateThrowEvent",
+      "lane": "warehouse_inspector",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_warehouse_inspection",
+      "name": "Product Inspection Completed",
+      "type": "endEvent",
+      "lane": "warehouse_inspector",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_finance",
+      "name": "Return Request Received",
+      "type": "startEvent",
+      "lane": "finance_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_12jgj3r",
+      "name": "Receive return request",
+      "type": "intermediateCatchEvent",
+      "lane": "finance_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_13q3q3s",
+      "name": "Check payment eligibility and record verdict",
+      "type": "intermediateThrowEvent",
+      "lane": "finance_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_finance_eligibility",
+      "name": "Payment Eligibility Check Completed",
+      "type": "endEvent",
+      "lane": "finance_officer",
       "eventDefinition": "none"
     }
   ],
   "gateways": [
     {
       "id": "split_verdicts",
-      "name": "Split Verdicts",
-      "type": "parallelGateway",
-      "lane": "admissions_clerk",
+      "name": "Review Verdicts?",
+      "type": "exclusiveGateway",
+      "lane": "cs_agent",
       "gatewayDirection": "diverging"
     },
     {
       "id": "join_verdicts",
-      "name": "Join Verdicts",
+      "name": "Both Verdicts Received?",
       "type": "parallelGateway",
-      "lane": "admissions_clerk",
+      "lane": "cs_agent",
       "gatewayDirection": "converging"
     }
   ],
   "sequence_flows": [
     {
-      "id": "sf1",
-      "from": "start_gp",
-      "to": "submit_referral"
+      "id": "Flow_01kd72rx",
+      "from": "start_customer",
+      "to": "submit_return"
     },
     {
-      "id": "sf2",
-      "from": "submit_referral",
-      "to": "register_referral"
+      "id": "Flow_02pjo55",
+      "from": "submit_return",
+      "to": "Event_03qjg3i"
     },
     {
-      "id": "sf3",
-      "from": "register_referral",
-      "to": "check_documentation"
+      "id": "Flow_03kd72rx",
+      "from": "Event_03qjg3i",
+      "to": "Event_04q3q3j"
     },
     {
-      "id": "sf4",
-      "from": "check_documentation",
+      "id": "Flow_04pjo55",
+      "from": "Event_04q3q3j",
+      "to": "register_return"
+    },
+    {
+      "id": "Flow_05kd72rx",
+      "from": "register_return",
       "to": "split_verdicts"
     },
     {
-      "id": "sf5",
+      "id": "Flow_06pjo55",
       "from": "split_verdicts",
-      "to": "notify_missing_docs",
-      "condition": "Missing Docs"
+      "to": "Event_08q3q3n",
+      "condition": "Negative verdict"
     },
     {
-      "id": "sf6",
+      "id": "Flow_07kd72rx",
       "from": "split_verdicts",
-      "to": "forward_referral",
-      "condition": "Docs Complete"
-    },
-    {
-      "id": "sf7",
-      "from": "notify_missing_docs",
-      "to": "end_gp"
-    },
-    {
-      "id": "sf8",
-      "from": "forward_referral",
-      "to": "conduct_assessment"
-    },
-    {
-      "id": "sf9",
-      "from": "conduct_assessment",
-      "to": "record_verdict"
-    },
-    {
-      "id": "sf10",
-      "from": "record_verdict",
-      "to": "verify_coverage"
-    },
-    {
-      "id": "sf11",
-      "from": "verify_coverage",
-      "to": "record_coverage_verdict"
-    },
-    {
-      "id": "sf12",
-      "from": "record_coverage_verdict",
       "to": "join_verdicts"
     },
     {
-      "id": "sf13",
+      "id": "Flow_08pjo55",
       "from": "join_verdicts",
       "to": "review_verdicts"
     },
     {
-      "id": "sf14",
+      "id": "Flow_09pjo55",
       "from": "review_verdicts",
-      "to": "send_rejection_notice",
-      "condition": "Negative Verdict"
+      "to": "Event_09q3q3o",
+      "condition": "Positive verdicts"
     },
     {
-      "id": "sf15",
-      "from": "review_verdicts",
-      "to": "send_approval_notice",
-      "condition": "Positive Verdict"
+      "id": "Flow_10kd72rx",
+      "from": "Event_09q3q3o",
+      "to": "end_cs_agent"
     },
     {
-      "id": "sf16",
-      "from": "send_rejection_notice",
-      "to": "end_hospital_rejected"
+      "id": "Flow_11kd72rx",
+      "from": "start_warehouse",
+      "to": "inspect_product"
     },
     {
-      "id": "sf17",
-      "from": "send_approval_notice",
-      "to": "end_hospital_approved"
+      "id": "Flow_12pjo55",
+      "from": "inspect_product",
+      "to": "Event_11q3q3q"
+    },
+    {
+      "id": "Flow_13kd72rx",
+      "from": "start_finance",
+      "to": "check_payment_eligibility"
+    },
+    {
+      "id": "Flow_14pjo55",
+      "from": "check_payment_eligibility",
+      "to": "Event_13q3q3s"
+    },
+    {
+      "id": "Flow_15kd72rx",
+      "from": "Event_13q3q3s",
+      "to": "join_verdicts"
     }
   ],
   "message_flows": [
     {
       "id": "mf1",
-      "from": "submit_referral",
-      "to": "start_hospital",
-      "name": "Referral Request"
+      "from": "Event_03qjg3i",
+      "to": "Event_04q3q3j",
+      "name": "Send return request"
     },
     {
-      "id": "mf2",
-      "from": "notify_missing_docs",
-      "to": "end_gp",
-      "name": "Missing Docs Notice"
+      "id": "Flow_02tqif3",
+      "from": "Event_08q3q3n",
+      "to": "Event_01jgj3g",
+      "name": "Return Rejected"
     },
     {
-      "id": "mf3",
-      "from": "send_approval_notice",
-      "to": "end_hospital_approved",
-      "name": "Approval Notice"
+      "id": "Flow_03nrpm8z",
+      "from": "Event_09q3q3o",
+      "to": "Event_03qjg3i",
+      "name": "Approval and Refund Confirmation"
     }
   ]
 }

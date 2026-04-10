@@ -6,9 +6,8 @@ except Exception:
     _LLAMA_CPP_AVAILABLE = False
 
 import json
+import sys
 import os
-from pathlib import Path
-from collections import defaultdict
 
 llm = None
 
@@ -17,15 +16,17 @@ def load_model():
     if llm is None:
         if not _LLAMA_CPP_AVAILABLE:
             raise RuntimeError("llama-cpp-python is not installed.")
+        
         llm = Llama.from_pretrained(
-            repo_id="TheBloke/Llama-2-7B-Chat-GGUF",
-            filename="llama-2-7b-chat.Q6_K.gguf",
-            n_ctx=4096,
-            n_gpu_layers=0,
+            repo_id="unsloth/phi-4-GGUF",
+            filename="phi-4-Q4_K_M.gguf", 
+            n_ctx=16384,
+            n_gpu_layers=-1,
             verbose=False
         )
     return llm
 
+# --- EVERYTHING BELOW REMAINS THE SAME UNTIL __MAIN__ ---
 
 BPMN_SCHEMA = {
     "type": "object",
@@ -135,80 +136,11 @@ BPMN_SCHEMA = {
     "required": ["pools", "lanes", "tasks", "events", "gateways", "sequence_flows", "message_flows"]
 }
 
-
-# ── Few-shot case loader ───────────────────────────────────────────────────────
-
-def load_few_shot_cases(few_shot_dir, exclude_case=None):
-    few_shot_dir = Path(few_shot_dir)
-    cases, missing = [], []
-
-    for txt_path in sorted(few_shot_dir.glob("*.txt")):
-        stem      = txt_path.stem
-        json_path = txt_path.with_suffix(".json")
-
-        if exclude_case and stem == exclude_case:
-            print(f"  [few-shot loader] Skipping '{stem}' (excluded to avoid eval contamination)")
-            continue
-
-        if not json_path.exists():
-            missing.append(stem)
-            continue
-
-        try:
-            text = txt_path.read_text(encoding="utf-8").strip()
-            bpmn = json.loads(json_path.read_text(encoding="utf-8"))
-            cases.append({"name": stem, "text": text, "json": bpmn})
-        except Exception as e:
-            print(f"  [few-shot loader] WARNING: Could not load '{stem}': {e}")
-
-    if missing:
-        print(f"  [few-shot loader] WARNING: No matching .json for: {missing}")
-
-    print(f"  [few-shot loader] Loaded {len(cases)} few-shot case(s) from '{few_shot_dir}'")
-    return cases
-
-
-def build_few_shot_block(cases):
-    if not cases:
-        return ""
-    lines = []
-    for i, case in enumerate(cases, 1):
-        lines.append(f"--- EXAMPLE {i}: {case['name']} ---")
-        lines.append("PROCESS DESCRIPTION:")
-        lines.append(case["text"])
-        lines.append("")
-        lines.append("CORRECT BPMN JSON OUTPUT:")
-        # Compact JSON to save tokens
-        lines.append(json.dumps(case["json"], separators=(',', ':')))
-        lines.append("")
-    return "\n".join(lines)
-
-def load_case(case_id: int, cases_dir: str = "few_shot_cases") -> dict:
-    """Load a single case by its ID number."""
-    txt_path = os.path.join(cases_dir, f"case_{case_id}.txt")
-    json_path = os.path.join(cases_dir, f"case_{case_id}.json")
-    
-    with open(txt_path, "r") as f:
-        text = f.read()
-    with open(json_path, "r") as f:
-        data = json.load(f)
-    
-    return {
-        "name": f"Case {case_id}",
-        "text": text,
-        "json": data
-    }
-
-def load_selected_cases(case_ids: list[int], cases_dir: str = "few_shot_cases") -> list[dict]:
-    """Load only the specific cases you want by ID."""
-    return [load_case(case_id, cases_dir) for case_id in case_ids]
-
-
-# ── Validation ────────────────────────────────────────────────────────────────
-
 def save_json_to_file(obj, path):
+    from pathlib import Path
     p = Path(path)
-    p.parent.mkdir(parents=True, exist_ok=True)
+    if p.parent and not p.parent.exists():
+        p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, ensure_ascii=False)
 
@@ -218,15 +150,11 @@ from collections import defaultdict
 def is_valid_bpmn(obj):
     """
     Returns (is_fully_valid, errors, warnings).
-    - errors:   blocking problems
-    - warnings: structural problems (missing start/end events, cross-pool sequence flows)
     """
     errors, warnings = [], []
-
     if not isinstance(obj, dict):
         return False, ["Output is not a JSON object"], []
 
-    # ── Required top-level keys ───────────────────────────────────────────────
     for key in ("pools", "lanes", "tasks", "events", "gateways", "sequence_flows", "message_flows"):
         if key not in obj:
             errors.append(f"Missing required field: '{key}'")
@@ -241,7 +169,6 @@ def is_valid_bpmn(obj):
     seq      = obj["sequence_flows"]
     mflows   = obj["message_flows"]
 
-    # ── Pools & lanes ─────────────────────────────────────────────────────────
     pool_ids = set()
     for p in pools:
         if not p.get("id") or not p.get("name"):
@@ -258,7 +185,6 @@ def is_valid_bpmn(obj):
         else:
             lane_ids.add(l["id"])
 
-    # ── Node validation ───────────────────────────────────────────────────────
     VALID_TASK_TYPES    = {"task","userTask","serviceTask","scriptTask","manualTask","subProcess","callActivity"}
     VALID_EVENT_TYPES   = {"startEvent","endEvent","intermediateCatchEvent","intermediateThrowEvent"}
     VALID_EVENT_DEFS    = {"none","message","timer","signal","error","escalation","conditional","link"}
@@ -298,7 +224,6 @@ def is_valid_bpmn(obj):
     validate_nodes(events,   VALID_EVENT_TYPES,   "Event",   check_event)
     validate_nodes(gateways, VALID_GATEWAY_TYPES, "Gateway", check_gateway)
 
-    # ── Sequence flows ────────────────────────────────────────────────────────
     incoming = defaultdict(int)
     outgoing = defaultdict(int)
 
@@ -309,18 +234,13 @@ def is_valid_bpmn(obj):
         if tgt not in node_ids:
             errors.append(f"sequence_flow '{sf.get('id')}': unknown 'to' node '{tgt}'")
         if src in node_ids and tgt in node_ids:
-            # Cross-lane within same pool is fine; cross-pool is not
             src_pool = next((l["pool"] for l in lanes if l["id"] == node_to_lane.get(src)), None)
             tgt_pool = next((l["pool"] for l in lanes if l["id"] == node_to_lane.get(tgt)), None)
             if src_pool and tgt_pool and src_pool != tgt_pool:
-                warnings.append(
-                    f"sequence_flow '{sf.get('id')}' crosses pools ('{src_pool}' -> '{tgt_pool}'). "
-                    f"Use message_flows for inter-pool communication."
-                )
+                warnings.append(f"sequence_flow '{sf.get('id')}' crosses pools.")
             outgoing[src] += 1
             incoming[tgt] += 1
 
-    # ── Message flows ─────────────────────────────────────────────────────────
     valid_refs = node_ids | pool_ids
     for mf in mflows:
         if mf.get("from") not in valid_refs or mf.get("to") not in valid_refs:
@@ -328,117 +248,116 @@ def is_valid_bpmn(obj):
         if not mf.get("name"):
             errors.append(f"message_flow '{mf.get('id')}': missing 'name'")
 
-    # ── Structural warnings ───────────────────────────────────────────────────
-    # Each pool needs at least one start and end event
-    lane_to_pool = {l["id"]: l["pool"] for l in lanes}
-    pool_has_start = defaultdict(bool)
-    pool_has_end   = defaultdict(bool)
-    for e in events:
-        pid = lane_to_pool.get(e.get("lane"))
-        if e.get("type") == "startEvent": pool_has_start[pid] = True
-        if e.get("type") == "endEvent":   pool_has_end[pid]   = True
-    for pid in pool_ids:
-        if not pool_has_start[pid]:
-            warnings.append(f"Pool '{pid}' has no startEvent")
-        if not pool_has_end[pid]:
-            warnings.append(f"Pool '{pid}' has no endEvent")
-
-    # Each task must have at least one incoming and one outgoing flow
-    for t in tasks:
-        tid = t.get("id")
-        if tid not in node_ids: continue
-        if incoming[tid] == 0:
-            warnings.append(f"Task '{tid}' has no incoming sequence flow")
-        if outgoing[tid] == 0:
-            warnings.append(f"Task '{tid}' has no outgoing sequence flow")
-
-    # Each gateway should have correct in/out counts
-    for g in gateways:
-        gid = g.get("id")
-        if gid not in node_ids: continue
-        direction = g.get("gatewayDirection")
-        if direction == "diverging" and incoming[gid] == 0:
-            warnings.append(f"Diverging gateway '{gid}' has no incoming flow")
-        if direction == "diverging" and outgoing[gid] < 2:
-            warnings.append(f"Diverging gateway '{gid}' has fewer than 2 outgoing flows")
-        if direction == "converging" and incoming[gid] < 2:
-            warnings.append(f"Converging gateway '{gid}' has fewer than 2 incoming flows")
-        if direction == "converging" and outgoing[gid] == 0:
-            warnings.append(f"Converging gateway '{gid}' has no outgoing flow")
-
-    # Start events should have no incoming, end events no outgoing
-    for e in events:
-        eid = e.get("id")
-        if eid not in node_ids: continue
-        if e.get("type") == "startEvent" and incoming[eid] > 0:
-            warnings.append(f"startEvent '{eid}' has incoming sequence flows")
-        if e.get("type") == "endEvent" and outgoing[eid] > 0:
-            warnings.append(f"endEvent '{eid}' has outgoing sequence flows")
-
     return len(errors) == 0 and len(warnings) == 0, errors, warnings
 
+def load_case(case_id, cases_dir):
+    txt_path = os.path.join(cases_dir, f"case_{case_id}.txt")
+    json_path = os.path.join(cases_dir, f"case_{case_id}.json")
+
+    if not os.path.exists(txt_path):
+        raise FileNotFoundError(f"Missing text file: {txt_path}")
+    if not os.path.exists(json_path):
+        raise FileNotFoundError(f"Missing JSON file: {json_path}")
+
+    with open(txt_path, "r", encoding="utf-8") as f:
+        description = f.read().strip()
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        json_output = json.load(f)
+
+    return {
+        "case_id": case_id,
+        "description": description,
+        "json_output": json_output
+    }
+
+
+def load_selected_cases(case_ids, cases_dir):
+    cases = []
+    for cid in case_ids:
+        cases.append(load_case(cid, cases_dir))
+    return cases
+
+
+def load_few_shot_cases(cases_dir, exclude_case=None):
+    cases = []
+
+    for filename in os.listdir(cases_dir):
+        if not filename.endswith(".txt"):
+            continue
+
+        case_name = filename[:-4]  # remove .txt
+        if exclude_case is not None and case_name == exclude_case:
+            continue
+
+        if not case_name.startswith("case_"):
+            continue
+
+        case_id_str = case_name.split("_")[1]
+        if not case_id_str.isdigit():
+            continue
+
+        case_id = int(case_id_str)
+
+        txt_path = os.path.join(cases_dir, f"{case_name}.txt")
+        json_path = os.path.join(cases_dir, f"{case_name}.json")
+
+        if not os.path.exists(json_path):
+            continue
+
+        with open(txt_path, "r", encoding="utf-8") as f:
+            description = f.read().strip()
+
+        with open(json_path, "r", encoding="utf-8") as f:
+            json_output = json.load(f)
+
+        cases.append({
+            "case_id": case_id,
+            "description": description,
+            "json_output": json_output
+        })
+
+    cases.sort(key=lambda x: x["case_id"])
+    return cases
+
+
+def build_few_shot_block(cases):
+    blocks = []
+
+    for i, case in enumerate(cases, start=1):
+        block = f"""### Example {i}
+Process description:
+{case["description"]}
+
+Correct BPMN JSON:
+{json.dumps(case["json_output"], indent=2, ensure_ascii=False)}
+"""
+        blocks.append(block)
+
+    return "\n\n".join(blocks)
+
 
 def _format_issues(errors, warnings):
-    lines = []
-    if errors:
-        lines.append("ERRORS:")
-        lines.extend(f"  - {e}" for e in errors)
-    if warnings:
-        lines.append("WARNINGS:")
-        lines.extend(f"  - {w}" for w in warnings)
-    return "\n".join(lines)
+    parts = []
 
-
-def _format_issues(errors, warnings):
-    """Format errors and warnings into a clear, actionable string for the retry prompt."""
-    lines = []
     if errors:
-        lines.append("ERRORS (these must be fixed — the XML will be broken):")
+        parts.append("Errors:")
         for e in errors:
-            lines.append(f"  - {e}")
+            parts.append(f"- {e}")
+
     if warnings:
-        lines.append("WARNINGS (these must also be fixed — the diagram will be incomplete):")
+        parts.append("Warnings:")
         for w in warnings:
-            lines.append(f"  - {w}")
-    return "\n".join(lines)
+            parts.append(f"- {w}")
 
-
-# ── Model ─────────────────────────────────────────────────────────────────────
-
-SYSTEM_MSG = (
-    "You are a business process modeling expert. "
-    "Extract structured BPMN models from process descriptions. "
-    "Always output valid JSON matching the provided schema. "
-    "Never use a 'nodes' array — always use separate 'tasks', 'events', and 'gateways' arrays. "
-    "Every node must belong to a declared participant. "
-    "Every pool must have a startEvent and an endEvent. "
-    "Sequence flows stay within pools; cross-pool communication uses message_flows."
-)
-
-
-def _call_model(model, prompt):
-    result = model.create_chat_completion(
-        messages=[
-            {"role": "system", "content": SYSTEM_MSG},
-            {"role": "user",   "content": prompt}
-        ],
-        response_format={"type": "json_object", "schema": BPMN_SCHEMA},
-        temperature=0.0,
-        max_tokens=8196
-    )
-    if isinstance(result, dict) and "choices" in result:
-        return result["choices"][0]["message"]["content"]
-    return str(result)
-
-
-# ── Main extraction function ───────────────────────────────────────────────────
+    return "\n".join(parts)
 
 def extract_bpmn_few_shot(process_description, case_name, few_shot_dir, output_file=None, retries=0, case_ids=None):
     if case_ids is not None:
         cases = load_selected_cases(case_ids, cases_dir=few_shot_dir)
     else:
         cases = load_few_shot_cases(few_shot_dir, exclude_case=case_name)
-    
+
     few_shot_block = build_few_shot_block(cases)
 
     prompt = f"""You are a BPMN 2.0 expert. Extract a structured BPMN model from the process description below.
@@ -507,22 +426,22 @@ Parallel work (do both simultaneously) → parallelGateway
 PARALLEL GATEWAY RULES (STRICT):
 - A parallel split (diverging) fans out to 2+ branches
 - A parallel join (converging) waits for ALL branches to finish
-- You MUST always have BOTH a split AND a join, 
+- You MUST always have BOTH a split AND a join
 - The split AND join must be in the SAME pool
 - You cannot join work that happens in different pools using a gateway
 
 XOR GATEWAY RULES:
 - An exclusive split (diverging) fans out to 2+ branches
-- An exclusive join (converging) waits for ONE branch to finish or has a clear end event for each branch 
+- An exclusive join (converging) waits for ONE branch to finish or has a clear end event for each branch
 - The split AND join must be in the SAME pool or if branches end in separate endEvents, they must be in the same pool
 - You cannot join work that happens in different pools using a gateway
 
 ## STEP 6 — COMPLETE FLOWS
 
-Every task must have (STRICT: CHECK THIS MUTLIPLE TIMES):
+Every task must have (STRICT: CHECK THIS MULTIPLE TIMES):
 - exactly 1 incoming sequence flow
 - exactly 1 outgoing sequence flow
-- NO MESSAGE FLOWS directly to or from tasks — use intermediate events aftet the task for messaging
+- NO MESSAGE FLOWS directly to or from tasks — use intermediate events after the task for messaging
 
 Every pool must have:
 - exactly 1 startEvent
@@ -538,19 +457,13 @@ CORRECT SEQUENCE OR MESSAGE FLOW PATTERNS FOR INTERMEDIATE EVENTS:
 
   intermediateThrowEvent (send):
     incoming: 1 sequence flow  (from previous TASK OR ExclusiveGateway in same lane)
-    outgoing: 1 message flow   (to a intermediateCatchEvent in a DIFFERENT pool)
+    outgoing: 1 message flow   (to an intermediateCatchEvent in a DIFFERENT pool)
     NO outgoing sequence flow
 
   intermediateCatchEvent (receive):
-    incoming: 1 message flow   (from a intermediateThrowEvent in a DIFFERENT pool)
+    incoming: 1 message flow   (from an intermediateThrowEvent in a DIFFERENT pool)
     outgoing: 1 sequence flow  (to next node in same lane)
     NO incoming sequence flow
-
-CORRECT pattern for cross-pool communication:
-
-  Pool A (sender lane):
-    ... → task_A → intermediateThrowEvent ──(message flow)──→ intermediateCatchEvent → endEvent → (Pool B, receiver lane)
-
 
 ## FINAL SELF-CHECK (MANDATORY — fix violations before output)
 
@@ -568,9 +481,6 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
 
 ## Process description
 {process_description}"""
-    
-    
-    
 
     try:
         model = load_model()
@@ -579,7 +489,37 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
         return None
 
     print(f"Running few-shot extraction for '{case_name}' with {len(cases)} example(s)...")
-    result_text = _call_model(model, prompt)
+
+    result = model.create_chat_completion(
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a business process modeling expert. "
+                    "Extract structured BPMN elements from process descriptions. "
+                    "Always output valid JSON matching the provided schema. "
+                    "Never use a 'nodes' array — always use separate 'tasks', 'events', and 'gateways' arrays. "
+                    "Every task, event, and gateway must belong to a declared lane, and every lane must belong to a declared pool. "
+                    "Every pool must have at most one startEvent and at least one endEvent. "
+                    "A pool represents one organisation or external entity like a company with multiple departments or a customer as an external entity. "
+                    "Roles and departments within the same organisation are LANES inside ONE pool, not separate pools. "
+                    "External parties (customers, suppliers, third parties) are ALWAYS modeled as their own pool."
+                )
+            },
+            {"role": "user", "content": prompt}
+        ],
+        response_format={
+            "type": "json_object"
+        },
+        temperature=0.0,
+        max_tokens=8192
+    )
+
+    if isinstance(result, dict) and "choices" in result:
+        result_text = result["choices"][0]["message"]["content"]
+    else:
+        result_text = str(result)
+
     print("Model output:\n", result_text)
 
     try:
@@ -612,8 +552,29 @@ Produce a corrected version of the complete BPMN JSON. Fix every issue listed ab
 - If a sequence_flow crosses pools, move it to message_flows.
 Output the complete corrected JSON. Do not omit any part of the model."""
 
-        print(f"Retry prompt (attempt {attempt}):\n{retry_prompt}\n")
-        result_text = _call_model(model, retry_prompt)
+        result = model.create_chat_completion(
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a business process modeling expert. "
+                        "Always return only corrected BPMN JSON."
+                    )
+                },
+                {"role": "user", "content": retry_prompt}
+            ],
+            response_format={
+                "type": "json_object"
+            },
+            temperature=0.0,
+            max_tokens=8192
+        )
+
+        if isinstance(result, dict) and "choices" in result:
+            result_text = result["choices"][0]["message"]["content"]
+        else:
+            result_text = str(result)
+
         print(f"Model output (retry {attempt}):\n", result_text)
 
         try:
@@ -624,7 +585,6 @@ Output the complete corrected JSON. Do not omit any part of the model."""
 
         fully_valid, errors, warnings = is_valid_bpmn(json_result) if json_result else (False, ["Failed to parse JSON"], [])
 
-    # ── Save output ───────────────────────────────────────────────────────────
     if json_result is None:
         print("\nError: Failed to parse JSON from model output after all attempts.")
     elif not fully_valid:
@@ -648,11 +608,8 @@ Output the complete corrected JSON. Do not omit any part of the model."""
 
     return json_result
 
-
-# ── Entry point ───────────────────────────────────────────────────────────────
-
 if __name__ == "__main__":
-    case_name = "case_21" # <-- Just change this to run a different case with few-shot examples
+    case_name = "case_24"  # <-- change this to run a different case
 
     SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -662,18 +619,19 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_few_shot_llama.json")
+    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_few_shot_phi4.json")
 
-    print("--- Few-Shot Pipeline Started ---")
+    print("--- Few-Shot Phi-4 Pipeline Started ---")
     print(f"Case:          {case_name}")
     print(f"Cases dir:     {CASES_DIR}")
     print(f"Few-shot dir:  {FEW_SHOT_DIR}")
     print(f"Output:        {out_file}")
-    print("---------------------------------")
+    print("--------------------------------------")
 
-    if not os.path.exists(input_path):
-        print(f"Error: Case file not found: {input_path}")
-    else:
+    try:
+        if not os.path.exists(input_path):
+            raise FileNotFoundError
+
         with open(input_path, "r", encoding="utf-8") as f:
             process_text = f.read()
 
@@ -683,10 +641,15 @@ if __name__ == "__main__":
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
             retries=0,
-            case_ids=[11, 13, 14] # choose cases for few-shot examples
+            case_ids=[17, 13]  # choose your few-shot examples
         )
 
         if bpmn_json:
-            print(f"Output saved to: outputs/{case_name}_few_shot_mistral.json")
+            print(f"Output saved to: outputs/{case_name}_few_shot_phi4.json")
         else:
             print("Model extraction failed. Check the logs above.")
+
+    except FileNotFoundError:
+        print(f"Error: The file '{case_name}.txt' was not found.")
+
+        

@@ -1,15 +1,1 @@
-A municipal authority manages building permit applications submitted by contractors.
-The contractor submits a building permit application to the permits office.
-The permits clerk registers the application and checks whether all required documentation
-(e.g. architectural drawings, site plan, structural calculations) is included.
-If the documentation is incomplete, the permits clerk notifies the contractor of the missing documents
-and requests resubmission. The contractor collects the missing documents and resubmits them,
-after which the permits clerk checks completeness again.
-Once the documentation is confirmed complete, the permits office simultaneously forwards the application
-to the urban planning department for a zoning compliance review and to the building safety department
-for a structural safety assessment.
-The urban planner reviews the application for zoning compliance and records their verdict.
-The safety engineer assesses the structural safety and records their verdict.
-Once both verdicts are recorded, the permits clerk reviews the combined outcomes.
-If either verdict is negative, the permits clerk sends a permit refusal notice to the contractor and the process ends.
-If both verdicts are positive, the permits clerk issues the building permit to the contractor and the process ends.
+Upon receiving a mortgage application, the bank initiates the mortgage assessment process. A mortgage file is created by the bank, marking the official start. Then the bank concurrently evaluates the clients financial stability, gathers income statements, and checks for other credit applications. Following this, an in-depth risk analysis is performed to further assess the clients eligibility. If the assessment is positive, a line of credit is granted to the client. If the assessment is negative, the mortgage application is declined.

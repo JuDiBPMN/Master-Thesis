@@ -1,13 +1,1 @@
-A company manages recruitment processes for job vacancies posted by hiring managers.
-The hiring manager submits a vacancy request to the HR department.
-The HR recruiter registers the vacancy and posts the job advertisement.
-Candidates apply for the vacancy. The HR recruiter screens the received applications
-and selects a shortlist of candidates.
-For each shortlisted candidate, the HR department simultaneously schedules a technical interview
-with the hiring manager and sends a personality assessment to the candidate.
-The hiring manager conducts the technical interview and records their verdict.
-The candidate completes the personality assessment and submits it, after which the HR recruiter
-scores the assessment and records their verdict.
-Once both verdicts are recorded, the HR recruiter reviews the combined outcomes.
-If either verdict is negative, the HR recruiter sends a rejection email to the candidate and the process ends for that candidate.
-If both verdicts are positive, the HR recruiter sends a job offer to the candidate and the process ends for that candidate.
+At Zarkan Industries, customer satisfaction is of paramount importance, and this is reflected in the streamlined complaint handling process. Upon receiving a complaint the CSR handles the complaint. For phone calls, the CSR records the call details. For in-person complaints at the service desk, the CSR carefully documents the customer's concerns. When the complaint is received as a letter, the CSR notes the letter's receipt date. After registering the complaint, the CSR analyzes the complaint to understand its nature and underlying issues. Meanwhile, the CSR consults other departments about the complaint. Once the analysis is complete, the CSR resolves the complaint based on the findings and the company's policies. After resolving the complaint to the customer's satisfaction, the CSR archives the complaint details for record-keeping, ensuring all actions taken are documented in accordance with privacy and regulatory standards. The final step is to formally close the complaint.
