@@ -260,7 +260,7 @@ def is_valid_bpmn(obj):
     return len(errors) == 0 and len(warnings) == 0, errors, warnings
 
 
-def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=2):
+def extract_bpmn(process_description, prompt_type="fine-tuned", output_file=None, retries=2):
     # Prompt is left as defined in your original script
     prompt = f""" You are a BPMN 2.0 expert. Extract a structured BPMN model from the process description below.
 
@@ -442,7 +442,7 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_zero_shot_phi4.json")
+    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_fine_tuned_phi4.json")
 
     try:
         if not os.path.exists(input_path):
@@ -453,6 +453,10 @@ if __name__ == "__main__":
         
         print(f"🤖 Phi-4 is analyzing '{case_name}'...")
         bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=0)
-        
+
+        if bpmn_json:
+            print(f"Output saved to: outputs/{case_name}_fine_tuned_phi4.json")
+        else:
+            print("Model extraction failed. Check the logs above.")
     except FileNotFoundError:
         print(f"Error: The file '{case_name}.txt' was not found.")
