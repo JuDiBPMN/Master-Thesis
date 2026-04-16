@@ -1,0 +1,331 @@
+{
+  "pools": [
+    {
+      "id": "government_agency",
+      "name": "Government Agency"
+    },
+    {
+      "id": "applicant_organisation",
+      "name": "Applicant Organisation"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "grants_office",
+      "name": "Grants Office",
+      "pool": "government_agency"
+    },
+    {
+      "id": "applicant",
+      "name": "Applicant",
+      "pool": "applicant_organisation"
+    },
+    {
+      "id": "technical_review_panel",
+      "name": "Technical Review Panel",
+      "pool": "government_agency"
+    },
+    {
+      "id": "finance_department",
+      "name": "Finance Department",
+      "pool": "government_agency"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_application",
+      "name": "Submit Application",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "register_application",
+      "name": "Register Application",
+      "type": "task",
+      "lane": "grants_office"
+    },
+    {
+      "id": "check_documentation",
+      "name": "Check Documentation",
+      "type": "task",
+      "lane": "grants_office"
+    },
+    {
+      "id": "notify_missing_documents",
+      "name": "Notify Missing Documents",
+      "type": "task",
+      "lane": "grants_office"
+    },
+    {
+      "id": "collect_missing_documents",
+      "name": "Collect Missing Documents",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "resubmit_documents",
+      "name": "Resubmit Documents",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "check_documentation_again",
+      "name": "Check Documentation Again",
+      "type": "task",
+      "lane": "grants_office"
+    },
+    {
+      "id": "forward_to_review_panels",
+      "name": "Forward to Review Panels",
+      "type": "task",
+      "lane": "grants_office"
+    },
+    {
+      "id": "assess_project_feasibility",
+      "name": "Assess Project Feasibility",
+      "type": "task",
+      "lane": "technical_review_panel"
+    },
+    {
+      "id": "record_technical_verdict",
+      "name": "Record Technical Verdict",
+      "type": "task",
+      "lane": "technical_review_panel"
+    },
+    {
+      "id": "review_proposed_budget",
+      "name": "Review Proposed Budget",
+      "type": "task",
+      "lane": "finance_department"
+    },
+    {
+      "id": "record_finance_verdict",
+      "name": "Record Finance Verdict",
+      "type": "task",
+      "lane": "finance_department"
+    },
+    {
+      "id": "review_combined_outcomes",
+      "name": "Review Combined Outcomes",
+      "type": "task",
+      "lane": "grants_office"
+    },
+    {
+      "id": "send_rejection_notice",
+      "name": "Send Rejection Notice",
+      "type": "task",
+      "lane": "grants_office"
+    },
+    {
+      "id": "issue_grant_approval",
+      "name": "Issue Grant Approval",
+      "type": "task",
+      "lane": "grants_office"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_application",
+      "name": "Start Application",
+      "type": "startEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_grants_office",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "grants_office",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_applicant",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_documentation_check",
+      "name": "Documentation Complete?",
+      "type": "exclusiveGateway",
+      "lane": "grants_office",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_documentation_check_join",
+      "name": "Documentation Check Complete",
+      "type": "exclusiveGateway",
+      "lane": "grants_office",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_parallel_split",
+      "name": "Start Concurrent Reviews",
+      "type": "parallelGateway",
+      "lane": "grants_office",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Reviews Complete",
+      "type": "parallelGateway",
+      "lane": "grants_office",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_outcome_review",
+      "name": "Review Outcomes",
+      "type": "exclusiveGateway",
+      "lane": "grants_office",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_outcome_review_join",
+      "name": "Outcome Review Complete",
+      "type": "exclusiveGateway",
+      "lane": "grants_office",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_application",
+      "to": "submit_application"
+    },
+    {
+      "id": "sf2",
+      "from": "submit_application",
+      "to": "register_application"
+    },
+    {
+      "id": "sf3",
+      "from": "register_application",
+      "to": "check_documentation"
+    },
+    {
+      "id": "sf4",
+      "from": "check_documentation",
+      "to": "gateway_documentation_check"
+    },
+    {
+      "id": "sf5",
+      "from": "gateway_documentation_check",
+      "to": "notify_missing_documents",
+      "condition": "documentation is incomplete"
+    },
+    {
+      "id": "sf6",
+      "from": "notify_missing_documents",
+      "to": "collect_missing_documents"
+    },
+    {
+      "id": "sf7",
+      "from": "collect_missing_documents",
+      "to": "resubmit_documents"
+    },
+    {
+      "id": "sf8",
+      "from": "resubmit_documents",
+      "to": "check_documentation_again"
+    },
+    {
+      "id": "sf9",
+      "from": "check_documentation_again",
+      "to": "gateway_documentation_check_join"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_documentation_check",
+      "to": "forward_to_review_panels",
+      "condition": "documentation is complete"
+    },
+    {
+      "id": "sf11",
+      "from": "forward_to_review_panels",
+      "to": "gateway_parallel_split"
+    },
+    {
+      "id": "sf12",
+      "from": "gateway_parallel_split",
+      "to": "assess_project_feasibility"
+    },
+    {
+      "id": "sf13",
+      "from": "gateway_parallel_split",
+      "to": "review_proposed_budget"
+    },
+    {
+      "id": "sf14",
+      "from": "assess_project_feasibility",
+      "to": "record_technical_verdict"
+    },
+    {
+      "id": "sf15",
+      "from": "review_proposed_budget",
+      "to": "record_finance_verdict"
+    },
+    {
+      "id": "sf16",
+      "from": "record_technical_verdict",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf17",
+      "from": "record_finance_verdict",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf18",
+      "from": "gateway_parallel_join",
+      "to": "review_combined_outcomes"
+    },
+    {
+      "id": "sf19",
+      "from": "review_combined_outcomes",
+      "to": "gateway_outcome_review"
+    },
+    {
+      "id": "sf20",
+      "from": "gateway_outcome_review",
+      "to": "send_rejection_notice",
+      "condition": "either verdict is negative"
+    },
+    {
+      "id": "sf21",
+      "from": "send_rejection_notice",
+      "to": "end_applicant"
+    },
+    {
+      "id": "sf22",
+      "from": "gateway_outcome_review",
+      "to": "issue_grant_approval",
+      "condition": "both verdicts are positive"
+    },
+    {
+      "id": "sf23",
+      "from": "issue_grant_approval",
+      "to": "end_grants_office"
+    },
+    {
+      "id": "sf24",
+      "from": "gateway_outcome_review",
+      "to": "gateway_outcome_review_join",
+      "condition": "either verdict is negative"
+    },
+    {
+      "id": "sf25",
+      "from": "issue_grant_approval",
+      "to": "gateway_outcome_review_join"
+    },
+    {
+      "id": "sf26",
+      "from": "gateway_outcome_review_join",
+      "to": "end_grants_office"
+    }
+  ],
+  "message_flows": []
+}

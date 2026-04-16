@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_GovernmentAgency" name="Government Agency Grants Office" processRef="Process_GovernmentAgency"/>
+    <bpmn:participant id="actor_Applicant" name="Applicant Organisation" processRef="Process_Applicant"/>
+    <bpmn:messageFlow id="NotifyMissingDocsToResubmit" name="Notify Missing Documents" sourceRef="NotifyMissingDocsEvent" targetRef="ResubmitDocsEvent"/>
+    <bpmn:messageFlow id="AssessFeasibilityToReviewOutcomes" name="Assess Feasibility" sourceRef="AssessFeasibilityEvent" targetRef="ReviewOutcomesEvent"/>
+    <bpmn:messageFlow id="ReviewBudgetToReviewOutcomes" name="Review Budget" sourceRef="ReviewBudgetEvent" targetRef="ReviewOutcomesEvent"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="ResubmitDocsEvent" targetRef="CheckCompleteness"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_GovernmentAgency" name="Government Agency Grants Office" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_GovernmentAgency">
+      <bpmn:lane id="GrantsAdmin" name="Grants Administrator">
+        <bpmn:flowNodeRef>StartEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>NotifyMissingDocsEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ReviewOutcomesEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RegisterApplication</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckDocuments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>NotifyMissingDocs</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckCompleteness</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ReviewOutcomes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SendRejection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>IssueApproval</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ExclusiveGateway1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ExclusiveGateway2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ParallelGateway1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ParallelGateway2</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="TechnicalReview" name="Technical Review Panel">
+        <bpmn:flowNodeRef>AssessFeasibilityEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>AssessFeasibility</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="FinanceDept" name="Finance Department">
+        <bpmn:flowNodeRef>ReviewBudgetEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ReviewBudget</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent" name="Start"/>
+    <bpmn:endEvent id="EndEvent" name="End"/>
+    <bpmn:intermediateThrowEvent id="NotifyMissingDocsEvent" name="Notify Missing Documents">
+      <bpmn:messageEventDefinition id="NotifyMissingDocsEvent_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="AssessFeasibilityEvent" name="Assess Feasibility">
+      <bpmn:messageEventDefinition id="AssessFeasibilityEvent_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="ReviewBudgetEvent" name="Review Budget">
+      <bpmn:messageEventDefinition id="ReviewBudgetEvent_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="ReviewOutcomesEvent" name="Review Outcomes">
+      <bpmn:messageEventDefinition id="ReviewOutcomesEvent_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="RegisterApplication" name="Register Application"/>
+    <bpmn:userTask id="CheckDocuments" name="Check Documents"/>
+    <bpmn:userTask id="NotifyMissingDocs" name="Notify Missing Documents"/>
+    <bpmn:userTask id="CheckCompleteness" name="Check Completeness Again"/>
+    <bpmn:userTask id="AssessFeasibility" name="Assess Project Feasibility"/>
+    <bpmn:userTask id="ReviewBudget" name="Review Proposed Budget"/>
+    <bpmn:userTask id="ReviewOutcomes" name="Review Combined Outcomes"/>
+    <bpmn:userTask id="SendRejection" name="Send Rejection Notice"/>
+    <bpmn:userTask id="IssueApproval" name="Issue Grant Approval Letter"/>
+    <bpmn:exclusiveGateway id="ExclusiveGateway1" name="Exclusive Gateway 1" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="ExclusiveGateway2" name="Exclusive Gateway 2" gatewayDirection="converging"/>
+    <bpmn:parallelGateway id="ParallelGateway1" name="Parallel Gateway 1" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="ParallelGateway2" name="Parallel Gateway 2" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="StartToRegister" sourceRef="StartEvent" targetRef="RegisterApplication"/>
+    <bpmn:sequenceFlow id="RegisterToCheck" sourceRef="RegisterApplication" targetRef="CheckDocuments"/>
+    <bpmn:sequenceFlow id="CheckToNotify" sourceRef="CheckDocuments" targetRef="ExclusiveGateway1"/>
+    <bpmn:sequenceFlow id="NotifyToResubmit" sourceRef="ExclusiveGateway1" targetRef="NotifyMissingDocsEvent"/>
+    <bpmn:sequenceFlow id="CheckCompletenessToParallel" sourceRef="CheckCompleteness" targetRef="ParallelGateway1"/>
+    <bpmn:sequenceFlow id="ParallelToAssess" sourceRef="ParallelGateway1" targetRef="AssessFeasibilityEvent"/>
+    <bpmn:sequenceFlow id="ParallelToReview" sourceRef="ParallelGateway1" targetRef="ReviewBudgetEvent"/>
+    <bpmn:sequenceFlow id="AssessToReviewOutcomes" sourceRef="AssessFeasibilityEvent" targetRef="ReviewOutcomesEvent"/>
+    <bpmn:sequenceFlow id="ReviewToReviewOutcomes" sourceRef="ReviewBudgetEvent" targetRef="ReviewOutcomesEvent"/>
+    <bpmn:sequenceFlow id="ReviewOutcomesToExclusive" sourceRef="ReviewOutcomesEvent" targetRef="ReviewOutcomes"/>
+    <bpmn:sequenceFlow id="ExclusiveToSendRejection" sourceRef="ExclusiveGateway2" targetRef="SendRejection"/>
+    <bpmn:sequenceFlow id="SendRejectionToEnd" sourceRef="SendRejection" targetRef="EndEvent"/>
+    <bpmn:sequenceFlow id="ExclusiveToIssueApproval" sourceRef="ExclusiveGateway2" targetRef="IssueApproval"/>
+    <bpmn:sequenceFlow id="IssueApprovalToEnd" sourceRef="IssueApproval" targetRef="EndEvent"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Applicant" name="Applicant Organisation" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Applicant">
+      <bpmn:lane id="ApplicantDept" name="Applicant Department">
+        <bpmn:flowNodeRef>EndEventApplicant</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ResubmitDocsEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CollectMissingDocs</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ResubmitDocs</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:endEvent id="EndEventApplicant" name="End"/>
+    <bpmn:intermediateCatchEvent id="ResubmitDocsEvent" name="Resubmit Documents">
+      <bpmn:messageEventDefinition id="ResubmitDocsEvent_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:userTask id="CollectMissingDocs" name="Collect Missing Documents"/>
+    <bpmn:userTask id="ResubmitDocs" name="Resubmit Documents"/>
+    <bpmn:sequenceFlow id="ResubmitToCollect" sourceRef="ResubmitDocsEvent" targetRef="CollectMissingDocs"/>
+    <bpmn:sequenceFlow id="CollectToResubmit" sourceRef="CollectMissingDocs" targetRef="ResubmitDocs"/>
+    <bpmn:sequenceFlow id="ResubmitToCheckAgain" sourceRef="ResubmitDocs" targetRef="ResubmitDocsEvent"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_GovernmentAgency_di" bpmnElement="actor_GovernmentAgency" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1540" height="1740"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Applicant_di" bpmnElement="actor_Applicant" isHorizontal="true">
+        <dc:Bounds x="10" y="1820" width="1020" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GrantsAdmin_di" bpmnElement="GrantsAdmin" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1510" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TechnicalReview_di" bpmnElement="TechnicalReview" isHorizontal="true">
+        <dc:Bounds x="40" y="600" width="1510" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="FinanceDept_di" bpmnElement="FinanceDept" isHorizontal="true">
+        <dc:Bounds x="40" y="1180" width="1510" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ApplicantDept_di" bpmnElement="ApplicantDept" isHorizontal="true">
+        <dc:Bounds x="40" y="1820" width="990" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_di" bpmnElement="StartEvent">
+        <dc:Bounds x="172" y="102" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="NotifyMissingDocs_di" bpmnElement="NotifyMissingDocs">
+        <dc:Bounds x="130" y="168" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckCompleteness_di" bpmnElement="CheckCompleteness">
+        <dc:Bounds x="130" y="278" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway2_di" bpmnElement="ExclusiveGateway2" isMarkerVisible="true">
+        <dc:Bounds x="165" y="388" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway2_di" bpmnElement="ParallelGateway2" isMarkerVisible="true">
+        <dc:Bounds x="165" y="468" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_di" bpmnElement="EndEvent">
+        <dc:Bounds x="692" y="237" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckDocuments_di" bpmnElement="CheckDocuments">
+        <dc:Bounds x="650" y="303" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="NotifyMissingDocsEvent_di" bpmnElement="NotifyMissingDocsEvent">
+        <dc:Bounds x="1212" y="237" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReviewOutcomes_di" bpmnElement="ReviewOutcomes">
+        <dc:Bounds x="1170" y="303" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReviewOutcomesEvent_di" bpmnElement="ReviewOutcomesEvent">
+        <dc:Bounds x="952" y="252" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway1_di" bpmnElement="ExclusiveGateway1" isMarkerVisible="true">
+        <dc:Bounds x="945" y="318" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="RegisterApplication_di" bpmnElement="RegisterApplication">
+        <dc:Bounds x="390" y="120" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SendRejection_di" bpmnElement="SendRejection">
+        <dc:Bounds x="390" y="230" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IssueApproval_di" bpmnElement="IssueApproval">
+        <dc:Bounds x="390" y="340" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway1_di" bpmnElement="ParallelGateway1" isMarkerVisible="true">
+        <dc:Bounds x="425" y="450" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="AssessFeasibilityEvent_di" bpmnElement="AssessFeasibilityEvent">
+        <dc:Bounds x="692" y="872" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="AssessFeasibility_di" bpmnElement="AssessFeasibility">
+        <dc:Bounds x="130" y="850" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReviewBudgetEvent_di" bpmnElement="ReviewBudgetEvent">
+        <dc:Bounds x="692" y="1452" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReviewBudget_di" bpmnElement="ReviewBudget">
+        <dc:Bounds x="130" y="1430" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEventApplicant_di" bpmnElement="EndEventApplicant">
+        <dc:Bounds x="172" y="1894" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ResubmitDocsEvent_di" bpmnElement="ResubmitDocsEvent">
+        <dc:Bounds x="172" y="1960" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CollectMissingDocs_di" bpmnElement="CollectMissingDocs">
+        <dc:Bounds x="390" y="1905" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ResubmitDocs_di" bpmnElement="ResubmitDocs">
+        <dc:Bounds x="650" y="1905" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="StartToRegister_di" bpmnElement="StartToRegister">
+        <di:waypoint x="208" y="120"/>
+        <di:waypoint x="299" y="120"/>
+        <di:waypoint x="299" y="160"/>
+        <di:waypoint x="390" y="160"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="RegisterToCheck_di" bpmnElement="RegisterToCheck">
+        <di:waypoint x="510" y="160"/>
+        <di:waypoint x="580" y="160"/>
+        <di:waypoint x="580" y="343"/>
+        <di:waypoint x="650" y="343"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckToNotify_di" bpmnElement="CheckToNotify">
+        <di:waypoint x="770" y="343"/>
+        <di:waypoint x="945" y="343"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="NotifyToResubmit_di" bpmnElement="NotifyToResubmit">
+        <di:waypoint x="995" y="343"/>
+        <di:waypoint x="1103" y="343"/>
+        <di:waypoint x="1103" y="255"/>
+        <di:waypoint x="1212" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ResubmitToCollect_di" bpmnElement="ResubmitToCollect">
+        <di:waypoint x="208" y="1978"/>
+        <di:waypoint x="299" y="1978"/>
+        <di:waypoint x="299" y="1945"/>
+        <di:waypoint x="390" y="1945"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CollectToResubmit_di" bpmnElement="CollectToResubmit">
+        <di:waypoint x="510" y="1945"/>
+        <di:waypoint x="650" y="1945"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ResubmitToCheckAgain_di" bpmnElement="ResubmitToCheckAgain">
+        <di:waypoint x="710" y="1905"/>
+        <di:waypoint x="710" y="1855"/>
+        <di:waypoint x="190" y="1855"/>
+        <di:waypoint x="190" y="1960"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckCompletenessToParallel_di" bpmnElement="CheckCompletenessToParallel">
+        <di:waypoint x="250" y="318"/>
+        <di:waypoint x="337" y="318"/>
+        <di:waypoint x="337" y="475"/>
+        <di:waypoint x="425" y="475"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ParallelToAssess_di" bpmnElement="ParallelToAssess">
+        <di:waypoint x="475" y="475"/>
+        <di:waypoint x="583" y="475"/>
+        <di:waypoint x="583" y="890"/>
+        <di:waypoint x="692" y="890"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ParallelToReview_di" bpmnElement="ParallelToReview">
+        <di:waypoint x="475" y="475"/>
+        <di:waypoint x="583" y="475"/>
+        <di:waypoint x="583" y="1470"/>
+        <di:waypoint x="692" y="1470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AssessToReviewOutcomes_di" bpmnElement="AssessToReviewOutcomes">
+        <di:waypoint x="728" y="890"/>
+        <di:waypoint x="840" y="890"/>
+        <di:waypoint x="840" y="270"/>
+        <di:waypoint x="952" y="270"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ReviewToReviewOutcomes_di" bpmnElement="ReviewToReviewOutcomes">
+        <di:waypoint x="728" y="1470"/>
+        <di:waypoint x="840" y="1470"/>
+        <di:waypoint x="840" y="270"/>
+        <di:waypoint x="952" y="270"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ReviewOutcomesToExclusive_di" bpmnElement="ReviewOutcomesToExclusive">
+        <di:waypoint x="988" y="270"/>
+        <di:waypoint x="1079" y="270"/>
+        <di:waypoint x="1079" y="343"/>
+        <di:waypoint x="1170" y="343"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ExclusiveToSendRejection_di" bpmnElement="ExclusiveToSendRejection">
+        <di:waypoint x="215" y="413"/>
+        <di:waypoint x="302" y="413"/>
+        <di:waypoint x="302" y="270"/>
+        <di:waypoint x="390" y="270"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SendRejectionToEnd_di" bpmnElement="SendRejectionToEnd">
+        <di:waypoint x="510" y="270"/>
+        <di:waypoint x="601" y="270"/>
+        <di:waypoint x="601" y="255"/>
+        <di:waypoint x="692" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ExclusiveToIssueApproval_di" bpmnElement="ExclusiveToIssueApproval">
+        <di:waypoint x="215" y="413"/>
+        <di:waypoint x="302" y="413"/>
+        <di:waypoint x="302" y="380"/>
+        <di:waypoint x="390" y="380"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="IssueApprovalToEnd_di" bpmnElement="IssueApprovalToEnd">
+        <di:waypoint x="510" y="380"/>
+        <di:waypoint x="601" y="380"/>
+        <di:waypoint x="601" y="255"/>
+        <di:waypoint x="692" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="NotifyMissingDocsToResubmit_di" bpmnElement="NotifyMissingDocsToResubmit">
+        <di:waypoint x="1230" y="273"/>
+        <di:waypoint x="190" y="1960"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="AssessFeasibilityToReviewOutcomes_di" bpmnElement="AssessFeasibilityToReviewOutcomes">
+        <di:waypoint x="710" y="872"/>
+        <di:waypoint x="970" y="288"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ReviewBudgetToReviewOutcomes_di" bpmnElement="ReviewBudgetToReviewOutcomes">
+        <di:waypoint x="710" y="1452"/>
+        <di:waypoint x="970" y="288"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="190" y="1960"/>
+        <di:waypoint x="190" y="358"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

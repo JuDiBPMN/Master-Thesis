@@ -1,0 +1,271 @@
+{
+  "pools": [
+    {
+      "id": "Company",
+      "name": "Company, HR department and hiring managers pool”, "
+    },
+    {
+      "id": "Candidate",
+      "name": "Candidate pool"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "HR_Department",
+      "name": "HR department",
+      "pool": "Company"
+    },
+    {
+      "id": "Hiring_Manager",
+      "name": "Hiring manager",
+      "pool": "Company"
+    },
+    {
+      "id": "Candidate",
+      "name": "Candidate",
+      "pool": "Candidate"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Submit_Vacancy_Request",
+      "name": "Submit vacancy request",
+      "type": "task",
+      "lane": "Hiring_Manager"
+    },
+    {
+      "id": "Register_Vacancy",
+      "name": "Register vacancy",
+      "type": "task",
+      "lane": "HR_Department"
+    },
+    {
+      "id": "Post_Job_Advertisement",
+      "name": "Post job advertisement",
+      "type": "task",
+      "lane": "HR_Department"
+    },
+    {
+      "id": "Screen_Applications",
+      "name": "Screen applications",
+      "type": "task",
+      "lane": "HR_Department"
+    },
+    {
+      "id": "Schedule_Technical_Interview",
+      "name": "Schedule technical interview",
+      "type": "task",
+      "lane": "HR_Department"
+    },
+    {
+      "id": "Send_Personality_Assessment",
+      "name": "Send personality assessment",
+      "type": "task",
+      "lane": "HR_Department"
+    },
+    {
+      "id": "Score_Personality_Assessment",
+      "name": "Score personality assessment",
+      "type": "task",
+      "lane": "HR_Department"
+    },
+    {
+      "id": "Record_Verdicts",
+      "name": "Record verdicts",
+      "type": "task",
+      "lane": "HR_Department"
+    },
+    {
+      "id": "Write_Rejection_Email",
+      "name": "Write rejection email",
+      "type": "task",
+      "lane": "HR_Department"
+    },
+    {
+      "id": "Draft_Job_Offer",
+      "name": "Draft job offer",
+      "type": "task",
+      "lane": "HR_Department"
+    },
+    {
+      "id": "Send_Job_Offer",
+      "name": "Send job offer",
+      "type": "task",
+      "lane": "HR_Department"
+    }
+  ],
+  "events": [
+    {
+      "id": "Vacancy_Request_Received",
+      "name": "Vacancy request received",
+      "type": "startEvent",
+      "lane": "HR_Department",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Application_Received",
+      "name": "Application received",
+      "type": "intermediateCatchEvent",
+      "lane": "HR_Department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Technical_Interview_Scheduled",
+      "name": "Technical interview scheduled",
+      "type": "intermediateThrowEvent",
+      "lane": "HR_Department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Personality_Assessment_Received",
+      "name": "Personality assessment received",
+      "type": "intermediateCatchEvent",
+      "lane": "HR_Department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Verdicts_Recorded",
+      "name": "Verdicts recorded",
+      "type": "intermediateThrowEvent",
+      "lane": "HR_Department",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Job_Offer_Drafted",
+      "name": "Job offer drafted",
+      "type": "intermediateThrowEvent",
+      "lane": "HR_Department",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Job_Offer_Sent",
+      "name": "Job offer sent",
+      "type": "endEvent",
+      "lane": "HR_Department",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Rejection_Email_Sent",
+      "name": "Rejection email sent",
+      "type": "endEvent",
+      "lane": "HR_Department",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Candidate_Applied",
+      "name": "Candidate applied",
+      "type": "startEvent",
+      "lane": "Candidate",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Personality_Assessment_Completed",
+      "name": "Personality assessment completed",
+      "type": "intermediateThrowEvent",
+      "lane": "Candidate",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Parallel_Split",
+      "name": "Parallel split",
+      "type": "parallelGateway",
+      "lane": "HR_Department",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "Parallel_Join",
+      "name": "Parallel join",
+      "type": "parallelGateway",
+      "lane": "HR_Department",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Vacancy_Request_Received_to_Register_Vacancy",
+      "from": "Vacancy_Request_Received",
+      "to": "Register_Vacancy"
+    },
+    {
+      "id": "Register_Vacancy_to_Post_Job_Advertisement",
+      "from": "Register_Vacancy",
+      "to": "Post_Job_Advertisement"
+    },
+    {
+      "id": "Post_Job_Advertisement_to_Screen_Applications",
+      "from": "Post_Job_Advertisement",
+      "to": "Screen_Applications"
+    },
+    {
+      "id": "Screen_Applications_to_Schedule_Technical_Interview",
+      "from": "Screen_Applications",
+      "to": "Schedule_Technical_Interview"
+    },
+    {
+      "id": "Schedule_Technical_Interview_to_Send_Personality_Assessment",
+      "from": "Schedule_Technical_Interview",
+      "to": "Send_Personality_Assessment"
+    },
+    {
+      "id": "Send_Personality_Assessment_to_Receive_Personality_Assessment",
+      "from": "Send_Personality_Assessment",
+      "to": "Personality_Assessment_Received"
+    },
+    {
+      "id": "Personality_Assessment_Received_to_Score_Personality_Assessment",
+      "from": "Personality_Assessment_Received",
+      "to": "Score_Personality_Assessment"
+    },
+    {
+      "id": "Score_Personality_Assessment_to_Record_Verdicts",
+      "from": "Score_Personality_Assessment",
+      "to": "Record_Verdicts"
+    },
+    {
+      "id": "Record_Verdicts_to_Parallel_Split",
+      "from": "Record_Verdicts",
+      "to": "Parallel_Split"
+    },
+    {
+      "id": "Parallel_Split_to_Write_Rejection_Email",
+      "from": "Parallel_Split",
+      "to": "Write_Rejection_Email"
+    },
+    {
+      "id": "Write_Rejection_Email_to_Rejection_Email_Sent",
+      "from": "Write_Rejection_Email",
+      "to": "Rejection_Email_Sent"
+    },
+    {
+      "id": "Parallel_Split_to_Draft_Job_Offer",
+      "from": "Parallel_Split",
+      "to": "Draft_Job_Offer"
+    },
+    {
+      "id": "Draft_Job_Offer_to_Send_Job_Offer",
+      "from": "Draft_Job_Offer",
+      "to": "Send_Job_Offer"
+    },
+    {
+      "id": "Send_Job_Offer_to_Job_Offer_Sent",
+      "from": "Send_Job_Offer",
+      "to": "Job_Offer_Sent"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "Personality_Assessment_Message_Flow",
+      "from": "Technical_Interview_Scheduled",
+      "to": "Personality_Assessment_Received",
+      "name": "Personality assessment message flow"
+    },
+    {
+      "id": "Verdicts_Message_Flow",
+      "from": "Record_Verdicts",
+      "to": "Parallel_Join",
+      "name": "Verdicts message flow"
+    }
+  ]
+}

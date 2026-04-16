@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_hr_manager_pool" name="HR Manager" processRef="Process_hr_manager_pool"/>
+    <bpmn:participant id="actor_business_manager_pool" name="Business Manager" processRef="Process_business_manager_pool"/>
+    <bpmn:messageFlow id="mf1" name="Send Candidate Information" sourceRef="Event_0j3q3w" targetRef="start_bm"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="discuss_candidate" targetRef="join_assessment"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="Event_0v3xzr" targetRef="Event_1k3yhg"/>
+    <bpmn:messageFlow id="MsgFlow_p2" name="Discussed with Business Manager" sourceRef="split_discuss" targetRef="end_bm"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_hr_manager_pool" name="HR Manager" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_hr_manager_pool">
+      <bpmn:lane id="hr_manager" name="HR Manager">
+        <bpmn:flowNodeRef>start_hr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0j3q3w</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1q3x2v</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1k3yhg</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_hr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>introduction_interview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>discuss_candidate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>inform_candidate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_discuss</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_hr" name="Start"/>
+    <bpmn:intermediateThrowEvent id="Event_0j3q3w" name="Introduction Interview Finished">
+      <bpmn:messageEventDefinition id="Event_0j3q3w_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Event_1q3x2v" name="Discuss Candidate with Business Manager">
+      <bpmn:messageEventDefinition id="Event_1q3x2v_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="Event_1k3yhg" name="Contract Preparation">
+      <bpmn:messageEventDefinition id="Event_1k3yhg_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="end_hr" name="End"/>
+    <bpmn:task id="introduction_interview" name="Introduction Interview"/>
+    <bpmn:task id="discuss_candidate" name="Discuss Candidate"/>
+    <bpmn:task id="inform_candidate" name="Inform Candidate"/>
+    <bpmn:exclusiveGateway id="split_discuss" name="Discuss with Business Manager?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="Flow_1j3q3w0" sourceRef="start_hr" targetRef="introduction_interview"/>
+    <bpmn:sequenceFlow id="Flow_03xzr1" sourceRef="introduction_interview" targetRef="Event_0j3q3w"/>
+    <bpmn:sequenceFlow id="Flow_1q3x2v0" sourceRef="Event_1q3x2v" targetRef="split_discuss"/>
+    <bpmn:sequenceFlow id="Flow_0x3w5e0" sourceRef="split_discuss" targetRef="discuss_candidate"/>
+    <bpmn:sequenceFlow id="Flow_03xw5e1" sourceRef="split_discuss" targetRef="end_hr" name="Not discussed with Business Manager">
+      <bpmn:conditionExpression>Not discussed with Business Manager</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmn:process id="Process_business_manager_pool" name="Business Manager" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_business_manager_pool">
+      <bpmn:lane id="business_manager" name="Business Manager">
+        <bpmn:flowNodeRef>Event_0x3w5e</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>start_bm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0v3xzr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_bm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>second_assessment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>join_assessment</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:intermediateThrowEvent id="Event_0x3w5e" name="Business Manager Decision">
+      <bpmn:messageEventDefinition id="Event_0x3w5e_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:startEvent id="start_bm" name="Receive Candidate Information">
+      <bpmn:messageEventDefinition id="start_bm_def"/>
+    </bpmn:startEvent>
+    <bpmn:intermediateCatchEvent id="Event_0v3xzr" name="Second Assessment Finished">
+      <bpmn:messageEventDefinition id="Event_0v3xzr_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="end_bm" name="End"/>
+    <bpmn:task id="second_assessment" name="Second Assessment"/>
+    <bpmn:parallelGateway id="join_assessment" name="Assessment Completed" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="Flow_0v3xzr1" sourceRef="join_assessment" targetRef="Event_0v3xzr"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_hr_manager_pool_di" bpmnElement="actor_hr_manager_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1020" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_business_manager_pool_di" bpmnElement="actor_business_manager_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="550" width="760" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="hr_manager_di" bpmnElement="hr_manager" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="990" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="business_manager_di" bpmnElement="business_manager" isHorizontal="true">
+        <dc:Bounds x="40" y="550" width="730" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_hr_di" bpmnElement="start_hr">
+        <dc:Bounds x="172" y="116" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1q3x2v_di" bpmnElement="Event_1q3x2v">
+        <dc:Bounds x="172" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1k3yhg_di" bpmnElement="Event_1k3yhg">
+        <dc:Bounds x="172" y="248" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="inform_candidate_di" bpmnElement="inform_candidate">
+        <dc:Bounds x="130" y="314" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0j3q3w_di" bpmnElement="Event_0j3q3w">
+        <dc:Bounds x="692" y="149" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_hr_di" bpmnElement="end_hr">
+        <dc:Bounds x="692" y="215" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="discuss_candidate_di" bpmnElement="discuss_candidate">
+        <dc:Bounds x="650" y="281" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="introduction_interview_di" bpmnElement="introduction_interview">
+        <dc:Bounds x="390" y="175" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_discuss_di" bpmnElement="split_discuss" isMarkerVisible="true">
+        <dc:Bounds x="425" y="285" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0x3w5e_di" bpmnElement="Event_0x3w5e">
+        <dc:Bounds x="172" y="661" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_bm_di" bpmnElement="start_bm">
+        <dc:Bounds x="172" y="727" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_bm_di" bpmnElement="end_bm">
+        <dc:Bounds x="172" y="793" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="second_assessment_di" bpmnElement="second_assessment">
+        <dc:Bounds x="130" y="859" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="join_assessment_di" bpmnElement="join_assessment" isMarkerVisible="true">
+        <dc:Bounds x="165" y="969" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0v3xzr_di" bpmnElement="Event_0v3xzr">
+        <dc:Bounds x="432" y="822" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1j3q3w0_di" bpmnElement="Flow_1j3q3w0">
+        <di:waypoint x="208" y="134"/>
+        <di:waypoint x="299" y="134"/>
+        <di:waypoint x="299" y="215"/>
+        <di:waypoint x="390" y="215"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03xzr1_di" bpmnElement="Flow_03xzr1">
+        <di:waypoint x="510" y="215"/>
+        <di:waypoint x="601" y="215"/>
+        <di:waypoint x="601" y="167"/>
+        <di:waypoint x="692" y="167"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1q3x2v0_di" bpmnElement="Flow_1q3x2v0">
+        <di:waypoint x="208" y="200"/>
+        <di:waypoint x="316" y="200"/>
+        <di:waypoint x="316" y="310"/>
+        <di:waypoint x="425" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0x3w5e0_di" bpmnElement="Flow_0x3w5e0">
+        <di:waypoint x="475" y="310"/>
+        <di:waypoint x="562" y="310"/>
+        <di:waypoint x="562" y="321"/>
+        <di:waypoint x="650" y="321"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0v3xzr1_di" bpmnElement="Flow_0v3xzr1">
+        <di:waypoint x="215" y="994"/>
+        <di:waypoint x="323" y="994"/>
+        <di:waypoint x="323" y="840"/>
+        <di:waypoint x="432" y="840"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03xw5e1_di" bpmnElement="Flow_03xw5e1">
+        <di:waypoint x="475" y="310"/>
+        <di:waypoint x="583" y="310"/>
+        <di:waypoint x="583" y="233"/>
+        <di:waypoint x="692" y="233"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="710" y="185"/>
+        <di:waypoint x="190" y="727"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="710" y="361"/>
+        <di:waypoint x="190" y="969"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="450" y="822"/>
+        <di:waypoint x="190" y="284"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p2_di" bpmnElement="MsgFlow_p2">
+        <di:waypoint x="450" y="335"/>
+        <di:waypoint x="190" y="793"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

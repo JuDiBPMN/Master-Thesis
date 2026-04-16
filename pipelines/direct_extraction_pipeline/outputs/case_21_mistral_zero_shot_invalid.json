@@ -1,0 +1,192 @@
+{
+  "pools": [
+    {
+      "id": "Retailer",
+      "name": "Retailer"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "CustomerService",
+      "name": "Customer Service",
+      "pool": "Retailer"
+    },
+    {
+      "id": "Warehouse",
+      "name": "Warehouse",
+      "pool": "Retailer"
+    },
+    {
+      "id": "Finance",
+      "name": "Finance",
+      "pool": "Retailer"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "pool": "Customer"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "RegisterReturnRequest",
+      "name": "Register Return Request",
+      "type": "task",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "CheckReturnInformation",
+      "name": "Check Return Information",
+      "type": "task",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "PhysicalProductInspection",
+      "name": "Physical Product Inspection",
+      "type": "task",
+      "lane": "Warehouse"
+    },
+    {
+      "id": "PaymentEligibilityCheck",
+      "name": "Payment Eligibility Check",
+      "type": "task",
+      "lane": "Finance"
+    },
+    {
+      "id": "ReviewCombinedOutcomes",
+      "name": "Review Combined Outcomes",
+      "type": "task",
+      "lane": "CustomerService"
+    }
+  ],
+  "events": [
+    {
+      "id": "CustomerSubmitsReturnRequest",
+      "name": "Customer Submits Return Request",
+      "type": "startEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ReturnRequestInformationComplete",
+      "name": "Return Request Information Complete",
+      "type": "intermediateCatchEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ReturnRequestInformationIncomplete",
+      "name": "Return Request Information Incomplete",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ProductVerdictRecorded",
+      "name": "Product Verdict Recorded",
+      "type": "intermediateCatchEvent",
+      "lane": "Warehouse",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "PaymentVerdictRecorded",
+      "name": "Payment Verdict Recorded",
+      "type": "intermediateCatchEvent",
+      "lane": "Finance",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ReturnApproved",
+      "name": "Return Approved",
+      "type": "endEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ReturnRejected",
+      "name": "Return Rejected",
+      "type": "endEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "CheckReturnInformationComplete",
+      "name": "Check Return Information Complete",
+      "type": "exclusiveGateway",
+      "lane": "CustomerService",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "CustomerSubmitsReturnRequest_RegisterReturnRequest",
+      "from": "CustomerSubmitsReturnRequest",
+      "to": "RegisterReturnRequest"
+    },
+    {
+      "id": "RegisterReturnRequest_CheckReturnInformation",
+      "from": "RegisterReturnRequest",
+      "to": "CheckReturnInformation"
+    },
+    {
+      "id": "CheckReturnInformation_ProductVerdictRecorded",
+      "from": "CheckReturnInformation",
+      "to": "ProductVerdictRecorded"
+    },
+    {
+      "id": "ProductVerdictRecorded_PaymentVerdictRecorded",
+      "from": "ProductVerdictRecorded",
+      "to": "PaymentVerdictRecorded"
+    },
+    {
+      "id": "PaymentVerdictRecorded_ReviewCombinedOutcomes",
+      "from": "PaymentVerdictRecorded",
+      "to": "ReviewCombinedOutcomes"
+    },
+    {
+      "id": "ReviewCombinedOutcomes_ReturnApproved",
+      "from": "ReviewCombinedOutcomes",
+      "to": "ReturnApproved"
+    },
+    {
+      "id": "ReviewCombinedOutcomes_ReturnRejected",
+      "from": "ReviewCombinedOutcomes",
+      "to": "ReturnRejected"
+    },
+    {
+      "id": "CheckReturnInformationComplete_ProductVerdictRecorded",
+      "from": "CheckReturnInformationComplete",
+      "to": "ProductVerdictRecorded"
+    },
+    {
+      "id": "CheckReturnInformationComplete_ReturnRejected",
+      "from": "CheckReturnInformationComplete",
+      "to": "ReturnRejected"
+    },
+    {
+      "id": "CheckReturnInformationComplete_ReturnApproved",
+      "from": "CheckReturnInformationComplete",
+      "to": "ReviewCombinedOutcomes"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "CustomerService_Warehouse",
+      "from": "CheckReturnInformation",
+      "to": "ProductVerdictRecorded",
+      "name": "Product Inspection Verdict"
+    },
+    {
+      "id": "CustomerService_Finance",
+      "from": "CheckReturnInformation",
+      "to": "PaymentVerdictRecorded",
+      "name": "Payment Eligibility Verdict"
+    }
+  ]
+}

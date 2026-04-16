@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_library_pool" name="Library" processRef="Process_library_pool"/>
+    <bpmn:messageFlow id="mf1" name="Book Request" sourceRef="Event_0qjx3w" targetRef="check_availability"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_library_pool" name="Library" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_library_pool">
+      <bpmn:lane id="library" name="Library Staff">
+        <bpmn:flowNodeRef>start_library</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0qjx3w</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0jwz3e</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1q3x5vg</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0j3x5vg</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1q3x5vh</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_library</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_availability</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>inform_requester</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>log_book</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>retrieve_book</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_library" name="Start"/>
+    <bpmn:intermediateThrowEvent id="Event_0qjx3w" name="Receive Book Request">
+      <bpmn:messageEventDefinition id="Event_0qjx3w_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Event_0jwz3e" name="Check Availability">
+      <bpmn:messageEventDefinition id="Event_0jwz3e_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="Event_1q3x5vg" name="Book Not Available"/>
+    <bpmn:endEvent id="Event_0j3x5vg" name="Book Available"/>
+    <bpmn:intermediateThrowEvent id="Event_1q3x5vh" name="Log Book and Retrieve">
+      <bpmn:messageEventDefinition id="Event_1q3x5vh_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="end_library" name="Checkout Completed"/>
+    <bpmn:task id="check_availability" name="Check Availability"/>
+    <bpmn:task id="inform_requester" name="Inform Requester"/>
+    <bpmn:task id="log_book" name="Log Book"/>
+    <bpmn:task id="retrieve_book" name="Retrieve Book"/>
+    <bpmn:sequenceFlow id="Flow_1j3x5vg" sourceRef="start_library" targetRef="check_availability"/>
+    <bpmn:sequenceFlow id="Flow_0qjx3w" sourceRef="Event_0jwz3e" targetRef="inform_requester"/>
+    <bpmn:sequenceFlow id="Flow_1q3x5vh" sourceRef="inform_requester" targetRef="log_book"/>
+    <bpmn:sequenceFlow id="Flow_0j3x5vg" sourceRef="log_book" targetRef="retrieve_book"/>
+    <bpmn:sequenceFlow id="Flow_0j3x5vg" sourceRef="retrieve_book" targetRef="end_library"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_library_pool_di" bpmnElement="actor_library_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1540" height="690"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="library_di" bpmnElement="library" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1510" height="690"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_library_di" bpmnElement="start_library">
+        <dc:Bounds x="172" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0qjx3w_di" bpmnElement="Event_0qjx3w">
+        <dc:Bounds x="172" y="248" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0jwz3e_di" bpmnElement="Event_0jwz3e">
+        <dc:Bounds x="172" y="314" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1q3x5vg_di" bpmnElement="Event_1q3x5vg">
+        <dc:Bounds x="172" y="380" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0j3x5vg_di" bpmnElement="Event_0j3x5vg">
+        <dc:Bounds x="172" y="446" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1q3x5vh_di" bpmnElement="Event_1q3x5vh">
+        <dc:Bounds x="172" y="512" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_library_di" bpmnElement="end_library">
+        <dc:Bounds x="1212" y="347" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_availability_di" bpmnElement="check_availability">
+        <dc:Bounds x="390" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="inform_requester_di" bpmnElement="inform_requester">
+        <dc:Bounds x="390" y="380" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="log_book_di" bpmnElement="log_book">
+        <dc:Bounds x="650" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="retrieve_book_di" bpmnElement="retrieve_book">
+        <dc:Bounds x="910" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1j3x5vg_di" bpmnElement="Flow_1j3x5vg">
+        <di:waypoint x="208" y="200"/>
+        <di:waypoint x="299" y="200"/>
+        <di:waypoint x="299" y="310"/>
+        <di:waypoint x="390" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qjx3w_di" bpmnElement="Flow_0qjx3w">
+        <di:waypoint x="208" y="332"/>
+        <di:waypoint x="299" y="332"/>
+        <di:waypoint x="299" y="420"/>
+        <di:waypoint x="390" y="420"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1q3x5vh_di" bpmnElement="Flow_1q3x5vh">
+        <di:waypoint x="510" y="420"/>
+        <di:waypoint x="580" y="420"/>
+        <di:waypoint x="580" y="365"/>
+        <di:waypoint x="650" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0j3x5vg_di" bpmnElement="Flow_0j3x5vg">
+        <di:waypoint x="770" y="365"/>
+        <di:waypoint x="910" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0j3x5vg_di" bpmnElement="Flow_0j3x5vg">
+        <di:waypoint x="1030" y="365"/>
+        <di:waypoint x="1212" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="190" y="248"/>
+        <di:waypoint x="450" y="350"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,207 @@
+{
+  "pools": [
+    {
+      "id": "Client",
+      "name": "Client, external party”, "
+    },
+    {
+      "id": "BrightWave Energy",
+      "name": "BrightWave Energy, organisation”, "
+    },
+    {
+      "id": "Customer Service",
+      "name": "Customer Service, internal department, BrightWave Energy, "
+    },
+    {
+      "id": "Invoicing",
+      "name": "Invoicing, internal department, BrightWave Energy,"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Client",
+      "name": "Client",
+      "pool": "Client"
+    },
+    {
+      "id": "Customer Service",
+      "name": "Customer Service",
+      "pool": "BrightWave Energy"
+    },
+    {
+      "id": "Invoicing",
+      "name": "Invoicing",
+      "pool": "BrightWave Energy"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Write_complaint_email",
+      "name": "Write complaint email",
+      "type": "task",
+      "lane": "Client"
+    },
+    {
+      "id": "Receive_complaint_email",
+      "name": "Receive complaint email",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Review_billing_information",
+      "name": "Review billing information",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Determine_mistake",
+      "name": "Determine mistake",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Create_ticket",
+      "name": "Create ticket",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Investigate_invoicing_mistake",
+      "name": "Investigate invoicing mistake",
+      "type": "task",
+      "lane": "Invoicing"
+    },
+    {
+      "id": "Make_correction",
+      "name": "Make correction",
+      "type": "task",
+      "lane": "Invoicing"
+    },
+    {
+      "id": "Generate_new_invoice",
+      "name": "Generate new invoice",
+      "type": "task",
+      "lane": "Invoicing"
+    },
+    {
+      "id": "Send_new_invoice_email",
+      "name": "Send new invoice email",
+      "type": "task",
+      "lane": "Customer Service"
+    }
+  ],
+  "events": [
+    {
+      "id": "Receive_complaint_email_event",
+      "name": "Receive complaint email event",
+      "type": "intermediateCatchEvent",
+      "lane": "Customer Service",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Determine_mistake_event",
+      "name": "Determine mistake event",
+      "type": "intermediateThrowEvent",
+      "lane": "Customer Service",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Create_ticket_event",
+      "name": "Create ticket event",
+      "type": "intermediateThrowEvent",
+      "lane": "Customer Service",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Investigate_invoicing_mistake_event",
+      "name": "Investigate invoicing mistake event",
+      "type": "intermediateCatchEvent",
+      "lane": "Invoicing",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Make_correction_event",
+      "name": "Make correction event",
+      "type": "intermediateThrowEvent",
+      "lane": "Invoicing",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Generate_new_invoice_event",
+      "name": "Generate new invoice event",
+      "type": "intermediateCatchEvent",
+      "lane": "Invoicing",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Send_new_invoice_email_event",
+      "name": "Send new invoice email event",
+      "type": "intermediateThrowEvent",
+      "lane": "Customer Service",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [],
+  "sequence_flows": [
+    {
+      "id": "Client_to_Customer_Service",
+      "from": "Write_complaint_email",
+      "to": "Receive_complaint_email_event"
+    },
+    {
+      "id": "Customer_Service_to_Customer_Service_Determine_mistake",
+      "from": "Receive_complaint_email_event",
+      "to": "Determine_mistake"
+    },
+    {
+      "id": "Customer_Service_to_Invoicing_Create_ticket",
+      "from": "Determine_mistake",
+      "to": "Create_ticket_event"
+    },
+    {
+      "id": "Invoicing_to_Invoicing_Investigate_mistake",
+      "from": "Create_ticket_event",
+      "to": "Investigate_invoicing_mistake_event"
+    },
+    {
+      "id": "Invoicing_to_Invoicing_Make_correction",
+      "from": "Investigate_invoicing_mistake_event",
+      "to": "Make_correction_event"
+    },
+    {
+      "id": "Invoicing_to_Customer_Service_Generate_new_invoice",
+      "from": "Make_correction_event",
+      "to": "Generate_new_invoice_event"
+    },
+    {
+      "id": "Customer_Service_to_Customer_Service_Send_new_invoice_email",
+      "from": "Generate_new_invoice_event",
+      "to": "Send_new_invoice_email"
+    },
+    {
+      "id": "Send_new_invoice_email_to_Client",
+      "from": "Send_new_invoice_email",
+      "to": "End"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "Client_to_Customer_Service_message_flow",
+      "from": "Write_complaint_email",
+      "to": "Receive_complaint_email_event",
+      "name": "message_flow_Client_to_Customer_Service"
+    },
+    {
+      "id": "Customer_Service_to_Invoicing_message_flow",
+      "from": "Create_ticket_event",
+      "to": "Investigate_invoicing_mistake_event",
+      "name": "message_flow_Customer_Service_to_Invoicing"
+    },
+    {
+      "id": "Invoicing_to_Customer_Service_message_flow",
+      "from": "Generate_new_invoice_event",
+      "to": "Send_new_invoice_email",
+      "name": "message_flow_Invoicing_to_Customer_Service"
+    }
+  ]
+}

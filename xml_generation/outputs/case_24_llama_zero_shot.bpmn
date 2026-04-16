@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Company" name="Company" processRef="Process_Company"/>
+    <bpmn:participant id="actor_Customer" name="Customer" processRef="Process_Customer"/>
+    <bpmn:messageFlow id="messageFlow1" name="Message Flow 1" sourceRef="intermediateThrowEvent" targetRef="intermediateCatchEvent"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Company" name="Company" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Company">
+      <bpmn:lane id="Customer Service" name="Customer Service">
+        <bpmn:flowNodeRef>intermediateThrowEvent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>registerApplication</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>checkDocumentation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>exclusiveGateway</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Operations" name="Operations">
+        <bpmn:flowNodeRef>forwardApplication</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>technicalReview</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Finance" name="Finance">
+        <bpmn:flowNodeRef>budgetReview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>issueGrantApprovalLetter</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:intermediateThrowEvent id="intermediateThrowEvent" name="Intermediate Throw Event">
+      <bpmn:messageEventDefinition id="intermediateThrowEvent_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:task id="registerApplication" name="Register Application"/>
+    <bpmn:task id="checkDocumentation" name="Check Documentation"/>
+    <bpmn:task id="forwardApplication" name="Forward Application"/>
+    <bpmn:task id="technicalReview" name="Technical Review"/>
+    <bpmn:task id="budgetReview" name="Budget Review"/>
+    <bpmn:task id="issueGrantApprovalLetter" name="Issue Grant Approval Letter"/>
+    <bpmn:exclusiveGateway id="exclusiveGateway" name="Exclusive Gateway" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sequenceFlow1" sourceRef="registerApplication" targetRef="checkDocumentation" name="true">
+      <bpmn:conditionExpression>true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sequenceFlow2" sourceRef="checkDocumentation" targetRef="forwardApplication" name="true">
+      <bpmn:conditionExpression>true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sequenceFlow3" sourceRef="forwardApplication" targetRef="technicalReview" name="true">
+      <bpmn:conditionExpression>true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sequenceFlow4" sourceRef="technicalReview" targetRef="budgetReview" name="true">
+      <bpmn:conditionExpression>true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sequenceFlow5" sourceRef="budgetReview" targetRef="issueGrantApprovalLetter" name="true">
+      <bpmn:conditionExpression>true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmn:process id="Process_Customer" name="Customer" isExecutable="false"/>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Company_di" bpmnElement="actor_Company" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1800" height="1080"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Customer_di" bpmnElement="actor_Customer" isHorizontal="true">
+        <dc:Bounds x="10" y="1160" width="400" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Customer Service_di" bpmnElement="Customer Service" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1770" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Operations_di" bpmnElement="Operations" isHorizontal="true">
+        <dc:Bounds x="40" y="380" width="1770" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Finance_di" bpmnElement="Finance" isHorizontal="true">
+        <dc:Bounds x="40" y="740" width="1770" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="intermediateThrowEvent_di" bpmnElement="intermediateThrowEvent">
+        <dc:Bounds x="172" y="87" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="registerApplication_di" bpmnElement="registerApplication">
+        <dc:Bounds x="130" y="153" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="exclusiveGateway_di" bpmnElement="exclusiveGateway" isMarkerVisible="true">
+        <dc:Bounds x="165" y="263" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="checkDocumentation_di" bpmnElement="checkDocumentation">
+        <dc:Bounds x="390" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="forwardApplication_di" bpmnElement="forwardApplication">
+        <dc:Bounds x="650" y="520" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="technicalReview_di" bpmnElement="technicalReview">
+        <dc:Bounds x="910" y="520" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="budgetReview_di" bpmnElement="budgetReview">
+        <dc:Bounds x="1170" y="880" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="issueGrantApprovalLetter_di" bpmnElement="issueGrantApprovalLetter">
+        <dc:Bounds x="1430" y="880" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sequenceFlow1_di" bpmnElement="sequenceFlow1">
+        <di:waypoint x="250" y="193"/>
+        <di:waypoint x="320" y="193"/>
+        <di:waypoint x="320" y="200"/>
+        <di:waypoint x="390" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sequenceFlow2_di" bpmnElement="sequenceFlow2">
+        <di:waypoint x="510" y="200"/>
+        <di:waypoint x="580" y="200"/>
+        <di:waypoint x="580" y="560"/>
+        <di:waypoint x="650" y="560"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sequenceFlow3_di" bpmnElement="sequenceFlow3">
+        <di:waypoint x="770" y="560"/>
+        <di:waypoint x="910" y="560"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sequenceFlow4_di" bpmnElement="sequenceFlow4">
+        <di:waypoint x="1030" y="560"/>
+        <di:waypoint x="1100" y="560"/>
+        <di:waypoint x="1100" y="920"/>
+        <di:waypoint x="1170" y="920"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sequenceFlow5_di" bpmnElement="sequenceFlow5">
+        <di:waypoint x="1290" y="920"/>
+        <di:waypoint x="1430" y="920"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

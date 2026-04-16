@@ -1,0 +1,39 @@
+{
+  "pools": [
+    {
+      "id": "Company",
+      "name": "Company"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Customer Service",
+      "name": "Customer Service",
+      "pool": "Company"
+    },
+    {
+      "id": "Operations",
+      "name": "Operations",
+      "pool": "Company"
+    },
+    {
+      "id": "Finance",
+      "name": "Finance",
+      "pool": "Company"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "pool": "Customer"
+    }
+  ],
+  "tasks": [],
+  "events": [],
+  "gateways": [],
+  "sequence_flows": [],
+  "message_flows": []
+}

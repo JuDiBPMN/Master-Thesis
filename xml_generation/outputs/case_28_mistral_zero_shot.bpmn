@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_CSR" name="CSR (Customer Service Representative)" processRef="Process_CSR"/>
+    <bpmn:participant id="actor_Company" name="Company (Zarkan Industries)" processRef="Process_Company"/>
+    <bpmn:messageFlow id="mf1" name="ConsultationRequest" sourceRef="ComplaintAnalyzed" targetRef="ConsultDepartments"/>
+    <bpmn:messageFlow id="mf2" name="ComplaintAnalysisResult" sourceRef="CSR" targetRef="ComplaintAnalyzed"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="ComplaintReceived" targetRef="RecordDetails"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="ComplaintClosed" targetRef="ComplaintReceived"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_CSR" name="CSR (Customer Service Representative)" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_CSR">
+      <bpmn:lane id="CSR" name="CSR"/>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="ComplaintReceived" name="Complaint Received"/>
+    <bpmn:intermediateCatchEvent id="ComplaintAnalyzed" name="Complaint Analyzed">
+      <bpmn:messageEventDefinition id="ComplaintAnalyzed_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="ComplaintResolved" name="Complaint Resolved">
+      <bpmn:messageEventDefinition id="ComplaintResolved_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="ComplaintClosed" name="Complaint Closed"/>
+    <bpmn:task id="ReceiveComplaint" name="Receive Complaint"/>
+    <bpmn:task id="RecordDetails" name="Record Details"/>
+    <bpmn:task id="AnalyzeComplaint" name="Analyze Complaint"/>
+    <bpmn:task id="ConsultDepartments" name="Consult Departments"/>
+    <bpmn:task id="ResolveComplaint" name="Resolve Complaint"/>
+    <bpmn:task id="ArchiveComplaint" name="Archive Complaint"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="RecordDetails" targetRef="AnalyzeComplaint"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="AnalyzeComplaint" targetRef="ConsultDepartments"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="ConsultDepartments" targetRef="ResolveComplaint"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="ResolveComplaint" targetRef="ArchiveComplaint"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="ArchiveComplaint" targetRef="ComplaintClosed"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Company" name="Company (Zarkan Industries)" isExecutable="false">
+    <bpmn:startEvent id="ComplaintReceived" name="Complaint Received"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_CSR_di" bpmnElement="actor_CSR" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1800" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Company_di" bpmnElement="actor_Company" isHorizontal="true">
+        <dc:Bounds x="10" y="660" width="1770" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CSR_di" bpmnElement="CSR" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1770" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ComplaintReceived_di" bpmnElement="ComplaintReceived">
+        <dc:Bounds x="1442" y="767" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ComplaintAnalyzed_di" bpmnElement="ComplaintAnalyzed">
+        <dc:Bounds x="172" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ComplaintResolved_di" bpmnElement="ComplaintResolved">
+        <dc:Bounds x="172" y="248" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveComplaint_di" bpmnElement="ReceiveComplaint">
+        <dc:Bounds x="130" y="314" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="RecordDetails_di" bpmnElement="RecordDetails">
+        <dc:Bounds x="130" y="424" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ComplaintClosed_di" bpmnElement="ComplaintClosed">
+        <dc:Bounds x="1472" y="292" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="AnalyzeComplaint_di" bpmnElement="AnalyzeComplaint">
+        <dc:Bounds x="390" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ConsultDepartments_di" bpmnElement="ConsultDepartments">
+        <dc:Bounds x="650" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ResolveComplaint_di" bpmnElement="ResolveComplaint">
+        <dc:Bounds x="910" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ArchiveComplaint_di" bpmnElement="ArchiveComplaint">
+        <dc:Bounds x="1170" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="250" y="464"/>
+        <di:waypoint x="320" y="464"/>
+        <di:waypoint x="320" y="310"/>
+        <di:waypoint x="390" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="510" y="310"/>
+        <di:waypoint x="650" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="770" y="310"/>
+        <di:waypoint x="910" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="1030" y="310"/>
+        <di:waypoint x="1170" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="1290" y="310"/>
+        <di:waypoint x="1472" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="190" y="182"/>
+        <di:waypoint x="710" y="350"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="1460" y="767"/>
+        <di:waypoint x="190" y="504"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="1490" y="328"/>
+        <di:waypoint x="1460" y="767"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,146 @@
+{
+  "pools": [
+    {
+      "id": "CSR",
+      "name": "CSR (Customer Service Representative)"
+    },
+    {
+      "id": "Company",
+      "name": "Company (Zarkan Industries)"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "CSR",
+      "name": "CSR",
+      "pool": "CSR"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "ReceiveComplaint",
+      "name": "Receive Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "RecordDetails",
+      "name": "Record Details",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "AnalyzeComplaint",
+      "name": "Analyze Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "ConsultDepartments",
+      "name": "Consult Departments",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "ResolveComplaint",
+      "name": "Resolve Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "ArchiveComplaint",
+      "name": "Archive Complaint",
+      "type": "task",
+      "lane": "CSR"
+    }
+  ],
+  "events": [
+    {
+      "id": "ComplaintReceived",
+      "name": "Complaint Received",
+      "type": "startEvent",
+      "lane": "CSR",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ComplaintAnalyzed",
+      "name": "Complaint Analyzed",
+      "type": "intermediateCatchEvent",
+      "lane": "CSR",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ComplaintResolved",
+      "name": "Complaint Resolved",
+      "type": "intermediateThrowEvent",
+      "lane": "CSR",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ComplaintClosed",
+      "name": "Complaint Closed",
+      "type": "endEvent",
+      "lane": "CSR",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ComplaintReceived",
+      "name": "Complaint Received",
+      "type": "startEvent",
+      "lane": "Company",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "ComplaintReceived",
+      "to": "RecordDetails"
+    },
+    {
+      "id": "sf2",
+      "from": "RecordDetails",
+      "to": "AnalyzeComplaint"
+    },
+    {
+      "id": "sf3",
+      "from": "AnalyzeComplaint",
+      "to": "ConsultDepartments"
+    },
+    {
+      "id": "sf4",
+      "from": "ConsultDepartments",
+      "to": "ResolveComplaint"
+    },
+    {
+      "id": "sf5",
+      "from": "ResolveComplaint",
+      "to": "ArchiveComplaint"
+    },
+    {
+      "id": "sf6",
+      "from": "ArchiveComplaint",
+      "to": "ComplaintClosed"
+    },
+    {
+      "id": "sf7",
+      "from": "ComplaintClosed",
+      "to": "ComplaintReceived"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "ComplaintAnalyzed",
+      "to": "ConsultDepartments",
+      "name": "ConsultationRequest"
+    },
+    {
+      "id": "mf2",
+      "from": "CSR",
+      "to": "ComplaintAnalyzed",
+      "name": "ComplaintAnalysisResult"
+    }
+  ]
+}

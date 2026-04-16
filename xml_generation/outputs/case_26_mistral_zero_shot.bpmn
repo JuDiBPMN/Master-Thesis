@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_HR_Pool" name="HR Manager Pool" processRef="Process_HR_Pool"/>
+    <bpmn:participant id="actor_Business_Pool" name="Business Manager Pool" processRef="Process_Business_Pool"/>
+    <bpmn:messageFlow id="HR_Discuss_Business_Message" name="Message from HR to Business Manager" sourceRef="HR_Discuss_Business" targetRef="HR_Discuss_Business_Catch"/>
+    <bpmn:messageFlow id="Business_Decision_Message" name="Message from Business Manager to HR" sourceRef="Business_Decision" targetRef="HR_Contract_Preparation"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_HR_Pool" name="HR Manager Pool" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_HR_Pool">
+      <bpmn:lane id="HR_Lane" name="HR Manager">
+        <bpmn:flowNodeRef>Candidate_Application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>HR_Discuss_Business</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>HR_Contract_Preparation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>HR_Application_Closure</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Introduction_Interview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Discuss_Candidate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Prepare_Contract</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Close_Application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>HR_Business_Decision</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Candidate_Application" name="Candidate Application"/>
+    <bpmn:intermediateThrowEvent id="HR_Discuss_Business" name="HR Discuss Business"/>
+    <bpmn:intermediateCatchEvent id="HR_Contract_Preparation" name="HR Contract Preparation"/>
+    <bpmn:endEvent id="HR_Application_Closure" name="HR Application Closure"/>
+    <bpmn:task id="Introduction_Interview" name="Introduction Interview"/>
+    <bpmn:task id="Discuss_Candidate" name="Discuss Candidate"/>
+    <bpmn:task id="Prepare_Contract" name="Prepare Contract"/>
+    <bpmn:task id="Close_Application" name="Close Application"/>
+    <bpmn:exclusiveGateway id="HR_Business_Decision" name="HR Business Decision" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="Introduction_Interview_to_Discuss_Candidate" sourceRef="Introduction_Interview" targetRef="Discuss_Candidate" name="none">
+      <bpmn:conditionExpression>none</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Discuss_Candidate_to_HR_Business_Decision" sourceRef="Discuss_Candidate" targetRef="HR_Business_Decision" name="none">
+      <bpmn:conditionExpression>none</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="HR_Business_Decision_to_Prepare_Contract" sourceRef="HR_Business_Decision" targetRef="Prepare_Contract" name="none">
+      <bpmn:conditionExpression>none</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Prepare_Contract_to_HR_Application_Closure" sourceRef="Prepare_Contract" targetRef="HR_Application_Closure" name="none">
+      <bpmn:conditionExpression>none</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="HR_Business_Decision_to_Close_Application" sourceRef="HR_Business_Decision" targetRef="Close_Application" name="none">
+      <bpmn:conditionExpression>none</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmn:process id="Process_Business_Pool" name="Business Manager Pool" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Business_Pool">
+      <bpmn:lane id="Business_Lane" name="Business Manager">
+        <bpmn:flowNodeRef>HR_Discuss_Business_Catch</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Business_Decision</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Business_Application_Closure</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Second_Assessment</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:intermediateCatchEvent id="HR_Discuss_Business_Catch" name="HR Discuss Business Catch"/>
+    <bpmn:intermediateThrowEvent id="Business_Decision" name="Business Decision"/>
+    <bpmn:endEvent id="Business_Application_Closure" name="Business Application Closure"/>
+    <bpmn:task id="Second_Assessment" name="Second Assessment"/>
+    <bpmn:sequenceFlow id="Business_Decision_to_Second_Assessment" sourceRef="Business_Decision" targetRef="Second_Assessment" name="none">
+      <bpmn:conditionExpression>none</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Second_Assessment_to_Business_Decision" sourceRef="Second_Assessment" targetRef="Business_Decision" name="none">
+      <bpmn:conditionExpression>none</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_HR_Pool_di" bpmnElement="actor_HR_Pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1540" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Business_Pool_di" bpmnElement="actor_Business_Pool" isHorizontal="true">
+        <dc:Bounds x="10" y="550" width="760" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="HR_Lane_di" bpmnElement="HR_Lane" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1510" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Business_Lane_di" bpmnElement="Business_Lane" isHorizontal="true">
+        <dc:Bounds x="40" y="550" width="730" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Candidate_Application_di" bpmnElement="Candidate_Application">
+        <dc:Bounds x="172" y="116" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="HR_Discuss_Business_di" bpmnElement="HR_Discuss_Business">
+        <dc:Bounds x="172" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="HR_Contract_Preparation_di" bpmnElement="HR_Contract_Preparation">
+        <dc:Bounds x="172" y="248" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Introduction_Interview_di" bpmnElement="Introduction_Interview">
+        <dc:Bounds x="130" y="314" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="HR_Application_Closure_di" bpmnElement="HR_Application_Closure">
+        <dc:Bounds x="1212" y="237" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Discuss_Candidate_di" bpmnElement="Discuss_Candidate">
+        <dc:Bounds x="390" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Prepare_Contract_di" bpmnElement="Prepare_Contract">
+        <dc:Bounds x="910" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Close_Application_di" bpmnElement="Close_Application">
+        <dc:Bounds x="910" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="HR_Business_Decision_di" bpmnElement="HR_Business_Decision" isMarkerVisible="true">
+        <dc:Bounds x="685" y="230" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="HR_Discuss_Business_Catch_di" bpmnElement="HR_Discuss_Business_Catch">
+        <dc:Bounds x="172" y="646" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Business_Decision_di" bpmnElement="Business_Decision">
+        <dc:Bounds x="172" y="712" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Business_Application_Closure_di" bpmnElement="Business_Application_Closure">
+        <dc:Bounds x="172" y="778" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Second_Assessment_di" bpmnElement="Second_Assessment">
+        <dc:Bounds x="390" y="690" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Introduction_Interview_to_Discuss_Candidate_di" bpmnElement="Introduction_Interview_to_Discuss_Candidate">
+        <di:waypoint x="250" y="354"/>
+        <di:waypoint x="320" y="354"/>
+        <di:waypoint x="320" y="255"/>
+        <di:waypoint x="390" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Discuss_Candidate_to_HR_Business_Decision_di" bpmnElement="Discuss_Candidate_to_HR_Business_Decision">
+        <di:waypoint x="510" y="255"/>
+        <di:waypoint x="685" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="HR_Business_Decision_to_Prepare_Contract_di" bpmnElement="HR_Business_Decision_to_Prepare_Contract">
+        <di:waypoint x="735" y="255"/>
+        <di:waypoint x="822" y="255"/>
+        <di:waypoint x="822" y="200"/>
+        <di:waypoint x="910" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Prepare_Contract_to_HR_Application_Closure_di" bpmnElement="Prepare_Contract_to_HR_Application_Closure">
+        <di:waypoint x="1030" y="200"/>
+        <di:waypoint x="1121" y="200"/>
+        <di:waypoint x="1121" y="255"/>
+        <di:waypoint x="1212" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="HR_Business_Decision_to_Close_Application_di" bpmnElement="HR_Business_Decision_to_Close_Application">
+        <di:waypoint x="735" y="255"/>
+        <di:waypoint x="822" y="255"/>
+        <di:waypoint x="822" y="310"/>
+        <di:waypoint x="910" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Business_Decision_to_Second_Assessment_di" bpmnElement="Business_Decision_to_Second_Assessment">
+        <di:waypoint x="208" y="730"/>
+        <di:waypoint x="390" y="730"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Second_Assessment_to_Business_Decision_di" bpmnElement="Second_Assessment_to_Business_Decision">
+        <di:waypoint x="450" y="690"/>
+        <di:waypoint x="450" y="640"/>
+        <di:waypoint x="190" y="640"/>
+        <di:waypoint x="190" y="712"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="HR_Discuss_Business_Message_di" bpmnElement="HR_Discuss_Business_Message">
+        <di:waypoint x="190" y="218"/>
+        <di:waypoint x="190" y="646"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Business_Decision_Message_di" bpmnElement="Business_Decision_Message">
+        <di:waypoint x="190" y="712"/>
+        <di:waypoint x="190" y="284"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

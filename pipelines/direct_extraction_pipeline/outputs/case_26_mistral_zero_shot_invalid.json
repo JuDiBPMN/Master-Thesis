@@ -1,0 +1,174 @@
+{
+  "pools": [
+    {
+      "id": "HR_Pool",
+      "name": "HR Manager Pool"
+    },
+    {
+      "id": "Business_Pool",
+      "name": "Business Manager Pool"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "HR_Lane",
+      "name": "HR Manager",
+      "pool": "HR_Pool"
+    },
+    {
+      "id": "Business_Lane",
+      "name": "Business Manager",
+      "pool": "Business_Pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Introduction_Interview",
+      "name": "Introduction Interview",
+      "type": "task",
+      "lane": "HR_Lane"
+    },
+    {
+      "id": "Discuss_Candidate",
+      "name": "Discuss Candidate",
+      "type": "task",
+      "lane": "HR_Lane"
+    },
+    {
+      "id": "Second_Assessment",
+      "name": "Second Assessment",
+      "type": "task",
+      "lane": "Business_Lane"
+    },
+    {
+      "id": "Prepare_Contract",
+      "name": "Prepare Contract",
+      "type": "task",
+      "lane": "HR_Lane"
+    },
+    {
+      "id": "Close_Application",
+      "name": "Close Application",
+      "type": "task",
+      "lane": "HR_Lane"
+    }
+  ],
+  "events": [
+    {
+      "id": "Candidate_Application",
+      "name": "Candidate Application",
+      "type": "startEvent",
+      "lane": "HR_Lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "HR_Discuss_Business",
+      "name": "HR Discuss Business",
+      "type": "intermediateThrowEvent",
+      "lane": "HR_Lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "HR_Discuss_Business_Catch",
+      "name": "HR Discuss Business Catch",
+      "type": "intermediateCatchEvent",
+      "lane": "Business_Lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Business_Decision",
+      "name": "Business Decision",
+      "type": "intermediateThrowEvent",
+      "lane": "Business_Lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "HR_Contract_Preparation",
+      "name": "HR Contract Preparation",
+      "type": "intermediateCatchEvent",
+      "lane": "HR_Lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "HR_Application_Closure",
+      "name": "HR Application Closure",
+      "type": "endEvent",
+      "lane": "HR_Lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Business_Application_Closure",
+      "name": "Business Application Closure",
+      "type": "endEvent",
+      "lane": "Business_Lane",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "HR_Business_Decision",
+      "name": "HR Business Decision",
+      "type": "exclusiveGateway",
+      "lane": "HR_Lane",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Introduction_Interview_to_Discuss_Candidate",
+      "from": "Introduction_Interview",
+      "to": "Discuss_Candidate",
+      "condition": "none"
+    },
+    {
+      "id": "Discuss_Candidate_to_HR_Business_Decision",
+      "from": "Discuss_Candidate",
+      "to": "HR_Business_Decision",
+      "condition": "none"
+    },
+    {
+      "id": "HR_Business_Decision_to_Prepare_Contract",
+      "from": "HR_Business_Decision",
+      "to": "Prepare_Contract",
+      "condition": "none"
+    },
+    {
+      "id": "Prepare_Contract_to_HR_Application_Closure",
+      "from": "Prepare_Contract",
+      "to": "HR_Application_Closure",
+      "condition": "none"
+    },
+    {
+      "id": "HR_Business_Decision_to_Close_Application",
+      "from": "HR_Business_Decision",
+      "to": "Close_Application",
+      "condition": "none"
+    },
+    {
+      "id": "Business_Decision_to_Second_Assessment",
+      "from": "Business_Decision",
+      "to": "Second_Assessment",
+      "condition": "none"
+    },
+    {
+      "id": "Second_Assessment_to_Business_Decision",
+      "from": "Second_Assessment",
+      "to": "Business_Decision",
+      "condition": "none"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "HR_Discuss_Business_Message",
+      "from": "HR_Discuss_Business",
+      "to": "HR_Discuss_Business_Catch",
+      "name": "Message from HR to Business Manager"
+    },
+    {
+      "id": "Business_Decision_Message",
+      "from": "Business_Decision",
+      "to": "HR_Contract_Preparation",
+      "name": "Message from Business Manager to HR"
+    }
+  ]
+}

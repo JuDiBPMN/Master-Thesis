@@ -1,0 +1,335 @@
+{
+  "pools": [
+    {
+      "id": "hr_pool",
+      "name": "HR Department & Hiring Manager"
+    },
+    {
+      "id": "candidate_pool",
+      "name": "Candidates"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "hr",
+      "name": "HR Recruiter",
+      "pool": "hr_pool"
+    },
+    {
+      "id": "hiring_manager",
+      "name": "Hiring Manager",
+      "pool": "hr_pool"
+    },
+    {
+      "id": "candidate",
+      "name": "Candidate",
+      "pool": "candidate_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_vacancy",
+      "name": "Submit Vacancy Request",
+      "type": "task",
+      "lane": "hiring_manager"
+    },
+    {
+      "id": "register_vacancy",
+      "name": "Register Vacancy",
+      "type": "task",
+      "lane": "hr"
+    },
+    {
+      "id": "post_job_advertisement",
+      "name": "Post Job Advertisement",
+      "type": "task",
+      "lane": "hr"
+    },
+    {
+      "id": "receive_application",
+      "name": "Receive Application",
+      "type": "task",
+      "lane": "hr"
+    },
+    {
+      "id": "screen_application",
+      "name": "Screen Application",
+      "type": "task",
+      "lane": "hr"
+    },
+    {
+      "id": "shortlist_candidate",
+      "name": "Shortlist Candidate",
+      "type": "task",
+      "lane": "hr"
+    },
+    {
+      "id": "schedule_technical_interview",
+      "name": "Schedule Technical Interview",
+      "type": "task",
+      "lane": "hr"
+    },
+    {
+      "id": "conduct_technical_interview",
+      "name": "Conduct Technical Interview",
+      "type": "task",
+      "lane": "hiring_manager"
+    },
+    {
+      "id": "complete_personality_assessment",
+      "name": "Complete Personality Assessment",
+      "type": "task",
+      "lane": "candidate"
+    },
+    {
+      "id": "score_personality_assessment",
+      "name": "Score Personality Assessment",
+      "type": "task",
+      "lane": "hr"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_hr",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "hr",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0q3w2vg",
+      "name": "Submit Vacancy Request",
+      "type": "intermediateThrowEvent",
+      "lane": "hiring_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1j3x56h",
+      "name": "Receive Vacancy Request",
+      "type": "intermediateCatchEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0x7y89t",
+      "name": "Register Vacancy",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1gkjlpo",
+      "name": "Post Job Advertisement",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0w2er3s",
+      "name": "Receive Application",
+      "type": "intermediateCatchEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1qzp90a",
+      "name": "Screen Application",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0vnjm5d",
+      "name": "Shortlist Candidate",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0k3lx7w",
+      "name": "Schedule Technical Interview",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1mnbpqr",
+      "name": "Conduct Technical Interview",
+      "type": "intermediateThrowEvent",
+      "lane": "hiring_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0l7x8zg",
+      "name": "Score Personality Assessment",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1pqrstu",
+      "name": "Receive Personality Assessment",
+      "type": "intermediateCatchEvent",
+      "lane": "candidate",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0njm5dg",
+      "name": "Combine Verdicts",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0iuytrw",
+      "name": "Negative Verdict",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0jhgfds",
+      "name": "Positive Verdict",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1abcd12",
+      "name": "Draft Job Offer",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0efgh34",
+      "name": "Send Job Offer",
+      "type": "intermediateThrowEvent",
+      "lane": "hr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0xyz567",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "hr",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0abcd87",
+      "name": "Receive Rejection Email",
+      "type": "intermediateCatchEvent",
+      "lane": "candidate",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0mnoqrs",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "candidate",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_candidates",
+      "name": "Shortlist Candidates?",
+      "type": "exclusiveGateway",
+      "lane": "hr",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_verdicts",
+      "name": "Both Verdicts Received?",
+      "type": "exclusiveGateway",
+      "lane": "hr",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Flow_1j3x56h_to_register_vacancy",
+      "from": "Event_0q3w2vg",
+      "to": "Event_0x7y89t"
+    },
+    {
+      "id": "Flow_0w2er3s_to_Event_0vnjm5d",
+      "from": "Event_0w2er3s",
+      "to": "Event_0vnjm5d"
+    },
+    {
+      "id": "Flow_0vnjm5d_to_split_candidates",
+      "from": "Event_0vnjm5d",
+      "to": "split_candidates"
+    },
+    {
+      "id": "Flow_1mnbpqr_to_join_verdicts",
+      "from": "Event_1mnbpqr",
+      "to": "join_verdicts"
+    },
+    {
+      "id": "Flow_0iuytrw_to_Event_0abcd12",
+      "from": "Event_0iuytrw",
+      "to": "Event_0abcd12"
+    },
+    {
+      "id": "Flow_0jhgfds_to_Event_0efgh34",
+      "from": "Event_0jhgfds",
+      "to": "Event_0efgh34"
+    },
+    {
+      "id": "Flow_0efgh34_to_Event_0xyz567",
+      "from": "Event_0efgh34",
+      "to": "Event_0xyz567"
+    },
+    {
+      "id": "Flow_0abcd12_to_Event_0mnoqrs",
+      "from": "Event_0abcd12",
+      "to": "Event_0mnoqrs"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Event_0q3w2vg",
+      "to": "Event_0w2er3s",
+      "name": "Submit Vacancy Request"
+    },
+    {
+      "id": "mf2",
+      "from": "Event_0efgh34",
+      "to": "Event_0abcd12",
+      "name": "Job Offer"
+    },
+    {
+      "id": "mf3",
+      "from": "Event_0abcd12",
+      "to": "Event_0mnoqrs",
+      "name": "Rejection Email"
+    },
+    {
+      "id": "mf4",
+      "from": "Event_0iuytrw",
+      "to": "Event_0jhgfds",
+      "name": "Negative Verdict"
+    },
+    {
+      "id": "mf5",
+      "from": "Event_0jhgfds",
+      "to": "Event_0efgh34",
+      "name": "Positive Verdict"
+    },
+    {
+      "id": "mf6",
+      "from": "Event_0vnjm5d",
+      "to": "Event_0iuytrw",
+      "name": "Negative Verdict"
+    },
+    {
+      "id": "mf7",
+      "from": "Event_0vnjm5d",
+      "to": "Event_0jhgfds",
+      "name": "Positive Verdict"
+    }
+  ]
+}

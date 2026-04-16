@@ -1,0 +1,186 @@
+{
+  "pools": [
+    {
+      "id": "hr_company_pool",
+      "name": "HR Company"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "hr_manager",
+      "name": "HR Manager",
+      "pool": "hr_company_pool"
+    },
+    {
+      "id": "business_manager",
+      "name": "Business Manager",
+      "pool": "hr_company_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "introduction_interview",
+      "name": "Introduction Interview",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "discuss_with_business_manager",
+      "name": "Discuss with Business Manager",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "inform_candidate",
+      "name": "Inform Candidate",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "second_assessment",
+      "name": "Second Assessment",
+      "type": "task",
+      "lane": "business_manager"
+    },
+    {
+      "id": "prepare_contract",
+      "name": "Prepare Contract",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "close_application",
+      "name": "Close Application",
+      "type": "task",
+      "lane": "hr_manager"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_hr_manager",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1rw3a6w",
+      "name": "Discuss with Business Manager",
+      "type": "intermediateThrowEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0muyk3x",
+      "name": "Inform Candidate",
+      "type": "intermediateThrowEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0lnnv01",
+      "name": "Second Assessment",
+      "type": "intermediateCatchEvent",
+      "lane": "business_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0tpcr9s",
+      "name": "Assessment Successful",
+      "type": "intermediateCatchEvent",
+      "lane": "business_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1r6yhp5",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_assessment",
+      "name": "Assessment Successful?",
+      "type": "exclusiveGateway",
+      "lane": "business_manager",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Flow_1kd72rx",
+      "from": "start_hr_manager",
+      "to": "introduction_interview"
+    },
+    {
+      "id": "sf1",
+      "from": "introduction_interview",
+      "to": "discuss_with_business_manager"
+    },
+    {
+      "id": "sf2",
+      "from": "discuss_with_business_manager",
+      "to": "Event_1rw3a6w"
+    },
+    {
+      "id": "sf3",
+      "from": "Event_1rw3a6w",
+      "to": "inform_candidate"
+    },
+    {
+      "id": "sf4",
+      "from": "inform_candidate",
+      "to": "Event_0muyk3x"
+    },
+    {
+      "id": "sf5",
+      "from": "Event_0muyk3x",
+      "to": "Event_0lnnv01"
+    },
+    {
+      "id": "sf6",
+      "from": "Event_0lnnv01",
+      "to": "split_assessment"
+    },
+    {
+      "id": "sf7",
+      "from": "split_assessment",
+      "to": "prepare_contract",
+      "condition": "Successful"
+    },
+    {
+      "id": "sf8",
+      "from": "split_assessment",
+      "to": "close_application",
+      "condition": "Not Successful"
+    },
+    {
+      "id": "sf9",
+      "from": "prepare_contract",
+      "to": "Event_1r6yhp5"
+    },
+    {
+      "id": "sf10",
+      "from": "close_application",
+      "to": "Event_1r6yhp5"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Event_1rw3a6w",
+      "to": "Event_0lnnv01",
+      "name": "Discuss with Business Manager"
+    },
+    {
+      "id": "Flow_0fx4d6n",
+      "from": "Event_0muyk3x",
+      "to": "Event_0tpcr9s",
+      "name": "Inform Candidate"
+    }
+  ],
+  "data": [],
+  "data_associations": []
+}

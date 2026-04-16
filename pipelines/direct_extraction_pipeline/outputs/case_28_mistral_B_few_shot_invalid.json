@@ -1,0 +1,188 @@
+{
+  "pools": [
+    {
+      "id": "csr_pool",
+      "name": "CSR Team at Zarkan Industries,\nCustomer Service Representative\nPool: Customer Satisfaction\nLanes: CSR"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "csr",
+      "name": "CSR",
+      "pool": "csr_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "register_complaint",
+      "name": "Register Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "analyze_complaint",
+      "name": "Analyze Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "consult_departments",
+      "name": "Consult Departments",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "resolve_complaint",
+      "name": "Resolve Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "archive_complaint",
+      "name": "Archive Complaint",
+      "type": "task",
+      "lane": "csr"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_csr",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "csr",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0qjx3w",
+      "name": "Receive Complaint",
+      "type": "intermediateThrowEvent",
+      "lane": "csr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3qj5x",
+      "name": "Receive call details",
+      "type": "intermediateCatchEvent",
+      "lane": "csr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0q3xj6g",
+      "name": "Receive in-person complaint",
+      "type": "intermediateCatchEvent",
+      "lane": "csr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3xj6h",
+      "name": "Receive letter complaint",
+      "type": "intermediateCatchEvent",
+      "lane": "csr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0q3xj6i",
+      "name": "Receive analysis results",
+      "type": "intermediateCatchEvent",
+      "lane": "csr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3xj6j",
+      "name": "Receive department consultation results",
+      "type": "intermediateCatchEvent",
+      "lane": "csr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0q3xj6k",
+      "name": "Resolve complaint to customer's satisfaction",
+      "type": "intermediateCatchEvent",
+      "lane": "csr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3xj6l",
+      "name": "Archive complaint details",
+      "type": "intermediateCatchEvent",
+      "lane": "csr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0q3xj6m",
+      "name": "Formally close complaint",
+      "type": "endEvent",
+      "lane": "csr",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [],
+  "sequence_flows": [
+    {
+      "id": "Flow_0q3xj6n",
+      "from": "start_csr",
+      "to": "register_complaint"
+    },
+    {
+      "id": "Flow_1q3xj6o",
+      "from": "register_complaint",
+      "to": "Event_0qjx3w"
+    },
+    {
+      "id": "Flow_0q3xj6p",
+      "from": "Event_0qjx3w",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "Flow_1q3xj6q",
+      "from": "analyze_complaint",
+      "to": "consult_departments"
+    },
+    {
+      "id": "Flow_0q3xj6r",
+      "from": "consult_departments",
+      "to": "resolve_complaint"
+    },
+    {
+      "id": "Flow_1q3xj6s",
+      "from": "resolve_complaint",
+      "to": "archive_complaint"
+    },
+    {
+      "id": "Flow_0q3xj6t",
+      "from": "archive_complaint",
+      "to": "Event_1q3xj6l"
+    },
+    {
+      "id": "Flow_0q3xj6u",
+      "from": "Event_1q3xj6k",
+      "to": "Event_0q3xj6m"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Event_0qjx3w",
+      "to": "register_complaint",
+      "name": "Receive Complaint"
+    },
+    {
+      "id": "mf2",
+      "from": "Event_1q3xj6l",
+      "to": "Event_0q3xj6k",
+      "name": "Send Complaint Details"
+    },
+    {
+      "id": "mf3",
+      "from": "Event_1q3xj6i",
+      "to": "Event_0q3xj6p",
+      "name": "Send Analysis Results"
+    },
+    {
+      "id": "mf4",
+      "from": "Event_1q3xj6j",
+      "to": "Event_0q3xj6q",
+      "name": "Send Department Consultation Results"
+    }
+  ]
+}

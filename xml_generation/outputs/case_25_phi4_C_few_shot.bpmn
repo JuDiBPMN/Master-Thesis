@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_library" name="Library" processRef="Process_library"/>
+    <bpmn:participant id="actor_requester" name="Requester" processRef="Process_requester"/>
+    <bpmn:messageFlow id="mf1" name="Unavailability Notification" sourceRef="inform_unavailable" targetRef="end_requester_unavailable"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="inform_unavailable" targetRef="end_requester_unavailable"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_library" name="Library" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_library">
+      <bpmn:lane id="library_staff" name="Library Staff">
+        <bpmn:flowNodeRef>start_library</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_library_checkout</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>consult_catalog</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>inform_unavailable</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>start_checkout</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>log_book</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>retrieve_book</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_availability</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_parallel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_parallel_join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_availability_join</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_library" name="Start"/>
+    <bpmn:endEvent id="end_library_checkout" name="End Checkout"/>
+    <bpmn:task id="consult_catalog" name="Consult Digital Catalog"/>
+    <bpmn:task id="inform_unavailable" name="Inform Requester of Unavailability"/>
+    <bpmn:task id="start_checkout" name="Start Checkout Procedure"/>
+    <bpmn:task id="log_book" name="Log Book Against Library Account"/>
+    <bpmn:task id="retrieve_book" name="Retrieve Book Using Automatic System"/>
+    <bpmn:exclusiveGateway id="gateway_availability" name="Book Availability Check" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gateway_parallel" name="Parallel Checkout Actions" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gateway_parallel_join" name="Checkout Complete" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="gateway_availability_join" name="Availability Decision Complete" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_library" targetRef="consult_catalog"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="consult_catalog" targetRef="gateway_availability"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="gateway_availability" targetRef="inform_unavailable" name="Unavailable">
+      <bpmn:conditionExpression>Unavailable</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf4" sourceRef="gateway_availability" targetRef="start_checkout" name="Available">
+      <bpmn:conditionExpression>Available</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf6" sourceRef="start_checkout" targetRef="gateway_parallel"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="gateway_parallel" targetRef="log_book"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="gateway_parallel" targetRef="retrieve_book"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="log_book" targetRef="gateway_parallel_join"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="retrieve_book" targetRef="gateway_parallel_join"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="gateway_parallel_join" targetRef="gateway_availability_join"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="gateway_availability_join" targetRef="end_library_checkout"/>
+  </bpmn:process>
+  <bpmn:process id="Process_requester" name="Requester" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_requester">
+      <bpmn:lane id="requester" name="Requester"/>
+    </bpmn:laneSet>
+    <bpmn:endEvent id="end_requester_unavailable" name="End Unavailable"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_library_di" bpmnElement="actor_library" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="2580" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_requester_di" bpmnElement="actor_requester" isHorizontal="true">
+        <dc:Bounds x="10" y="330" width="1280" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="library_staff_di" bpmnElement="library_staff" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="2550" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="requester_di" bpmnElement="requester" isHorizontal="true">
+        <dc:Bounds x="40" y="330" width="1250" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_library_di" bpmnElement="start_library">
+        <dc:Bounds x="172" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_library_checkout_di" bpmnElement="end_library_checkout">
+        <dc:Bounds x="2252" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="consult_catalog_di" bpmnElement="consult_catalog">
+        <dc:Bounds x="390" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="inform_unavailable_di" bpmnElement="inform_unavailable">
+        <dc:Bounds x="910" y="50" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_checkout_di" bpmnElement="start_checkout">
+        <dc:Bounds x="910" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="log_book_di" bpmnElement="log_book">
+        <dc:Bounds x="1430" y="50" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="retrieve_book_di" bpmnElement="retrieve_book">
+        <dc:Bounds x="1430" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_availability_di" bpmnElement="gateway_availability" isMarkerVisible="true">
+        <dc:Bounds x="685" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_parallel_di" bpmnElement="gateway_parallel" isMarkerVisible="true">
+        <dc:Bounds x="1205" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_parallel_join_di" bpmnElement="gateway_parallel_join" isMarkerVisible="true">
+        <dc:Bounds x="1725" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_availability_join_di" bpmnElement="gateway_availability_join" isMarkerVisible="true">
+        <dc:Bounds x="1985" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_requester_unavailable_di" bpmnElement="end_requester_unavailable">
+        <dc:Bounds x="952" y="422" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="208" y="145"/>
+        <di:waypoint x="390" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="510" y="145"/>
+        <di:waypoint x="685" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="735" y="145"/>
+        <di:waypoint x="822" y="145"/>
+        <di:waypoint x="822" y="90"/>
+        <di:waypoint x="910" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="735" y="145"/>
+        <di:waypoint x="822" y="145"/>
+        <di:waypoint x="822" y="200"/>
+        <di:waypoint x="910" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="1030" y="200"/>
+        <di:waypoint x="1117" y="200"/>
+        <di:waypoint x="1117" y="145"/>
+        <di:waypoint x="1205" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="1255" y="145"/>
+        <di:waypoint x="1342" y="145"/>
+        <di:waypoint x="1342" y="90"/>
+        <di:waypoint x="1430" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="1255" y="145"/>
+        <di:waypoint x="1342" y="145"/>
+        <di:waypoint x="1342" y="200"/>
+        <di:waypoint x="1430" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="1550" y="90"/>
+        <di:waypoint x="1637" y="90"/>
+        <di:waypoint x="1637" y="145"/>
+        <di:waypoint x="1725" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="1550" y="200"/>
+        <di:waypoint x="1637" y="200"/>
+        <di:waypoint x="1637" y="145"/>
+        <di:waypoint x="1725" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="1775" y="145"/>
+        <di:waypoint x="1985" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="2035" y="145"/>
+        <di:waypoint x="2252" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="970" y="130"/>
+        <di:waypoint x="970" y="422"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="970" y="130"/>
+        <di:waypoint x="970" y="422"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

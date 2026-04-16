@@ -1,0 +1,354 @@
+{
+  "pools": [
+    {
+      "id": "applicant_pool",
+      "name": "Applicant Organisation"
+    },
+    {
+      "id": "grants_office_pool",
+      "name": "Government Agency"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "applicant",
+      "name": "Applicant",
+      "pool": "applicant_pool"
+    },
+    {
+      "id": "grants_administrator",
+      "name": "Grants Administrator",
+      "pool": "grants_office_pool"
+    },
+    {
+      "id": "technical_reviewer",
+      "name": "Technical Reviewer",
+      "pool": "grants_office_pool"
+    },
+    {
+      "id": "finance_officer",
+      "name": "Finance Officer",
+      "pool": "grants_office_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_application",
+      "name": "Submit Grant Application",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "register_application",
+      "name": "Register Application",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "check_documentation",
+      "name": "Check Documentation",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "request_missing_documents",
+      "name": "Request Missing Documents",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "collect_missing_documents",
+      "name": "Collect Missing Documents",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "recheck_documentation",
+      "name": "Recheck Documentation",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "forward_application",
+      "name": "Forward Application",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "technical_review",
+      "name": "Technical Review",
+      "type": "task",
+      "lane": "technical_reviewer"
+    },
+    {
+      "id": "financial_review",
+      "name": "Financial Review",
+      "type": "task",
+      "lane": "finance_officer"
+    },
+    {
+      "id": "review_verdicts",
+      "name": "Review Verdicts",
+      "type": "task",
+      "lane": "grants_administrator"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_applicant",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0qjw3xg",
+      "name": "Submit Application",
+      "type": "intermediateThrowEvent",
+      "lane": "applicant",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0qjw3xg_1",
+      "name": "Receive Application",
+      "type": "intermediateCatchEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0qjw3xg_2",
+      "name": "Application Received",
+      "type": "intermediateThrowEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0qjw3xg_3",
+      "name": "Check Documentation",
+      "type": "intermediateThrowEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1qjw3xg_4",
+      "name": "Documentation Incomplete",
+      "type": "intermediateThrowEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1qjw3xg_5",
+      "name": "Request Missing Documents",
+      "type": "intermediateThrowEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1qjw3xg_6",
+      "name": "Missing Documents Collected",
+      "type": "intermediateThrowEvent",
+      "lane": "applicant",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1qjw3xg_7",
+      "name": "Recheck Documentation",
+      "type": "intermediateThrowEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1qjw3xg_8",
+      "name": "Documentation Complete",
+      "type": "intermediateThrowEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0qjw3xg_9",
+      "name": "Forward Application",
+      "type": "intermediateThrowEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1qjw3xg_10",
+      "name": "Technical Review Started",
+      "type": "startEvent",
+      "lane": "technical_reviewer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1qjw3xg_11",
+      "name": "Technical Review Finished",
+      "type": "endEvent",
+      "lane": "technical_reviewer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0qjw3xg_12",
+      "name": "Financial Review Started",
+      "type": "startEvent",
+      "lane": "finance_officer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1qjw3xg_13",
+      "name": "Financial Review Finished",
+      "type": "endEvent",
+      "lane": "finance_officer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1qjw3xg_14",
+      "name": "Review Verdicts",
+      "type": "startEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1qjw3xg_15",
+      "name": "Verdicts Reviewed",
+      "type": "endEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1qjw3xg_16",
+      "name": "Grant Approval",
+      "type": "endEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1qjw3xg_17",
+      "name": "Grant Rejected",
+      "type": "endEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_documentation",
+      "name": "Documentation Complete?",
+      "type": "exclusiveGateway",
+      "lane": "grants_administrator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_verdicts",
+      "name": "Both Verdicts Received",
+      "type": "parallelGateway",
+      "lane": "grants_administrator",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Flow_1qjw3xg_18",
+      "from": "start_applicant",
+      "to": "submit_application"
+    },
+    {
+      "id": "Flow_0qjw3xg_19",
+      "from": "submit_application",
+      "to": "Event_0qjw3xg_2"
+    },
+    {
+      "id": "Flow_1qjw3xg_20",
+      "from": "Event_0qjw3xg_2",
+      "to": "register_application"
+    },
+    {
+      "id": "Flow_1qjw3xg_21",
+      "from": "register_application",
+      "to": "check_documentation"
+    },
+    {
+      "id": "Flow_1qjw3xg_22",
+      "from": "check_documentation",
+      "to": "split_documentation"
+    },
+    {
+      "id": "Flow_1qjw3xg_23",
+      "from": "split_documentation",
+      "to": "Event_1qjw3xg_4",
+      "condition": "Incomplete"
+    },
+    {
+      "id": "Flow_1qjw3xg_24",
+      "from": "split_documentation",
+      "to": "forward_application",
+      "condition": "Complete"
+    },
+    {
+      "id": "Flow_1qjw3xg_25",
+      "from": "forward_application",
+      "to": "Event_1qjw3xg_9"
+    },
+    {
+      "id": "Flow_1qjw3xg_26",
+      "from": "Event_1qjw3xg_11",
+      "to": "join_verdicts"
+    },
+    {
+      "id": "Flow_1qjw3xg_27",
+      "from": "Event_1qjw3xg_13",
+      "to": "join_verdicts"
+    },
+    {
+      "id": "Flow_1qjw3xg_28",
+      "from": "join_verdicts",
+      "to": "Event_1qjw3xg_14"
+    },
+    {
+      "id": "Flow_1qjw3xg_29",
+      "from": "Event_1qjw3xg_15",
+      "to": "Event_1qjw3xg_16"
+    },
+    {
+      "id": "Flow_1qjw3xg_30",
+      "from": "Event_1qjw3xg_15",
+      "to": "Event_1qjw3xg_17"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Event_0qjw3xg",
+      "to": "Event_0qjw3xg_2",
+      "name": "Submit Application"
+    },
+    {
+      "id": "mf2",
+      "from": "Event_1qjw3xg_4",
+      "to": "Event_1qjw3xg_5",
+      "name": "Request Missing Documents"
+    },
+    {
+      "id": "mf3",
+      "from": "Event_1qjw3xg_6",
+      "to": "Event_1qjw3xg_7",
+      "name": "Collect Missing Documents"
+    },
+    {
+      "id": "mf4",
+      "from": "Event_1qjw3xg_8",
+      "to": "Event_1qjw3xg_9",
+      "name": "Forward Application"
+    },
+    {
+      "id": "mf5",
+      "from": "Event_1qjw3xg_11",
+      "to": "Event_1qjw3xg_12",
+      "name": "Technical Review"
+    },
+    {
+      "id": "mf6",
+      "from": "Event_1qjw3xg_13",
+      "to": "Event_1qjw3xg_14",
+      "name": "Financial Review"
+    }
+  ]
+}

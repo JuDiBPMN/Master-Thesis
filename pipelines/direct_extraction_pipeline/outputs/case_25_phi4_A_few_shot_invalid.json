@@ -1,0 +1,141 @@
+{
+  "pools": [
+    {
+      "id": "library",
+      "name": "Library"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "library_staff",
+      "name": "Library Staff",
+      "pool": "library"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "consult_catalog",
+      "name": "Consult Catalog",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "inform_requester",
+      "name": "Inform Requester",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "start_checkout",
+      "name": "Start Checkout",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "log_book",
+      "name": "Log Book",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "retrieve_book",
+      "name": "Retrieve Book",
+      "type": "task",
+      "lane": "library_staff"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_library",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "library_staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_library",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "library_staff",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_check_availability",
+      "name": "Check Availability",
+      "type": "exclusiveGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_split",
+      "name": "Start Concurrent Actions",
+      "type": "parallelGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Actions Complete",
+      "type": "parallelGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_library",
+      "to": "consult_catalog"
+    },
+    {
+      "id": "sf2",
+      "from": "consult_catalog",
+      "to": "gateway_check_availability"
+    },
+    {
+      "id": "sf3",
+      "from": "gateway_check_availability",
+      "to": "inform_requester",
+      "condition": "book not available"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_check_availability",
+      "to": "start_checkout",
+      "condition": "book available"
+    },
+    {
+      "id": "sf5",
+      "from": "start_checkout",
+      "to": "gateway_parallel_split"
+    },
+    {
+      "id": "sf6",
+      "from": "gateway_parallel_split",
+      "to": "log_book"
+    },
+    {
+      "id": "sf7",
+      "from": "gateway_parallel_split",
+      "to": "retrieve_book"
+    },
+    {
+      "id": "sf8",
+      "from": "log_book",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf9",
+      "from": "retrieve_book",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_parallel_join",
+      "to": "end_library"
+    }
+  ],
+  "message_flows": []
+}

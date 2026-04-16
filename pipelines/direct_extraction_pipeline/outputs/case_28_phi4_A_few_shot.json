@@ -1,0 +1,173 @@
+{
+  "pools": [
+    {
+      "id": "Zarkan_Industries",
+      "name": "Zarkan Industries"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "csr",
+      "name": "Customer Service Representative",
+      "pool": "Zarkan_Industries"
+    },
+    {
+      "id": "other_departments",
+      "name": "Other Departments",
+      "pool": "Zarkan_Industries"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "handle_complaint",
+      "name": "Handle Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "record_call_details",
+      "name": "Record Call Details",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "document_concerns",
+      "name": "Document Concerns",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "note_letter_receipt",
+      "name": "Note Letter Receipt Date",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "analyze_complaint",
+      "name": "Analyze Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "resolve_complaint",
+      "name": "Resolve Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "archive_complaint",
+      "name": "Archive Complaint Details",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "consult_other_departments",
+      "name": "Consult Other Departments",
+      "type": "task",
+      "lane": "other_departments"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_complaint_handling",
+      "name": "Start Complaint Handling",
+      "type": "startEvent",
+      "lane": "csr",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_complaint_handling",
+      "name": "End Complaint Handling",
+      "type": "endEvent",
+      "lane": "csr",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_complaint_type_split",
+      "name": "Complaint Type?",
+      "type": "exclusiveGateway",
+      "lane": "csr",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_complaint_type_join",
+      "name": "Complaint Registered",
+      "type": "exclusiveGateway",
+      "lane": "csr",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_complaint_handling",
+      "to": "handle_complaint"
+    },
+    {
+      "id": "sf2",
+      "from": "handle_complaint",
+      "to": "gateway_complaint_type_split"
+    },
+    {
+      "id": "sf3",
+      "from": "gateway_complaint_type_split",
+      "to": "record_call_details",
+      "condition": "phone call"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_complaint_type_split",
+      "to": "document_concerns",
+      "condition": "in-person complaint"
+    },
+    {
+      "id": "sf5",
+      "from": "gateway_complaint_type_split",
+      "to": "note_letter_receipt",
+      "condition": "letter"
+    },
+    {
+      "id": "sf6",
+      "from": "record_call_details",
+      "to": "gateway_complaint_type_join"
+    },
+    {
+      "id": "sf7",
+      "from": "document_concerns",
+      "to": "gateway_complaint_type_join"
+    },
+    {
+      "id": "sf8",
+      "from": "note_letter_receipt",
+      "to": "gateway_complaint_type_join"
+    },
+    {
+      "id": "sf9",
+      "from": "gateway_complaint_type_join",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf10",
+      "from": "analyze_complaint",
+      "to": "consult_other_departments"
+    },
+    {
+      "id": "sf11",
+      "from": "consult_other_departments",
+      "to": "resolve_complaint"
+    },
+    {
+      "id": "sf12",
+      "from": "resolve_complaint",
+      "to": "archive_complaint"
+    },
+    {
+      "id": "sf13",
+      "from": "archive_complaint",
+      "to": "end_complaint_handling"
+    }
+  ],
+  "message_flows": []
+}

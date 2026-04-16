@@ -1,0 +1,125 @@
+{
+  "pools": [
+    {
+      "id": "Company",
+      "name": "Company"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Customer Service",
+      "name": "Customer Service",
+      "pool": "Company"
+    },
+    {
+      "id": "Operations",
+      "name": "Operations",
+      "pool": "Company"
+    },
+    {
+      "id": "Finance",
+      "name": "Finance",
+      "pool": "Company"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "registerApplication",
+      "name": "Register Application",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "checkDocumentation",
+      "name": "Check Documentation",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "forwardApplication",
+      "name": "Forward Application",
+      "type": "task",
+      "lane": "Operations"
+    },
+    {
+      "id": "technicalReview",
+      "name": "Technical Review",
+      "type": "task",
+      "lane": "Operations"
+    },
+    {
+      "id": "budgetReview",
+      "name": "Budget Review",
+      "type": "task",
+      "lane": "Finance"
+    },
+    {
+      "id": "issueGrantApprovalLetter",
+      "name": "Issue Grant Approval Letter",
+      "type": "task",
+      "lane": "Finance"
+    }
+  ],
+  "events": [
+    {
+      "id": "intermediateThrowEvent",
+      "name": "Intermediate Throw Event",
+      "type": "intermediateThrowEvent",
+      "lane": "Customer Service",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "exclusiveGateway",
+      "name": "Exclusive Gateway",
+      "type": "exclusiveGateway",
+      "lane": "Customer Service",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sequenceFlow1",
+      "from": "registerApplication",
+      "to": "checkDocumentation",
+      "condition": "true"
+    },
+    {
+      "id": "sequenceFlow2",
+      "from": "checkDocumentation",
+      "to": "forwardApplication",
+      "condition": "true"
+    },
+    {
+      "id": "sequenceFlow3",
+      "from": "forwardApplication",
+      "to": "technicalReview",
+      "condition": "true"
+    },
+    {
+      "id": "sequenceFlow4",
+      "from": "technicalReview",
+      "to": "budgetReview",
+      "condition": "true"
+    },
+    {
+      "id": "sequenceFlow5",
+      "from": "budgetReview",
+      "to": "issueGrantApprovalLetter",
+      "condition": "true"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "messageFlow1",
+      "from": "intermediateThrowEvent",
+      "to": "intermediateCatchEvent",
+      "name": "Message Flow 1"
+    }
+  ]
+}

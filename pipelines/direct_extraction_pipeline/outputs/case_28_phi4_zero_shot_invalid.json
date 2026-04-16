@@ -1,0 +1,176 @@
+{
+  "pools": [
+    {
+      "id": "ZarkanIndustries",
+      "name": "Zarkan Industries"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "CSR",
+      "name": "Customer Service Representative",
+      "pool": "ZarkanIndustries"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "pool": "Customer"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "receiveComplaint",
+      "name": "Receive Complaint",
+      "type": "manualTask",
+      "lane": "CSR"
+    },
+    {
+      "id": "recordCallDetails",
+      "name": "Record Call Details",
+      "type": "manualTask",
+      "lane": "CSR"
+    },
+    {
+      "id": "documentConcerns",
+      "name": "Document Customer's Concerns",
+      "type": "manualTask",
+      "lane": "CSR"
+    },
+    {
+      "id": "noteReceiptDate",
+      "name": "Note Letter's Receipt Date",
+      "type": "manualTask",
+      "lane": "CSR"
+    },
+    {
+      "id": "analyzeComplaint",
+      "name": "Analyze Complaint",
+      "type": "manualTask",
+      "lane": "CSR"
+    },
+    {
+      "id": "consultDepartments",
+      "name": "Consult Other Departments",
+      "type": "manualTask",
+      "lane": "CSR"
+    },
+    {
+      "id": "resolveComplaint",
+      "name": "Resolve Complaint",
+      "type": "manualTask",
+      "lane": "CSR"
+    },
+    {
+      "id": "archiveComplaint",
+      "name": "Archive Complaint Details",
+      "type": "manualTask",
+      "lane": "CSR"
+    }
+  ],
+  "events": [
+    {
+      "id": "startEvent",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "CSR",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "endEvent",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "CSR",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "complaintReceived",
+      "name": "Complaint Received",
+      "type": "intermediateCatchEvent",
+      "lane": "CSR",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "decisionGateway",
+      "name": "Decision Gateway",
+      "type": "exclusiveGateway",
+      "lane": "CSR",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "startToReceiveComplaint",
+      "from": "startEvent",
+      "to": "receiveComplaint"
+    },
+    {
+      "id": "receiveComplaintToDecisionGateway",
+      "from": "receiveComplaint",
+      "to": "decisionGateway"
+    },
+    {
+      "id": "decisionGatewayToRecordCallDetails",
+      "from": "decisionGateway",
+      "to": "recordCallDetails"
+    },
+    {
+      "id": "decisionGatewayToDocumentConcerns",
+      "from": "decisionGateway",
+      "to": "documentConcerns"
+    },
+    {
+      "id": "decisionGatewayToNoteReceiptDate",
+      "from": "decisionGateway",
+      "to": "noteReceiptDate"
+    },
+    {
+      "id": "recordCallDetailsToAnalyzeComplaint",
+      "from": "recordCallDetails",
+      "to": "analyzeComplaint"
+    },
+    {
+      "id": "documentConcernsToAnalyzeComplaint",
+      "from": "documentConcerns",
+      "to": "analyzeComplaint"
+    },
+    {
+      "id": "noteReceiptDateToAnalyzeComplaint",
+      "from": "noteReceiptDate",
+      "to": "analyzeComplaint"
+    },
+    {
+      "id": "analyzeComplaintToConsultDepartments",
+      "from": "analyzeComplaint",
+      "to": "consultDepartments"
+    },
+    {
+      "id": "consultDepartmentsToResolveComplaint",
+      "from": "consultDepartments",
+      "to": "resolveComplaint"
+    },
+    {
+      "id": "resolveComplaintToArchiveComplaint",
+      "from": "resolveComplaint",
+      "to": "archiveComplaint"
+    },
+    {
+      "id": "archiveComplaintToEndEvent",
+      "from": "archiveComplaint",
+      "to": "endEvent"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "complaintReceivedToStart",
+      "from": "complaintReceived",
+      "to": "startEvent",
+      "name": "Receive Complaint Message"
+    }
+  ]
+}

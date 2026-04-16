@@ -1,0 +1,230 @@
+{
+  "pools": [
+    {
+      "id": "Government_Agency",
+      "name": "Government Agency”, "
+    },
+    {
+      "id": "Applicant_Organisation",
+      "name": "Applicant Organisation"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Grants_Office",
+      "name": "Grants Office",
+      "pool": "Government_Agency"
+    },
+    {
+      "id": "Grants_Administrator",
+      "name": "Grants Administrator",
+      "pool": "Government_Agency"
+    },
+    {
+      "id": "Technical_Review_Panel",
+      "name": "Technical Review Panel",
+      "pool": "Government_Agency"
+    },
+    {
+      "id": "Finance_Department",
+      "name": "Finance Department",
+      "pool": "Government_Agency"
+    },
+    {
+      "id": "Applicant",
+      "name": "Applicant",
+      "pool": "Applicant_Organisation"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Register_Application",
+      "name": "Register Application",
+      "type": "task",
+      "lane": "Grants_Office"
+    },
+    {
+      "id": "Check_Documentation",
+      "name": "Check Documentation",
+      "type": "task",
+      "lane": "Grants_Administrator"
+    },
+    {
+      "id": "Notify_Missing_Documents",
+      "name": "Notify Missing Documents",
+      "type": "task",
+      "lane": "Grants_Administrator"
+    },
+    {
+      "id": "Resubmit_Documents",
+      "name": "Resubmit Documents",
+      "type": "task",
+      "lane": "Applicant"
+    },
+    {
+      "id": "Receive_Documents",
+      "name": "Receive Documents",
+      "type": "task",
+      "lane": "Grants_Administrator"
+    },
+    {
+      "id": "Check_Documentation_Again",
+      "name": "Check Documentation Again",
+      "type": "task",
+      "lane": "Grants_Administrator"
+    },
+    {
+      "id": "Assess_Project_Feasibility",
+      "name": "Assess Project Feasibility",
+      "type": "task",
+      "lane": "Technical_Reviewer"
+    },
+    {
+      "id": "Review_Proposed_Budget",
+      "name": "Review Proposed Budget",
+      "type": "task",
+      "lane": "Finance_Officer"
+    },
+    {
+      "id": "Review_Combined_Outcomes",
+      "name": "Review Combined Outcomes",
+      "type": "task",
+      "lane": "Grants_Administrator"
+    }
+  ],
+  "events": [
+    {
+      "id": "Application_Submitted",
+      "name": "Application Submitted",
+      "type": "startEvent",
+      "lane": "Grants_Office",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Application_Rejected",
+      "name": "Application Rejected",
+      "type": "endEvent",
+      "lane": "Grants_Administrator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Application_Approved",
+      "name": "Application Approved",
+      "type": "endEvent",
+      "lane": "Grants_Administrator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Missing_Documents_Notification",
+      "name": "Missing Documents Notification",
+      "type": "intermediateThrowEvent",
+      "lane": "Grants_Administrator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Missing_Documents_Received",
+      "name": "Missing Documents Received",
+      "type": "intermediateCatchEvent",
+      "lane": "Grants_Administrator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Project_Feasibility_Assessment_Completed",
+      "name": "Project Feasibility Assessment Completed",
+      "type": "intermediateCatchEvent",
+      "lane": "Technical_Review_Panel",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Budget_Adequacy_Review_Completed",
+      "name": "Budget Adequacy Review Completed",
+      "type": "intermediateCatchEvent",
+      "lane": "Finance_Department",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Documentation_Check_Gateway",
+      "name": "Documentation Check Gateway",
+      "type": "exclusiveGateway",
+      "lane": "Grants_Administrator",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Application_Submitted_to_Grants_Office",
+      "from": "Application_Submitted",
+      "to": "Register_Application"
+    },
+    {
+      "id": "Register_Application_to_Check_Documentation",
+      "from": "Register_Application",
+      "to": "Check_Documentation"
+    },
+    {
+      "id": "Check_Documentation_to_Notify_Missing_Documents",
+      "from": "Check_Documentation",
+      "to": "Notify_Missing_Documents"
+    },
+    {
+      "id": "Notify_Missing_Documents_to_Resubmit_Documents",
+      "from": "Notify_Missing_Documents",
+      "to": "Resubmit_Documents"
+    },
+    {
+      "id": "Resubmit_Documents_to_Receive_Documents",
+      "from": "Resubmit_Documents",
+      "to": "Receive_Documents"
+    },
+    {
+      "id": "Receive_Documents_to_Check_Documentation_Again",
+      "from": "Receive_Documents",
+      "to": "Check_Documentation_Again"
+    },
+    {
+      "id": "Check_Documentation_Again_to_Assess_Project_Feasibility",
+      "from": "Check_Documentation_Again",
+      "to": "Assess_Project_Feasibility"
+    },
+    {
+      "id": "Assess_Project_Feasibility_to_Review_Combined_Outcomes",
+      "from": "Assess_Project_Feasibility",
+      "to": "Review_Combined_Outcomes"
+    },
+    {
+      "id": "Review_Combined_Outcomes_to_Application_Approved",
+      "from": "Review_Combined_Outcomes",
+      "to": "Application_Approved"
+    },
+    {
+      "id": "Review_Combined_Outcomes_to_Application_Rejected",
+      "from": "Review_Combined_Outcomes",
+      "to": "Application_Rejected"
+    },
+    {
+      "id": "Missing_Documents_Notification_to_Missing_Documents_Received",
+      "from": "Missing_Documents_Notification",
+      "to": "Missing_Documents_Received"
+    },
+    {
+      "id": "Project_Feasibility_Assessment_Completed_to_Review_Combined_Outcomes",
+      "from": "Project_Feasibility_Assessment_Completed",
+      "to": "Review_Combined_Outcomes"
+    },
+    {
+      "id": "Budget_Adequacy_Review_Completed_to_Review_Combined_Outcomes",
+      "from": "Budget_Adequacy_Review_Completed",
+      "to": "Review_Combined_Outcomes"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "Missing_Documents_Notification_to_Applicant",
+      "from": "Missing_Documents_Notification",
+      "to": "Missing_Documents_Received",
+      "name": "Missing Documents Notification"
+    }
+  ]
+}

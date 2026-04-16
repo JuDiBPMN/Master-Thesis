@@ -1,0 +1,126 @@
+{
+  "pools": [
+    {
+      "id": "Library",
+      "name": "Library, internal processes and systems"
+    },
+    {
+      "id": "Requester",
+      "name": "External requester"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Library Staff",
+      "name": "Library staff member",
+      "pool": "Library"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "CheckCatalog",
+      "name": "Check catalog for book availability",
+      "type": "task",
+      "lane": "Library Staff"
+    },
+    {
+      "id": "InformRequester",
+      "name": "Inform requester of book availability",
+      "type": "task",
+      "lane": "Library Staff"
+    }
+  ],
+  "events": [
+    {
+      "id": "RequestBook",
+      "name": "Request for book",
+      "type": "startEvent",
+      "lane": "Requester",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "CheckCatalogAvailable",
+      "name": "Book availability checked",
+      "type": "intermediateCatchEvent",
+      "lane": "Library Staff",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CheckCatalogNotAvailable",
+      "name": "Book not available",
+      "type": "intermediateThrowEvent",
+      "lane": "Library Staff",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CheckoutProcedureStarted",
+      "name": "Checkout procedure started",
+      "type": "intermediateThrowEvent",
+      "lane": "Library Staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "CheckoutProcedureCompleted",
+      "name": "Checkout procedure completed",
+      "type": "endEvent",
+      "lane": "Library Staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "BookRetrieved",
+      "name": "Book retrieved",
+      "type": "intermediateCatchEvent",
+      "lane": "Library Staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "BookLoanedOrNotInCollection",
+      "name": "Book loaned or not in collection",
+      "type": "intermediateCatchEvent",
+      "lane": "Library Staff",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [],
+  "sequence_flows": [
+    {
+      "id": "RequestBook_CheckCatalogAvailable",
+      "from": "RequestBook",
+      "to": "CheckCatalogAvailable"
+    },
+    {
+      "id": "CheckCatalogAvailable_CheckCatalogNotAvailable",
+      "from": "CheckCatalogAvailable",
+      "to": "CheckCatalogNotAvailable",
+      "condition": "xor"
+    },
+    {
+      "id": "CheckCatalogNotAvailable_End",
+      "from": "CheckCatalogNotAvailable",
+      "to": "CheckoutProcedureCompleted"
+    },
+    {
+      "id": "CheckCatalogAvailable_CheckoutProcedureStarted",
+      "from": "CheckCatalogAvailable",
+      "to": "CheckoutProcedureStarted"
+    },
+    {
+      "id": "CheckoutProcedureStarted_BookRetrieved",
+      "from": "CheckoutProcedureStarted",
+      "to": "BookRetrieved"
+    },
+    {
+      "id": "BookRetrieved_CheckoutProcedureCompleted",
+      "from": "BookRetrieved",
+      "to": "CheckoutProcedureCompleted"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "CheckCatalogNotAvailable_Message",
+      "from": "CheckCatalogNotAvailable",
+      "to": "InformRequester",
+      "name": "Message informing requester of book not being available"
+    }
+  ]
+}

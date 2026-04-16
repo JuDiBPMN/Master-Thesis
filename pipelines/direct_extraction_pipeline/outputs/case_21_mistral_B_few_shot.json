@@ -1,0 +1,384 @@
+{
+  "pools": [
+    {
+      "id": "retailer_pool",
+      "name": "Retailer Company"
+    },
+    {
+      "id": "customer_pool",
+      "name": "Customer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "customer",
+      "name": "Customer",
+      "pool": "customer_pool"
+    },
+    {
+      "id": "cs_agent",
+      "name": "Customer Service Agent",
+      "pool": "retailer_pool"
+    },
+    {
+      "id": "warehouse",
+      "name": "Warehouse",
+      "pool": "retailer_pool"
+    },
+    {
+      "id": "finance",
+      "name": "Finance",
+      "pool": "retailer_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_return",
+      "name": "Submit Return Request",
+      "type": "task",
+      "lane": "customer"
+    },
+    {
+      "id": "register_return",
+      "name": "Register Return Request",
+      "type": "task",
+      "lane": "cs_agent"
+    },
+    {
+      "id": "check_information",
+      "name": "Check Return Information",
+      "type": "task",
+      "lane": "cs_agent"
+    },
+    {
+      "id": "inspect_product",
+      "name": "Inspect Product",
+      "type": "task",
+      "lane": "warehouse"
+    },
+    {
+      "id": "check_payment_eligibility",
+      "name": "Check Payment Eligibility",
+      "type": "task",
+      "lane": "finance"
+    },
+    {
+      "id": "review_verdicts",
+      "name": "Review Verdicts",
+      "type": "task",
+      "lane": "cs_agent"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_customer",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0v5w3xw",
+      "name": "Submit Return Request",
+      "type": "intermediateThrowEvent",
+      "lane": "customer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0q3y56v",
+      "name": "Receive Return Request",
+      "type": "intermediateCatchEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0xjz78g",
+      "name": "Check Information Complete?",
+      "type": "intermediateCatchEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0w2q32s",
+      "name": "Information Incomplete",
+      "type": "endEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0z3q12a",
+      "name": "Information Complete",
+      "type": "endEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_warehouse",
+      "name": "Return Request Received",
+      "type": "startEvent",
+      "lane": "warehouse",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0y3q21r",
+      "name": "Product Inspection Completed",
+      "type": "intermediateThrowEvent",
+      "lane": "warehouse",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0xqz89w",
+      "name": "Product Inspection Failed",
+      "type": "endEvent",
+      "lane": "warehouse",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_finance",
+      "name": "Return Request Received",
+      "type": "startEvent",
+      "lane": "finance",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0z3q12b",
+      "name": "Payment Eligibility Check Completed",
+      "type": "intermediateThrowEvent",
+      "lane": "finance",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0xqz89x",
+      "name": "Payment Eligibility Failed",
+      "type": "endEvent",
+      "lane": "finance",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0q3y56v_1",
+      "name": "Receive Verdicts",
+      "type": "intermediateCatchEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0w2q32s_1",
+      "name": "Return Rejected",
+      "type": "endEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0z3q12a_1",
+      "name": "Return Approved",
+      "type": "endEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_cs",
+      "name": "Return Approved",
+      "type": "startEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_054v6tw",
+      "name": "Process Refund",
+      "type": "intermediateThrowEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_054v6tw_1",
+      "name": "Refund Processed",
+      "type": "intermediateCatchEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_054v6tw_2",
+      "name": "Send Refund Confirmation",
+      "type": "intermediateThrowEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_054v6tw_3",
+      "name": "Refund Confirmation Sent",
+      "type": "endEvent",
+      "lane": "cs_agent",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_verdicts",
+      "name": "Verdicts Received?",
+      "type": "exclusiveGateway",
+      "lane": "cs_agent",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_verdicts",
+      "name": "Both Verdicts Received",
+      "type": "exclusiveGateway",
+      "lane": "cs_agent",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Flow_054v6tw_4",
+      "from": "Event_0q3y56v",
+      "to": "check_information"
+    },
+    {
+      "id": "Flow_054v6tw_5",
+      "from": "check_information",
+      "to": "split_verdicts"
+    },
+    {
+      "id": "Flow_054v6tw_6",
+      "from": "split_verdicts",
+      "to": "Event_0w2q32s",
+      "condition": "Information Incomplete"
+    },
+    {
+      "id": "Flow_054v6tw_7",
+      "from": "split_verdicts",
+      "to": "Event_0z3q12a",
+      "condition": "Information Complete"
+    },
+    {
+      "id": "Flow_054v6tw_8",
+      "from": "Event_0z3q12a",
+      "to": "inspect_product"
+    },
+    {
+      "id": "Flow_054v6tw_9",
+      "from": "inspect_product",
+      "to": "join_verdicts"
+    },
+    {
+      "id": "Flow_054v6tw_10",
+      "from": "join_verdicts",
+      "to": "Event_0q3y56v_1"
+    },
+    {
+      "id": "Flow_054v6tw_11",
+      "from": "Event_0w2q32s",
+      "to": "Event_0xqz89w"
+    },
+    {
+      "id": "Flow_054v6tw_12",
+      "from": "Event_0z3q12a",
+      "to": "Event_0xqz89x"
+    },
+    {
+      "id": "Flow_054v6tw_13",
+      "from": "join_verdicts",
+      "to": "Event_0q3y56v_1"
+    },
+    {
+      "id": "Flow_054v6tw_14",
+      "from": "Event_0q3y56v_1",
+      "to": "review_verdicts"
+    },
+    {
+      "id": "Flow_054v6tw_15",
+      "from": "review_verdicts",
+      "to": "Event_0w2q32s_1"
+    },
+    {
+      "id": "Flow_054v6tw_16",
+      "from": "review_verdicts",
+      "to": "Event_0z3q12a_1"
+    },
+    {
+      "id": "Flow_054v6tw_17",
+      "from": "Event_0z3q12a_1",
+      "to": "Event_054v6tw"
+    },
+    {
+      "id": "Flow_054v6tw_18",
+      "from": "Event_0w2q32s_1",
+      "to": "Event_0xqz89w"
+    },
+    {
+      "id": "Flow_054v6tw_19",
+      "from": "Event_0z3q12a_1",
+      "to": "Event_0xqz89x"
+    },
+    {
+      "id": "Flow_054v6tw_20",
+      "from": "Event_0q3y56v_1",
+      "to": "Event_054v6tw_13"
+    },
+    {
+      "id": "Flow_054v6tw_21",
+      "from": "Event_054v6tw_14",
+      "to": "Event_054v6tw_17"
+    },
+    {
+      "id": "Flow_054v6tw_22",
+      "from": "Event_054v6tw_15",
+      "to": "Event_054v6tw_18"
+    },
+    {
+      "id": "Flow_054v6tw_23",
+      "from": "Event_054v6tw_16",
+      "to": "Event_054v6tw_19"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Event_0v5w3xw",
+      "to": "Event_0q3y56v",
+      "name": "Submit Return Request"
+    },
+    {
+      "id": "Flow_054v6tw_24",
+      "from": "Event_0xqz89w",
+      "to": "Event_0w2q32s",
+      "name": "Product Inspection Failed"
+    },
+    {
+      "id": "Flow_054v6tw_25",
+      "from": "Event_0xqz89x",
+      "to": "Event_0z3q12a",
+      "name": "Payment Eligibility Failed"
+    },
+    {
+      "id": "Flow_054v6tw_26",
+      "from": "Event_0xqz89x",
+      "to": "Event_0z3q12a_1",
+      "name": "Payment Eligibility Check Failed"
+    },
+    {
+      "id": "Flow_054v6tw_27",
+      "from": "Event_0xqz89w",
+      "to": "Event_0w2q32s_1",
+      "name": "Product Inspection Failed"
+    },
+    {
+      "id": "Flow_054v6tw_28",
+      "from": "Event_054v6tw_17",
+      "to": "Event_054v6tw_1",
+      "name": "Refund Processed"
+    },
+    {
+      "id": "Flow_054v6tw_29",
+      "from": "Event_054v6tw_18",
+      "to": "Event_054v6tw_1",
+      "name": "Refund Processed"
+    },
+    {
+      "id": "Flow_054v6tw_30",
+      "from": "Event_054v6tw_19",
+      "to": "Event_054v6tw_1",
+      "name": "Refund Processed"
+    }
+  ]
+}

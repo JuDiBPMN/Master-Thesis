@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Company" name="Company Pool" processRef="Process_Company"/>
+    <bpmn:participant id="actor_Candidate" name="Candidate Pool" processRef="Process_Candidate"/>
+    <bpmn:messageFlow id="message_flow_discuss" name="Discuss with Business Manager" sourceRef="throw_event_discuss" targetRef="catch_event_discuss"/>
+    <bpmn:messageFlow id="message_flow_inform" name="Inform Candidate" sourceRef="throw_event_inform" targetRef="catch_event_inform"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="throw_event_inform" targetRef="catch_event_inform"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="catch_event_inform" targetRef="second_assessment"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Company" name="Company Pool" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Company">
+      <bpmn:lane id="HR_Manager" name="HR Manager">
+        <bpmn:flowNodeRef>start_event</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_event_success</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_event_failure</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>throw_event_discuss</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>throw_event_inform</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>introduction_interview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>discuss_with_business_manager</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>inform_candidate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>prepare_contract</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>close_application</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Business_Manager" name="Business Manager">
+        <bpmn:flowNodeRef>catch_event_discuss</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>second_assessment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>decision_gateway</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_event" name="Start"/>
+    <bpmn:endEvent id="end_event_success" name="End - Success"/>
+    <bpmn:endEvent id="end_event_failure" name="End - Failure"/>
+    <bpmn:intermediateThrowEvent id="throw_event_discuss" name="Discuss with Business Manager">
+      <bpmn:messageEventDefinition id="throw_event_discuss_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="catch_event_discuss" name="Catch Discuss with Business Manager">
+      <bpmn:messageEventDefinition id="catch_event_discuss_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="throw_event_inform" name="Inform Candidate">
+      <bpmn:messageEventDefinition id="throw_event_inform_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:userTask id="introduction_interview" name="Introduction Interview"/>
+    <bpmn:userTask id="discuss_with_business_manager" name="Discuss with Business Manager"/>
+    <bpmn:userTask id="inform_candidate" name="Inform Candidate"/>
+    <bpmn:userTask id="second_assessment" name="Second Assessment"/>
+    <bpmn:userTask id="prepare_contract" name="Prepare Contract"/>
+    <bpmn:userTask id="close_application" name="Close Application"/>
+    <bpmn:exclusiveGateway id="decision_gateway" name="Decision Gateway" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="flow_1" sourceRef="start_event" targetRef="introduction_interview"/>
+    <bpmn:sequenceFlow id="flow_2" sourceRef="introduction_interview" targetRef="discuss_with_business_manager"/>
+    <bpmn:sequenceFlow id="flow_3" sourceRef="discuss_with_business_manager" targetRef="throw_event_discuss"/>
+    <bpmn:sequenceFlow id="flow_4" sourceRef="throw_event_discuss" targetRef="catch_event_discuss"/>
+    <bpmn:sequenceFlow id="flow_5" sourceRef="catch_event_discuss" targetRef="second_assessment"/>
+    <bpmn:sequenceFlow id="flow_6" sourceRef="second_assessment" targetRef="decision_gateway"/>
+    <bpmn:sequenceFlow id="flow_7" sourceRef="decision_gateway" targetRef="prepare_contract" name="successful">
+      <bpmn:conditionExpression>successful</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_8" sourceRef="decision_gateway" targetRef="close_application" name="not successful">
+      <bpmn:conditionExpression>not successful</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_9" sourceRef="discuss_with_business_manager" targetRef="throw_event_inform"/>
+    <bpmn:sequenceFlow id="flow_12" sourceRef="prepare_contract" targetRef="end_event_success"/>
+    <bpmn:sequenceFlow id="flow_13" sourceRef="close_application" targetRef="end_event_failure"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Candidate" name="Candidate Pool" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Candidate">
+      <bpmn:lane id="Candidate" name="Candidate"/>
+    </bpmn:laneSet>
+    <bpmn:intermediateCatchEvent id="catch_event_inform" name="Catch Inform Candidate">
+      <bpmn:messageEventDefinition id="catch_event_inform_def"/>
+    </bpmn:intermediateCatchEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Company_di" bpmnElement="actor_Company" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="2580" height="500"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Candidate_di" bpmnElement="actor_Candidate" isHorizontal="true">
+        <dc:Bounds x="10" y="580" width="1800" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="HR_Manager_di" bpmnElement="HR_Manager" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="2550" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Business_Manager_di" bpmnElement="Business_Manager" isHorizontal="true">
+        <dc:Bounds x="40" y="270" width="2550" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Candidate_di" bpmnElement="Candidate" isHorizontal="true">
+        <dc:Bounds x="40" y="580" width="1770" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_event_di" bpmnElement="start_event">
+        <dc:Bounds x="172" y="72" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="inform_candidate_di" bpmnElement="inform_candidate">
+        <dc:Bounds x="130" y="138" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_event_success_di" bpmnElement="end_event_success">
+        <dc:Bounds x="2252" y="94" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_event_failure_di" bpmnElement="end_event_failure">
+        <dc:Bounds x="2252" y="160" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="throw_event_discuss_di" bpmnElement="throw_event_discuss">
+        <dc:Bounds x="952" y="94" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="throw_event_inform_di" bpmnElement="throw_event_inform">
+        <dc:Bounds x="952" y="160" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="introduction_interview_di" bpmnElement="introduction_interview">
+        <dc:Bounds x="390" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="discuss_with_business_manager_di" bpmnElement="discuss_with_business_manager">
+        <dc:Bounds x="650" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="prepare_contract_di" bpmnElement="prepare_contract">
+        <dc:Bounds x="1950" y="50" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="close_application_di" bpmnElement="close_application">
+        <dc:Bounds x="1950" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="catch_event_discuss_di" bpmnElement="catch_event_discuss">
+        <dc:Bounds x="1212" y="377" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="second_assessment_di" bpmnElement="second_assessment">
+        <dc:Bounds x="1430" y="355" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="decision_gateway_di" bpmnElement="decision_gateway" isMarkerVisible="true">
+        <dc:Bounds x="1725" y="370" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="catch_event_inform_di" bpmnElement="catch_event_inform">
+        <dc:Bounds x="1472" y="672" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow_1_di" bpmnElement="flow_1">
+        <di:waypoint x="208" y="90"/>
+        <di:waypoint x="299" y="90"/>
+        <di:waypoint x="299" y="145"/>
+        <di:waypoint x="390" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_2_di" bpmnElement="flow_2">
+        <di:waypoint x="510" y="145"/>
+        <di:waypoint x="650" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_3_di" bpmnElement="flow_3">
+        <di:waypoint x="770" y="145"/>
+        <di:waypoint x="861" y="145"/>
+        <di:waypoint x="861" y="112"/>
+        <di:waypoint x="952" y="112"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_4_di" bpmnElement="flow_4">
+        <di:waypoint x="988" y="112"/>
+        <di:waypoint x="1100" y="112"/>
+        <di:waypoint x="1100" y="395"/>
+        <di:waypoint x="1212" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_5_di" bpmnElement="flow_5">
+        <di:waypoint x="1248" y="395"/>
+        <di:waypoint x="1430" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_6_di" bpmnElement="flow_6">
+        <di:waypoint x="1550" y="395"/>
+        <di:waypoint x="1725" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_7_di" bpmnElement="flow_7">
+        <di:waypoint x="1775" y="395"/>
+        <di:waypoint x="1862" y="395"/>
+        <di:waypoint x="1862" y="90"/>
+        <di:waypoint x="1950" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_8_di" bpmnElement="flow_8">
+        <di:waypoint x="1775" y="395"/>
+        <di:waypoint x="1862" y="395"/>
+        <di:waypoint x="1862" y="200"/>
+        <di:waypoint x="1950" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_9_di" bpmnElement="flow_9">
+        <di:waypoint x="770" y="145"/>
+        <di:waypoint x="861" y="145"/>
+        <di:waypoint x="861" y="178"/>
+        <di:waypoint x="952" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_12_di" bpmnElement="flow_12">
+        <di:waypoint x="2070" y="90"/>
+        <di:waypoint x="2161" y="90"/>
+        <di:waypoint x="2161" y="112"/>
+        <di:waypoint x="2252" y="112"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_13_di" bpmnElement="flow_13">
+        <di:waypoint x="2070" y="200"/>
+        <di:waypoint x="2161" y="200"/>
+        <di:waypoint x="2161" y="178"/>
+        <di:waypoint x="2252" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="message_flow_discuss_di" bpmnElement="message_flow_discuss">
+        <di:waypoint x="970" y="94"/>
+        <di:waypoint x="1230" y="413"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="message_flow_inform_di" bpmnElement="message_flow_inform">
+        <di:waypoint x="970" y="196"/>
+        <di:waypoint x="1490" y="672"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="970" y="196"/>
+        <di:waypoint x="1490" y="672"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="1490" y="672"/>
+        <di:waypoint x="1490" y="435"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

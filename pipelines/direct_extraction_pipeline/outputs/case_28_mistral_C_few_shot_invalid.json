@@ -1,0 +1,152 @@
+{
+  "pools": [
+    {
+      "id": "csr_pool",
+      "name": "CSR"
+    },
+    {
+      "id": "zarkan_industries_pool",
+      "name": "Zarkan Industries"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "csr_lane",
+      "name": "CSR",
+      "pool": "csr_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "register_complaint",
+      "name": "Register Complaint",
+      "type": "task",
+      "lane": "csr_lane"
+    },
+    {
+      "id": "analyze_complaint",
+      "name": "Analyze Complaint",
+      "type": "task",
+      "lane": "csr_lane"
+    },
+    {
+      "id": "consult_departments",
+      "name": "Consult Departments",
+      "type": "task",
+      "lane": "csr_lane"
+    },
+    {
+      "id": "resolve_complaint",
+      "name": "Resolve Complaint",
+      "type": "task",
+      "lane": "csr_lane"
+    },
+    {
+      "id": "archive_complaint",
+      "name": "Archive Complaint",
+      "type": "task",
+      "lane": "csr_lane"
+    },
+    {
+      "id": "close_complaint",
+      "name": "Close Complaint",
+      "type": "task",
+      "lane": "csr_lane"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_complaint",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "csr_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_complaint",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "csr_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_zarkan_industries",
+      "name": "Complaint Received",
+      "type": "startEvent",
+      "lane": "zarkan_industries_pool",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_analysis_split",
+      "name": "Analysis Complete?",
+      "type": "exclusiveGateway",
+      "lane": "csr_lane",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_analysis_join",
+      "name": "Analysis Complete",
+      "type": "exclusiveGateway",
+      "lane": "csr_lane",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_complaint",
+      "to": "register_complaint"
+    },
+    {
+      "id": "sf2",
+      "from": "register_complaint",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf3",
+      "from": "analyze_complaint",
+      "to": "gateway_analysis_split"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_analysis_split",
+      "to": "consult_departments"
+    },
+    {
+      "id": "sf5",
+      "from": "consult_departments",
+      "to": "resolve_complaint"
+    },
+    {
+      "id": "sf6",
+      "from": "resolve_complaint",
+      "to": "archive_complaint"
+    },
+    {
+      "id": "sf7",
+      "from": "archive_complaint",
+      "to": "close_complaint"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_analysis_split",
+      "to": "end_complaint",
+      "condition": "Unresolved"
+    },
+    {
+      "id": "sf9",
+      "from": "gateway_analysis_join",
+      "to": "end_complaint"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "register_complaint",
+      "to": "start_zarkan_industries",
+      "name": "Complaint Details"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:process id="Process_bank" name="Bank" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_bank">
+      <bpmn:lane id="mortgage_processing" name="Mortgage Processing">
+        <bpmn:flowNodeRef>start_mortgage_processing</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_mortgage_processing</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>receive_application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>initiate_mortgage_file</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>evaluate_financial_stability</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gather_income_statements</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_credit_applications</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>perform_risk_analysis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>grant_line_of_credit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>decline_mortgage_application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_assessment</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_mortgage_processing" name="Start"/>
+    <bpmn:endEvent id="end_mortgage_processing" name="End"/>
+    <bpmn:task id="receive_application" name="Receive Mortgage Application"/>
+    <bpmn:task id="initiate_mortgage_file" name="Initiate Mortgage File"/>
+    <bpmn:task id="evaluate_financial_stability" name="Evaluate Financial Stability"/>
+    <bpmn:task id="gather_income_statements" name="Gather Income Statements"/>
+    <bpmn:task id="check_credit_applications" name="Check for Other Credit Applications"/>
+    <bpmn:task id="perform_risk_analysis" name="Perform In-depth Risk Analysis"/>
+    <bpmn:task id="grant_line_of_credit" name="Grant Line of Credit"/>
+    <bpmn:task id="decline_mortgage_application" name="Decline Mortgage Application"/>
+    <bpmn:exclusiveGateway id="gateway_assessment" name="Assessment Result" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_mortgage_processing" targetRef="receive_application"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="receive_application" targetRef="initiate_mortgage_file"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="initiate_mortgage_file" targetRef="evaluate_financial_stability"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="evaluate_financial_stability" targetRef="gateway_assessment"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="gateway_assessment" targetRef="grant_line_of_credit" name="Positive">
+      <bpmn:conditionExpression>Positive</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf6" sourceRef="gateway_assessment" targetRef="decline_mortgage_application" name="Negative">
+      <bpmn:conditionExpression>Negative</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_bank">
+      <bpmndi:BPMNShape id="mortgage_processing_di" bpmnElement="mortgage_processing" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1770" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_mortgage_processing_di" bpmnElement="start_mortgage_processing">
+        <dc:Bounds x="172" y="94" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_mortgage_processing_di" bpmnElement="end_mortgage_processing">
+        <dc:Bounds x="172" y="160" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gather_income_statements_di" bpmnElement="gather_income_statements">
+        <dc:Bounds x="130" y="226" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_credit_applications_di" bpmnElement="check_credit_applications">
+        <dc:Bounds x="130" y="336" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="perform_risk_analysis_di" bpmnElement="perform_risk_analysis">
+        <dc:Bounds x="130" y="446" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="receive_application_di" bpmnElement="receive_application">
+        <dc:Bounds x="390" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="initiate_mortgage_file_di" bpmnElement="initiate_mortgage_file">
+        <dc:Bounds x="650" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="evaluate_financial_stability_di" bpmnElement="evaluate_financial_stability">
+        <dc:Bounds x="910" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="grant_line_of_credit_di" bpmnElement="grant_line_of_credit">
+        <dc:Bounds x="1430" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="decline_mortgage_application_di" bpmnElement="decline_mortgage_application">
+        <dc:Bounds x="1430" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_assessment_di" bpmnElement="gateway_assessment" isMarkerVisible="true">
+        <dc:Bounds x="1205" y="285" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="208" y="112"/>
+        <di:waypoint x="299" y="112"/>
+        <di:waypoint x="299" y="310"/>
+        <di:waypoint x="390" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="510" y="310"/>
+        <di:waypoint x="650" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="770" y="310"/>
+        <di:waypoint x="910" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="1030" y="310"/>
+        <di:waypoint x="1205" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="1255" y="310"/>
+        <di:waypoint x="1342" y="310"/>
+        <di:waypoint x="1342" y="255"/>
+        <di:waypoint x="1430" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="1255" y="310"/>
+        <di:waypoint x="1342" y="310"/>
+        <di:waypoint x="1342" y="365"/>
+        <di:waypoint x="1430" y="365"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

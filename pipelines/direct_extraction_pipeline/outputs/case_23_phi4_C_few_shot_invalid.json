@@ -1,0 +1,284 @@
+{
+  "pools": [
+    {
+      "id": "client_pool",
+      "name": "Client"
+    },
+    {
+      "id": "brightwave_energy_pool",
+      "name": "BrightWave Energy"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "client",
+      "name": "Client",
+      "pool": "client_pool"
+    },
+    {
+      "id": "customer_service",
+      "name": "Customer Service",
+      "pool": "brightwave_energy_pool"
+    },
+    {
+      "id": "invoicing_department",
+      "name": "Invoicing Department",
+      "pool": "brightwave_energy_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "write_complaint_email",
+      "name": "Write Complaint Email",
+      "type": "task",
+      "lane": "client"
+    },
+    {
+      "id": "receive_complaint",
+      "name": "Receive Complaint",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "lookup_billing_info",
+      "name": "Lookup Billing Information",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "review_invoice",
+      "name": "Review Invoice",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "write_explanation_email",
+      "name": "Write Explanation Email",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "send_explanation_email",
+      "name": "Send Explanation Email",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "create_ticket",
+      "name": "Create Ticket",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "assign_ticket",
+      "name": "Assign Ticket to Invoicing Department",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "investigate_mistake",
+      "name": "Investigate Invoicing Mistake",
+      "type": "task",
+      "lane": "invoicing_department"
+    },
+    {
+      "id": "correct_mistake",
+      "name": "Correct Mistake",
+      "type": "task",
+      "lane": "invoicing_department"
+    },
+    {
+      "id": "generate_new_invoice",
+      "name": "Generate New Invoice",
+      "type": "task",
+      "lane": "invoicing_department"
+    },
+    {
+      "id": "send_new_invoice",
+      "name": "Send New Invoice",
+      "type": "task",
+      "lane": "invoicing_department"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_client",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_client_explanation",
+      "name": "Explanation Sent",
+      "type": "endEvent",
+      "lane": "client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_client_new_invoice",
+      "name": "New Invoice Sent",
+      "type": "endEvent",
+      "lane": "client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_customer_service",
+      "name": "Complaint Received",
+      "type": "startEvent",
+      "lane": "customer_service",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_customer_service_explanation",
+      "name": "Explanation Email Sent",
+      "type": "endEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_customer_service_ticket",
+      "name": "Ticket Created",
+      "type": "endEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_mistake_check",
+      "name": "Mistake Found?",
+      "type": "exclusiveGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_mistake_check_join",
+      "name": "Mistake Check Complete",
+      "type": "exclusiveGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_client",
+      "to": "write_complaint_email"
+    },
+    {
+      "id": "sf2",
+      "from": "write_complaint_email",
+      "to": "start_customer_service"
+    },
+    {
+      "id": "sf3",
+      "from": "start_customer_service",
+      "to": "receive_complaint"
+    },
+    {
+      "id": "sf4",
+      "from": "receive_complaint",
+      "to": "lookup_billing_info"
+    },
+    {
+      "id": "sf5",
+      "from": "lookup_billing_info",
+      "to": "review_invoice"
+    },
+    {
+      "id": "sf6",
+      "from": "review_invoice",
+      "to": "gateway_mistake_check"
+    },
+    {
+      "id": "sf7",
+      "from": "gateway_mistake_check",
+      "to": "write_explanation_email",
+      "condition": "No Mistake"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_mistake_check",
+      "to": "create_ticket",
+      "condition": "Mistake Found"
+    },
+    {
+      "id": "sf9",
+      "from": "write_explanation_email",
+      "to": "send_explanation_email"
+    },
+    {
+      "id": "sf10",
+      "from": "send_explanation_email",
+      "to": "end_customer_service_explanation"
+    },
+    {
+      "id": "sf11",
+      "from": "create_ticket",
+      "to": "assign_ticket"
+    },
+    {
+      "id": "sf12",
+      "from": "assign_ticket",
+      "to": "end_customer_service_ticket"
+    },
+    {
+      "id": "sf13",
+      "from": "end_customer_service_ticket",
+      "to": "investigate_mistake"
+    },
+    {
+      "id": "sf14",
+      "from": "investigate_mistake",
+      "to": "correct_mistake"
+    },
+    {
+      "id": "sf15",
+      "from": "correct_mistake",
+      "to": "generate_new_invoice"
+    },
+    {
+      "id": "sf16",
+      "from": "generate_new_invoice",
+      "to": "send_new_invoice"
+    },
+    {
+      "id": "sf17",
+      "from": "send_new_invoice",
+      "to": "end_client_new_invoice"
+    },
+    {
+      "id": "sf18",
+      "from": "send_explanation_email",
+      "to": "gateway_mistake_check_join"
+    },
+    {
+      "id": "sf19",
+      "from": "send_new_invoice",
+      "to": "gateway_mistake_check_join"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "write_complaint_email",
+      "to": "start_customer_service",
+      "name": "Complaint Email"
+    },
+    {
+      "id": "mf2",
+      "from": "send_explanation_email",
+      "to": "end_client_explanation",
+      "name": "Explanation Email"
+    },
+    {
+      "id": "mf3",
+      "from": "send_new_invoice",
+      "to": "end_client_new_invoice",
+      "name": "New Invoice Email"
+    }
+  ],
+  "data": [],
+  "data_associations": []
+}

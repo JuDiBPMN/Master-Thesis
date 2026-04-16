@@ -1,0 +1,351 @@
+{
+  "pools": [
+    {
+      "id": "customer_pool",
+      "name": "Customer"
+    },
+    {
+      "id": "retailer_pool",
+      "name": "Retailer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "customer",
+      "name": "Customer",
+      "pool": "customer_pool"
+    },
+    {
+      "id": "customer_service",
+      "name": "Customer Service",
+      "pool": "retailer_pool"
+    },
+    {
+      "id": "warehouse",
+      "name": "Warehouse",
+      "pool": "retailer_pool"
+    },
+    {
+      "id": "finance",
+      "name": "Finance",
+      "pool": "retailer_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_return_request",
+      "name": "Submit Return Request",
+      "type": "task",
+      "lane": "customer"
+    },
+    {
+      "id": "register_return_request",
+      "name": "Register Return Request",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "check_information",
+      "name": "Check Request Information",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "notify_incomplete",
+      "name": "Notify Customer of Missing Info",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "review_outcomes",
+      "name": "Review Combined Verdicts",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "send_rejection_notice",
+      "name": "Send Return Rejection Notice",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "approve_return",
+      "name": "Approve Return",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "process_refund",
+      "name": "Process Refund",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "send_refund_confirmation",
+      "name": "Send Refund Confirmation",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "inspect_product",
+      "name": "Inspect Returned Product",
+      "type": "task",
+      "lane": "warehouse"
+    },
+    {
+      "id": "record_warehouse_verdict",
+      "name": "Record Warehouse Verdict",
+      "type": "task",
+      "lane": "warehouse"
+    },
+    {
+      "id": "check_payment_eligibility",
+      "name": "Check Payment Eligibility",
+      "type": "task",
+      "lane": "finance"
+    },
+    {
+      "id": "record_finance_verdict",
+      "name": "Record Finance Verdict",
+      "type": "task",
+      "lane": "finance"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_customer",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_customer_incomplete",
+      "name": "Incomplete Information",
+      "type": "endEvent",
+      "lane": "customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_customer_rejected",
+      "name": "Return Rejected",
+      "type": "endEvent",
+      "lane": "customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_customer_refunded",
+      "name": "Refund Confirmed",
+      "type": "endEvent",
+      "lane": "customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_retailer",
+      "name": "Return Request Received",
+      "type": "startEvent",
+      "lane": "customer_service",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_retailer_incomplete",
+      "name": "Customer Notified",
+      "type": "endEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_retailer_rejected",
+      "name": "Rejection Notice Sent",
+      "type": "endEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_retailer_refunded",
+      "name": "Refund Processed",
+      "type": "endEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_information",
+      "name": "Information Complete?",
+      "type": "exclusiveGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "split_parallel",
+      "name": "Forward for Review",
+      "type": "parallelGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Both Verdicts Recorded",
+      "type": "parallelGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "split_outcome",
+      "name": "Both Verdicts Positive?",
+      "type": "exclusiveGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_customer",
+      "to": "submit_return_request"
+    },
+    {
+      "id": "sf2",
+      "from": "start_retailer",
+      "to": "register_return_request"
+    },
+    {
+      "id": "sf3",
+      "from": "register_return_request",
+      "to": "check_information"
+    },
+    {
+      "id": "sf4",
+      "from": "check_information",
+      "to": "split_information"
+    },
+    {
+      "id": "sf5",
+      "from": "split_information",
+      "to": "notify_incomplete",
+      "condition": "Incomplete"
+    },
+    {
+      "id": "sf6",
+      "from": "split_information",
+      "to": "split_parallel",
+      "condition": "Complete"
+    },
+    {
+      "id": "sf7",
+      "from": "notify_incomplete",
+      "to": "end_retailer_incomplete"
+    },
+    {
+      "id": "sf8",
+      "from": "split_parallel",
+      "to": "inspect_product"
+    },
+    {
+      "id": "sf9",
+      "from": "split_parallel",
+      "to": "check_payment_eligibility"
+    },
+    {
+      "id": "sf10",
+      "from": "inspect_product",
+      "to": "record_warehouse_verdict"
+    },
+    {
+      "id": "sf11",
+      "from": "record_warehouse_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf12",
+      "from": "check_payment_eligibility",
+      "to": "record_finance_verdict"
+    },
+    {
+      "id": "sf13",
+      "from": "record_finance_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf14",
+      "from": "join_parallel",
+      "to": "review_outcomes"
+    },
+    {
+      "id": "sf15",
+      "from": "review_outcomes",
+      "to": "split_outcome"
+    },
+    {
+      "id": "sf16",
+      "from": "split_outcome",
+      "to": "send_rejection_notice",
+      "condition": "One or more verdicts negative"
+    },
+    {
+      "id": "sf17",
+      "from": "split_outcome",
+      "to": "approve_return",
+      "condition": "Both verdicts positive"
+    },
+    {
+      "id": "sf18",
+      "from": "approve_return",
+      "to": "process_refund"
+    },
+    {
+      "id": "sf19",
+      "from": "process_refund",
+      "to": "send_refund_confirmation"
+    },
+    {
+      "id": "sf20",
+      "from": "send_rejection_notice",
+      "to": "end_retailer_rejected"
+    },
+    {
+      "id": "sf21",
+      "from": "send_refund_confirmation",
+      "to": "end_retailer_refunded"
+    },
+    {
+      "id": "sf22",
+      "from": "end_retailer_rejected",
+      "to": "end_customer_rejected"
+    },
+    {
+      "id": "sf23",
+      "from": "end_retailer_refunded",
+      "to": "end_customer_refunded"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "submit_return_request",
+      "to": "start_retailer",
+      "name": "Return Request"
+    },
+    {
+      "id": "mf2",
+      "from": "notify_incomplete",
+      "to": "end_customer_incomplete",
+      "name": "Incomplete Notice"
+    },
+    {
+      "id": "mf3",
+      "from": "send_rejection_notice",
+      "to": "end_customer_rejected",
+      "name": "Rejection Notice"
+    },
+    {
+      "id": "mf4",
+      "from": "send_refund_confirmation",
+      "to": "end_customer_refunded",
+      "name": "Refund Confirmation"
+    }
+  ],
+  "data": [],
+  "data_associations": []
+}

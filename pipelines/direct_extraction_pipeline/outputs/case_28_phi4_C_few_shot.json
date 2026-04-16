@@ -1,0 +1,151 @@
+{
+  "pools": [
+    {
+      "id": "zarkan_industries",
+      "name": "Zarkan Industries"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "csr",
+      "name": "Customer Service Representative",
+      "pool": "zarkan_industries"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "handle_complaint",
+      "name": "Handle Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "record_call_details",
+      "name": "Record Call Details",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "document_concerns",
+      "name": "Document Customer's Concerns",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "note_letter_receipt",
+      "name": "Note Letter's Receipt Date",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "analyze_complaint",
+      "name": "Analyze Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "consult_departments",
+      "name": "Consult Other Departments",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "resolve_complaint",
+      "name": "Resolve Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "archive_complaint",
+      "name": "Archive Complaint Details",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "close_complaint",
+      "name": "Close Complaint",
+      "type": "task",
+      "lane": "csr"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_csr",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "csr",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_csr",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "csr",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_csr",
+      "to": "handle_complaint"
+    },
+    {
+      "id": "sf2",
+      "from": "handle_complaint",
+      "to": "record_call_details"
+    },
+    {
+      "id": "sf3",
+      "from": "handle_complaint",
+      "to": "document_concerns"
+    },
+    {
+      "id": "sf4",
+      "from": "handle_complaint",
+      "to": "note_letter_receipt"
+    },
+    {
+      "id": "sf5",
+      "from": "record_call_details",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf6",
+      "from": "document_concerns",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf7",
+      "from": "note_letter_receipt",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf8",
+      "from": "analyze_complaint",
+      "to": "consult_departments"
+    },
+    {
+      "id": "sf9",
+      "from": "consult_departments",
+      "to": "resolve_complaint"
+    },
+    {
+      "id": "sf10",
+      "from": "resolve_complaint",
+      "to": "archive_complaint"
+    },
+    {
+      "id": "sf11",
+      "from": "archive_complaint",
+      "to": "close_complaint"
+    },
+    {
+      "id": "sf12",
+      "from": "close_complaint",
+      "to": "end_csr"
+    }
+  ],
+  "message_flows": []
+}

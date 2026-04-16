@@ -1,0 +1,145 @@
+{
+  "pools": [
+    {
+      "id": "HR_and_Business_Management",
+      "name": "HR and Business Management"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "hr_manager",
+      "name": "HR Manager",
+      "pool": "HR_and_Business_Management"
+    },
+    {
+      "id": "business_manager",
+      "name": "Business Manager",
+      "pool": "HR_and_Business_Management"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "introduction_interview",
+      "name": "Introduction Interview",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "discuss_with_business_manager",
+      "name": "Discuss with Business Manager",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "inform_candidate",
+      "name": "Inform Candidate",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "second_assessment",
+      "name": "Second Assessment",
+      "type": "task",
+      "lane": "business_manager"
+    },
+    {
+      "id": "prepare_contract",
+      "name": "Prepare Contract",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "close_application_process",
+      "name": "Close Application Process",
+      "type": "task",
+      "lane": "hr_manager"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_hr_manager",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_hr_manager",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "assessment_outcome",
+      "name": "Assessment Outcome",
+      "type": "exclusiveGateway",
+      "lane": "business_manager",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "assessment_outcome_join",
+      "name": "Assessment Outcome Join",
+      "type": "exclusiveGateway",
+      "lane": "business_manager",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_hr_manager",
+      "to": "introduction_interview"
+    },
+    {
+      "id": "sf2",
+      "from": "introduction_interview",
+      "to": "discuss_with_business_manager"
+    },
+    {
+      "id": "sf3",
+      "from": "discuss_with_business_manager",
+      "to": "inform_candidate"
+    },
+    {
+      "id": "sf4",
+      "from": "inform_candidate",
+      "to": "second_assessment"
+    },
+    {
+      "id": "sf5",
+      "from": "second_assessment",
+      "to": "assessment_outcome"
+    },
+    {
+      "id": "sf6",
+      "from": "assessment_outcome",
+      "to": "prepare_contract",
+      "condition": "successful"
+    },
+    {
+      "id": "sf7",
+      "from": "assessment_outcome",
+      "to": "close_application_process",
+      "condition": "not successful"
+    },
+    {
+      "id": "sf8",
+      "from": "prepare_contract",
+      "to": "assessment_outcome_join"
+    },
+    {
+      "id": "sf9",
+      "from": "close_application_process",
+      "to": "assessment_outcome_join"
+    },
+    {
+      "id": "sf10",
+      "from": "assessment_outcome_join",
+      "to": "end_hr_manager"
+    }
+  ],
+  "message_flows": []
+}

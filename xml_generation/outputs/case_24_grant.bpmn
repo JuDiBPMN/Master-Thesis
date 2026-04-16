@@ -64,7 +64,6 @@
         <bpmn:flowNodeRef>register_application</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>check_docs</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>review_outcomes</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>send_rejection</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>issue_approval</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>join_rework</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>split_complete</bpmn:flowNodeRef>
@@ -83,7 +82,6 @@
     <bpmn:task id="register_application" name="Register Grant Application" />
     <bpmn:task id="check_docs" name="Check Documentation Completeness" />
     <bpmn:task id="review_outcomes" name="Review Combined Verdicts" />
-    <bpmn:task id="send_rejection" name="Send Rejection Notice" />
     <bpmn:task id="issue_approval" name="Issue Grant Approval Letter" />
     <bpmn:task id="assess_feasibility" name="Assess Project Feasibility" />
     <bpmn:task id="record_tech" name="Record Technical Verdict" />
@@ -105,6 +103,7 @@
     </bpmn:intermediateThrowEvent>
     <bpmn:parallelGateway id="split_parallel" name="Forward for Review" gatewayDirection="diverging" />
     <bpmn:intermediateThrowEvent id="throw_rejection" name="Send Rejection Notice">
+      <bpmn:incoming>sf21</bpmn:incoming>
       <bpmn:messageEventDefinition id="throw_rejection_def" />
     </bpmn:intermediateThrowEvent>
     <bpmn:intermediateThrowEvent id="throw_approval" name="Send Grant Approval Letter">
@@ -117,10 +116,9 @@
     <bpmn:sequenceFlow id="sf9" sourceRef="check_docs" targetRef="split_complete" />
     <bpmn:sequenceFlow id="sf19" sourceRef="join_parallel" targetRef="review_outcomes" />
     <bpmn:sequenceFlow id="sf20" sourceRef="review_outcomes" targetRef="split_outcome" />
-    <bpmn:sequenceFlow id="sf21" name="One or more verdicts negative" sourceRef="split_outcome" targetRef="send_rejection">
+    <bpmn:sequenceFlow id="sf21" name="One or more verdicts negative" sourceRef="split_outcome" targetRef="throw_rejection">
       <bpmn:conditionExpression>One or more verdicts negative</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf23" sourceRef="send_rejection" targetRef="throw_rejection" />
     <bpmn:sequenceFlow id="sf22" name="Both verdicts positive" sourceRef="split_outcome" targetRef="issue_approval">
       <bpmn:conditionExpression>Both verdicts positive</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
@@ -223,15 +221,15 @@
       <bpmndi:BPMNShape id="actor_agency_pool_di" bpmnElement="actor_agency_pool" isHorizontal="true">
         <dc:Bounds x="160" y="610" width="4140" height="750" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="finance_di" bpmnElement="finance" isHorizontal="true">
-        <dc:Bounds x="190" y="1110" width="4110" height="250" />
+      <bpmndi:BPMNShape id="grants_admin_di" bpmnElement="grants_admin" isHorizontal="true">
+        <dc:Bounds x="190" y="610" width="4110" height="270" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="tech_review_di" bpmnElement="tech_review" isHorizontal="true">
         <dc:Bounds x="190" y="880" width="4110" height="230" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="grants_admin_di" bpmnElement="grants_admin" isHorizontal="true">
-        <dc:Bounds x="190" y="610" width="4110" height="270" />
-        <bpmndi:BPMNLabel />
+      <bpmndi:BPMNShape id="finance_di" bpmnElement="finance" isHorizontal="true">
+        <dc:Bounds x="190" y="1110" width="4110" height="250" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="end_grants_di" bpmnElement="end_grants">
         <dc:Bounds x="3962" y="717" width="36" height="36" />
@@ -247,9 +245,6 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="review_outcomes_di" bpmnElement="review_outcomes">
         <dc:Bounds x="2620" y="695" width="120" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="send_rejection_di" bpmnElement="send_rejection">
-        <dc:Bounds x="3140" y="640" width="120" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="issue_approval_di" bpmnElement="issue_approval">
         <dc:Bounds x="3140" y="750" width="120" height="80" />
@@ -364,14 +359,10 @@
         <di:waypoint x="2965" y="735" />
         <di:waypoint x="3052" y="735" />
         <di:waypoint x="3052" y="680" />
-        <di:waypoint x="3140" y="680" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3019" y="646" width="82" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="sf23_di" bpmnElement="sf23">
-        <di:waypoint x="3260" y="680" />
         <di:waypoint x="3442" y="680" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3050" y="646" width="83" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf22_di" bpmnElement="sf22">
         <di:waypoint x="2965" y="735" />
@@ -453,15 +444,6 @@
         <di:waypoint x="3586" y="735" />
         <di:waypoint x="3695" y="735" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
-        <di:waypoint x="1640" y="642" />
-        <di:waypoint x="1640" y="489" />
-        <di:waypoint x="1080" y="489" />
-        <di:waypoint x="1080" y="300" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1085" y="366" width="90" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
         <di:waypoint x="503" y="256" />
         <di:waypoint x="503" y="430" />
@@ -469,6 +451,15 @@
         <di:waypoint x="315" y="725" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="408" y="280" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="1640" y="642" />
+        <di:waypoint x="1640" y="489" />
+        <di:waypoint x="1080" y="489" />
+        <di:waypoint x="1080" y="300" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1085" y="366" width="90" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">

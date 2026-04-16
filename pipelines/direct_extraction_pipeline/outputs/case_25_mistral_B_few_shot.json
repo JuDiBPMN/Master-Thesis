@@ -1,0 +1,128 @@
+{
+  "pools": [
+    {
+      "id": "library_pool",
+      "name": "Library"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "library",
+      "name": "Library Staff",
+      "pool": "library_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "check_availability",
+      "name": "Check Availability",
+      "type": "task",
+      "lane": "library"
+    },
+    {
+      "id": "inform_requester",
+      "name": "Inform Requester",
+      "type": "task",
+      "lane": "library"
+    },
+    {
+      "id": "log_book",
+      "name": "Log Book",
+      "type": "task",
+      "lane": "library"
+    },
+    {
+      "id": "retrieve_book",
+      "name": "Retrieve Book",
+      "type": "task",
+      "lane": "library"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_library",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "library",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0qjx3w",
+      "name": "Receive Book Request",
+      "type": "intermediateThrowEvent",
+      "lane": "library",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0jwz3e",
+      "name": "Check Availability",
+      "type": "intermediateCatchEvent",
+      "lane": "library",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3x5vg",
+      "name": "Book Not Available",
+      "type": "endEvent",
+      "lane": "library",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0j3x5vg",
+      "name": "Book Available",
+      "type": "endEvent",
+      "lane": "library",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1q3x5vh",
+      "name": "Log Book and Retrieve",
+      "type": "intermediateThrowEvent",
+      "lane": "library",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_library",
+      "name": "Checkout Completed",
+      "type": "endEvent",
+      "lane": "library",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [],
+  "sequence_flows": [
+    {
+      "id": "Flow_1j3x5vg",
+      "from": "start_library",
+      "to": "check_availability"
+    },
+    {
+      "id": "Flow_0qjx3w",
+      "from": "Event_0jwz3e",
+      "to": "inform_requester"
+    },
+    {
+      "id": "Flow_1q3x5vh",
+      "from": "inform_requester",
+      "to": "log_book"
+    },
+    {
+      "id": "Flow_0j3x5vg",
+      "from": "log_book",
+      "to": "retrieve_book"
+    },
+    {
+      "id": "Flow_0j3x5vg",
+      "from": "retrieve_book",
+      "to": "end_library"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Event_0qjx3w",
+      "to": "check_availability",
+      "name": "Book Request"
+    }
+  ]
+}

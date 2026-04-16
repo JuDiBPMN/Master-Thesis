@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Customer" name="Customer" processRef="Process_Customer"/>
+    <bpmn:participant id="actor_Company" name="Company" processRef="Process_Company"/>
+    <bpmn:messageFlow id="IntermediateThrowEvent" name="message flow" sourceRef="Submit Return Request" targetRef="IntermediateThrowEvent"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="true" sourceRef="Check Information" targetRef="Inspect Product"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="true" sourceRef="Forward Return Request" targetRef="Check Payment Eligibility"/>
+    <bpmn:messageFlow id="MsgFlow_p2" name="true" sourceRef="Inspect Product" targetRef="Combine Outcomes"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Customer" name="Customer" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Customer">
+      <bpmn:lane id="Customer" name="Customer"/>
+    </bpmn:laneSet>
+    <bpmn:intermediateThrowEvent id="IntermediateThrowEvent" name="IntermediateThrowEvent">
+      <bpmn:messageEventDefinition id="IntermediateThrowEvent_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="EndEvent" name="EndEvent">
+      <bpmn:messageEventDefinition id="EndEvent_def"/>
+    </bpmn:endEvent>
+    <bpmn:intermediateThrowEvent id="ExclusiveGateway" name="ExclusiveGateway">
+      <bpmn:messageEventDefinition id="ExclusiveGateway_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="MessageFlow" name="MessageFlow">
+      <bpmn:messageEventDefinition id="MessageFlow_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:task id="Submit Return Request" name="Submit Return Request"/>
+    <bpmn:task id="Register Return Request" name="Register Return Request"/>
+    <bpmn:task id="Check Information" name="Check Information"/>
+    <bpmn:task id="Forward Return Request" name="Forward Return Request"/>
+    <bpmn:task id="Combine Outcomes" name="Combine Outcomes"/>
+    <bpmn:exclusiveGateway id="ExclusiveGateway" name="ExclusiveGateway" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="Submit Return Request" sourceRef="Submit Return Request" targetRef="Register Return Request" name="true">
+      <bpmn:conditionExpression>true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Register Return Request" sourceRef="Submit Return Request" targetRef="Check Information" name="true">
+      <bpmn:conditionExpression>true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Check Information" sourceRef="Register Return Request" targetRef="Forward Return Request" name="true">
+      <bpmn:conditionExpression>true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmn:process id="Process_Company" name="Company" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Company">
+      <bpmn:lane id="Company" name="Company"/>
+    </bpmn:laneSet>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent" name="IntermediateCatchEvent">
+      <bpmn:messageEventDefinition id="IntermediateCatchEvent_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:startEvent id="StartEvent" name="StartEvent">
+      <bpmn:messageEventDefinition id="StartEvent_def"/>
+    </bpmn:startEvent>
+    <bpmn:intermediateCatchEvent id="ExclusiveGateway" name="ExclusiveGateway">
+      <bpmn:messageEventDefinition id="ExclusiveGateway_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="MessageFlow" name="MessageFlow">
+      <bpmn:messageEventDefinition id="MessageFlow_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="Inspect Product" name="Inspect Product"/>
+    <bpmn:task id="Check Payment Eligibility" name="Check Payment Eligibility"/>
+    <bpmn:exclusiveGateway id="ExclusiveGateway" name="ExclusiveGateway" gatewayDirection="converging"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Customer_di" bpmnElement="actor_Customer" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1020" height="800"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Company_di" bpmnElement="actor_Company" isHorizontal="true">
+        <dc:Bounds x="10" y="880" width="1020" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Customer_di" bpmnElement="Customer" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="990" height="800"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Company_di" bpmnElement="Company" isHorizontal="true">
+        <dc:Bounds x="40" y="880" width="990" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateThrowEvent_di" bpmnElement="IntermediateThrowEvent">
+        <dc:Bounds x="172" y="153" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_di" bpmnElement="EndEvent">
+        <dc:Bounds x="172" y="219" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_di" bpmnElement="ExclusiveGateway" isMarkerVisible="true">
+        <dc:Bounds x="165" y="1277" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="MessageFlow_di" bpmnElement="MessageFlow">
+        <dc:Bounds x="172" y="1211" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Submit Return Request_di" bpmnElement="Submit Return Request">
+        <dc:Bounds x="130" y="417" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Combine Outcomes_di" bpmnElement="Combine Outcomes">
+        <dc:Bounds x="130" y="527" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Register Return Request_di" bpmnElement="Register Return Request">
+        <dc:Bounds x="390" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Check Information_di" bpmnElement="Check Information">
+        <dc:Bounds x="390" y="435" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forward Return Request_di" bpmnElement="Forward Return Request">
+        <dc:Bounds x="650" y="380" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_di" bpmnElement="IntermediateCatchEvent">
+        <dc:Bounds x="172" y="1013" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_di" bpmnElement="StartEvent">
+        <dc:Bounds x="172" y="1079" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Inspect Product_di" bpmnElement="Inspect Product">
+        <dc:Bounds x="390" y="1130" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Check Payment Eligibility_di" bpmnElement="Check Payment Eligibility">
+        <dc:Bounds x="650" y="1130" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Submit Return Request_di" bpmnElement="Submit Return Request">
+        <di:waypoint x="250" y="457"/>
+        <di:waypoint x="320" y="457"/>
+        <di:waypoint x="320" y="365"/>
+        <di:waypoint x="390" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Register Return Request_di" bpmnElement="Register Return Request">
+        <di:waypoint x="250" y="457"/>
+        <di:waypoint x="320" y="457"/>
+        <di:waypoint x="320" y="475"/>
+        <di:waypoint x="390" y="475"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Check Information_di" bpmnElement="Check Information">
+        <di:waypoint x="510" y="365"/>
+        <di:waypoint x="580" y="365"/>
+        <di:waypoint x="580" y="420"/>
+        <di:waypoint x="650" y="420"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="IntermediateThrowEvent_di" bpmnElement="IntermediateThrowEvent">
+        <di:waypoint x="190" y="417"/>
+        <di:waypoint x="190" y="189"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="450" y="515"/>
+        <di:waypoint x="450" y="1130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="710" y="460"/>
+        <di:waypoint x="710" y="1130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p2_di" bpmnElement="MsgFlow_p2">
+        <di:waypoint x="450" y="1130"/>
+        <di:waypoint x="190" y="607"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,345 @@
+{
+  "pools": [
+    {
+      "id": "applicant_pool",
+      "name": "Applicant"
+    },
+    {
+      "id": "government_agency_pool",
+      "name": "Government Agency"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "applicant",
+      "name": "Applicant",
+      "pool": "applicant_pool"
+    },
+    {
+      "id": "grants_administrator",
+      "name": "Grants Administrator",
+      "pool": "government_agency_pool"
+    },
+    {
+      "id": "technical_review_panel",
+      "name": "Technical Review Panel",
+      "pool": "government_agency_pool"
+    },
+    {
+      "id": "finance_department",
+      "name": "Finance Department",
+      "pool": "government_agency_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_application",
+      "name": "Submit Grant Application",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "register_application",
+      "name": "Register Application",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "check_documentation",
+      "name": "Check Documentation Completeness",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "notify_missing_documents",
+      "name": "Notify Applicant of Missing Documents",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "collect_missing_documents",
+      "name": "Collect Missing Documents",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "resubmit_documents",
+      "name": "Resubmit Documents",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "check_documentation_again",
+      "name": "Check Documentation Completeness Again",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "review_outcomes",
+      "name": "Review Combined Verdicts",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "issue_rejection_notice",
+      "name": "Issue Rejection Notice",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "issue_approval_letter",
+      "name": "Issue Grant Approval Letter",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "assess_project_feasibility",
+      "name": "Assess Project Feasibility",
+      "type": "task",
+      "lane": "technical_review_panel"
+    },
+    {
+      "id": "record_technical_verdict",
+      "name": "Record Technical Verdict",
+      "type": "task",
+      "lane": "technical_review_panel"
+    },
+    {
+      "id": "review_proposed_budget",
+      "name": "Review Proposed Budget",
+      "type": "task",
+      "lane": "finance_department"
+    },
+    {
+      "id": "record_finance_verdict",
+      "name": "Record Finance Verdict",
+      "type": "task",
+      "lane": "finance_department"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_applicant",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_applicant_reject",
+      "name": "Application Rejected",
+      "type": "endEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_applicant_approval",
+      "name": "Grant Approved",
+      "type": "endEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_government_agency",
+      "name": "Application Received",
+      "type": "startEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_incomplete",
+      "name": "Applicant Notified",
+      "type": "endEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_rejected",
+      "name": "Rejection Notice Issued",
+      "type": "endEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_approved",
+      "name": "Approval Letter Issued",
+      "type": "endEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_documentation",
+      "name": "Documentation Complete?",
+      "type": "exclusiveGateway",
+      "lane": "grants_administrator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "split_parallel",
+      "name": "Forward for Review",
+      "type": "parallelGateway",
+      "lane": "grants_administrator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Both Verdicts Recorded",
+      "type": "parallelGateway",
+      "lane": "grants_administrator",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "split_outcome",
+      "name": "Both Verdicts Positive?",
+      "type": "exclusiveGateway",
+      "lane": "grants_administrator",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_applicant",
+      "to": "submit_application"
+    },
+    {
+      "id": "sf2",
+      "from": "start_government_agency",
+      "to": "register_application"
+    },
+    {
+      "id": "sf3",
+      "from": "register_application",
+      "to": "check_documentation"
+    },
+    {
+      "id": "sf4",
+      "from": "check_documentation",
+      "to": "split_documentation"
+    },
+    {
+      "id": "sf5",
+      "from": "split_documentation",
+      "to": "notify_missing_documents",
+      "condition": "Incomplete"
+    },
+    {
+      "id": "sf6",
+      "from": "notify_missing_documents",
+      "to": "end_incomplete"
+    },
+    {
+      "id": "sf7",
+      "from": "split_documentation",
+      "to": "split_parallel",
+      "condition": "Complete"
+    },
+    {
+      "id": "sf8",
+      "from": "split_parallel",
+      "to": "assess_project_feasibility"
+    },
+    {
+      "id": "sf9",
+      "from": "split_parallel",
+      "to": "review_proposed_budget"
+    },
+    {
+      "id": "sf10",
+      "from": "assess_project_feasibility",
+      "to": "record_technical_verdict"
+    },
+    {
+      "id": "sf11",
+      "from": "record_technical_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf12",
+      "from": "review_proposed_budget",
+      "to": "record_finance_verdict"
+    },
+    {
+      "id": "sf13",
+      "from": "record_finance_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf14",
+      "from": "join_parallel",
+      "to": "review_outcomes"
+    },
+    {
+      "id": "sf15",
+      "from": "review_outcomes",
+      "to": "split_outcome"
+    },
+    {
+      "id": "sf16",
+      "from": "split_outcome",
+      "to": "issue_rejection_notice",
+      "condition": "One or more verdicts negative"
+    },
+    {
+      "id": "sf17",
+      "from": "split_outcome",
+      "to": "issue_approval_letter",
+      "condition": "Both verdicts positive"
+    },
+    {
+      "id": "sf18",
+      "from": "issue_rejection_notice",
+      "to": "end_rejected"
+    },
+    {
+      "id": "sf19",
+      "from": "issue_approval_letter",
+      "to": "end_approved"
+    },
+    {
+      "id": "sf20",
+      "from": "end_incomplete",
+      "to": "collect_missing_documents"
+    },
+    {
+      "id": "sf21",
+      "from": "collect_missing_documents",
+      "to": "resubmit_documents"
+    },
+    {
+      "id": "sf22",
+      "from": "resubmit_documents",
+      "to": "check_documentation_again"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "submit_application",
+      "to": "start_government_agency",
+      "name": "Grant Application"
+    },
+    {
+      "id": "mf2",
+      "from": "notify_missing_documents",
+      "to": "end_applicant_reject",
+      "name": "Incomplete Notice"
+    },
+    {
+      "id": "mf3",
+      "from": "issue_rejection_notice",
+      "to": "end_applicant_reject",
+      "name": "Rejection Notice"
+    },
+    {
+      "id": "mf4",
+      "from": "issue_approval_letter",
+      "to": "end_applicant_approval",
+      "name": "Approval Letter"
+    }
+  ],
+  "data": [],
+  "data_associations": []
+}
