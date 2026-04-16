@@ -3,31 +3,30 @@
   <bpmn:collaboration id="Collaboration_1">
     <bpmn:participant id="actor_applicant_pool" name="Applicant Organisation" processRef="Process_applicant_pool" />
     <bpmn:participant id="actor_agency_pool" name="Government Agency" processRef="Process_agency_pool" />
-    <bpmn:messageFlow id="mf1" name="Grant Application" sourceRef="submit_application" targetRef="start_grants" />
     <bpmn:messageFlow id="mf2" name="Missing Documents Notice" sourceRef="throw_incomplete" targetRef="catch_incomplete" />
     <bpmn:messageFlow id="mf3" name="Resubmitted Documents" sourceRef="throw_resubmit" targetRef="catch_resubmission" />
     <bpmn:messageFlow id="mf4" name="Rejection Notice" sourceRef="throw_rejection" targetRef="catch_rejection" />
     <bpmn:messageFlow id="mf5" name="Grant Approval Letter" sourceRef="throw_approval" targetRef="catch_approval" />
+    <bpmn:messageFlow id="Flow_1qhnr5a" sourceRef="Event_15pellp" targetRef="start_grants" />
   </bpmn:collaboration>
   <bpmn:process id="Process_applicant_pool" name="Applicant Organisation" isExecutable="false">
     <bpmn:laneSet id="LaneSet_applicant_pool">
       <bpmn:lane id="applicant" name="Applicant Organisation">
-        <bpmn:flowNodeRef>start_applicant</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>catch_incomplete</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>submit_application</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>collect_docs</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>throw_resubmit</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>end_applicant_rejected</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>catch_rejection</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>catch_approval</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>end_applicant_approved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>start_applicant</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>submit_application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_15pellp</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="start_applicant" name="Start" />
     <bpmn:intermediateCatchEvent id="catch_incomplete" name="Missing Documents Notice Received">
       <bpmn:messageEventDefinition id="catch_incomplete_def" />
     </bpmn:intermediateCatchEvent>
-    <bpmn:task id="submit_application" name="Submit Grant Application" />
     <bpmn:task id="collect_docs" name="Collect Missing Documents" />
     <bpmn:intermediateThrowEvent id="throw_resubmit" name="Resubmit Documents">
       <bpmn:messageEventDefinition id="throw_resubmit_def" />
@@ -48,6 +47,15 @@
     <bpmn:sequenceFlow id="sf3" sourceRef="collect_docs" targetRef="throw_resubmit" />
     <bpmn:sequenceFlow id="sf4" sourceRef="catch_rejection" targetRef="end_applicant_rejected" />
     <bpmn:sequenceFlow id="Flow_1qovlpb" sourceRef="catch_approval" targetRef="end_applicant_approved" />
+    <bpmn:startEvent id="start_applicant" name="Start" />
+    <bpmn:task id="submit_application" name="Submit Grant Application">
+      <bpmn:outgoing>Flow_1hbu485</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1hbu485" sourceRef="submit_application" targetRef="Event_15pellp" />
+    <bpmn:intermediateThrowEvent id="Event_15pellp" name="Send application">
+      <bpmn:incoming>Flow_1hbu485</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0hcouw6" />
+    </bpmn:intermediateThrowEvent>
   </bpmn:process>
   <bpmn:process id="Process_agency_pool" name="Government Agency" isExecutable="false">
     <bpmn:laneSet id="LaneSet_agency_pool">
@@ -149,20 +157,11 @@
         <dc:Bounds x="190" y="80" width="4110" height="470" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="start_applicant_di" bpmnElement="start_applicant">
-        <dc:Bounds x="322" y="198" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="328" y="234" width="25" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="catch_incomplete_di" bpmnElement="catch_incomplete">
         <dc:Bounds x="1062" y="264" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1035" y="214" width="90" height="40" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="submit_application_di" bpmnElement="submit_application">
-        <dc:Bounds x="410" y="176" width="120" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="collect_docs_di" bpmnElement="collect_docs">
         <dc:Bounds x="660" y="396" width="120" height="80" />
@@ -197,9 +196,24 @@
           <dc:Bounds x="3457" y="218" width="67" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_applicant_di" bpmnElement="start_applicant">
+        <dc:Bounds x="232" y="198" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="238" y="234" width="25" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_application_di" bpmnElement="submit_application">
+        <dc:Bounds x="330" y="176" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1aq4wkd_di" bpmnElement="Event_15pellp">
+        <dc:Bounds x="512" y="198" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="509" y="168" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
-        <di:waypoint x="358" y="216" />
-        <di:waypoint x="410" y="216" />
+        <di:waypoint x="268" y="216" />
+        <di:waypoint x="330" y="216" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
         <di:waypoint x="1062" y="282" />
@@ -217,6 +231,10 @@
       <bpmndi:BPMNEdge id="Flow_1qovlpb_di" bpmnElement="Flow_1qovlpb">
         <di:waypoint x="3368" y="200" />
         <di:waypoint x="3472" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hbu485_di" bpmnElement="Flow_1hbu485">
+        <di:waypoint x="450" y="216" />
+        <di:waypoint x="512" y="216" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="actor_agency_pool_di" bpmnElement="actor_agency_pool" isHorizontal="true">
         <dc:Bounds x="160" y="610" width="4140" height="750" />
@@ -444,15 +462,6 @@
         <di:waypoint x="3586" y="735" />
         <di:waypoint x="3695" y="735" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
-        <di:waypoint x="503" y="256" />
-        <di:waypoint x="503" y="430" />
-        <di:waypoint x="315" y="430" />
-        <di:waypoint x="315" y="725" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="408" y="280" width="84" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
         <di:waypoint x="1640" y="642" />
         <di:waypoint x="1640" y="489" />
@@ -484,6 +493,12 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="3263" y="455" width="74" height="27" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qhnr5a_di" bpmnElement="Flow_1qhnr5a">
+        <di:waypoint x="530" y="234" />
+        <di:waypoint x="530" y="476" />
+        <di:waypoint x="330" y="476" />
+        <di:waypoint x="330" y="717" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
