@@ -1,0 +1,60 @@
+{
+    "pools": [
+      { "id": "insurance_pool", "name": "Insurance Company" }
+    ],
+    "lanes": [
+      { "id": "claims_intake",  "name": "Claims Intake",   "pool": "insurance_pool" },
+      { "id": "claims_handler", "name": "Claims Handler",  "pool": "insurance_pool" },
+      { "id": "fraud_detection","name": "Fraud Detection", "pool": "insurance_pool" },
+      { "id": "assessment",     "name": "Assessment",      "pool": "insurance_pool" },
+      { "id": "finance",        "name": "Finance",         "pool": "insurance_pool" }
+    ],
+    "tasks": [
+      { "id": "receive_claim",       "name": "Receive Claim",                        "type": "task", "lane": "claims_intake" },
+      { "id": "assign_handler",      "name": "Assign Claims Handler",                "type": "task", "lane": "claims_intake" },
+      { "id": "register_claim",      "name": "Register Claim",                       "type": "task", "lane": "claims_handler" },
+      { "id": "evaluate_results",    "name": "Evaluate Combined Results",            "type": "task", "lane": "claims_handler" },
+      { "id": "reject_claim",        "name": "Reject Claim",                         "type": "task", "lane": "claims_handler" },
+      { "id": "notify_rejected",     "name": "Notify Customer of Rejection",         "type": "task", "lane": "claims_handler" },
+      { "id": "request_documents",   "name": "Request Additional Documents",         "type": "task", "lane": "claims_handler" },
+      { "id": "notify_approved",     "name": "Notify Customer of Approval",          "type": "task", "lane": "claims_handler" },
+      { "id": "fraud_check",         "name": "Run Automated Fraud Check",            "type": "task", "lane": "fraud_detection" },
+      { "id": "review_documents",    "name": "Review Supporting Documents",          "type": "task", "lane": "assessment" },
+      { "id": "process_payment",     "name": "Process Payment",                      "type": "task", "lane": "finance" }
+    ],
+    "events": [
+      { "id": "start",           "name": "Claim Received",       "type": "startEvent", "lane": "claims_intake",  "eventDefinition": "none" },
+      { "id": "end_rejected",    "name": "Claim Rejected",       "type": "endEvent",   "lane": "claims_handler", "eventDefinition": "none" },
+      { "id": "end_approved",    "name": "Claim Approved",       "type": "endEvent",   "lane": "claims_handler", "eventDefinition": "none" }
+    ],
+    "gateways": [
+      { "id": "split_parallel",   "name": "Start Parallel Checks",      "type": "parallelGateway",  "lane": "claims_handler", "gatewayDirection": "diverging" },
+      { "id": "join_parallel",    "name": "Both Checks Complete",       "type": "parallelGateway",  "lane": "claims_handler", "gatewayDirection": "converging" },
+      { "id": "split_evaluation", "name": "Evaluation Outcome?",        "type": "exclusiveGateway", "lane": "claims_handler", "gatewayDirection": "diverging" },
+      { "id": "join_recheck",     "name": "Re-evaluation Loop Join",    "type": "exclusiveGateway", "lane": "claims_handler", "gatewayDirection": "converging" }
+    ],
+    "sequence_flows": [
+      { "id": "sf1",  "from": "start",             "to": "receive_claim" },
+      { "id": "sf2",  "from": "receive_claim",     "to": "assign_handler" },
+      { "id": "sf3",  "from": "assign_handler",    "to": "register_claim" },
+      { "id": "sf4",  "from": "register_claim",    "to": "split_parallel" },
+      { "id": "sf5",  "from": "split_parallel",    "to": "fraud_check" },
+      { "id": "sf6",  "from": "split_parallel",    "to": "review_documents" },
+      { "id": "sf7",  "from": "fraud_check",       "to": "join_parallel" },
+      { "id": "sf8",  "from": "review_documents",  "to": "join_parallel" },
+      { "id": "sf9",  "from": "join_parallel",     "to": "join_recheck" },
+      { "id": "sf10", "from": "join_recheck",      "to": "evaluate_results" },
+      { "id": "sf11", "from": "evaluate_results",  "to": "split_evaluation" },
+      { "id": "sf12", "from": "split_evaluation",  "to": "reject_claim",         "condition": "Fraudulent" },
+      { "id": "sf13", "from": "split_evaluation",  "to": "request_documents",    "condition": "Documentation insufficient" },
+      { "id": "sf14", "from": "split_evaluation",  "to": "process_payment",      "condition": "Approved" },
+      { "id": "sf15", "from": "reject_claim",      "to": "notify_rejected" },
+      { "id": "sf16", "from": "notify_rejected",   "to": "end_rejected" },
+      { "id": "sf17", "from": "request_documents", "to": "review_documents" },
+      { "id": "sf18", "from": "process_payment",   "to": "notify_approved" },
+      { "id": "sf19", "from": "notify_approved",   "to": "end_approved" }
+    ],
+    "message_flows": [],
+    "data": [],
+    "data_associations": []
+  }
