@@ -19,7 +19,7 @@ def load_model():
 
         SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
         PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-        model_path   = os.path.join(PROJECT_ROOT, "_fine_tuned_llm", "bpmn-mistral-finetuned.gguf")
+        model_path   = os.path.join(PROJECT_ROOT, "_fine_tuned_llm", "bpmn-phi4-finetuned_seed123.gguf")
 
         if not os.path.exists(model_path):
             raise FileNotFoundError(
@@ -442,7 +442,7 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_fine_tuned_phi4.json")
+    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_fine_tuned_phi4_seed123.json")
 
     try:
         if not os.path.exists(input_path):
