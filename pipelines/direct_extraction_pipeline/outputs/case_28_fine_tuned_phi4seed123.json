@@ -1,0 +1,220 @@
+{
+  "pools": [
+    {
+      "id": "ZarkanIndustries",
+      "name": "Zarkan Industries"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "CSR",
+      "name": "Customer Service Representative",
+      "pool": "ZarkanIndustries"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "pool": "Customer"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "receiveComplaint",
+      "name": "Receive Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "recordCallDetails",
+      "name": "Record Call Details",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "documentConcerns",
+      "name": "Document Concerns",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "noteReceiptDate",
+      "name": "Note Receipt Date",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "analyzeComplaint",
+      "name": "Analyze Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "consultDepartments",
+      "name": "Consult Departments",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "resolveComplaint",
+      "name": "Resolve Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "archiveComplaint",
+      "name": "Archive Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "closeComplaint",
+      "name": "Close Complaint",
+      "type": "task",
+      "lane": "CSR"
+    }
+  ],
+  "events": [
+    {
+      "id": "startEvent",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "CSR",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "endEvent",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "CSR",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "complaintReceived",
+      "name": "Complaint Received",
+      "type": "intermediateCatchEvent",
+      "lane": "CSR",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "complaintHandled",
+      "name": "Complaint Handled",
+      "type": "intermediateThrowEvent",
+      "lane": "CSR",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "exclusiveGateway1",
+      "name": "Exclusive Gateway 1",
+      "type": "exclusiveGateway",
+      "lane": "CSR",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "exclusiveGateway2",
+      "name": "Exclusive Gateway 2",
+      "type": "exclusiveGateway",
+      "lane": "CSR",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "startEvent",
+      "to": "exclusiveGateway1",
+      "condition": "none"
+    },
+    {
+      "id": "sf2",
+      "from": "exclusiveGateway1",
+      "to": "recordCallDetails",
+      "condition": "phone call"
+    },
+    {
+      "id": "sf3",
+      "from": "exclusiveGateway1",
+      "to": "documentConcerns",
+      "condition": "in-person"
+    },
+    {
+      "id": "sf4",
+      "from": "exclusiveGateway1",
+      "to": "noteReceiptDate",
+      "condition": "letter"
+    },
+    {
+      "id": "sf5",
+      "from": "recordCallDetails",
+      "to": "complaintReceived",
+      "condition": "none"
+    },
+    {
+      "id": "sf6",
+      "from": "documentConcerns",
+      "to": "complaintReceived",
+      "condition": "none"
+    },
+    {
+      "id": "sf7",
+      "from": "noteReceiptDate",
+      "to": "complaintReceived",
+      "condition": "none"
+    },
+    {
+      "id": "sf8",
+      "from": "complaintReceived",
+      "to": "analyzeComplaint",
+      "condition": "none"
+    },
+    {
+      "id": "sf9",
+      "from": "analyzeComplaint",
+      "to": "consultDepartments",
+      "condition": "none"
+    },
+    {
+      "id": "sf10",
+      "from": "consultDepartments",
+      "to": "exclusiveGateway2",
+      "condition": "none"
+    },
+    {
+      "id": "sf11",
+      "from": "exclusiveGateway2",
+      "to": "resolveComplaint",
+      "condition": "none"
+    },
+    {
+      "id": "sf12",
+      "from": "resolveComplaint",
+      "to": "archiveComplaint",
+      "condition": "none"
+    },
+    {
+      "id": "sf13",
+      "from": "archiveComplaint",
+      "to": "closeComplaint",
+      "condition": "none"
+    },
+    {
+      "id": "sf14",
+      "from": "closeComplaint",
+      "to": "endEvent",
+      "condition": "none"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "complaintHandled",
+      "to": "complaintReceived",
+      "name": "Handle Complaint"
+    }
+  ]
+}

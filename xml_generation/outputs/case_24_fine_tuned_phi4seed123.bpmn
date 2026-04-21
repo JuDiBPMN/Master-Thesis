@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Government Agency" name="Government Agency Grants Office" processRef="Process_Government Agency"/>
+    <bpmn:participant id="actor_Applicant Organisation" name="Applicant Organisation" processRef="Process_Applicant Organisation"/>
+    <bpmn:messageFlow id="Submit Application to Application Received" name="Submit Application" sourceRef="Submit Application" targetRef="Application Received"/>
+    <bpmn:messageFlow id="Notify Missing Documents to Incomplete Documentation" name="Notify Missing Documents" sourceRef="Notify Missing Documents" targetRef="Incomplete Documentation"/>
+    <bpmn:messageFlow id="Forward to Technical Review to Technical Review Received" name="Forward to Technical Review" sourceRef="Forward to Technical Review" targetRef="Technical Review Received"/>
+    <bpmn:messageFlow id="Technical Verdict Recorded to Technical Review Received" name="Technical Verdict Recorded" sourceRef="Technical Verdict Recorded" targetRef="Technical Review Received"/>
+    <bpmn:messageFlow id="Forward to Finance to Finance Review Received" name="Forward to Finance" sourceRef="Forward to Finance" targetRef="Finance Review Received"/>
+    <bpmn:messageFlow id="Finance Verdict Recorded to Finance Review Received" name="Finance Verdict Recorded" sourceRef="Finance Verdict Recorded" targetRef="Finance Review Received"/>
+    <bpmn:messageFlow id="Negative Verdict to Send Rejection Notice" name="Negative Verdict" sourceRef="Negative Verdict" targetRef="Send Rejection Notice"/>
+    <bpmn:messageFlow id="Send Rejection Notice to Grant Rejected" name="Send Rejection Notice" sourceRef="Send Rejection Notice" targetRef="Grant Rejected"/>
+    <bpmn:messageFlow id="Issue Grant Approval to Grant Approved" name="Issue Grant Approval" sourceRef="Issue Grant Approval" targetRef="Grant Approved"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="Submit Application" targetRef="Application Received"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="Documents Resubmitted" targetRef="Collect Missing Documents"/>
+    <bpmn:messageFlow id="MsgFlow_p2" name="" sourceRef="Resubmit Documents" targetRef="Documents Resubmitted"/>
+    <bpmn:messageFlow id="MsgFlow_p3" name="" sourceRef="Complete Documentation" targetRef="Complete Documentation Decision"/>
+    <bpmn:messageFlow id="MsgFlow_p4" name="" sourceRef="Complete Documentation Decision" targetRef="Parallel Split"/>
+    <bpmn:messageFlow id="MsgFlow_p5" name="" sourceRef="Forward to Technical Review" targetRef="Technical Review Received"/>
+    <bpmn:messageFlow id="MsgFlow_p6" name="" sourceRef="Forward to Finance" targetRef="Finance Review Received"/>
+    <bpmn:messageFlow id="MsgFlow_p7" name="" sourceRef="Technical Review Received" targetRef="Parallel Join"/>
+    <bpmn:messageFlow id="MsgFlow_p8" name="" sourceRef="Finance Review Received" targetRef="Parallel Join"/>
+    <bpmn:messageFlow id="MsgFlow_p9" name="" sourceRef="Send Rejection Notice" targetRef="Grant Rejected"/>
+    <bpmn:messageFlow id="MsgFlow_p10" name="" sourceRef="Issue Grant Approval" targetRef="Grant Approved"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Government Agency" name="Government Agency Grants Office" isExecutable="false"/>
+  <bpmn:process id="Process_Applicant Organisation" name="Applicant Organisation" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Applicant Organisation">
+      <bpmn:lane id="Applicant" name="Applicant">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Submit Application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Grant Rejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Grant Approved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Collect Missing Documents</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Resubmit Documents</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Start"/>
+    <bpmn:intermediateThrowEvent id="Submit Application" name="Submit Application">
+      <bpmn:messageEventDefinition id="Submit Application_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="Grant Rejected" name="Grant Rejected"/>
+    <bpmn:endEvent id="Grant Approved" name="Grant Approved"/>
+    <bpmn:task id="Collect Missing Documents" name="Collect Missing Documents"/>
+    <bpmn:task id="Resubmit Documents" name="Resubmit Documents"/>
+    <bpmn:sequenceFlow id="Start to Submit Application" sourceRef="Start" targetRef="Submit Application"/>
+    <bpmn:sequenceFlow id="Collect Missing Documents to Resubmit Documents" sourceRef="Collect Missing Documents" targetRef="Resubmit Documents"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Government Agency_di" bpmnElement="actor_Government Agency" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="400" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Applicant Organisation_di" bpmnElement="actor_Applicant Organisation" isHorizontal="true">
+        <dc:Bounds x="10" y="330" width="760" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Applicant_di" bpmnElement="Applicant" isHorizontal="true">
+        <dc:Bounds x="40" y="330" width="730" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_di" bpmnElement="Start">
+        <dc:Bounds x="172" y="426" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Grant Rejected_di" bpmnElement="Grant Rejected">
+        <dc:Bounds x="172" y="492" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Grant Approved_di" bpmnElement="Grant Approved">
+        <dc:Bounds x="172" y="558" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Collect Missing Documents_di" bpmnElement="Collect Missing Documents">
+        <dc:Bounds x="130" y="624" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Submit Application_di" bpmnElement="Submit Application">
+        <dc:Bounds x="432" y="492" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Resubmit Documents_di" bpmnElement="Resubmit Documents">
+        <dc:Bounds x="390" y="558" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Start to Submit Application_di" bpmnElement="Start to Submit Application">
+        <di:waypoint x="208" y="444"/>
+        <di:waypoint x="320" y="444"/>
+        <di:waypoint x="320" y="510"/>
+        <di:waypoint x="432" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Collect Missing Documents to Resubmit Documents_di" bpmnElement="Collect Missing Documents to Resubmit Documents">
+        <di:waypoint x="250" y="664"/>
+        <di:waypoint x="320" y="664"/>
+        <di:waypoint x="320" y="598"/>
+        <di:waypoint x="390" y="598"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

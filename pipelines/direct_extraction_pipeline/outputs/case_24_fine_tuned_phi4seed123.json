@@ -1,0 +1,472 @@
+{
+  "pools": [
+    {
+      "id": "Government Agency",
+      "name": "Government Agency Grants Office"
+    },
+    {
+      "id": "Applicant Organisation",
+      "name": "Applicant Organisation"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Grants Administrator",
+      "name": "Grants Administrator",
+      "pool": "Government Agency Grants Office"
+    },
+    {
+      "id": "Technical Review Panel",
+      "name": "Technical Review Panel",
+      "pool": "Government Agency Grants Office"
+    },
+    {
+      "id": "Finance Department",
+      "name": "Finance Department",
+      "pool": "Government Agency Grants Office"
+    },
+    {
+      "id": "Applicant",
+      "name": "Applicant",
+      "pool": "Applicant Organisation"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Register Application",
+      "name": "Register Application",
+      "type": "task",
+      "lane": "Grants Administrator"
+    },
+    {
+      "id": "Check Documentation",
+      "name": "Check Documentation",
+      "type": "task",
+      "lane": "Grants Administrator"
+    },
+    {
+      "id": "Notify Missing Documents",
+      "name": "Notify Missing Documents",
+      "type": "task",
+      "lane": "Grants Administrator"
+    },
+    {
+      "id": "Collect Missing Documents",
+      "name": "Collect Missing Documents",
+      "type": "task",
+      "lane": "Applicant"
+    },
+    {
+      "id": "Resubmit Documents",
+      "name": "Resubmit Documents",
+      "type": "task",
+      "lane": "Applicant"
+    },
+    {
+      "id": "Assess Project Feasibility",
+      "name": "Assess Project Feasibility",
+      "type": "task",
+      "lane": "Technical Review Panel"
+    },
+    {
+      "id": "Review Proposed Budget",
+      "name": "Review Proposed Budget",
+      "type": "task",
+      "lane": "Finance Department"
+    },
+    {
+      "id": "Review Combined Outcomes",
+      "name": "Review Combined Outcomes",
+      "type": "task",
+      "lane": "Grants Administrator"
+    },
+    {
+      "id": "Send Rejection Notice",
+      "name": "Send Rejection Notice",
+      "type": "task",
+      "lane": "Grants Administrator"
+    },
+    {
+      "id": "Issue Grant Approval",
+      "name": "Issue Grant Approval",
+      "type": "task",
+      "lane": "Grants Administrator"
+    }
+  ],
+  "events": [
+    {
+      "id": "Start",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "Applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Submit Application",
+      "name": "Submit Application",
+      "type": "intermediateThrowEvent",
+      "lane": "Applicant",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Application Received",
+      "name": "Application Received",
+      "type": "intermediateCatchEvent",
+      "lane": "Grants Administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Incomplete Documentation",
+      "name": "Incomplete Documentation",
+      "type": "intermediateCatchEvent",
+      "lane": "Grants Administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Documents Resubmitted",
+      "name": "Documents Resubmitted",
+      "type": "intermediateCatchEvent",
+      "lane": "Grants Administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Complete Documentation",
+      "name": "Complete Documentation",
+      "type": "intermediateCatchEvent",
+      "lane": "Grants Administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Forward to Technical Review",
+      "name": "Forward to Technical Review",
+      "type": "intermediateThrowEvent",
+      "lane": "Grants Administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Technical Review Received",
+      "name": "Technical Review Received",
+      "type": "intermediateCatchEvent",
+      "lane": "Technical Review Panel",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Technical Verdict Recorded",
+      "name": "Technical Verdict Recorded",
+      "type": "intermediateThrowEvent",
+      "lane": "Technical Review Panel",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Forward to Finance",
+      "name": "Forward to Finance",
+      "type": "intermediateThrowEvent",
+      "lane": "Grants Administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Finance Review Received",
+      "name": "Finance Review Received",
+      "type": "intermediateCatchEvent",
+      "lane": "Finance Department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Finance Verdict Recorded",
+      "name": "Finance Verdict Recorded",
+      "type": "intermediateThrowEvent",
+      "lane": "Finance Department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Negative Verdict",
+      "name": "Negative Verdict",
+      "type": "intermediateCatchEvent",
+      "lane": "Grants Administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Grant Rejected",
+      "name": "Grant Rejected",
+      "type": "endEvent",
+      "lane": "Applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Grant Approved",
+      "name": "Grant Approved",
+      "type": "endEvent",
+      "lane": "Applicant",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Check Documentation Decision",
+      "name": "Check Documentation Decision",
+      "type": "exclusiveGateway",
+      "lane": "Grants Administrator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "Documentation Complete Decision",
+      "name": "Documentation Complete Decision",
+      "type": "exclusiveGateway",
+      "lane": "Grants Administrator",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "Verdicts Review Decision",
+      "name": "Verdicts Review Decision",
+      "type": "exclusiveGateway",
+      "lane": "Grants Administrator",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "Parallel Split",
+      "name": "Parallel Split",
+      "type": "parallelGateway",
+      "lane": "Grants Administrator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "Parallel Join",
+      "name": "Parallel Join",
+      "type": "parallelGateway",
+      "lane": "Grants Administrator",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Start to Submit Application",
+      "from": "Start",
+      "to": "Submit Application"
+    },
+    {
+      "id": "Submit Application to Application Received",
+      "from": "Submit Application",
+      "to": "Application Received"
+    },
+    {
+      "id": "Application Received to Register Application",
+      "from": "Application Received",
+      "to": "Register Application"
+    },
+    {
+      "id": "Register Application to Check Documentation",
+      "from": "Register Application",
+      "to": "Check Documentation"
+    },
+    {
+      "id": "Check Documentation to Check Documentation Decision",
+      "from": "Check Documentation",
+      "to": "Check Documentation Decision"
+    },
+    {
+      "id": "Check Documentation Decision to Notify Missing Documents",
+      "from": "Check Documentation Decision",
+      "to": "Notify Missing Documents",
+      "condition": "documentation is incomplete"
+    },
+    {
+      "id": "Notify Missing Documents to Incomplete Documentation",
+      "from": "Notify Missing Documents",
+      "to": "Incomplete Documentation"
+    },
+    {
+      "id": "Incomplete Documentation to Documents Resubmitted",
+      "from": "Incomplete Documentation",
+      "to": "Documents Resubmitted"
+    },
+    {
+      "id": "Documents Resubmitted to Collect Missing Documents",
+      "from": "Documents Resubmitted",
+      "to": "Collect Missing Documents"
+    },
+    {
+      "id": "Collect Missing Documents to Resubmit Documents",
+      "from": "Collect Missing Documents",
+      "to": "Resubmit Documents"
+    },
+    {
+      "id": "Resubmit Documents to Documents Resubmitted",
+      "from": "Resubmit Documents",
+      "to": "Documents Resubmitted"
+    },
+    {
+      "id": "Documents Resubmitted to Check Documentation",
+      "from": "Documents Resubmitted",
+      "to": "Check Documentation"
+    },
+    {
+      "id": "Check Documentation Decision to Complete Documentation",
+      "from": "Check Documentation Decision",
+      "to": "Complete Documentation",
+      "condition": "documentation is complete"
+    },
+    {
+      "id": "Complete Documentation to Complete Documentation Decision",
+      "from": "Complete Documentation",
+      "to": "Complete Documentation Decision"
+    },
+    {
+      "id": "Complete Documentation Decision to Parallel Split",
+      "from": "Complete Documentation Decision",
+      "to": "Parallel Split"
+    },
+    {
+      "id": "Parallel Split to Forward to Technical Review",
+      "from": "Parallel Split",
+      "to": "Forward to Technical Review"
+    },
+    {
+      "id": "Parallel Split to Forward to Finance",
+      "from": "Parallel Split",
+      "to": "Forward to Finance"
+    },
+    {
+      "id": "Forward to Technical Review to Technical Review Received",
+      "from": "Forward to Technical Review",
+      "to": "Technical Review Received"
+    },
+    {
+      "id": "Technical Review Received to Assess Project Feasibility",
+      "from": "Technical Review Received",
+      "to": "Assess Project Feasibility"
+    },
+    {
+      "id": "Assess Project Feasibility to Technical Verdict Recorded",
+      "from": "Assess Project Feasibility",
+      "to": "Technical Verdict Recorded"
+    },
+    {
+      "id": "Technical Verdict Recorded to Technical Review Received",
+      "from": "Technical Verdict Recorded",
+      "to": "Technical Review Received"
+    },
+    {
+      "id": "Forward to Finance to Finance Review Received",
+      "from": "Forward to Finance",
+      "to": "Finance Review Received"
+    },
+    {
+      "id": "Finance Review Received to Review Proposed Budget",
+      "from": "Finance Review Received",
+      "to": "Review Proposed Budget"
+    },
+    {
+      "id": "Review Proposed Budget to Finance Verdict Recorded",
+      "from": "Review Proposed Budget",
+      "to": "Finance Verdict Recorded"
+    },
+    {
+      "id": "Finance Verdict Recorded to Finance Review Received",
+      "from": "Finance Verdict Recorded",
+      "to": "Finance Review Received"
+    },
+    {
+      "id": "Technical Review Received to Parallel Join",
+      "from": "Technical Review Received",
+      "to": "Parallel Join"
+    },
+    {
+      "id": "Finance Review Received to Parallel Join",
+      "from": "Finance Review Received",
+      "to": "Parallel Join"
+    },
+    {
+      "id": "Parallel Join to Review Combined Outcomes",
+      "from": "Parallel Join",
+      "to": "Review Combined Outcomes"
+    },
+    {
+      "id": "Review Combined Outcomes to Verdicts Review Decision",
+      "from": "Review Combined Outcomes",
+      "to": "Verdicts Review Decision"
+    },
+    {
+      "id": "Verdicts Review Decision to Negative Verdict",
+      "from": "Verdicts Review Decision",
+      "to": "Negative Verdict",
+      "condition": "either verdict is negative"
+    },
+    {
+      "id": "Negative Verdict to Send Rejection Notice",
+      "from": "Negative Verdict",
+      "to": "Send Rejection Notice"
+    },
+    {
+      "id": "Send Rejection Notice to Grant Rejected",
+      "from": "Send Rejection Notice",
+      "to": "Grant Rejected"
+    },
+    {
+      "id": "Verdicts Review Decision to Issue Grant Approval",
+      "from": "Verdicts Review Decision",
+      "to": "Issue Grant Approval",
+      "condition": "both verdicts are positive"
+    },
+    {
+      "id": "Issue Grant Approval to Grant Approved",
+      "from": "Issue Grant Approval",
+      "to": "Grant Approved"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "Submit Application to Application Received",
+      "from": "Submit Application",
+      "to": "Application Received",
+      "name": "Submit Application"
+    },
+    {
+      "id": "Notify Missing Documents to Incomplete Documentation",
+      "from": "Notify Missing Documents",
+      "to": "Incomplete Documentation",
+      "name": "Notify Missing Documents"
+    },
+    {
+      "id": "Forward to Technical Review to Technical Review Received",
+      "from": "Forward to Technical Review",
+      "to": "Technical Review Received",
+      "name": "Forward to Technical Review"
+    },
+    {
+      "id": "Technical Verdict Recorded to Technical Review Received",
+      "from": "Technical Verdict Recorded",
+      "to": "Technical Review Received",
+      "name": "Technical Verdict Recorded"
+    },
+    {
+      "id": "Forward to Finance to Finance Review Received",
+      "from": "Forward to Finance",
+      "to": "Finance Review Received",
+      "name": "Forward to Finance"
+    },
+    {
+      "id": "Finance Verdict Recorded to Finance Review Received",
+      "from": "Finance Verdict Recorded",
+      "to": "Finance Review Received",
+      "name": "Finance Verdict Recorded"
+    },
+    {
+      "id": "Negative Verdict to Send Rejection Notice",
+      "from": "Negative Verdict",
+      "to": "Send Rejection Notice",
+      "name": "Negative Verdict"
+    },
+    {
+      "id": "Send Rejection Notice to Grant Rejected",
+      "from": "Send Rejection Notice",
+      "to": "Grant Rejected",
+      "name": "Send Rejection Notice"
+    },
+    {
+      "id": "Issue Grant Approval to Grant Approved",
+      "from": "Issue Grant Approval",
+      "to": "Grant Approved",
+      "name": "Issue Grant Approval"
+    }
+  ]
+}
