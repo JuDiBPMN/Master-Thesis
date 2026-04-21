@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:process id="Process_pool_bank" name="Bank" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_pool_bank">
+      <bpmn:lane id="lane_bank" name="Mortgage Department">
+        <bpmn:flowNodeRef>start_bank</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_bank_approved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_bank_declined</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_create_file</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_evaluate_stability</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_gather_income</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_check_credit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_risk_analysis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_grant_credit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_decline_application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_parallel_split</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_parallel_join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_assessment_split</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_bank" name="Mortgage application received"/>
+    <bpmn:endEvent id="end_bank_approved" name="End – credit granted"/>
+    <bpmn:endEvent id="end_bank_declined" name="End – application declined"/>
+    <bpmn:userTask id="task_create_file" name="Create mortgage file"/>
+    <bpmn:userTask id="task_evaluate_stability" name="Evaluate financial stability"/>
+    <bpmn:userTask id="task_gather_income" name="Gather income statements"/>
+    <bpmn:userTask id="task_check_credit" name="Check other credit applications"/>
+    <bpmn:userTask id="task_risk_analysis" name="Perform in-depth risk analysis"/>
+    <bpmn:userTask id="task_grant_credit" name="Grant line of credit"/>
+    <bpmn:userTask id="task_decline_application" name="Decline mortgage application"/>
+    <bpmn:parallelGateway id="gw_parallel_split" name="Begin concurrent evaluations" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gw_parallel_join" name="All evaluations complete" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="gw_assessment_split" name="Assessment outcome?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf01" sourceRef="start_bank" targetRef="task_create_file"/>
+    <bpmn:sequenceFlow id="sf02" sourceRef="task_create_file" targetRef="gw_parallel_split"/>
+    <bpmn:sequenceFlow id="sf03" sourceRef="gw_parallel_split" targetRef="task_evaluate_stability"/>
+    <bpmn:sequenceFlow id="sf04" sourceRef="gw_parallel_split" targetRef="task_gather_income"/>
+    <bpmn:sequenceFlow id="sf05" sourceRef="gw_parallel_split" targetRef="task_check_credit"/>
+    <bpmn:sequenceFlow id="sf06" sourceRef="task_evaluate_stability" targetRef="gw_parallel_join"/>
+    <bpmn:sequenceFlow id="sf07" sourceRef="task_gather_income" targetRef="gw_parallel_join"/>
+    <bpmn:sequenceFlow id="sf08" sourceRef="task_check_credit" targetRef="gw_parallel_join"/>
+    <bpmn:sequenceFlow id="sf09" sourceRef="gw_parallel_join" targetRef="task_risk_analysis"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="task_risk_analysis" targetRef="gw_assessment_split"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="gw_assessment_split" targetRef="task_grant_credit" name="Assessment positive">
+      <bpmn:conditionExpression>Assessment positive</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf12" sourceRef="task_grant_credit" targetRef="end_bank_approved"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="gw_assessment_split" targetRef="task_decline_application" name="Assessment negative">
+      <bpmn:conditionExpression>Assessment negative</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf14" sourceRef="task_decline_application" targetRef="end_bank_declined"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_pool_bank">
+      <bpmndi:BPMNShape id="lane_bank_di" bpmnElement="lane_bank" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="2550" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_bank_di" bpmnElement="start_bank">
+        <dc:Bounds x="172" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_bank_approved_di" bpmnElement="end_bank_approved">
+        <dc:Bounds x="2252" y="149" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_bank_declined_di" bpmnElement="end_bank_declined">
+        <dc:Bounds x="2252" y="215" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task_create_file_di" bpmnElement="task_create_file">
+        <dc:Bounds x="390" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task_evaluate_stability_di" bpmnElement="task_evaluate_stability">
+        <dc:Bounds x="910" y="50" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task_gather_income_di" bpmnElement="task_gather_income">
+        <dc:Bounds x="910" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task_check_credit_di" bpmnElement="task_check_credit">
+        <dc:Bounds x="910" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task_risk_analysis_di" bpmnElement="task_risk_analysis">
+        <dc:Bounds x="1430" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task_grant_credit_di" bpmnElement="task_grant_credit">
+        <dc:Bounds x="1950" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="task_decline_application_di" bpmnElement="task_decline_application">
+        <dc:Bounds x="1950" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_parallel_split_di" bpmnElement="gw_parallel_split" isMarkerVisible="true">
+        <dc:Bounds x="685" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_parallel_join_di" bpmnElement="gw_parallel_join" isMarkerVisible="true">
+        <dc:Bounds x="1205" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_assessment_split_di" bpmnElement="gw_assessment_split" isMarkerVisible="true">
+        <dc:Bounds x="1725" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf01_di" bpmnElement="sf01">
+        <di:waypoint x="208" y="200"/>
+        <di:waypoint x="390" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf02_di" bpmnElement="sf02">
+        <di:waypoint x="510" y="200"/>
+        <di:waypoint x="685" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf03_di" bpmnElement="sf03">
+        <di:waypoint x="735" y="200"/>
+        <di:waypoint x="822" y="200"/>
+        <di:waypoint x="822" y="90"/>
+        <di:waypoint x="910" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf04_di" bpmnElement="sf04">
+        <di:waypoint x="735" y="200"/>
+        <di:waypoint x="910" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf05_di" bpmnElement="sf05">
+        <di:waypoint x="735" y="200"/>
+        <di:waypoint x="822" y="200"/>
+        <di:waypoint x="822" y="310"/>
+        <di:waypoint x="910" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf06_di" bpmnElement="sf06">
+        <di:waypoint x="1030" y="90"/>
+        <di:waypoint x="1117" y="90"/>
+        <di:waypoint x="1117" y="200"/>
+        <di:waypoint x="1205" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf07_di" bpmnElement="sf07">
+        <di:waypoint x="1030" y="200"/>
+        <di:waypoint x="1205" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf08_di" bpmnElement="sf08">
+        <di:waypoint x="1030" y="310"/>
+        <di:waypoint x="1117" y="310"/>
+        <di:waypoint x="1117" y="200"/>
+        <di:waypoint x="1205" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf09_di" bpmnElement="sf09">
+        <di:waypoint x="1255" y="200"/>
+        <di:waypoint x="1430" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="1550" y="200"/>
+        <di:waypoint x="1725" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="1775" y="200"/>
+        <di:waypoint x="1862" y="200"/>
+        <di:waypoint x="1862" y="145"/>
+        <di:waypoint x="1950" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="2070" y="145"/>
+        <di:waypoint x="2161" y="145"/>
+        <di:waypoint x="2161" y="167"/>
+        <di:waypoint x="2252" y="167"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="1775" y="200"/>
+        <di:waypoint x="1862" y="200"/>
+        <di:waypoint x="1862" y="255"/>
+        <di:waypoint x="1950" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="2070" y="255"/>
+        <di:waypoint x="2161" y="255"/>
+        <di:waypoint x="2161" y="233"/>
+        <di:waypoint x="2252" y="233"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
