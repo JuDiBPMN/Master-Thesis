@@ -1,170 +1,187 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
-  <bpmn:process id="Process_pool_bank" name="Bank" isExecutable="false">
-    <bpmn:laneSet id="LaneSet_pool_bank">
-      <bpmn:lane id="lane_bank" name="Mortgage Department">
-        <bpmn:flowNodeRef>start_bank</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_bank_approved</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>end_bank_declined</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_create_file</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_evaluate_stability</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_gather_income</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_check_credit</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_risk_analysis</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_grant_credit</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_decline_application</bpmn:flowNodeRef>
+  <bpmn:process id="Process_pool_zarkan" name="Zarkan Industries" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_pool_zarkan">
+      <bpmn:lane id="lane_csr" name="Customer Service Representative">
+        <bpmn:flowNodeRef>start_csr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_csr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_record_call</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_document_concerns</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_note_receipt_date</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_analyze_complaint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_consult_departments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_resolve_complaint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_archive_complaint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_close_complaint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_channel_split</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gw_channel_join</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>gw_parallel_split</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>gw_parallel_join</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>gw_assessment_split</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="start_bank" name="Mortgage application received"/>
-    <bpmn:endEvent id="end_bank_approved" name="End – credit granted"/>
-    <bpmn:endEvent id="end_bank_declined" name="End – application declined"/>
-    <bpmn:userTask id="task_create_file" name="Create mortgage file"/>
-    <bpmn:userTask id="task_evaluate_stability" name="Evaluate financial stability"/>
-    <bpmn:userTask id="task_gather_income" name="Gather income statements"/>
-    <bpmn:userTask id="task_check_credit" name="Check other credit applications"/>
-    <bpmn:userTask id="task_risk_analysis" name="Perform in-depth risk analysis"/>
-    <bpmn:userTask id="task_grant_credit" name="Grant line of credit"/>
-    <bpmn:userTask id="task_decline_application" name="Decline mortgage application"/>
-    <bpmn:parallelGateway id="gw_parallel_split" name="Begin concurrent evaluations" gatewayDirection="diverging"/>
-    <bpmn:parallelGateway id="gw_parallel_join" name="All evaluations complete" gatewayDirection="converging"/>
-    <bpmn:exclusiveGateway id="gw_assessment_split" name="Assessment outcome?" gatewayDirection="diverging"/>
-    <bpmn:sequenceFlow id="sf01" sourceRef="start_bank" targetRef="task_create_file"/>
-    <bpmn:sequenceFlow id="sf02" sourceRef="task_create_file" targetRef="gw_parallel_split"/>
-    <bpmn:sequenceFlow id="sf03" sourceRef="gw_parallel_split" targetRef="task_evaluate_stability"/>
-    <bpmn:sequenceFlow id="sf04" sourceRef="gw_parallel_split" targetRef="task_gather_income"/>
-    <bpmn:sequenceFlow id="sf05" sourceRef="gw_parallel_split" targetRef="task_check_credit"/>
-    <bpmn:sequenceFlow id="sf06" sourceRef="task_evaluate_stability" targetRef="gw_parallel_join"/>
-    <bpmn:sequenceFlow id="sf07" sourceRef="task_gather_income" targetRef="gw_parallel_join"/>
-    <bpmn:sequenceFlow id="sf08" sourceRef="task_check_credit" targetRef="gw_parallel_join"/>
-    <bpmn:sequenceFlow id="sf09" sourceRef="gw_parallel_join" targetRef="task_risk_analysis"/>
-    <bpmn:sequenceFlow id="sf10" sourceRef="task_risk_analysis" targetRef="gw_assessment_split"/>
-    <bpmn:sequenceFlow id="sf11" sourceRef="gw_assessment_split" targetRef="task_grant_credit" name="Assessment positive">
-      <bpmn:conditionExpression>Assessment positive</bpmn:conditionExpression>
+    <bpmn:startEvent id="start_csr" name="Complaint received"/>
+    <bpmn:endEvent id="end_csr" name="End – complaint closed"/>
+    <bpmn:userTask id="task_record_call" name="Record call details"/>
+    <bpmn:userTask id="task_document_concerns" name="Document customer concerns"/>
+    <bpmn:userTask id="task_note_receipt_date" name="Note letter receipt date"/>
+    <bpmn:userTask id="task_analyze_complaint" name="Analyze complaint"/>
+    <bpmn:userTask id="task_consult_departments" name="Consult other departments"/>
+    <bpmn:userTask id="task_resolve_complaint" name="Resolve complaint"/>
+    <bpmn:userTask id="task_archive_complaint" name="Archive complaint details"/>
+    <bpmn:userTask id="task_close_complaint" name="Close complaint"/>
+    <bpmn:exclusiveGateway id="gw_channel_split" name="Complaint channel?" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="gw_channel_join" name="Registration complete" gatewayDirection="converging"/>
+    <bpmn:parallelGateway id="gw_parallel_split" name="Analyze and consult simultaneously" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gw_parallel_join" name="Analysis and consultation complete" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf01" sourceRef="start_csr" targetRef="gw_channel_split"/>
+    <bpmn:sequenceFlow id="sf02" sourceRef="gw_channel_split" targetRef="task_record_call" name="Phone call">
+      <bpmn:conditionExpression>Phone call</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf12" sourceRef="task_grant_credit" targetRef="end_bank_approved"/>
-    <bpmn:sequenceFlow id="sf13" sourceRef="gw_assessment_split" targetRef="task_decline_application" name="Assessment negative">
-      <bpmn:conditionExpression>Assessment negative</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="sf03" sourceRef="gw_channel_split" targetRef="task_document_concerns" name="In-person at service desk">
+      <bpmn:conditionExpression>In-person at service desk</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="sf14" sourceRef="task_decline_application" targetRef="end_bank_declined"/>
+    <bpmn:sequenceFlow id="sf04" sourceRef="gw_channel_split" targetRef="task_note_receipt_date" name="Letter">
+      <bpmn:conditionExpression>Letter</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf05" sourceRef="task_record_call" targetRef="gw_channel_join"/>
+    <bpmn:sequenceFlow id="sf06" sourceRef="task_document_concerns" targetRef="gw_channel_join"/>
+    <bpmn:sequenceFlow id="sf07" sourceRef="task_note_receipt_date" targetRef="gw_channel_join"/>
+    <bpmn:sequenceFlow id="sf08" sourceRef="gw_channel_join" targetRef="gw_parallel_split"/>
+    <bpmn:sequenceFlow id="sf09" sourceRef="gw_parallel_split" targetRef="task_analyze_complaint"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="gw_parallel_split" targetRef="task_consult_departments"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="task_analyze_complaint" targetRef="gw_parallel_join"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="task_consult_departments" targetRef="gw_parallel_join"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="gw_parallel_join" targetRef="task_resolve_complaint"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="task_resolve_complaint" targetRef="task_archive_complaint"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="task_archive_complaint" targetRef="task_close_complaint"/>
+    <bpmn:sequenceFlow id="sf16" sourceRef="task_close_complaint" targetRef="end_csr"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_pool_bank">
-      <bpmndi:BPMNShape id="lane_bank_di" bpmnElement="lane_bank" isHorizontal="true">
-        <dc:Bounds x="40" y="20" width="2550" height="360"/>
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_pool_zarkan">
+      <bpmndi:BPMNShape id="lane_csr_di" bpmnElement="lane_csr" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="3070" height="360"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="start_bank_di" bpmnElement="start_bank">
+      <bpmndi:BPMNShape id="start_csr_di" bpmnElement="start_csr">
         <dc:Bounds x="172" y="182" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_bank_approved_di" bpmnElement="end_bank_approved">
-        <dc:Bounds x="2252" y="149" width="36" height="36"/>
+      <bpmndi:BPMNShape id="end_csr_di" bpmnElement="end_csr">
+        <dc:Bounds x="2772" y="182" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="end_bank_declined_di" bpmnElement="end_bank_declined">
-        <dc:Bounds x="2252" y="215" width="36" height="36"/>
+      <bpmndi:BPMNShape id="task_record_call_di" bpmnElement="task_record_call">
+        <dc:Bounds x="650" y="50" width="120" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="task_create_file_di" bpmnElement="task_create_file">
-        <dc:Bounds x="390" y="160" width="120" height="80"/>
+      <bpmndi:BPMNShape id="task_document_concerns_di" bpmnElement="task_document_concerns">
+        <dc:Bounds x="650" y="160" width="120" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="task_evaluate_stability_di" bpmnElement="task_evaluate_stability">
-        <dc:Bounds x="910" y="50" width="120" height="80"/>
+      <bpmndi:BPMNShape id="task_note_receipt_date_di" bpmnElement="task_note_receipt_date">
+        <dc:Bounds x="650" y="270" width="120" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="task_gather_income_di" bpmnElement="task_gather_income">
-        <dc:Bounds x="910" y="160" width="120" height="80"/>
+      <bpmndi:BPMNShape id="task_analyze_complaint_di" bpmnElement="task_analyze_complaint">
+        <dc:Bounds x="1430" y="105" width="120" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="task_check_credit_di" bpmnElement="task_check_credit">
-        <dc:Bounds x="910" y="270" width="120" height="80"/>
+      <bpmndi:BPMNShape id="task_consult_departments_di" bpmnElement="task_consult_departments">
+        <dc:Bounds x="1430" y="215" width="120" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="task_risk_analysis_di" bpmnElement="task_risk_analysis">
-        <dc:Bounds x="1430" y="160" width="120" height="80"/>
+      <bpmndi:BPMNShape id="task_resolve_complaint_di" bpmnElement="task_resolve_complaint">
+        <dc:Bounds x="1950" y="160" width="120" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="task_grant_credit_di" bpmnElement="task_grant_credit">
-        <dc:Bounds x="1950" y="105" width="120" height="80"/>
+      <bpmndi:BPMNShape id="task_archive_complaint_di" bpmnElement="task_archive_complaint">
+        <dc:Bounds x="2210" y="160" width="120" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="task_decline_application_di" bpmnElement="task_decline_application">
-        <dc:Bounds x="1950" y="215" width="120" height="80"/>
+      <bpmndi:BPMNShape id="task_close_complaint_di" bpmnElement="task_close_complaint">
+        <dc:Bounds x="2470" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_channel_split_di" bpmnElement="gw_channel_split" isMarkerVisible="true">
+        <dc:Bounds x="425" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_channel_join_di" bpmnElement="gw_channel_join" isMarkerVisible="true">
+        <dc:Bounds x="945" y="175" width="50" height="50"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="gw_parallel_split_di" bpmnElement="gw_parallel_split" isMarkerVisible="true">
-        <dc:Bounds x="685" y="175" width="50" height="50"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="gw_parallel_join_di" bpmnElement="gw_parallel_join" isMarkerVisible="true">
         <dc:Bounds x="1205" y="175" width="50" height="50"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="gw_assessment_split_di" bpmnElement="gw_assessment_split" isMarkerVisible="true">
+      <bpmndi:BPMNShape id="gw_parallel_join_di" bpmnElement="gw_parallel_join" isMarkerVisible="true">
         <dc:Bounds x="1725" y="175" width="50" height="50"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="sf01_di" bpmnElement="sf01">
         <di:waypoint x="208" y="200"/>
-        <di:waypoint x="390" y="200"/>
+        <di:waypoint x="425" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf02_di" bpmnElement="sf02">
-        <di:waypoint x="510" y="200"/>
-        <di:waypoint x="685" y="200"/>
+        <di:waypoint x="475" y="200"/>
+        <di:waypoint x="562" y="200"/>
+        <di:waypoint x="562" y="90"/>
+        <di:waypoint x="650" y="90"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf03_di" bpmnElement="sf03">
-        <di:waypoint x="735" y="200"/>
-        <di:waypoint x="822" y="200"/>
-        <di:waypoint x="822" y="90"/>
-        <di:waypoint x="910" y="90"/>
+        <di:waypoint x="475" y="200"/>
+        <di:waypoint x="650" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf04_di" bpmnElement="sf04">
-        <di:waypoint x="735" y="200"/>
-        <di:waypoint x="910" y="200"/>
+        <di:waypoint x="475" y="200"/>
+        <di:waypoint x="562" y="200"/>
+        <di:waypoint x="562" y="310"/>
+        <di:waypoint x="650" y="310"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf05_di" bpmnElement="sf05">
-        <di:waypoint x="735" y="200"/>
-        <di:waypoint x="822" y="200"/>
-        <di:waypoint x="822" y="310"/>
-        <di:waypoint x="910" y="310"/>
+        <di:waypoint x="770" y="90"/>
+        <di:waypoint x="857" y="90"/>
+        <di:waypoint x="857" y="200"/>
+        <di:waypoint x="945" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf06_di" bpmnElement="sf06">
-        <di:waypoint x="1030" y="90"/>
-        <di:waypoint x="1117" y="90"/>
-        <di:waypoint x="1117" y="200"/>
-        <di:waypoint x="1205" y="200"/>
+        <di:waypoint x="770" y="200"/>
+        <di:waypoint x="945" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf07_di" bpmnElement="sf07">
-        <di:waypoint x="1030" y="200"/>
-        <di:waypoint x="1205" y="200"/>
+        <di:waypoint x="770" y="310"/>
+        <di:waypoint x="857" y="310"/>
+        <di:waypoint x="857" y="200"/>
+        <di:waypoint x="945" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf08_di" bpmnElement="sf08">
-        <di:waypoint x="1030" y="310"/>
-        <di:waypoint x="1117" y="310"/>
-        <di:waypoint x="1117" y="200"/>
+        <di:waypoint x="995" y="200"/>
         <di:waypoint x="1205" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf09_di" bpmnElement="sf09">
         <di:waypoint x="1255" y="200"/>
-        <di:waypoint x="1430" y="200"/>
+        <di:waypoint x="1342" y="200"/>
+        <di:waypoint x="1342" y="145"/>
+        <di:waypoint x="1430" y="145"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
-        <di:waypoint x="1550" y="200"/>
-        <di:waypoint x="1725" y="200"/>
+        <di:waypoint x="1255" y="200"/>
+        <di:waypoint x="1342" y="200"/>
+        <di:waypoint x="1342" y="255"/>
+        <di:waypoint x="1430" y="255"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
-        <di:waypoint x="1775" y="200"/>
-        <di:waypoint x="1862" y="200"/>
-        <di:waypoint x="1862" y="145"/>
-        <di:waypoint x="1950" y="145"/>
+        <di:waypoint x="1550" y="145"/>
+        <di:waypoint x="1637" y="145"/>
+        <di:waypoint x="1637" y="200"/>
+        <di:waypoint x="1725" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
-        <di:waypoint x="2070" y="145"/>
-        <di:waypoint x="2161" y="145"/>
-        <di:waypoint x="2161" y="167"/>
-        <di:waypoint x="2252" y="167"/>
+        <di:waypoint x="1550" y="255"/>
+        <di:waypoint x="1637" y="255"/>
+        <di:waypoint x="1637" y="200"/>
+        <di:waypoint x="1725" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
         <di:waypoint x="1775" y="200"/>
-        <di:waypoint x="1862" y="200"/>
-        <di:waypoint x="1862" y="255"/>
-        <di:waypoint x="1950" y="255"/>
+        <di:waypoint x="1950" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
-        <di:waypoint x="2070" y="255"/>
-        <di:waypoint x="2161" y="255"/>
-        <di:waypoint x="2161" y="233"/>
-        <di:waypoint x="2252" y="233"/>
+        <di:waypoint x="2070" y="200"/>
+        <di:waypoint x="2210" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="2330" y="200"/>
+        <di:waypoint x="2470" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf16_di" bpmnElement="sf16">
+        <di:waypoint x="2590" y="200"/>
+        <di:waypoint x="2772" y="200"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
