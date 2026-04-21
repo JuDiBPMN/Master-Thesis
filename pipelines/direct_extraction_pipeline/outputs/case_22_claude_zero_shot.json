@@ -1,0 +1,100 @@
+{
+  "pools": [
+    { "id": "pool_company",   "name": "Company" },
+    { "id": "pool_candidate", "name": "Candidate" }
+  ],
+  "lanes": [
+    { "id": "lane_hm",        "name": "Hiring Manager", "pool": "pool_company" },
+    { "id": "lane_hr",        "name": "HR Recruiter",   "pool": "pool_company" },
+    { "id": "lane_candidate", "name": "Candidate",      "pool": "pool_candidate" }
+  ],
+  "tasks": [
+    { "id": "task_register_vacancy",      "name": "Register vacancy",                    "type": "userTask",   "lane": "lane_hr" },
+    { "id": "task_post_job_ad",           "name": "Post job advertisement",              "type": "userTask",   "lane": "lane_hr" },
+    { "id": "task_screen_applications",   "name": "Screen applications and shortlist",   "type": "userTask",   "lane": "lane_hr" },
+    { "id": "task_schedule_interview",    "name": "Schedule technical interview",        "type": "userTask",   "lane": "lane_hr" },
+    { "id": "task_score_assessment",      "name": "Score personality assessment",        "type": "userTask",   "lane": "lane_hr" },
+    { "id": "task_record_hr_verdict",     "name": "Record assessment verdict",           "type": "userTask",   "lane": "lane_hr" },
+    { "id": "task_review_outcomes",       "name": "Review combined outcomes",            "type": "userTask",   "lane": "lane_hr" },
+    { "id": "task_write_rejection",       "name": "Write rejection email",               "type": "userTask",   "lane": "lane_hr" },
+    { "id": "task_draft_job_offer",       "name": "Draft job offer",                     "type": "userTask",   "lane": "lane_hr" },
+    { "id": "task_conduct_interview",     "name": "Conduct technical interview",         "type": "userTask",   "lane": "lane_hm" },
+    { "id": "task_record_hm_verdict",     "name": "Record interview verdict",            "type": "userTask",   "lane": "lane_hm" },
+    { "id": "task_apply",                 "name": "Apply for vacancy",                   "type": "userTask",   "lane": "lane_candidate" },
+    { "id": "task_complete_assessment",   "name": "Complete personality assessment",     "type": "userTask",   "lane": "lane_candidate" },
+    { "id": "task_submit_assessment",     "name": "Submit personality assessment",       "type": "userTask",   "lane": "lane_candidate" }
+  ],
+  "events": [
+    { "id": "start_hm",                   "name": "Submit vacancy request",              "type": "startEvent",             "lane": "lane_hm",        "eventDefinition": "none" },
+    { "id": "throw_hm_vacancy",           "name": "Send vacancy request to HR",          "type": "intermediateThrowEvent", "lane": "lane_hm",        "eventDefinition": "message" },
+    { "id": "catch_hm_interview_sched",   "name": "Receive interview schedule",          "type": "intermediateCatchEvent", "lane": "lane_hm",        "eventDefinition": "message" },
+    { "id": "throw_hm_verdict",           "name": "Send interview verdict",              "type": "intermediateThrowEvent", "lane": "lane_hm",        "eventDefinition": "message" },
+    { "id": "end_hm",                     "name": "End",                                 "type": "endEvent",               "lane": "lane_hm",        "eventDefinition": "none" },
+
+    { "id": "start_hr",                   "name": "Receive vacancy request",             "type": "startEvent",             "lane": "lane_hr",        "eventDefinition": "message" },
+    { "id": "throw_hr_schedule",          "name": "Send interview schedule to HM",       "type": "intermediateThrowEvent", "lane": "lane_hr",        "eventDefinition": "message" },
+    { "id": "throw_hr_assessment",        "name": "Send personality assessment",         "type": "intermediateThrowEvent", "lane": "lane_hr",        "eventDefinition": "message" },
+    { "id": "catch_hr_hm_verdict",        "name": "Receive interview verdict",           "type": "intermediateCatchEvent", "lane": "lane_hr",        "eventDefinition": "message" },
+    { "id": "catch_hr_assessment_result", "name": "Receive completed assessment",        "type": "intermediateCatchEvent", "lane": "lane_hr",        "eventDefinition": "message" },
+    { "id": "throw_hr_rejection",         "name": "Send rejection email",                "type": "intermediateThrowEvent", "lane": "lane_hr",        "eventDefinition": "message" },
+    { "id": "throw_hr_job_offer",         "name": "Send job offer",                      "type": "intermediateThrowEvent", "lane": "lane_hr",        "eventDefinition": "message" },
+    { "id": "end_hr_rejected",            "name": "End – candidate rejected",            "type": "endEvent",               "lane": "lane_hr",        "eventDefinition": "none" },
+    { "id": "end_hr_offered",             "name": "End – job offer sent",                "type": "endEvent",               "lane": "lane_hr",        "eventDefinition": "none" },
+
+    { "id": "start_candidate",            "name": "Job advertisement posted",            "type": "startEvent",             "lane": "lane_candidate", "eventDefinition": "message" },
+    { "id": "catch_cand_assessment",      "name": "Receive personality assessment",      "type": "intermediateCatchEvent", "lane": "lane_candidate", "eventDefinition": "message" },
+    { "id": "throw_cand_assessment",      "name": "Send completed assessment to HR",     "type": "intermediateThrowEvent", "lane": "lane_candidate", "eventDefinition": "message" },
+    { "id": "catch_cand_outcome",         "name": "Receive rejection or job offer",      "type": "intermediateCatchEvent", "lane": "lane_candidate", "eventDefinition": "message" },
+    { "id": "end_candidate",              "name": "End",                                 "type": "endEvent",               "lane": "lane_candidate", "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "gw_parallel_split",  "name": "Initiate interview and assessment", "type": "parallelGateway",  "lane": "lane_hr", "gatewayDirection": "diverging" },
+    { "id": "gw_parallel_join",   "name": "Wait for both verdicts",            "type": "parallelGateway",  "lane": "lane_hr", "gatewayDirection": "converging" },
+    { "id": "gw_verdicts_split",  "name": "Both verdicts positive?",           "type": "exclusiveGateway", "lane": "lane_hr", "gatewayDirection": "diverging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf01", "from": "start_hm",                   "to": "throw_hm_vacancy" },
+    { "id": "sf02", "from": "catch_hm_interview_sched",   "to": "task_conduct_interview" },
+    { "id": "sf03", "from": "task_conduct_interview",     "to": "task_record_hm_verdict" },
+    { "id": "sf04", "from": "task_record_hm_verdict",     "to": "throw_hm_verdict" },
+    { "id": "sf05", "from": "throw_hm_verdict",           "to": "end_hm" },
+
+    { "id": "sf06", "from": "start_hr",                   "to": "task_register_vacancy" },
+    { "id": "sf07", "from": "task_register_vacancy",      "to": "task_post_job_ad" },
+    { "id": "sf08", "from": "task_post_job_ad",           "to": "task_screen_applications" },
+    { "id": "sf09", "from": "task_screen_applications",   "to": "gw_parallel_split" },
+    { "id": "sf10", "from": "gw_parallel_split",          "to": "task_schedule_interview" },
+    { "id": "sf11", "from": "task_schedule_interview",    "to": "throw_hr_schedule" },
+    { "id": "sf12", "from": "gw_parallel_split",          "to": "throw_hr_assessment" },
+    { "id": "sf13", "from": "catch_hr_hm_verdict",        "to": "gw_parallel_join" },
+    { "id": "sf14", "from": "catch_hr_assessment_result", "to": "task_score_assessment" },
+    { "id": "sf15", "from": "task_score_assessment",      "to": "task_record_hr_verdict" },
+    { "id": "sf16", "from": "task_record_hr_verdict",     "to": "gw_parallel_join" },
+    { "id": "sf17", "from": "gw_parallel_join",           "to": "task_review_outcomes" },
+    { "id": "sf18", "from": "task_review_outcomes",       "to": "gw_verdicts_split" },
+    { "id": "sf19", "from": "gw_verdicts_split",          "to": "task_write_rejection",  "condition": "Either verdict is negative" },
+    { "id": "sf20", "from": "task_write_rejection",       "to": "throw_hr_rejection" },
+    { "id": "sf21", "from": "throw_hr_rejection",         "to": "end_hr_rejected" },
+    { "id": "sf22", "from": "gw_verdicts_split",          "to": "task_draft_job_offer",  "condition": "Both verdicts positive" },
+    { "id": "sf23", "from": "task_draft_job_offer",       "to": "throw_hr_job_offer" },
+    { "id": "sf24", "from": "throw_hr_job_offer",         "to": "end_hr_offered" },
+
+    { "id": "sf25", "from": "start_candidate",            "to": "task_apply" },
+    { "id": "sf26", "from": "task_apply",                 "to": "catch_cand_assessment" },
+    { "id": "sf27", "from": "catch_cand_assessment",      "to": "task_complete_assessment" },
+    { "id": "sf28", "from": "task_complete_assessment",   "to": "task_submit_assessment" },
+    { "id": "sf29", "from": "task_submit_assessment",     "to": "throw_cand_assessment" },
+    { "id": "sf30", "from": "throw_cand_assessment",      "to": "catch_cand_outcome" },
+    { "id": "sf31", "from": "catch_cand_outcome",         "to": "end_candidate" }
+  ],
+  "message_flows": [
+    { "id": "mf01", "from": "throw_hm_vacancy",        "to": "start_hr",                   "name": "Vacancy request" },
+    { "id": "mf02", "from": "task_post_job_ad",         "to": "start_candidate",            "name": "Job advertisement" },
+    { "id": "mf03", "from": "throw_hr_schedule",        "to": "catch_hm_interview_sched",   "name": "Interview schedule" },
+    { "id": "mf04", "from": "throw_hr_assessment",      "to": "catch_cand_assessment",      "name": "Personality assessment" },
+    { "id": "mf05", "from": "throw_hm_verdict",         "to": "catch_hr_hm_verdict",        "name": "Interview verdict" },
+    { "id": "mf06", "from": "throw_cand_assessment",    "to": "catch_hr_assessment_result", "name": "Completed assessment" },
+    { "id": "mf07", "from": "throw_hr_rejection",       "to": "catch_cand_outcome",         "name": "Rejection email" },
+    { "id": "mf08", "from": "throw_hr_job_offer",       "to": "catch_cand_outcome",         "name": "Job offer" }
+  ]
+}

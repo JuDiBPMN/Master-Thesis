@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_zarkan_industries" name="Zarkan Industries" processRef="Process_zarkan_industries"/>
+    <bpmn:participant id="actor_csr" name="CSR" processRef="Process_csr"/>
+    <bpmn:participant id="actor_other_departments" name="Other Departments" processRef="Process_other_departments"/>
+    <bpmn:messageFlow id="mf1" name="Complaint Closed" sourceRef="close_complaint" targetRef="end_zarkan"/>
+    <bpmn:messageFlow id="mf2" name="Complaint Received" sourceRef="start_csr" targetRef="handle_complaint"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="start_zarkan" targetRef="start_csr"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="gateway_join_analysis" targetRef="consult_other_departments"/>
+    <bpmn:messageFlow id="MsgFlow_p2" name="" sourceRef="consult_other_departments" targetRef="resolve_complaint"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_zarkan_industries" name="Zarkan Industries" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_zarkan_industries">
+      <bpmn:lane id="zarkan_industries" name="Zarkan Industries"/>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_zarkan" name="Start"/>
+    <bpmn:endEvent id="end_zarkan" name="End"/>
+    <bpmn:sequenceFlow id="sf16" sourceRef="start_zarkan" targetRef="end_zarkan"/>
+  </bpmn:process>
+  <bpmn:process id="Process_csr" name="CSR" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_csr">
+      <bpmn:lane id="csr" name="CSR"/>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_csr" name="Complaint Received">
+      <bpmn:messageEventDefinition id="start_csr_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_csr" name="Complaint Closed">
+      <bpmn:messageEventDefinition id="end_csr_def"/>
+    </bpmn:endEvent>
+    <bpmn:task id="handle_complaint" name="Handle Complaint"/>
+    <bpmn:task id="record_call_details" name="Record Call Details"/>
+    <bpmn:task id="document_customer_concerns" name="Document Customer Concerns"/>
+    <bpmn:task id="note_letter_receipt" name="Note Letter Receipt Date"/>
+    <bpmn:task id="analyze_complaint" name="Analyze Complaint"/>
+    <bpmn:task id="resolve_complaint" name="Resolve Complaint"/>
+    <bpmn:task id="archive_complaint" name="Archive Complaint"/>
+    <bpmn:task id="close_complaint" name="Close Complaint"/>
+    <bpmn:exclusiveGateway id="gateway_complaint_type" name="Complaint Type" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="gateway_complaint_resolved" name="Complaint Resolved?" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="gateway_join_analysis" name="Analysis Complete" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="gateway_join_resolution" name="Resolution Complete" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="start_csr" targetRef="gateway_complaint_type"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="gateway_complaint_type" targetRef="record_call_details" name="Phone call">
+      <bpmn:conditionExpression>Phone call</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf4" sourceRef="gateway_complaint_type" targetRef="document_customer_concerns" name="In-person complaint">
+      <bpmn:conditionExpression>In-person complaint</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf5" sourceRef="gateway_complaint_type" targetRef="note_letter_receipt" name="Letter">
+      <bpmn:conditionExpression>Letter</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf6" sourceRef="record_call_details" targetRef="analyze_complaint"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="document_customer_concerns" targetRef="analyze_complaint"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="note_letter_receipt" targetRef="analyze_complaint"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="analyze_complaint" targetRef="gateway_join_analysis"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="resolve_complaint" targetRef="gateway_join_resolution"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="gateway_join_resolution" targetRef="archive_complaint"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="archive_complaint" targetRef="close_complaint"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="close_complaint" targetRef="end_csr"/>
+  </bpmn:process>
+  <bpmn:process id="Process_other_departments" name="Other Departments" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_other_departments">
+      <bpmn:lane id="other_departments" name="Other Departments"/>
+    </bpmn:laneSet>
+    <bpmn:task id="consult_other_departments" name="Consult Other Departments"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_zarkan_industries_di" bpmnElement="actor_zarkan_industries" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="760" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_csr_di" bpmnElement="actor_csr" isHorizontal="true">
+        <dc:Bounds x="10" y="300" width="1540" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_other_departments_di" bpmnElement="actor_other_departments" isHorizontal="true">
+        <dc:Bounds x="10" y="830" width="1540" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="zarkan_industries_di" bpmnElement="zarkan_industries" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="730" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="csr_di" bpmnElement="csr" isHorizontal="true">
+        <dc:Bounds x="40" y="300" width="1510" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="other_departments_di" bpmnElement="other_departments" isHorizontal="true">
+        <dc:Bounds x="40" y="830" width="1510" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_zarkan_di" bpmnElement="start_zarkan">
+        <dc:Bounds x="172" y="112" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_zarkan_di" bpmnElement="end_zarkan">
+        <dc:Bounds x="432" y="112" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_csr_di" bpmnElement="start_csr">
+        <dc:Bounds x="172" y="367" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="handle_complaint_di" bpmnElement="handle_complaint">
+        <dc:Bounds x="130" y="433" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="resolve_complaint_di" bpmnElement="resolve_complaint">
+        <dc:Bounds x="130" y="543" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_complaint_resolved_di" bpmnElement="gateway_complaint_resolved" isMarkerVisible="true">
+        <dc:Bounds x="165" y="653" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_csr_di" bpmnElement="end_csr">
+        <dc:Bounds x="1212" y="477" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_join_analysis_di" bpmnElement="gateway_join_analysis" isMarkerVisible="true">
+        <dc:Bounds x="1205" y="543" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_call_details_di" bpmnElement="record_call_details">
+        <dc:Bounds x="650" y="330" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="document_customer_concerns_di" bpmnElement="document_customer_concerns">
+        <dc:Bounds x="650" y="440" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="note_letter_receipt_di" bpmnElement="note_letter_receipt">
+        <dc:Bounds x="650" y="550" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="archive_complaint_di" bpmnElement="archive_complaint">
+        <dc:Bounds x="650" y="660" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="analyze_complaint_di" bpmnElement="analyze_complaint">
+        <dc:Bounds x="910" y="440" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="close_complaint_di" bpmnElement="close_complaint">
+        <dc:Bounds x="910" y="550" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_complaint_type_di" bpmnElement="gateway_complaint_type" isMarkerVisible="true">
+        <dc:Bounds x="425" y="470" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_join_resolution_di" bpmnElement="gateway_join_resolution" isMarkerVisible="true">
+        <dc:Bounds x="425" y="550" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="consult_other_departments_di" bpmnElement="consult_other_departments">
+        <dc:Bounds x="1170" y="900" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="208" y="385"/>
+        <di:waypoint x="316" y="385"/>
+        <di:waypoint x="316" y="495"/>
+        <di:waypoint x="425" y="495"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="475" y="495"/>
+        <di:waypoint x="562" y="495"/>
+        <di:waypoint x="562" y="370"/>
+        <di:waypoint x="650" y="370"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="475" y="495"/>
+        <di:waypoint x="562" y="495"/>
+        <di:waypoint x="562" y="480"/>
+        <di:waypoint x="650" y="480"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="475" y="495"/>
+        <di:waypoint x="562" y="495"/>
+        <di:waypoint x="562" y="590"/>
+        <di:waypoint x="650" y="590"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="770" y="370"/>
+        <di:waypoint x="840" y="370"/>
+        <di:waypoint x="840" y="480"/>
+        <di:waypoint x="910" y="480"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="770" y="480"/>
+        <di:waypoint x="910" y="480"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="770" y="590"/>
+        <di:waypoint x="840" y="590"/>
+        <di:waypoint x="840" y="480"/>
+        <di:waypoint x="910" y="480"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="1030" y="480"/>
+        <di:waypoint x="1117" y="480"/>
+        <di:waypoint x="1117" y="568"/>
+        <di:waypoint x="1205" y="568"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="250" y="583"/>
+        <di:waypoint x="337" y="583"/>
+        <di:waypoint x="337" y="575"/>
+        <di:waypoint x="425" y="575"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="475" y="575"/>
+        <di:waypoint x="562" y="575"/>
+        <di:waypoint x="562" y="700"/>
+        <di:waypoint x="650" y="700"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="770" y="700"/>
+        <di:waypoint x="840" y="700"/>
+        <di:waypoint x="840" y="590"/>
+        <di:waypoint x="910" y="590"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="1030" y="590"/>
+        <di:waypoint x="1121" y="590"/>
+        <di:waypoint x="1121" y="495"/>
+        <di:waypoint x="1212" y="495"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf16_di" bpmnElement="sf16">
+        <di:waypoint x="208" y="130"/>
+        <di:waypoint x="432" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="970" y="550"/>
+        <di:waypoint x="450" y="148"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="190" y="367"/>
+        <di:waypoint x="190" y="513"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="190" y="148"/>
+        <di:waypoint x="190" y="367"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="1230" y="593"/>
+        <di:waypoint x="1230" y="900"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p2_di" bpmnElement="MsgFlow_p2">
+        <di:waypoint x="1230" y="900"/>
+        <di:waypoint x="190" y="623"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

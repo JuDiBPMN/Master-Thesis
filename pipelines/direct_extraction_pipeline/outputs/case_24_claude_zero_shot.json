@@ -1,0 +1,109 @@
+{
+  "pools": [
+    { "id": "pool_applicant", "name": "Applicant Organisation" },
+    { "id": "pool_agency",    "name": "Government Agency" }
+  ],
+  "lanes": [
+    { "id": "lane_applicant",  "name": "Applicant",         "pool": "pool_applicant" },
+    { "id": "lane_grants",     "name": "Grants Office",     "pool": "pool_agency" },
+    { "id": "lane_technical",  "name": "Technical Review Panel", "pool": "pool_agency" },
+    { "id": "lane_finance",    "name": "Finance Department","pool": "pool_agency" }
+  ],
+  "tasks": [
+    { "id": "task_submit_application",    "name": "Submit grant application",           "type": "userTask",  "lane": "lane_applicant" },
+    { "id": "task_collect_documents",     "name": "Collect missing documents",          "type": "userTask",  "lane": "lane_applicant" },
+    { "id": "task_resubmit",              "name": "Resubmit application",               "type": "userTask",  "lane": "lane_applicant" },
+    { "id": "task_register_application",  "name": "Register application",               "type": "userTask",  "lane": "lane_grants" },
+    { "id": "task_check_completeness",    "name": "Check documentation completeness",   "type": "userTask",  "lane": "lane_grants" },
+    { "id": "task_notify_missing",        "name": "Notify applicant of missing documents", "type": "userTask","lane": "lane_grants" },
+    { "id": "task_review_outcomes",       "name": "Review combined outcomes",           "type": "userTask",  "lane": "lane_grants" },
+    { "id": "task_assess_feasibility",    "name": "Assess project feasibility",         "type": "userTask",  "lane": "lane_technical" },
+    { "id": "task_record_tech_verdict",   "name": "Record feasibility verdict",         "type": "userTask",  "lane": "lane_technical" },
+    { "id": "task_review_budget",         "name": "Review proposed budget",             "type": "userTask",  "lane": "lane_finance" },
+    { "id": "task_record_fin_verdict",    "name": "Record budget verdict",              "type": "userTask",  "lane": "lane_finance" }
+  ],
+  "events": [
+    { "id": "start_applicant",            "name": "Grant application process started",  "type": "startEvent",             "lane": "lane_applicant",  "eventDefinition": "none" },
+    { "id": "throw_applicant_submission", "name": "Send grant application",             "type": "intermediateThrowEvent", "lane": "lane_applicant",  "eventDefinition": "message" },
+    { "id": "catch_applicant_missing",    "name": "Receive missing documents notice",   "type": "intermediateCatchEvent", "lane": "lane_applicant",  "eventDefinition": "message" },
+    { "id": "throw_applicant_resubmit",   "name": "Send resubmission",                  "type": "intermediateThrowEvent", "lane": "lane_applicant",  "eventDefinition": "message" },
+    { "id": "catch_applicant_outcome",    "name": "Receive decision from agency",       "type": "intermediateCatchEvent", "lane": "lane_applicant",  "eventDefinition": "message" },
+    { "id": "end_applicant",              "name": "End",                                "type": "endEvent",               "lane": "lane_applicant",  "eventDefinition": "none" },
+
+    { "id": "start_grants",               "name": "Receive grant application",          "type": "startEvent",             "lane": "lane_grants",     "eventDefinition": "message" },
+    { "id": "catch_grants_resubmission",  "name": "Receive resubmission",               "type": "intermediateCatchEvent", "lane": "lane_grants",     "eventDefinition": "message" },
+    { "id": "throw_grants_missing",       "name": "Send missing documents notice",      "type": "intermediateThrowEvent", "lane": "lane_grants",     "eventDefinition": "message" },
+    { "id": "throw_grants_to_technical",  "name": "Forward application to technical panel", "type": "intermediateThrowEvent", "lane": "lane_grants", "eventDefinition": "message" },
+    { "id": "throw_grants_to_finance",    "name": "Forward application to finance",     "type": "intermediateThrowEvent", "lane": "lane_grants",     "eventDefinition": "message" },
+    { "id": "catch_grants_tech_verdict",  "name": "Receive feasibility verdict",        "type": "intermediateCatchEvent", "lane": "lane_grants",     "eventDefinition": "message" },
+    { "id": "catch_grants_fin_verdict",   "name": "Receive budget verdict",             "type": "intermediateCatchEvent", "lane": "lane_grants",     "eventDefinition": "message" },
+    { "id": "throw_grants_rejection",     "name": "Send rejection notice",              "type": "intermediateThrowEvent", "lane": "lane_grants",     "eventDefinition": "message" },
+    { "id": "throw_grants_approval",      "name": "Send grant approval letter",         "type": "intermediateThrowEvent", "lane": "lane_grants",     "eventDefinition": "message" },
+    { "id": "end_grants_rejected",        "name": "End – application rejected",         "type": "endEvent",               "lane": "lane_grants",     "eventDefinition": "none" },
+    { "id": "end_grants_approved",        "name": "End – grant approved",               "type": "endEvent",               "lane": "lane_grants",     "eventDefinition": "none" },
+
+    { "id": "catch_technical_request",    "name": "Receive application for review",     "type": "intermediateCatchEvent", "lane": "lane_technical",  "eventDefinition": "message" },
+    { "id": "throw_technical_verdict",    "name": "Send feasibility verdict",           "type": "intermediateThrowEvent", "lane": "lane_technical",  "eventDefinition": "message" },
+    { "id": "end_technical",              "name": "End",                                "type": "endEvent",               "lane": "lane_technical",  "eventDefinition": "none" },
+
+    { "id": "catch_finance_request",      "name": "Receive application for budget review", "type": "intermediateCatchEvent", "lane": "lane_finance", "eventDefinition": "message" },
+    { "id": "throw_finance_verdict",      "name": "Send budget verdict",                "type": "intermediateThrowEvent", "lane": "lane_finance",    "eventDefinition": "message" },
+    { "id": "end_finance",                "name": "End",                                "type": "endEvent",               "lane": "lane_finance",    "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "gw_complete_split",   "name": "Documentation complete?",       "type": "exclusiveGateway", "lane": "lane_grants", "gatewayDirection": "diverging" },
+    { "id": "gw_complete_join",    "name": "Merge completeness check loop", "type": "exclusiveGateway", "lane": "lane_grants", "gatewayDirection": "converging" },
+    { "id": "gw_parallel_split",   "name": "Forward to reviewers",          "type": "parallelGateway",  "lane": "lane_grants", "gatewayDirection": "diverging" },
+    { "id": "gw_parallel_join",    "name": "Wait for both verdicts",        "type": "parallelGateway",  "lane": "lane_grants", "gatewayDirection": "converging" },
+    { "id": "gw_verdicts_split",   "name": "Both verdicts positive?",       "type": "exclusiveGateway", "lane": "lane_grants", "gatewayDirection": "diverging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf01", "from": "start_applicant",            "to": "task_submit_application" },
+    { "id": "sf02", "from": "task_submit_application",    "to": "throw_applicant_submission" },
+    { "id": "sf03", "from": "catch_applicant_missing",    "to": "task_collect_documents" },
+    { "id": "sf04", "from": "task_collect_documents",     "to": "task_resubmit" },
+    { "id": "sf05", "from": "task_resubmit",              "to": "throw_applicant_resubmit" },
+    { "id": "sf06", "from": "catch_applicant_outcome",    "to": "end_applicant" },
+
+    { "id": "sf07", "from": "start_grants",               "to": "gw_complete_join" },
+    { "id": "sf08", "from": "catch_grants_resubmission",  "to": "gw_complete_join" },
+    { "id": "sf09", "from": "gw_complete_join",           "to": "task_register_application" },
+    { "id": "sf10", "from": "task_register_application",  "to": "task_check_completeness" },
+    { "id": "sf11", "from": "task_check_completeness",    "to": "gw_complete_split" },
+    { "id": "sf12", "from": "gw_complete_split",          "to": "task_notify_missing",       "condition": "Documentation incomplete" },
+    { "id": "sf13", "from": "task_notify_missing",        "to": "throw_grants_missing" },
+    { "id": "sf14", "from": "throw_grants_missing",       "to": "gw_complete_join" },
+    { "id": "sf15", "from": "gw_complete_split",          "to": "gw_parallel_split",         "condition": "Documentation complete" },
+    { "id": "sf16", "from": "gw_parallel_split",          "to": "throw_grants_to_technical" },
+    { "id": "sf17", "from": "gw_parallel_split",          "to": "throw_grants_to_finance" },
+    { "id": "sf18", "from": "catch_grants_tech_verdict",  "to": "gw_parallel_join" },
+    { "id": "sf19", "from": "catch_grants_fin_verdict",   "to": "gw_parallel_join" },
+    { "id": "sf20", "from": "gw_parallel_join",           "to": "task_review_outcomes" },
+    { "id": "sf21", "from": "task_review_outcomes",       "to": "gw_verdicts_split" },
+    { "id": "sf22", "from": "gw_verdicts_split",          "to": "throw_grants_rejection",    "condition": "Either verdict is negative" },
+    { "id": "sf23", "from": "throw_grants_rejection",     "to": "end_grants_rejected" },
+    { "id": "sf24", "from": "gw_verdicts_split",          "to": "throw_grants_approval",     "condition": "Both verdicts positive" },
+    { "id": "sf25", "from": "throw_grants_approval",      "to": "end_grants_approved" },
+
+    { "id": "sf26", "from": "catch_technical_request",    "to": "task_assess_feasibility" },
+    { "id": "sf27", "from": "task_assess_feasibility",    "to": "task_record_tech_verdict" },
+    { "id": "sf28", "from": "task_record_tech_verdict",   "to": "throw_technical_verdict" },
+    { "id": "sf29", "from": "throw_technical_verdict",    "to": "end_technical" },
+
+    { "id": "sf30", "from": "catch_finance_request",      "to": "task_review_budget" },
+    { "id": "sf31", "from": "task_review_budget",         "to": "task_record_fin_verdict" },
+    { "id": "sf32", "from": "task_record_fin_verdict",    "to": "throw_finance_verdict" },
+    { "id": "sf33", "from": "throw_finance_verdict",      "to": "end_finance" }
+  ],
+  "message_flows": [
+    { "id": "mf01", "from": "throw_applicant_submission", "to": "start_grants",              "name": "Grant application" },
+    { "id": "mf02", "from": "throw_grants_missing",       "to": "catch_applicant_missing",   "name": "Missing documents notice" },
+    { "id": "mf03", "from": "throw_applicant_resubmit",   "to": "catch_grants_resubmission", "name": "Resubmitted application" },
+    { "id": "mf04", "from": "throw_grants_to_technical",  "to": "catch_technical_request",   "name": "Application for feasibility review" },
+    { "id": "mf05", "from": "throw_grants_to_finance",    "to": "catch_finance_request",     "name": "Application for budget review" },
+    { "id": "mf06", "from": "throw_technical_verdict",    "to": "catch_grants_tech_verdict", "name": "Feasibility verdict" },
+    { "id": "mf07", "from": "throw_finance_verdict",      "to": "catch_grants_fin_verdict",  "name": "Budget verdict" },
+    { "id": "mf08", "from": "throw_grants_rejection",     "to": "catch_applicant_outcome",   "name": "Rejection notice" },
+    { "id": "mf09", "from": "throw_grants_approval",      "to": "catch_applicant_outcome",   "name": "Grant approval letter" }
+  ]
+}
