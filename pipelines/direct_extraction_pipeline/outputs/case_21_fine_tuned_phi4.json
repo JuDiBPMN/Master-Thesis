@@ -1,0 +1,293 @@
+{
+  "pools": [
+    {
+      "id": "retailer",
+      "name": "Retailer"
+    },
+    {
+      "id": "customer",
+      "name": "Customer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "customer_service",
+      "name": "Customer Service",
+      "pool": "retailer"
+    },
+    {
+      "id": "warehouse",
+      "name": "Warehouse",
+      "pool": "retailer"
+    },
+    {
+      "id": "finance",
+      "name": "Finance",
+      "pool": "retailer"
+    },
+    {
+      "id": "customer",
+      "name": "Customer",
+      "pool": "customer"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_return_request",
+      "name": "Submit Return Request",
+      "type": "task",
+      "lane": "customer"
+    },
+    {
+      "id": "register_return_request",
+      "name": "Register Return Request",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "check_info",
+      "name": "Check Information Completeness",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "notify_customer",
+      "name": "Notify Customer of Missing Info",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "inspect_product",
+      "name": "Inspect Returned Product",
+      "type": "task",
+      "lane": "warehouse"
+    },
+    {
+      "id": "check_payment_eligibility",
+      "name": "Check Payment Eligibility",
+      "type": "task",
+      "lane": "finance"
+    },
+    {
+      "id": "review_outcomes",
+      "name": "Review Combined Verdicts",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "send_rejection",
+      "name": "Send Return Rejection Notice",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "approve_return",
+      "name": "Approve Return",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "process_refund",
+      "name": "Process Refund",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "send_confirmation",
+      "name": "Send Refund Confirmation",
+      "type": "task",
+      "lane": "customer_service"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_retailer",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_retailer",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_customer",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_customer",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "customer",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_info",
+      "name": "Information Complete?",
+      "type": "exclusiveGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_info",
+      "name": "Join after Info Check",
+      "type": "exclusiveGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "split_parallel",
+      "name": "Start Parallel Checks",
+      "type": "parallelGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Join after Parallel Checks",
+      "type": "parallelGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_retailer",
+      "to": "submit_return_request"
+    },
+    {
+      "id": "sf2",
+      "from": "submit_return_request",
+      "to": "register_return_request"
+    },
+    {
+      "id": "sf3",
+      "from": "register_return_request",
+      "to": "check_info"
+    },
+    {
+      "id": "sf4",
+      "from": "check_info",
+      "to": "split_info"
+    },
+    {
+      "id": "sf5",
+      "from": "split_info",
+      "to": "notify_customer",
+      "condition": "Incomplete"
+    },
+    {
+      "id": "sf6",
+      "from": "split_info",
+      "to": "join_info",
+      "condition": "Complete"
+    },
+    {
+      "id": "sf7",
+      "from": "notify_customer",
+      "to": "join_info"
+    },
+    {
+      "id": "sf8",
+      "from": "join_info",
+      "to": "split_parallel"
+    },
+    {
+      "id": "sf9",
+      "from": "split_parallel",
+      "to": "inspect_product"
+    },
+    {
+      "id": "sf10",
+      "from": "split_parallel",
+      "to": "check_payment_eligibility"
+    },
+    {
+      "id": "sf11",
+      "from": "inspect_product",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf12",
+      "from": "check_payment_eligibility",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf13",
+      "from": "join_parallel",
+      "to": "review_outcomes"
+    },
+    {
+      "id": "sf14",
+      "from": "review_outcomes",
+      "to": "split_outcome"
+    },
+    {
+      "id": "sf15",
+      "from": "split_outcome",
+      "to": "send_rejection",
+      "condition": "Verdict negative"
+    },
+    {
+      "id": "sf16",
+      "from": "split_outcome",
+      "to": "approve_return",
+      "condition": "Verdict positive"
+    },
+    {
+      "id": "sf17",
+      "from": "send_rejection",
+      "to": "end_retailer"
+    },
+    {
+      "id": "sf18",
+      "from": "approve_return",
+      "to": "process_refund"
+    },
+    {
+      "id": "sf19",
+      "from": "process_refund",
+      "to": "send_confirmation"
+    },
+    {
+      "id": "sf20",
+      "from": "send_confirmation",
+      "to": "end_retailer"
+    },
+    {
+      "id": "sf21",
+      "from": "start_customer",
+      "to": "end_customer"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "submit_return_request",
+      "to": "register_return_request",
+      "name": "Return Request"
+    },
+    {
+      "id": "mf2",
+      "from": "notify_customer",
+      "to": "end_customer",
+      "name": "Return Rejection"
+    },
+    {
+      "id": "mf3",
+      "from": "send_confirmation",
+      "to": "end_customer",
+      "name": "Refund Confirmation"
+    }
+  ]
+}

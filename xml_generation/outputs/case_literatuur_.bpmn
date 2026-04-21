@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_company" name="Company" processRef="Process_company"/>
+    <bpmn:participant id="actor_requester" name="Requester" processRef="Process_requester"/>
+    <bpmn:messageFlow id="mf1" name="Order + Supporting Documents" sourceRef="upload_documents" targetRef="review_supplier"/>
+    <bpmn:messageFlow id="mf2" name="Payment Notification" sourceRef="confirm_payment" targetRef="receive_notification"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_company" name="Company" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_company">
+      <bpmn:lane id="finance_lane" name="Finance">
+        <bpmn:flowNodeRef>start_process</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_process</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_supplier</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>forward_file</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="manager_lane" name="Manager">
+        <bpmn:flowNodeRef>confirm_payment</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_process" name="Purchase Order Approved"/>
+    <bpmn:endEvent id="end_process" name="End"/>
+    <bpmn:task id="review_supplier" name="Review Supplier Details"/>
+    <bpmn:task id="forward_file" name="Forward File to Manager"/>
+    <bpmn:task id="confirm_payment" name="Confirm Payment"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_process" targetRef="review_supplier"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="review_supplier" targetRef="forward_file"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="forward_file" targetRef="confirm_payment"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="confirm_payment" targetRef="end_process"/>
+  </bpmn:process>
+  <bpmn:process id="Process_requester" name="Requester" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_requester">
+      <bpmn:lane id="requester_lane" name="Requester">
+        <bpmn:flowNodeRef>start_requester</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_requester</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>enter_order</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>upload_documents</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>receive_notification</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_requester" name="Start"/>
+    <bpmn:endEvent id="end_requester" name="End"/>
+    <bpmn:task id="enter_order" name="Enter Order"/>
+    <bpmn:task id="upload_documents" name="Upload Supporting Documents"/>
+    <bpmn:task id="receive_notification" name="Receive Notification"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="start_requester" targetRef="enter_order"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="enter_order" targetRef="upload_documents"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="upload_documents" targetRef="end_requester"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_company_di" bpmnElement="actor_company" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1540" height="440"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_requester_di" bpmnElement="actor_requester" isHorizontal="true">
+        <dc:Bounds x="10" y="520" width="1280" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="finance_lane_di" bpmnElement="finance_lane" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1510" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="manager_lane_di" bpmnElement="manager_lane" isHorizontal="true">
+        <dc:Bounds x="40" y="240" width="1510" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="requester_lane_di" bpmnElement="requester_lane" isHorizontal="true">
+        <dc:Bounds x="40" y="520" width="1250" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_process_di" bpmnElement="start_process">
+        <dc:Bounds x="172" y="112" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_process_di" bpmnElement="end_process">
+        <dc:Bounds x="1212" y="112" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_supplier_di" bpmnElement="review_supplier">
+        <dc:Bounds x="390" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="forward_file_di" bpmnElement="forward_file">
+        <dc:Bounds x="650" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="confirm_payment_di" bpmnElement="confirm_payment">
+        <dc:Bounds x="910" y="310" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_requester_di" bpmnElement="start_requester">
+        <dc:Bounds x="172" y="572" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="receive_notification_di" bpmnElement="receive_notification">
+        <dc:Bounds x="130" y="638" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_requester_di" bpmnElement="end_requester">
+        <dc:Bounds x="952" y="627" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="enter_order_di" bpmnElement="enter_order">
+        <dc:Bounds x="390" y="605" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="upload_documents_di" bpmnElement="upload_documents">
+        <dc:Bounds x="650" y="605" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="208" y="130"/>
+        <di:waypoint x="390" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="510" y="130"/>
+        <di:waypoint x="650" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="770" y="130"/>
+        <di:waypoint x="840" y="130"/>
+        <di:waypoint x="840" y="350"/>
+        <di:waypoint x="910" y="350"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="1030" y="350"/>
+        <di:waypoint x="1121" y="350"/>
+        <di:waypoint x="1121" y="130"/>
+        <di:waypoint x="1212" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="208" y="590"/>
+        <di:waypoint x="299" y="590"/>
+        <di:waypoint x="299" y="645"/>
+        <di:waypoint x="390" y="645"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="510" y="645"/>
+        <di:waypoint x="650" y="645"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="770" y="645"/>
+        <di:waypoint x="952" y="645"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="710" y="605"/>
+        <di:waypoint x="450" y="170"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="970" y="390"/>
+        <di:waypoint x="190" y="638"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

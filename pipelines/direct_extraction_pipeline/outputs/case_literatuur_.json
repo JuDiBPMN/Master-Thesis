@@ -1,0 +1,39 @@
+{
+  "pools": [
+    { "id": "company", "name": "Company" },
+    { "id": "requester", "name": "Requester" }
+  ],
+  "lanes": [
+    { "id": "finance_lane", "name": "Finance", "pool": "company" },
+    { "id": "manager_lane", "name": "Manager", "pool": "company" },
+    { "id": "requester_lane", "name": "Requester", "pool": "requester" }
+  ],
+  "tasks": [
+    { "id": "review_supplier",   "name": "Review Supplier Details",   "type": "task", "lane": "finance_lane" },
+    { "id": "forward_file",      "name": "Forward File to Manager",   "type": "task", "lane": "finance_lane" },
+    { "id": "confirm_payment",   "name": "Confirm Payment",           "type": "task", "lane": "manager_lane" },
+    { "id": "enter_order",       "name": "Enter Order",               "type": "task", "lane": "requester_lane" },
+    { "id": "upload_documents",  "name": "Upload Supporting Documents","type": "task", "lane": "requester_lane" },
+    { "id": "receive_notification","name": "Receive Notification",    "type": "task", "lane": "requester_lane" }
+  ],
+  "events": [
+    { "id": "start_process",   "name": "Purchase Order Approved", "type": "startEvent", "lane": "finance_lane",   "eventDefinition": "none" },
+    { "id": "end_process",     "name": "End",                     "type": "endEvent",   "lane": "finance_lane",   "eventDefinition": "none" },
+    { "id": "start_requester", "name": "Start",                   "type": "startEvent", "lane": "requester_lane", "eventDefinition": "none" },
+    { "id": "end_requester",   "name": "End",                     "type": "endEvent",   "lane": "requester_lane", "eventDefinition": "none" }
+  ],
+  "gateways": [],
+  "sequence_flows": [
+    { "id": "sf1", "from": "start_process",    "to": "review_supplier"    },
+    { "id": "sf2", "from": "review_supplier",  "to": "forward_file"       },
+    { "id": "sf3", "from": "forward_file",     "to": "confirm_payment"    },
+    { "id": "sf4", "from": "confirm_payment",  "to": "end_process"        },
+    { "id": "sf5", "from": "start_requester",  "to": "enter_order"        },
+    { "id": "sf6", "from": "enter_order",      "to": "upload_documents"   },
+    { "id": "sf7", "from": "upload_documents", "to": "end_requester"      }
+  ],
+  "message_flows": [
+    { "id": "mf1", "from": "upload_documents", "to": "review_supplier",  "name": "Order + Supporting Documents" },
+    { "id": "mf2", "from": "confirm_payment",  "to": "receive_notification", "name": "Payment Notification" }
+  ]
+}

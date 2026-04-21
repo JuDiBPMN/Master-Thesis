@@ -1,0 +1,256 @@
+{
+  "pools": [
+    {
+      "id": "HR_manager",
+      "name": "HR Manager"
+    },
+    {
+      "id": "Business_manager",
+      "name": "Business Manager"
+    },
+    {
+      "id": "Candidate",
+      "name": "Candidate"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "HR_manager_lane",
+      "name": "HR Manager Lane",
+      "pool": "HR_manager"
+    },
+    {
+      "id": "Business_manager_lane",
+      "name": "Business Manager Lane",
+      "pool": "Business_manager"
+    },
+    {
+      "id": "Candidate_lane",
+      "name": "Candidate Lane",
+      "pool": "Candidate"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "introduction_interview",
+      "name": "Perform Introduction Interview",
+      "type": "task",
+      "lane": "HR_manager_lane"
+    },
+    {
+      "id": "discuss_candidate",
+      "name": "Discuss Candidate with Business Manager",
+      "type": "task",
+      "lane": "HR_manager_lane"
+    },
+    {
+      "id": "inform_candidate",
+      "name": "Inform Candidate about Application",
+      "type": "task",
+      "lane": "HR_manager_lane"
+    },
+    {
+      "id": "second_assessment",
+      "name": "Perform Second Assessment",
+      "type": "task",
+      "lane": "Business_manager_lane"
+    },
+    {
+      "id": "prepare_contract",
+      "name": "Prepare Contract",
+      "type": "task",
+      "lane": "HR_manager_lane"
+    },
+    {
+      "id": "close_application",
+      "name": "Close Application Process",
+      "type": "task",
+      "lane": "HR_manager_lane"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_HR",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "HR_manager_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_HR_success",
+      "name": "Candidate Contract Prepared",
+      "type": "endEvent",
+      "lane": "HR_manager_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_HR_failure",
+      "name": "Application Closed",
+      "type": "endEvent",
+      "lane": "HR_manager_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_Business",
+      "name": "Candidate Assessment Started",
+      "type": "startEvent",
+      "lane": "Business_manager_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_Business",
+      "name": "Candidate Assessment Complete",
+      "type": "endEvent",
+      "lane": "Business_manager_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_Candidate",
+      "name": "Candidate Receives Invitation",
+      "type": "startEvent",
+      "lane": "Candidate_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_Candidate",
+      "name": "Candidate Assessment Complete",
+      "type": "endEvent",
+      "lane": "Candidate_lane",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "parallel_split",
+      "name": "Start Concurrent Tasks",
+      "type": "parallelGateway",
+      "lane": "HR_manager_lane",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "parallel_join",
+      "name": "Both Tasks Complete",
+      "type": "parallelGateway",
+      "lane": "HR_manager_lane",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "exclusive_split",
+      "name": "Assessment Successful?",
+      "type": "exclusiveGateway",
+      "lane": "HR_manager_lane",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "exclusive_join",
+      "name": "Assessment Outcome Decided",
+      "type": "exclusiveGateway",
+      "lane": "HR_manager_lane",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_HR",
+      "to": "introduction_interview"
+    },
+    {
+      "id": "sf2",
+      "from": "introduction_interview",
+      "to": "discuss_candidate"
+    },
+    {
+      "id": "sf3",
+      "from": "discuss_candidate",
+      "to": "inform_candidate"
+    },
+    {
+      "id": "sf4",
+      "from": "inform_candidate",
+      "to": "parallel_split"
+    },
+    {
+      "id": "sf5",
+      "from": "parallel_split",
+      "to": "second_assessment"
+    },
+    {
+      "id": "sf6",
+      "from": "parallel_split",
+      "to": "prepare_contract"
+    },
+    {
+      "id": "sf7",
+      "from": "second_assessment",
+      "to": "exclusive_split"
+    },
+    {
+      "id": "sf8",
+      "from": "prepare_contract",
+      "to": "exclusive_split"
+    },
+    {
+      "id": "sf9",
+      "from": "exclusive_split",
+      "to": "end_HR_success",
+      "condition": "Assessment successful"
+    },
+    {
+      "id": "sf10",
+      "from": "exclusive_split",
+      "to": "close_application",
+      "condition": "Assessment not successful"
+    },
+    {
+      "id": "sf11",
+      "from": "close_application",
+      "to": "end_HR_failure"
+    },
+    {
+      "id": "sf12",
+      "from": "parallel_join",
+      "to": "end_HR_success"
+    },
+    {
+      "id": "sf13",
+      "from": "start_Business",
+      "to": "parallel_join"
+    },
+    {
+      "id": "sf14",
+      "from": "end_HR_success",
+      "to": "end_Business"
+    },
+    {
+      "id": "sf15",
+      "from": "end_HR_failure",
+      "to": "end_Business"
+    },
+    {
+      "id": "sf16",
+      "from": "start_Candidate",
+      "to": "end_Candidate"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "start_Candidate",
+      "to": "start_HR",
+      "name": "Candidate Receives Invitation"
+    },
+    {
+      "id": "mf2",
+      "from": "end_HR_success",
+      "to": "end_Candidate",
+      "name": "Candidate Receives Contract"
+    },
+    {
+      "id": "mf3",
+      "from": "end_HR_failure",
+      "to": "end_Candidate",
+      "name": "Candidate Receives Rejection"
+    }
+  ]
+}
