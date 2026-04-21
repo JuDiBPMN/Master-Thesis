@@ -1,0 +1,71 @@
+{
+  "pools": [
+    { "id": "pool_company",   "name": "Company" },
+    { "id": "pool_candidate", "name": "Candidate" }
+  ],
+  "lanes": [
+    { "id": "lane_hr",        "name": "HR Manager",       "pool": "pool_company" },
+    { "id": "lane_bm",        "name": "Business Manager", "pool": "pool_company" },
+    { "id": "lane_candidate", "name": "Candidate",        "pool": "pool_candidate" }
+  ],
+  "tasks": [
+    { "id": "task_intro_interview",     "name": "Perform introduction interview",  "type": "userTask", "lane": "lane_hr" },
+    { "id": "task_discuss_candidate",   "name": "Discuss candidate",               "type": "userTask", "lane": "lane_hr" },
+    { "id": "task_inform_candidate",    "name": "Inform candidate about application", "type": "userTask", "lane": "lane_hr" },
+    { "id": "task_prepare_contract",    "name": "Prepare contract",                "type": "userTask", "lane": "lane_hr" },
+    { "id": "task_close_application",  "name": "Close application process",       "type": "userTask", "lane": "lane_hr" },
+    { "id": "task_second_assessment",  "name": "Perform second assessment",       "type": "userTask", "lane": "lane_bm" },
+    { "id": "task_attend_interview",   "name": "Attend introduction interview",   "type": "userTask", "lane": "lane_candidate" },
+    { "id": "task_receive_info",       "name": "Receive application update",      "type": "userTask", "lane": "lane_candidate" },
+    { "id": "task_attend_assessment",  "name": "Attend second assessment",        "type": "userTask", "lane": "lane_candidate" }
+  ],
+  "events": [
+    { "id": "start_hr",                 "name": "Recruitment process started",     "type": "startEvent",             "lane": "lane_hr",        "eventDefinition": "none" },
+    { "id": "throw_hr_inform",          "name": "Send application update",         "type": "intermediateThrowEvent", "lane": "lane_hr",        "eventDefinition": "message" },
+    { "id": "end_hr_contract",          "name": "End – contract prepared",         "type": "endEvent",               "lane": "lane_hr",        "eventDefinition": "none" },
+    { "id": "end_hr_closed",            "name": "End – application closed",        "type": "endEvent",               "lane": "lane_hr",        "eventDefinition": "none" },
+
+    { "id": "start_bm",                 "name": "Candidate discussion initiated",  "type": "startEvent",             "lane": "lane_bm",        "eventDefinition": "message" },
+    { "id": "throw_bm_assessment_done", "name": "Send assessment result",          "type": "intermediateThrowEvent", "lane": "lane_bm",        "eventDefinition": "message" },
+    { "id": "end_bm",                   "name": "End",                             "type": "endEvent",               "lane": "lane_bm",        "eventDefinition": "none" },
+
+    { "id": "start_candidate",          "name": "Interview invitation received",   "type": "startEvent",             "lane": "lane_candidate", "eventDefinition": "message" },
+    { "id": "catch_candidate_info",     "name": "Receive application update",      "type": "intermediateCatchEvent", "lane": "lane_candidate", "eventDefinition": "message" },
+    { "id": "end_candidate",            "name": "End",                             "type": "endEvent",               "lane": "lane_candidate", "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "gw_parallel_split",        "name": "Discuss and inform simultaneously", "type": "parallelGateway",  "lane": "lane_hr", "gatewayDirection": "diverging" },
+    { "id": "gw_parallel_join",         "name": "Both actions complete",             "type": "parallelGateway",  "lane": "lane_hr", "gatewayDirection": "converging" },
+    { "id": "gw_assessment_split",      "name": "Second assessment successful?",     "type": "exclusiveGateway", "lane": "lane_hr", "gatewayDirection": "diverging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf01", "from": "start_hr",                 "to": "task_intro_interview" },
+    { "id": "sf02", "from": "task_intro_interview",     "to": "gw_parallel_split" },
+    { "id": "sf03", "from": "gw_parallel_split",        "to": "task_discuss_candidate" },
+    { "id": "sf04", "from": "task_discuss_candidate",   "to": "gw_parallel_join" },
+    { "id": "sf05", "from": "gw_parallel_split",        "to": "task_inform_candidate" },
+    { "id": "sf06", "from": "task_inform_candidate",    "to": "throw_hr_inform" },
+    { "id": "sf07", "from": "throw_hr_inform",          "to": "gw_parallel_join" },
+    { "id": "sf08", "from": "gw_parallel_join",         "to": "gw_assessment_split" },
+    { "id": "sf09", "from": "gw_assessment_split",      "to": "task_prepare_contract",   "condition": "Second assessment successful" },
+    { "id": "sf10", "from": "task_prepare_contract",    "to": "end_hr_contract" },
+    { "id": "sf11", "from": "gw_assessment_split",      "to": "task_close_application",  "condition": "Second assessment not successful" },
+    { "id": "sf12", "from": "task_close_application",   "to": "end_hr_closed" },
+
+    { "id": "sf13", "from": "start_bm",                 "to": "task_second_assessment" },
+    { "id": "sf14", "from": "task_second_assessment",   "to": "throw_bm_assessment_done" },
+    { "id": "sf15", "from": "throw_bm_assessment_done", "to": "end_bm" },
+
+    { "id": "sf16", "from": "start_candidate",          "to": "task_attend_interview" },
+    { "id": "sf17", "from": "task_attend_interview",    "to": "catch_candidate_info" },
+    { "id": "sf18", "from": "catch_candidate_info",     "to": "task_receive_info" },
+    { "id": "sf19", "from": "task_receive_info",        "to": "task_attend_assessment" },
+    { "id": "sf20", "from": "task_attend_assessment",   "to": "end_candidate" }
+  ],
+  "message_flows": [
+    { "id": "mf01", "from": "task_intro_interview",     "to": "start_candidate",          "name": "Interview invitation" },
+    { "id": "mf02", "from": "task_discuss_candidate",   "to": "start_bm",                 "name": "Candidate discussion request" },
+    { "id": "mf03", "from": "throw_hr_inform",          "to": "catch_candidate_info",     "name": "Application update" },
+    { "id": "mf04", "from": "throw_bm_assessment_done", "to": "gw_assessment_split",      "name": "Second assessment result" }
+  ]
+}

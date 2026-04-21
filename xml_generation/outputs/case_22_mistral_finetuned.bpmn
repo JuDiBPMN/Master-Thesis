@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_hr_pool" name="HR Department" processRef="Process_hr_pool"/>
+    <bpmn:participant id="actor_candidate_pool" name="Candidate" processRef="Process_candidate_pool"/>
+    <bpmn:participant id="actor_hiring_manager_pool" name="Hiring Manager" processRef="Process_hiring_manager_pool"/>
+    <bpmn:messageFlow id="mf1" name="Personality Assessment" sourceRef="send_personality_assessment" targetRef="complete_personality_assessment"/>
+    <bpmn:messageFlow id="mf2" name="Rejection Email" sourceRef="send_rejection_email" targetRef="end_candidate"/>
+    <bpmn:messageFlow id="mf3" name="Job Offer" sourceRef="send_job_offer" targetRef="end_candidate"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="start_hr" targetRef="submit_vacancy_request"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="submit_vacancy_request" targetRef="register_vacancy"/>
+    <bpmn:messageFlow id="MsgFlow_p2" name="" sourceRef="post_job_advertisement" targetRef="start_candidate"/>
+    <bpmn:messageFlow id="MsgFlow_p3" name="" sourceRef="start_candidate" targetRef="apply_for_vacancy"/>
+    <bpmn:messageFlow id="MsgFlow_p4" name="" sourceRef="apply_for_vacancy" targetRef="screen_applications"/>
+    <bpmn:messageFlow id="MsgFlow_p5" name="" sourceRef="gateway_parallel_split" targetRef="send_personality_assessment"/>
+    <bpmn:messageFlow id="MsgFlow_p6" name="" sourceRef="schedule_technical_interview" targetRef="conduct_technical_interview"/>
+    <bpmn:messageFlow id="MsgFlow_p7" name="" sourceRef="record_verdict" targetRef="gateway_parallel_join"/>
+    <bpmn:messageFlow id="MsgFlow_p8" name="" sourceRef="send_personality_assessment" targetRef="complete_personality_assessment"/>
+    <bpmn:messageFlow id="MsgFlow_p9" name="" sourceRef="complete_personality_assessment" targetRef="score_assessment"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_hr_pool" name="HR Department" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_hr_pool">
+      <bpmn:lane id="hr_recruiter" name="HR Recruiter">
+        <bpmn:flowNodeRef>start_hr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_hr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>register_vacancy</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>post_job_advertisement</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>screen_applications</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>schedule_technical_interview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>score_assessment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>write_rejection_email</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_rejection_email</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>draft_job_offer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_job_offer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_parallel_split</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_parallel_join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_outcome_split</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_outcome_join</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_hr" name="Start"/>
+    <bpmn:endEvent id="end_hr" name="End"/>
+    <bpmn:task id="register_vacancy" name="Register Vacancy"/>
+    <bpmn:task id="post_job_advertisement" name="Post Job Advertisement"/>
+    <bpmn:task id="screen_applications" name="Screen Applications"/>
+    <bpmn:task id="schedule_technical_interview" name="Schedule Technical Interview"/>
+    <bpmn:task id="score_assessment" name="Score Assessment"/>
+    <bpmn:task id="write_rejection_email" name="Write Rejection Email"/>
+    <bpmn:task id="send_rejection_email" name="Send Rejection Email"/>
+    <bpmn:task id="draft_job_offer" name="Draft Job Offer"/>
+    <bpmn:task id="send_job_offer" name="Send Job Offer"/>
+    <bpmn:parallelGateway id="gateway_parallel_split" name="Start Simultaneous Activities" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gateway_parallel_join" name="Both Activities Completed" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="gateway_outcome_split" name="Verdicts?" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="gateway_outcome_join" name="Both Verdicts Recorded" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="register_vacancy" targetRef="post_job_advertisement"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="screen_applications" targetRef="gateway_parallel_split"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="gateway_parallel_split" targetRef="schedule_technical_interview"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="score_assessment" targetRef="gateway_parallel_join"/>
+    <bpmn:sequenceFlow id="sf16" sourceRef="gateway_parallel_join" targetRef="gateway_outcome_split"/>
+    <bpmn:sequenceFlow id="sf17" sourceRef="gateway_outcome_split" targetRef="write_rejection_email" name="at least one verdict is negative">
+      <bpmn:conditionExpression>at least one verdict is negative</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf18" sourceRef="gateway_outcome_split" targetRef="draft_job_offer" name="both verdicts are positive">
+      <bpmn:conditionExpression>both verdicts are positive</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf19" sourceRef="write_rejection_email" targetRef="send_rejection_email"/>
+    <bpmn:sequenceFlow id="sf20" sourceRef="send_rejection_email" targetRef="end_hr"/>
+    <bpmn:sequenceFlow id="sf21" sourceRef="draft_job_offer" targetRef="send_job_offer"/>
+    <bpmn:sequenceFlow id="sf22" sourceRef="send_job_offer" targetRef="end_hr"/>
+  </bpmn:process>
+  <bpmn:process id="Process_candidate_pool" name="Candidate" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_candidate_pool">
+      <bpmn:lane id="candidate" name="Candidate">
+        <bpmn:flowNodeRef>start_candidate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_candidate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>complete_personality_assessment</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_candidate" name="Start"/>
+    <bpmn:endEvent id="end_candidate" name="End"/>
+    <bpmn:task id="complete_personality_assessment" name="Complete Personality Assessment"/>
+  </bpmn:process>
+  <bpmn:process id="Process_hiring_manager_pool" name="Hiring Manager" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_hiring_manager_pool">
+      <bpmn:lane id="hiring_manager" name="Hiring Manager">
+        <bpmn:flowNodeRef>start_hiring_manager</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_hiring_manager</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>submit_vacancy_request</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>conduct_technical_interview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_verdict</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_hiring_manager" name="Start"/>
+    <bpmn:endEvent id="end_hiring_manager" name="End"/>
+    <bpmn:task id="submit_vacancy_request" name="Submit Vacancy Request"/>
+    <bpmn:task id="conduct_technical_interview" name="Conduct Technical Interview"/>
+    <bpmn:task id="record_verdict" name="Record Verdict"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="conduct_technical_interview" targetRef="record_verdict"/>
+    <bpmn:sequenceFlow id="sf23" sourceRef="start_hiring_manager" targetRef="end_hiring_manager"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_hr_pool_di" bpmnElement="actor_hr_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1800" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_candidate_pool_di" bpmnElement="actor_candidate_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="660" width="1540" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_hiring_manager_pool_di" bpmnElement="actor_hiring_manager_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="940" width="760" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="hr_recruiter_di" bpmnElement="hr_recruiter" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1770" height="580"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="candidate_di" bpmnElement="candidate" isHorizontal="true">
+        <dc:Bounds x="40" y="660" width="1510" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="hiring_manager_di" bpmnElement="hiring_manager" isHorizontal="true">
+        <dc:Bounds x="40" y="940" width="730" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_hr_di" bpmnElement="start_hr">
+        <dc:Bounds x="172" y="87" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="register_vacancy_di" bpmnElement="register_vacancy">
+        <dc:Bounds x="130" y="153" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="screen_applications_di" bpmnElement="screen_applications">
+        <dc:Bounds x="130" y="263" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="score_assessment_di" bpmnElement="score_assessment">
+        <dc:Bounds x="130" y="373" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_outcome_join_di" bpmnElement="gateway_outcome_join" isMarkerVisible="true">
+        <dc:Bounds x="165" y="483" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_hr_di" bpmnElement="end_hr">
+        <dc:Bounds x="1472" y="292" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="post_job_advertisement_di" bpmnElement="post_job_advertisement">
+        <dc:Bounds x="390" y="190" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_parallel_split_di" bpmnElement="gateway_parallel_split" isMarkerVisible="true">
+        <dc:Bounds x="425" y="300" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_parallel_join_di" bpmnElement="gateway_parallel_join" isMarkerVisible="true">
+        <dc:Bounds x="425" y="380" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="schedule_technical_interview_di" bpmnElement="schedule_technical_interview">
+        <dc:Bounds x="650" y="230" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_outcome_split_di" bpmnElement="gateway_outcome_split" isMarkerVisible="true">
+        <dc:Bounds x="685" y="340" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="write_rejection_email_di" bpmnElement="write_rejection_email">
+        <dc:Bounds x="910" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="draft_job_offer_di" bpmnElement="draft_job_offer">
+        <dc:Bounds x="910" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_rejection_email_di" bpmnElement="send_rejection_email">
+        <dc:Bounds x="1170" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_job_offer_di" bpmnElement="send_job_offer">
+        <dc:Bounds x="1170" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_candidate_di" bpmnElement="start_candidate">
+        <dc:Bounds x="432" y="752" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_candidate_di" bpmnElement="end_candidate">
+        <dc:Bounds x="1212" y="752" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="complete_personality_assessment_di" bpmnElement="complete_personality_assessment">
+        <dc:Bounds x="130" y="730" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_hiring_manager_di" bpmnElement="start_hiring_manager">
+        <dc:Bounds x="172" y="992" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_vacancy_request_di" bpmnElement="submit_vacancy_request">
+        <dc:Bounds x="130" y="1058" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="conduct_technical_interview_di" bpmnElement="conduct_technical_interview">
+        <dc:Bounds x="130" y="1168" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_hiring_manager_di" bpmnElement="end_hiring_manager">
+        <dc:Bounds x="432" y="1047" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_verdict_di" bpmnElement="record_verdict">
+        <dc:Bounds x="390" y="1113" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="250" y="193"/>
+        <di:waypoint x="320" y="193"/>
+        <di:waypoint x="320" y="230"/>
+        <di:waypoint x="390" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="250" y="303"/>
+        <di:waypoint x="337" y="303"/>
+        <di:waypoint x="337" y="325"/>
+        <di:waypoint x="425" y="325"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="475" y="325"/>
+        <di:waypoint x="562" y="325"/>
+        <di:waypoint x="562" y="270"/>
+        <di:waypoint x="650" y="270"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="250" y="1208"/>
+        <di:waypoint x="320" y="1208"/>
+        <di:waypoint x="320" y="1153"/>
+        <di:waypoint x="390" y="1153"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="250" y="413"/>
+        <di:waypoint x="337" y="413"/>
+        <di:waypoint x="337" y="405"/>
+        <di:waypoint x="425" y="405"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf16_di" bpmnElement="sf16">
+        <di:waypoint x="475" y="405"/>
+        <di:waypoint x="580" y="405"/>
+        <di:waypoint x="580" y="365"/>
+        <di:waypoint x="685" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf17_di" bpmnElement="sf17">
+        <di:waypoint x="735" y="365"/>
+        <di:waypoint x="822" y="365"/>
+        <di:waypoint x="822" y="255"/>
+        <di:waypoint x="910" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf18_di" bpmnElement="sf18">
+        <di:waypoint x="735" y="365"/>
+        <di:waypoint x="910" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf19_di" bpmnElement="sf19">
+        <di:waypoint x="1030" y="255"/>
+        <di:waypoint x="1170" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf20_di" bpmnElement="sf20">
+        <di:waypoint x="1290" y="255"/>
+        <di:waypoint x="1381" y="255"/>
+        <di:waypoint x="1381" y="310"/>
+        <di:waypoint x="1472" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf21_di" bpmnElement="sf21">
+        <di:waypoint x="1030" y="365"/>
+        <di:waypoint x="1170" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf22_di" bpmnElement="sf22">
+        <di:waypoint x="1290" y="365"/>
+        <di:waypoint x="1381" y="365"/>
+        <di:waypoint x="1381" y="310"/>
+        <di:waypoint x="1472" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf23_di" bpmnElement="sf23">
+        <di:waypoint x="208" y="1010"/>
+        <di:waypoint x="320" y="1010"/>
+        <di:waypoint x="320" y="1065"/>
+        <di:waypoint x="432" y="1065"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="1230" y="295"/>
+        <di:waypoint x="1230" y="752"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
+        <di:waypoint x="1230" y="405"/>
+        <di:waypoint x="1230" y="752"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="190" y="123"/>
+        <di:waypoint x="190" y="1058"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="190" y="1058"/>
+        <di:waypoint x="190" y="233"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p2_di" bpmnElement="MsgFlow_p2">
+        <di:waypoint x="450" y="270"/>
+        <di:waypoint x="450" y="752"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p6_di" bpmnElement="MsgFlow_p6">
+        <di:waypoint x="710" y="310"/>
+        <di:waypoint x="190" y="1168"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p7_di" bpmnElement="MsgFlow_p7">
+        <di:waypoint x="450" y="1113"/>
+        <di:waypoint x="450" y="430"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p9_di" bpmnElement="MsgFlow_p9">
+        <di:waypoint x="190" y="730"/>
+        <di:waypoint x="190" y="453"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

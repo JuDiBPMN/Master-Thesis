@@ -1,0 +1,39 @@
+{
+  "pools": [
+    { "id": "pool_library", "name": "Library" }
+  ],
+  "lanes": [
+    { "id": "lane_staff",  "name": "Library Staff",      "pool": "pool_library" },
+    { "id": "lane_system", "name": "Automatic System",   "pool": "pool_library" }
+  ],
+  "tasks": [
+    { "id": "task_consult_catalog",   "name": "Consult digital catalog",            "type": "userTask",    "lane": "lane_staff" },
+    { "id": "task_inform_requester",  "name": "Inform requester of unavailability", "type": "userTask",    "lane": "lane_staff" },
+    { "id": "task_log_account",       "name": "Log book against requester account", "type": "userTask",    "lane": "lane_staff" },
+    { "id": "task_retrieve_book",     "name": "Retrieve book",                      "type": "serviceTask", "lane": "lane_system" }
+  ],
+  "events": [
+    { "id": "start_library",          "name": "Book request received",              "type": "startEvent",  "lane": "lane_staff",  "eventDefinition": "none" },
+    { "id": "end_unavailable",        "name": "End – requester informed",           "type": "endEvent",    "lane": "lane_staff",  "eventDefinition": "none" },
+    { "id": "end_staff_checkout",     "name": "End – checkout complete",            "type": "endEvent",    "lane": "lane_staff",  "eventDefinition": "none" },
+    { "id": "end_system",             "name": "End",                                "type": "endEvent",    "lane": "lane_system", "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "gw_availability_split",  "name": "Book available?",                    "type": "exclusiveGateway", "lane": "lane_staff",  "gatewayDirection": "diverging" },
+    { "id": "gw_parallel_split",      "name": "Start checkout steps",               "type": "parallelGateway",  "lane": "lane_staff",  "gatewayDirection": "diverging" },
+    { "id": "gw_parallel_join",       "name": "Checkout steps complete",            "type": "parallelGateway",  "lane": "lane_staff",  "gatewayDirection": "converging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf01", "from": "start_library",         "to": "task_consult_catalog" },
+    { "id": "sf02", "from": "task_consult_catalog",  "to": "gw_availability_split" },
+    { "id": "sf03", "from": "gw_availability_split", "to": "task_inform_requester",  "condition": "Book on loan or not in collection" },
+    { "id": "sf04", "from": "task_inform_requester", "to": "end_unavailable" },
+    { "id": "sf05", "from": "gw_availability_split", "to": "gw_parallel_split",      "condition": "Book available" },
+    { "id": "sf06", "from": "gw_parallel_split",     "to": "task_log_account" },
+    { "id": "sf07", "from": "gw_parallel_split",     "to": "task_retrieve_book" },
+    { "id": "sf08", "from": "task_log_account",      "to": "gw_parallel_join" },
+    { "id": "sf09", "from": "task_retrieve_book",    "to": "end_system" },
+    { "id": "sf10", "from": "gw_parallel_join",      "to": "end_staff_checkout" }
+  ],
+  "message_flows": []
+}
