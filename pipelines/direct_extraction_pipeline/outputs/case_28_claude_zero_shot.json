@@ -1,44 +1,47 @@
 {
   "pools": [
-    { "id": "pool_bank", "name": "Bank" }
+    { "id": "pool_zarkan", "name": "Zarkan Industries" }
   ],
   "lanes": [
-    { "id": "lane_bank", "name": "Mortgage Department", "pool": "pool_bank" }
+    { "id": "lane_csr", "name": "Customer Service Representative", "pool": "pool_zarkan" }
   ],
   "tasks": [
-    { "id": "task_create_file",           "name": "Create mortgage file",              "type": "userTask",    "lane": "lane_bank" },
-    { "id": "task_evaluate_stability",    "name": "Evaluate financial stability",      "type": "userTask",    "lane": "lane_bank" },
-    { "id": "task_gather_income",         "name": "Gather income statements",          "type": "userTask",    "lane": "lane_bank" },
-    { "id": "task_check_credit",          "name": "Check other credit applications",   "type": "userTask",    "lane": "lane_bank" },
-    { "id": "task_risk_analysis",         "name": "Perform in-depth risk analysis",    "type": "userTask",    "lane": "lane_bank" },
-    { "id": "task_grant_credit",          "name": "Grant line of credit",              "type": "userTask",    "lane": "lane_bank" },
-    { "id": "task_decline_application",   "name": "Decline mortgage application",      "type": "userTask",    "lane": "lane_bank" }
+    { "id": "task_record_call",         "name": "Record call details",                "type": "userTask", "lane": "lane_csr" },
+    { "id": "task_document_concerns",   "name": "Document customer concerns",         "type": "userTask", "lane": "lane_csr" },
+    { "id": "task_note_receipt_date",   "name": "Note letter receipt date",           "type": "userTask", "lane": "lane_csr" },
+    { "id": "task_analyze_complaint",   "name": "Analyze complaint",                  "type": "userTask", "lane": "lane_csr" },
+    { "id": "task_consult_departments", "name": "Consult other departments",          "type": "userTask", "lane": "lane_csr" },
+    { "id": "task_resolve_complaint",   "name": "Resolve complaint",                  "type": "userTask", "lane": "lane_csr" },
+    { "id": "task_archive_complaint",   "name": "Archive complaint details",          "type": "userTask", "lane": "lane_csr" },
+    { "id": "task_close_complaint",     "name": "Close complaint",                    "type": "userTask", "lane": "lane_csr" }
   ],
   "events": [
-    { "id": "start_bank",                 "name": "Mortgage application received",     "type": "startEvent",  "lane": "lane_bank", "eventDefinition": "none" },
-    { "id": "end_bank_approved",          "name": "End – credit granted",              "type": "endEvent",    "lane": "lane_bank", "eventDefinition": "none" },
-    { "id": "end_bank_declined",          "name": "End – application declined",        "type": "endEvent",    "lane": "lane_bank", "eventDefinition": "none" }
+    { "id": "start_csr",                "name": "Complaint received",                 "type": "startEvent", "lane": "lane_csr", "eventDefinition": "none" },
+    { "id": "end_csr",                  "name": "End – complaint closed",             "type": "endEvent",   "lane": "lane_csr", "eventDefinition": "none" }
   ],
   "gateways": [
-    { "id": "gw_parallel_split",          "name": "Begin concurrent evaluations",      "type": "parallelGateway",  "lane": "lane_bank", "gatewayDirection": "diverging" },
-    { "id": "gw_parallel_join",           "name": "All evaluations complete",          "type": "parallelGateway",  "lane": "lane_bank", "gatewayDirection": "converging" },
-    { "id": "gw_assessment_split",        "name": "Assessment outcome?",               "type": "exclusiveGateway", "lane": "lane_bank", "gatewayDirection": "diverging" }
+    { "id": "gw_channel_split",         "name": "Complaint channel?",                 "type": "exclusiveGateway", "lane": "lane_csr", "gatewayDirection": "diverging" },
+    { "id": "gw_channel_join",          "name": "Registration complete",              "type": "exclusiveGateway", "lane": "lane_csr", "gatewayDirection": "converging" },
+    { "id": "gw_parallel_split",        "name": "Analyze and consult simultaneously", "type": "parallelGateway",  "lane": "lane_csr", "gatewayDirection": "diverging" },
+    { "id": "gw_parallel_join",         "name": "Analysis and consultation complete", "type": "parallelGateway",  "lane": "lane_csr", "gatewayDirection": "converging" }
   ],
   "sequence_flows": [
-    { "id": "sf01", "from": "start_bank",               "to": "task_create_file" },
-    { "id": "sf02", "from": "task_create_file",         "to": "gw_parallel_split" },
-    { "id": "sf03", "from": "gw_parallel_split",        "to": "task_evaluate_stability" },
-    { "id": "sf04", "from": "gw_parallel_split",        "to": "task_gather_income" },
-    { "id": "sf05", "from": "gw_parallel_split",        "to": "task_check_credit" },
-    { "id": "sf06", "from": "task_evaluate_stability",  "to": "gw_parallel_join" },
-    { "id": "sf07", "from": "task_gather_income",       "to": "gw_parallel_join" },
-    { "id": "sf08", "from": "task_check_credit",        "to": "gw_parallel_join" },
-    { "id": "sf09", "from": "gw_parallel_join",         "to": "task_risk_analysis" },
-    { "id": "sf10", "from": "task_risk_analysis",       "to": "gw_assessment_split" },
-    { "id": "sf11", "from": "gw_assessment_split",      "to": "task_grant_credit",        "condition": "Assessment positive" },
-    { "id": "sf12", "from": "task_grant_credit",        "to": "end_bank_approved" },
-    { "id": "sf13", "from": "gw_assessment_split",      "to": "task_decline_application", "condition": "Assessment negative" },
-    { "id": "sf14", "from": "task_decline_application", "to": "end_bank_declined" }
+    { "id": "sf01", "from": "start_csr",                "to": "gw_channel_split" },
+    { "id": "sf02", "from": "gw_channel_split",         "to": "task_record_call",         "condition": "Phone call" },
+    { "id": "sf03", "from": "gw_channel_split",         "to": "task_document_concerns",   "condition": "In-person at service desk" },
+    { "id": "sf04", "from": "gw_channel_split",         "to": "task_note_receipt_date",   "condition": "Letter" },
+    { "id": "sf05", "from": "task_record_call",         "to": "gw_channel_join" },
+    { "id": "sf06", "from": "task_document_concerns",   "to": "gw_channel_join" },
+    { "id": "sf07", "from": "task_note_receipt_date",   "to": "gw_channel_join" },
+    { "id": "sf08", "from": "gw_channel_join",          "to": "gw_parallel_split" },
+    { "id": "sf09", "from": "gw_parallel_split",        "to": "task_analyze_complaint" },
+    { "id": "sf10", "from": "gw_parallel_split",        "to": "task_consult_departments" },
+    { "id": "sf11", "from": "task_analyze_complaint",   "to": "gw_parallel_join" },
+    { "id": "sf12", "from": "task_consult_departments", "to": "gw_parallel_join" },
+    { "id": "sf13", "from": "gw_parallel_join",         "to": "task_resolve_complaint" },
+    { "id": "sf14", "from": "task_resolve_complaint",   "to": "task_archive_complaint" },
+    { "id": "sf15", "from": "task_archive_complaint",   "to": "task_close_complaint" },
+    { "id": "sf16", "from": "task_close_complaint",     "to": "end_csr" }
   ],
   "message_flows": []
 }
