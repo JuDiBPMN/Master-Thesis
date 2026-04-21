@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Client" name="Client" processRef="Process_Client"/>
+    <bpmn:participant id="actor_BrightWave Energy" name="BrightWave Energy" processRef="Process_BrightWave Energy"/>
+    <bpmn:messageFlow id="Complaint Sent_Complaint Received" name="Complaint" sourceRef="Complaint Sent" targetRef="Complaint Received"/>
+    <bpmn:messageFlow id="No Mistake Found_Explanation Sent" name="Explanation" sourceRef="No Mistake Found" targetRef="Explanation Sent"/>
+    <bpmn:messageFlow id="Ticket Created_Ticket Assigned" name="Ticket" sourceRef="Ticket Created" targetRef="Ticket Assigned"/>
+    <bpmn:messageFlow id="Send New Invoice_New Invoice Received" name="New Invoice" sourceRef="Send New Invoice" targetRef="New Invoice Received"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="Complaint Sent" targetRef="Complaint Received"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="No Mistake Found" targetRef="Explanation Sent"/>
+    <bpmn:messageFlow id="MsgFlow_p2" name="" sourceRef="Send New Invoice" targetRef="New Invoice Received"/>
+    <bpmn:messageFlow id="MsgFlow_p3" name="" sourceRef="New Invoice Received" targetRef="Mistake Resolved"/>
+    <bpmn:messageFlow id="MsgFlow_p4" name="" sourceRef="Mistake Resolved" targetRef="End"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Client" name="Client" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Client">
+      <bpmn:lane id="Client" name="Client"/>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Start"/>
+    <bpmn:intermediateThrowEvent id="Complaint Sent" name="Complaint Sent">
+      <bpmn:messageEventDefinition id="Complaint Sent_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Explanation Sent" name="Explanation Sent">
+      <bpmn:messageEventDefinition id="Explanation Sent_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="New Invoice Received" name="New Invoice Received">
+      <bpmn:messageEventDefinition id="New Invoice Received_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="End" name="End"/>
+    <bpmn:task id="Write Complaint Email" name="Write Complaint Email"/>
+    <bpmn:sequenceFlow id="Start_Write Complaint Email" sourceRef="Start" targetRef="Write Complaint Email"/>
+    <bpmn:sequenceFlow id="Write Complaint Email_Complaint Sent" sourceRef="Write Complaint Email" targetRef="Complaint Sent"/>
+    <bpmn:sequenceFlow id="Explanation Sent_End" sourceRef="Explanation Sent" targetRef="End"/>
+  </bpmn:process>
+  <bpmn:process id="Process_BrightWave Energy" name="BrightWave Energy" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_BrightWave Energy">
+      <bpmn:lane id="Customer Service" name="Customer Service">
+        <bpmn:flowNodeRef>Complaint Received</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>No Mistake Found</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Ticket Created</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Receive Complaint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Lookup Billing Information</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Review Invoice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Write Explanation Email</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Create Ticket</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Assign Ticket</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Check Mistake</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Mistake Resolved</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Invoicing" name="Invoicing">
+        <bpmn:flowNodeRef>Ticket Assigned</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>New Invoice Sent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Investigate Mistake</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Make Correction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Generate New Invoice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Send New Invoice</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:intermediateCatchEvent id="Complaint Received" name="Complaint Received">
+      <bpmn:messageEventDefinition id="Complaint Received_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="No Mistake Found" name="No Mistake Found">
+      <bpmn:messageEventDefinition id="No Mistake Found_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="Ticket Created" name="Ticket Created">
+      <bpmn:messageEventDefinition id="Ticket Created_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Ticket Assigned" name="Ticket Assigned">
+      <bpmn:messageEventDefinition id="Ticket Assigned_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="New Invoice Sent" name="New Invoice Sent">
+      <bpmn:messageEventDefinition id="New Invoice Sent_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:task id="Receive Complaint" name="Receive Complaint"/>
+    <bpmn:task id="Lookup Billing Information" name="Lookup Billing Information"/>
+    <bpmn:task id="Review Invoice" name="Review Invoice"/>
+    <bpmn:task id="Write Explanation Email" name="Write Explanation Email"/>
+    <bpmn:task id="Create Ticket" name="Create Ticket"/>
+    <bpmn:task id="Assign Ticket" name="Assign Ticket"/>
+    <bpmn:task id="Investigate Mistake" name="Investigate Mistake"/>
+    <bpmn:task id="Make Correction" name="Make Correction"/>
+    <bpmn:task id="Generate New Invoice" name="Generate New Invoice"/>
+    <bpmn:task id="Send New Invoice" name="Send New Invoice"/>
+    <bpmn:exclusiveGateway id="Check Mistake" name="Check Mistake" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="Mistake Resolved" name="Mistake Resolved" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="Complaint Received_Lookup Billing Information" sourceRef="Complaint Received" targetRef="Lookup Billing Information"/>
+    <bpmn:sequenceFlow id="Lookup Billing Information_Review Invoice" sourceRef="Lookup Billing Information" targetRef="Review Invoice"/>
+    <bpmn:sequenceFlow id="Review Invoice_Check Mistake" sourceRef="Review Invoice" targetRef="Check Mistake"/>
+    <bpmn:sequenceFlow id="Check Mistake_Write Explanation Email" sourceRef="Check Mistake" targetRef="Write Explanation Email" name="no mistake">
+      <bpmn:conditionExpression>no mistake</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Write Explanation Email_No Mistake Found" sourceRef="Write Explanation Email" targetRef="No Mistake Found"/>
+    <bpmn:sequenceFlow id="Check Mistake_Create Ticket" sourceRef="Check Mistake" targetRef="Create Ticket" name="mistake found">
+      <bpmn:conditionExpression>mistake found</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Create Ticket_Ticket Created" sourceRef="Create Ticket" targetRef="Ticket Created"/>
+    <bpmn:sequenceFlow id="Ticket Created_Ticket Assigned" sourceRef="Ticket Created" targetRef="Ticket Assigned"/>
+    <bpmn:sequenceFlow id="Ticket Assigned_Investigate Mistake" sourceRef="Ticket Assigned" targetRef="Investigate Mistake"/>
+    <bpmn:sequenceFlow id="Investigate Mistake_Make Correction" sourceRef="Investigate Mistake" targetRef="Make Correction"/>
+    <bpmn:sequenceFlow id="Make Correction_Generate New Invoice" sourceRef="Make Correction" targetRef="Generate New Invoice"/>
+    <bpmn:sequenceFlow id="Generate New Invoice_Send New Invoice" sourceRef="Generate New Invoice" targetRef="Send New Invoice"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Client_di" bpmnElement="actor_Client" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1020" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_BrightWave Energy_di" bpmnElement="actor_BrightWave Energy" isHorizontal="true">
+        <dc:Bounds x="10" y="440" width="3100" height="940"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Client_di" bpmnElement="Client" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="990" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Customer Service_di" bpmnElement="Customer Service" isHorizontal="true">
+        <dc:Bounds x="40" y="440" width="3070" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Invoicing_di" bpmnElement="Invoicing" isHorizontal="true">
+        <dc:Bounds x="40" y="910" width="3070" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_di" bpmnElement="Start">
+        <dc:Bounds x="172" y="116" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Explanation Sent_di" bpmnElement="Explanation Sent">
+        <dc:Bounds x="172" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="New Invoice Received_di" bpmnElement="New Invoice Received">
+        <dc:Bounds x="172" y="248" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Complaint Sent_di" bpmnElement="Complaint Sent">
+        <dc:Bounds x="692" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_di" bpmnElement="End">
+        <dc:Bounds x="432" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Write Complaint Email_di" bpmnElement="Write Complaint Email">
+        <dc:Bounds x="390" y="193" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Complaint Received_di" bpmnElement="Complaint Received">
+        <dc:Bounds x="172" y="507" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Receive Complaint_di" bpmnElement="Receive Complaint">
+        <dc:Bounds x="130" y="573" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Assign Ticket_di" bpmnElement="Assign Ticket">
+        <dc:Bounds x="130" y="683" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Mistake Resolved_di" bpmnElement="Mistake Resolved" isMarkerVisible="true">
+        <dc:Bounds x="165" y="793" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="No Mistake Found_di" bpmnElement="No Mistake Found">
+        <dc:Bounds x="1472" y="624" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Ticket Created_di" bpmnElement="Ticket Created">
+        <dc:Bounds x="1472" y="690" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lookup Billing Information_di" bpmnElement="Lookup Billing Information">
+        <dc:Bounds x="390" y="635" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Review Invoice_di" bpmnElement="Review Invoice">
+        <dc:Bounds x="650" y="635" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Write Explanation Email_di" bpmnElement="Write Explanation Email">
+        <dc:Bounds x="1170" y="580" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Create Ticket_di" bpmnElement="Create Ticket">
+        <dc:Bounds x="1170" y="690" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Check Mistake_di" bpmnElement="Check Mistake" isMarkerVisible="true">
+        <dc:Bounds x="945" y="650" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Ticket Assigned_di" bpmnElement="Ticket Assigned">
+        <dc:Bounds x="1732" y="1127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="New Invoice Sent_di" bpmnElement="New Invoice Sent">
+        <dc:Bounds x="172" y="1127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Investigate Mistake_di" bpmnElement="Investigate Mistake">
+        <dc:Bounds x="1950" y="1105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Make Correction_di" bpmnElement="Make Correction">
+        <dc:Bounds x="2210" y="1105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Generate New Invoice_di" bpmnElement="Generate New Invoice">
+        <dc:Bounds x="2470" y="1105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Send New Invoice_di" bpmnElement="Send New Invoice">
+        <dc:Bounds x="2730" y="1105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Start_Write Complaint Email_di" bpmnElement="Start_Write Complaint Email">
+        <di:waypoint x="208" y="134"/>
+        <di:waypoint x="299" y="134"/>
+        <di:waypoint x="299" y="233"/>
+        <di:waypoint x="390" y="233"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Write Complaint Email_Complaint Sent_di" bpmnElement="Write Complaint Email_Complaint Sent">
+        <di:waypoint x="510" y="233"/>
+        <di:waypoint x="601" y="233"/>
+        <di:waypoint x="601" y="200"/>
+        <di:waypoint x="692" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Complaint Received_Lookup Billing Information_di" bpmnElement="Complaint Received_Lookup Billing Information">
+        <di:waypoint x="208" y="525"/>
+        <di:waypoint x="299" y="525"/>
+        <di:waypoint x="299" y="675"/>
+        <di:waypoint x="390" y="675"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Lookup Billing Information_Review Invoice_di" bpmnElement="Lookup Billing Information_Review Invoice">
+        <di:waypoint x="510" y="675"/>
+        <di:waypoint x="650" y="675"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Review Invoice_Check Mistake_di" bpmnElement="Review Invoice_Check Mistake">
+        <di:waypoint x="770" y="675"/>
+        <di:waypoint x="945" y="675"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Check Mistake_Write Explanation Email_di" bpmnElement="Check Mistake_Write Explanation Email">
+        <di:waypoint x="995" y="675"/>
+        <di:waypoint x="1082" y="675"/>
+        <di:waypoint x="1082" y="620"/>
+        <di:waypoint x="1170" y="620"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Write Explanation Email_No Mistake Found_di" bpmnElement="Write Explanation Email_No Mistake Found">
+        <di:waypoint x="1290" y="620"/>
+        <di:waypoint x="1381" y="620"/>
+        <di:waypoint x="1381" y="642"/>
+        <di:waypoint x="1472" y="642"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Explanation Sent_End_di" bpmnElement="Explanation Sent_End">
+        <di:waypoint x="208" y="200"/>
+        <di:waypoint x="320" y="200"/>
+        <di:waypoint x="320" y="145"/>
+        <di:waypoint x="432" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Check Mistake_Create Ticket_di" bpmnElement="Check Mistake_Create Ticket">
+        <di:waypoint x="995" y="675"/>
+        <di:waypoint x="1082" y="675"/>
+        <di:waypoint x="1082" y="730"/>
+        <di:waypoint x="1170" y="730"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Create Ticket_Ticket Created_di" bpmnElement="Create Ticket_Ticket Created">
+        <di:waypoint x="1290" y="730"/>
+        <di:waypoint x="1381" y="730"/>
+        <di:waypoint x="1381" y="708"/>
+        <di:waypoint x="1472" y="708"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Ticket Created_Ticket Assigned_di" bpmnElement="Ticket Created_Ticket Assigned">
+        <di:waypoint x="1508" y="708"/>
+        <di:waypoint x="1620" y="708"/>
+        <di:waypoint x="1620" y="1145"/>
+        <di:waypoint x="1732" y="1145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Ticket Assigned_Investigate Mistake_di" bpmnElement="Ticket Assigned_Investigate Mistake">
+        <di:waypoint x="1768" y="1145"/>
+        <di:waypoint x="1950" y="1145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Investigate Mistake_Make Correction_di" bpmnElement="Investigate Mistake_Make Correction">
+        <di:waypoint x="2070" y="1145"/>
+        <di:waypoint x="2210" y="1145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Make Correction_Generate New Invoice_di" bpmnElement="Make Correction_Generate New Invoice">
+        <di:waypoint x="2330" y="1145"/>
+        <di:waypoint x="2470" y="1145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Generate New Invoice_Send New Invoice_di" bpmnElement="Generate New Invoice_Send New Invoice">
+        <di:waypoint x="2590" y="1145"/>
+        <di:waypoint x="2730" y="1145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Complaint Sent_Complaint Received_di" bpmnElement="Complaint Sent_Complaint Received">
+        <di:waypoint x="710" y="218"/>
+        <di:waypoint x="190" y="507"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="No Mistake Found_Explanation Sent_di" bpmnElement="No Mistake Found_Explanation Sent">
+        <di:waypoint x="1490" y="624"/>
+        <di:waypoint x="190" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Ticket Created_Ticket Assigned_di" bpmnElement="Ticket Created_Ticket Assigned">
+        <di:waypoint x="1490" y="690"/>
+        <di:waypoint x="1750" y="1163"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Send New Invoice_New Invoice Received_di" bpmnElement="Send New Invoice_New Invoice Received">
+        <di:waypoint x="2790" y="1105"/>
+        <di:waypoint x="190" y="284"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="710" y="218"/>
+        <di:waypoint x="190" y="507"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="1490" y="624"/>
+        <di:waypoint x="190" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p2_di" bpmnElement="MsgFlow_p2">
+        <di:waypoint x="2790" y="1105"/>
+        <di:waypoint x="190" y="284"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p3_di" bpmnElement="MsgFlow_p3">
+        <di:waypoint x="190" y="284"/>
+        <di:waypoint x="190" y="793"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p4_di" bpmnElement="MsgFlow_p4">
+        <di:waypoint x="190" y="793"/>
+        <di:waypoint x="450" y="163"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

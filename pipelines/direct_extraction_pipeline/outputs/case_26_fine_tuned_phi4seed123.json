@@ -1,0 +1,278 @@
+{
+  "pools": [
+    {
+      "id": "Company",
+      "name": "Company Pool"
+    },
+    {
+      "id": "Candidate",
+      "name": "Candidate Pool"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "HR_Manager",
+      "name": "HR Manager",
+      "pool": "Company"
+    },
+    {
+      "id": "Business_Manager",
+      "name": "Business Manager",
+      "pool": "Company"
+    },
+    {
+      "id": "Candidate",
+      "name": "Candidate",
+      "pool": "Candidate"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "introduction_interview",
+      "name": "Introduction Interview",
+      "type": "task",
+      "lane": "HR_Manager"
+    },
+    {
+      "id": "discuss_candidate",
+      "name": "Discuss Candidate",
+      "type": "task",
+      "lane": "HR_Manager"
+    },
+    {
+      "id": "inform_candidate",
+      "name": "Inform Candidate",
+      "type": "task",
+      "lane": "HR_Manager"
+    },
+    {
+      "id": "second_assessment",
+      "name": "Second Assessment",
+      "type": "task",
+      "lane": "Business_Manager"
+    },
+    {
+      "id": "prepare_contract",
+      "name": "Prepare Contract",
+      "type": "task",
+      "lane": "HR_Manager"
+    },
+    {
+      "id": "close_application",
+      "name": "Close Application",
+      "type": "task",
+      "lane": "HR_Manager"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_interview",
+      "name": "Start Interview",
+      "type": "startEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_interview",
+      "name": "End Interview",
+      "type": "endEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_discussion",
+      "name": "Start Discussion",
+      "type": "startEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_discussion",
+      "name": "End Discussion",
+      "type": "endEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_assessment",
+      "name": "Start Assessment",
+      "type": "startEvent",
+      "lane": "Business_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_assessment",
+      "name": "End Assessment",
+      "type": "endEvent",
+      "lane": "Business_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "successful_assessment",
+      "name": "Successful Assessment",
+      "type": "endEvent",
+      "lane": "Business_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "unsuccessful_assessment",
+      "name": "Unsuccessful Assessment",
+      "type": "endEvent",
+      "lane": "Business_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_inform",
+      "name": "Start Inform",
+      "type": "startEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_inform",
+      "name": "End Inform",
+      "type": "endEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_prepare_contract",
+      "name": "Start Prepare Contract",
+      "type": "startEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_prepare_contract",
+      "name": "End Prepare Contract",
+      "type": "endEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_close_application",
+      "name": "Start Close Application",
+      "type": "startEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_close_application",
+      "name": "End Close Application",
+      "type": "endEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "decision_assessment",
+      "name": "Decision Assessment",
+      "type": "exclusiveGateway",
+      "lane": "Business_Manager",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "flow_1",
+      "from": "start_interview",
+      "to": "introduction_interview"
+    },
+    {
+      "id": "flow_2",
+      "from": "introduction_interview",
+      "to": "end_interview"
+    },
+    {
+      "id": "flow_3",
+      "from": "end_interview",
+      "to": "start_discussion"
+    },
+    {
+      "id": "flow_4",
+      "from": "start_discussion",
+      "to": "discuss_candidate"
+    },
+    {
+      "id": "flow_5",
+      "from": "discuss_candidate",
+      "to": "start_inform"
+    },
+    {
+      "id": "flow_6",
+      "from": "start_inform",
+      "to": "inform_candidate"
+    },
+    {
+      "id": "flow_7",
+      "from": "inform_candidate",
+      "to": "end_inform"
+    },
+    {
+      "id": "flow_8",
+      "from": "end_inform",
+      "to": "end_discussion"
+    },
+    {
+      "id": "flow_9",
+      "from": "end_discussion",
+      "to": "start_assessment"
+    },
+    {
+      "id": "flow_10",
+      "from": "start_assessment",
+      "to": "second_assessment"
+    },
+    {
+      "id": "flow_11",
+      "from": "second_assessment",
+      "to": "decision_assessment"
+    },
+    {
+      "id": "flow_12",
+      "from": "decision_assessment",
+      "to": "start_prepare_contract",
+      "condition": "successful"
+    },
+    {
+      "id": "flow_13",
+      "from": "decision_assessment",
+      "to": "start_close_application",
+      "condition": "unsuccessful"
+    },
+    {
+      "id": "flow_14",
+      "from": "start_prepare_contract",
+      "to": "prepare_contract"
+    },
+    {
+      "id": "flow_15",
+      "from": "prepare_contract",
+      "to": "end_prepare_contract"
+    },
+    {
+      "id": "flow_16",
+      "from": "end_prepare_contract",
+      "to": "end_discussion"
+    },
+    {
+      "id": "flow_17",
+      "from": "start_close_application",
+      "to": "close_application"
+    },
+    {
+      "id": "flow_18",
+      "from": "close_application",
+      "to": "end_close_application"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "message_1",
+      "from": "inform_candidate",
+      "to": "start_assessment",
+      "name": "Inform Candidate"
+    }
+  ]
+}

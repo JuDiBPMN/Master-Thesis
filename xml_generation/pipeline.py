@@ -734,7 +734,7 @@ if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
     case_name          = "case_28"
     pipeline_name      = "direct_extraction_pipeline"
-    prompting_strategy = "fine_tuned_phi4"
+    prompting_strategy = "fine_tuned_phi4seed123"
     # ──────────────────────────────────────────────────────────────────────────
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))

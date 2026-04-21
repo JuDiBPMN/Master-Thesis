@@ -1,0 +1,315 @@
+{
+  "pools": [
+    {
+      "id": "Client",
+      "name": "Client"
+    },
+    {
+      "id": "BrightWave Energy",
+      "name": "BrightWave Energy"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Client",
+      "name": "Client",
+      "pool": "Client"
+    },
+    {
+      "id": "Customer Service",
+      "name": "Customer Service",
+      "pool": "BrightWave Energy"
+    },
+    {
+      "id": "Invoicing",
+      "name": "Invoicing",
+      "pool": "BrightWave Energy"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Write Complaint Email",
+      "name": "Write Complaint Email",
+      "type": "task",
+      "lane": "Client"
+    },
+    {
+      "id": "Receive Complaint",
+      "name": "Receive Complaint",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Lookup Billing Information",
+      "name": "Lookup Billing Information",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Review Invoice",
+      "name": "Review Invoice",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Write Explanation Email",
+      "name": "Write Explanation Email",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Create Ticket",
+      "name": "Create Ticket",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Assign Ticket",
+      "name": "Assign Ticket",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Investigate Mistake",
+      "name": "Investigate Mistake",
+      "type": "task",
+      "lane": "Invoicing"
+    },
+    {
+      "id": "Make Correction",
+      "name": "Make Correction",
+      "type": "task",
+      "lane": "Invoicing"
+    },
+    {
+      "id": "Generate New Invoice",
+      "name": "Generate New Invoice",
+      "type": "task",
+      "lane": "Invoicing"
+    },
+    {
+      "id": "Send New Invoice",
+      "name": "Send New Invoice",
+      "type": "task",
+      "lane": "Invoicing"
+    }
+  ],
+  "events": [
+    {
+      "id": "Start",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "Client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Complaint Sent",
+      "name": "Complaint Sent",
+      "type": "intermediateThrowEvent",
+      "lane": "Client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Complaint Received",
+      "name": "Complaint Received",
+      "type": "intermediateCatchEvent",
+      "lane": "Customer Service",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "No Mistake Found",
+      "name": "No Mistake Found",
+      "type": "intermediateThrowEvent",
+      "lane": "Customer Service",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Explanation Sent",
+      "name": "Explanation Sent",
+      "type": "intermediateCatchEvent",
+      "lane": "Client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Ticket Created",
+      "name": "Ticket Created",
+      "type": "intermediateThrowEvent",
+      "lane": "Customer Service",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Ticket Assigned",
+      "name": "Ticket Assigned",
+      "type": "intermediateCatchEvent",
+      "lane": "Invoicing",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "New Invoice Sent",
+      "name": "New Invoice Sent",
+      "type": "intermediateThrowEvent",
+      "lane": "Invoicing",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "New Invoice Received",
+      "name": "New Invoice Received",
+      "type": "intermediateCatchEvent",
+      "lane": "Client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "End",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Client",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Check Mistake",
+      "name": "Check Mistake",
+      "type": "exclusiveGateway",
+      "lane": "Customer Service",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "Mistake Resolved",
+      "name": "Mistake Resolved",
+      "type": "exclusiveGateway",
+      "lane": "Customer Service",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Start_Write Complaint Email",
+      "from": "Start",
+      "to": "Write Complaint Email"
+    },
+    {
+      "id": "Write Complaint Email_Complaint Sent",
+      "from": "Write Complaint Email",
+      "to": "Complaint Sent"
+    },
+    {
+      "id": "Complaint Sent_Complaint Received",
+      "from": "Complaint Sent",
+      "to": "Complaint Received"
+    },
+    {
+      "id": "Complaint Received_Lookup Billing Information",
+      "from": "Complaint Received",
+      "to": "Lookup Billing Information"
+    },
+    {
+      "id": "Lookup Billing Information_Review Invoice",
+      "from": "Lookup Billing Information",
+      "to": "Review Invoice"
+    },
+    {
+      "id": "Review Invoice_Check Mistake",
+      "from": "Review Invoice",
+      "to": "Check Mistake"
+    },
+    {
+      "id": "Check Mistake_Write Explanation Email",
+      "from": "Check Mistake",
+      "to": "Write Explanation Email",
+      "condition": "no mistake"
+    },
+    {
+      "id": "Write Explanation Email_No Mistake Found",
+      "from": "Write Explanation Email",
+      "to": "No Mistake Found"
+    },
+    {
+      "id": "No Mistake Found_Explanation Sent",
+      "from": "No Mistake Found",
+      "to": "Explanation Sent"
+    },
+    {
+      "id": "Explanation Sent_End",
+      "from": "Explanation Sent",
+      "to": "End"
+    },
+    {
+      "id": "Check Mistake_Create Ticket",
+      "from": "Check Mistake",
+      "to": "Create Ticket",
+      "condition": "mistake found"
+    },
+    {
+      "id": "Create Ticket_Ticket Created",
+      "from": "Create Ticket",
+      "to": "Ticket Created"
+    },
+    {
+      "id": "Ticket Created_Ticket Assigned",
+      "from": "Ticket Created",
+      "to": "Ticket Assigned"
+    },
+    {
+      "id": "Ticket Assigned_Investigate Mistake",
+      "from": "Ticket Assigned",
+      "to": "Investigate Mistake"
+    },
+    {
+      "id": "Investigate Mistake_Make Correction",
+      "from": "Investigate Mistake",
+      "to": "Make Correction"
+    },
+    {
+      "id": "Make Correction_Generate New Invoice",
+      "from": "Make Correction",
+      "to": "Generate New Invoice"
+    },
+    {
+      "id": "Generate New Invoice_Send New Invoice",
+      "from": "Generate New Invoice",
+      "to": "Send New Invoice"
+    },
+    {
+      "id": "Send New Invoice_New Invoice Received",
+      "from": "Send New Invoice",
+      "to": "New Invoice Received"
+    },
+    {
+      "id": "New Invoice Received_Mistake Resolved",
+      "from": "New Invoice Received",
+      "to": "Mistake Resolved"
+    },
+    {
+      "id": "Mistake Resolved_End",
+      "from": "Mistake Resolved",
+      "to": "End"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "Complaint Sent_Complaint Received",
+      "from": "Complaint Sent",
+      "to": "Complaint Received",
+      "name": "Complaint"
+    },
+    {
+      "id": "No Mistake Found_Explanation Sent",
+      "from": "No Mistake Found",
+      "to": "Explanation Sent",
+      "name": "Explanation"
+    },
+    {
+      "id": "Ticket Created_Ticket Assigned",
+      "from": "Ticket Created",
+      "to": "Ticket Assigned",
+      "name": "Ticket"
+    },
+    {
+      "id": "Send New Invoice_New Invoice Received",
+      "from": "Send New Invoice",
+      "to": "New Invoice Received",
+      "name": "New Invoice"
+    }
+  ]
+}

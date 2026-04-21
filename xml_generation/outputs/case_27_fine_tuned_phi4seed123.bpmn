@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Bank" name="Bank Process Flow for Mortgage Application Assessment" processRef="Process_Bank"/>
+    <bpmn:participant id="actor_Client" name="Client Process Flow" processRef="Process_Client"/>
+    <bpmn:messageFlow id="mf1" name="Send Mortgage File" sourceRef="send_mortgage_file" targetRef="receive_mortgage_file"/>
+    <bpmn:messageFlow id="mf2" name="Send Assessment Result" sourceRef="send_assessment_result" targetRef="receive_assessment_result"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="send_mortgage_file" targetRef="receive_mortgage_file"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="receive_mortgage_file" targetRef="parallel_gateway"/>
+    <bpmn:messageFlow id="MsgFlow_p2" name="" sourceRef="send_assessment_result" targetRef="receive_assessment_result"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Bank" name="Bank Process Flow for Mortgage Application Assessment" isExecutable="false">
+    <bpmn:startEvent id="start_mortgage_assessment" name="Start Mortgage Assessment"/>
+    <bpmn:endEvent id="end_mortgage_assessment" name="End Mortgage Assessment"/>
+    <bpmn:intermediateCatchEvent id="receive_mortgage_application" name="Receive Mortgage Application">
+      <bpmn:messageEventDefinition id="receive_mortgage_application_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="send_mortgage_file" name="Send Mortgage File">
+      <bpmn:messageEventDefinition id="send_mortgage_file_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="send_assessment_result" name="Send Assessment Result">
+      <bpmn:messageEventDefinition id="send_assessment_result_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:task id="create_mortgage_file" name="Create Mortgage File"/>
+    <bpmn:task id="evaluate_financial_stability" name="Evaluate Client's Financial Stability"/>
+    <bpmn:task id="gather_income_statements" name="Gather Income Statements"/>
+    <bpmn:task id="check_other_credit_applications" name="Check for Other Credit Applications"/>
+    <bpmn:task id="perform_risk_analysis" name="Perform Risk Analysis"/>
+    <bpmn:task id="grant_line_of_credit" name="Grant Line of Credit"/>
+    <bpmn:task id="decline_mortgage_application" name="Decline Mortgage Application"/>
+    <bpmn:parallelGateway id="parallel_gateway" name="Parallel Gateway" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="parallel_gateway_join" name="Parallel Gateway Join" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="exclusive_gateway" name="Exclusive Gateway" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="exclusive_gateway_join" name="Exclusive Gateway Join" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_mortgage_assessment" targetRef="receive_mortgage_application"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="receive_mortgage_application" targetRef="create_mortgage_file"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="create_mortgage_file" targetRef="send_mortgage_file"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="parallel_gateway" targetRef="evaluate_financial_stability"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="parallel_gateway" targetRef="gather_income_statements"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="parallel_gateway" targetRef="check_other_credit_applications"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="evaluate_financial_stability" targetRef="parallel_gateway_join"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="gather_income_statements" targetRef="parallel_gateway_join"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="check_other_credit_applications" targetRef="parallel_gateway_join"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="parallel_gateway_join" targetRef="perform_risk_analysis"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="perform_risk_analysis" targetRef="exclusive_gateway"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="exclusive_gateway" targetRef="grant_line_of_credit"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="exclusive_gateway" targetRef="decline_mortgage_application"/>
+    <bpmn:sequenceFlow id="sf16" sourceRef="grant_line_of_credit" targetRef="send_assessment_result"/>
+    <bpmn:sequenceFlow id="sf17" sourceRef="decline_mortgage_application" targetRef="send_assessment_result"/>
+    <bpmn:sequenceFlow id="sf20" sourceRef="grant_line_of_credit" targetRef="end_mortgage_assessment"/>
+    <bpmn:sequenceFlow id="sf21" sourceRef="decline_mortgage_application" targetRef="end_mortgage_assessment"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Client" name="Client Process Flow" isExecutable="false">
+    <bpmn:endEvent id="end_mortgage_assessment_client" name="End Mortgage Assessment"/>
+    <bpmn:intermediateCatchEvent id="receive_mortgage_file" name="Receive Mortgage File">
+      <bpmn:messageEventDefinition id="receive_mortgage_file_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="receive_assessment_result" name="Receive Assessment Result">
+      <bpmn:messageEventDefinition id="receive_assessment_result_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="sf19" sourceRef="receive_assessment_result" targetRef="end_mortgage_assessment_client"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Bank_di" bpmnElement="actor_Bank" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="2030" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Client_di" bpmnElement="actor_Client" isHorizontal="true">
+        <dc:Bounds x="10" y="330" width="730" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_mortgage_assessment_di" bpmnElement="start_mortgage_assessment">
+        <dc:Bounds x="142" y="47" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="parallel_gateway_di" bpmnElement="parallel_gateway" isMarkerVisible="true">
+        <dc:Bounds x="135" y="113" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="exclusive_gateway_join_di" bpmnElement="exclusive_gateway_join" isMarkerVisible="true">
+        <dc:Bounds x="135" y="193" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_mortgage_assessment_di" bpmnElement="end_mortgage_assessment">
+        <dc:Bounds x="1702" y="94" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_assessment_result_di" bpmnElement="send_assessment_result">
+        <dc:Bounds x="1702" y="160" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="receive_mortgage_application_di" bpmnElement="receive_mortgage_application">
+        <dc:Bounds x="402" y="-38" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="evaluate_financial_stability_di" bpmnElement="evaluate_financial_stability">
+        <dc:Bounds x="360" y="28" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gather_income_statements_di" bpmnElement="gather_income_statements">
+        <dc:Bounds x="360" y="138" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_other_credit_applications_di" bpmnElement="check_other_credit_applications">
+        <dc:Bounds x="360" y="248" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_mortgage_file_di" bpmnElement="send_mortgage_file">
+        <dc:Bounds x="922" y="72" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="perform_risk_analysis_di" bpmnElement="perform_risk_analysis">
+        <dc:Bounds x="880" y="138" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="create_mortgage_file_di" bpmnElement="create_mortgage_file">
+        <dc:Bounds x="620" y="65" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="parallel_gateway_join_di" bpmnElement="parallel_gateway_join" isMarkerVisible="true">
+        <dc:Bounds x="655" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="grant_line_of_credit_di" bpmnElement="grant_line_of_credit">
+        <dc:Bounds x="1400" y="50" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="decline_mortgage_application_di" bpmnElement="decline_mortgage_application">
+        <dc:Bounds x="1400" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="exclusive_gateway_di" bpmnElement="exclusive_gateway" isMarkerVisible="true">
+        <dc:Bounds x="1175" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_mortgage_assessment_client_di" bpmnElement="end_mortgage_assessment_client">
+        <dc:Bounds x="402" y="437" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="receive_mortgage_file_di" bpmnElement="receive_mortgage_file">
+        <dc:Bounds x="142" y="404" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="receive_assessment_result_di" bpmnElement="receive_assessment_result">
+        <dc:Bounds x="142" y="470" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="178" y="65"/>
+        <di:waypoint x="290" y="65"/>
+        <di:waypoint x="290" y="-20"/>
+        <di:waypoint x="402" y="-20"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="438" y="-20"/>
+        <di:waypoint x="529" y="-20"/>
+        <di:waypoint x="529" y="105"/>
+        <di:waypoint x="620" y="105"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="740" y="105"/>
+        <di:waypoint x="831" y="105"/>
+        <di:waypoint x="831" y="90"/>
+        <di:waypoint x="922" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="185" y="138"/>
+        <di:waypoint x="272" y="138"/>
+        <di:waypoint x="272" y="68"/>
+        <di:waypoint x="360" y="68"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="185" y="138"/>
+        <di:waypoint x="272" y="138"/>
+        <di:waypoint x="272" y="178"/>
+        <di:waypoint x="360" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="185" y="138"/>
+        <di:waypoint x="272" y="138"/>
+        <di:waypoint x="272" y="288"/>
+        <di:waypoint x="360" y="288"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="480" y="68"/>
+        <di:waypoint x="567" y="68"/>
+        <di:waypoint x="567" y="200"/>
+        <di:waypoint x="655" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="480" y="178"/>
+        <di:waypoint x="567" y="178"/>
+        <di:waypoint x="567" y="200"/>
+        <di:waypoint x="655" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="480" y="288"/>
+        <di:waypoint x="567" y="288"/>
+        <di:waypoint x="567" y="200"/>
+        <di:waypoint x="655" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="705" y="200"/>
+        <di:waypoint x="792" y="200"/>
+        <di:waypoint x="792" y="178"/>
+        <di:waypoint x="880" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="1000" y="178"/>
+        <di:waypoint x="1087" y="178"/>
+        <di:waypoint x="1087" y="145"/>
+        <di:waypoint x="1175" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="1225" y="145"/>
+        <di:waypoint x="1312" y="145"/>
+        <di:waypoint x="1312" y="90"/>
+        <di:waypoint x="1400" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="1225" y="145"/>
+        <di:waypoint x="1312" y="145"/>
+        <di:waypoint x="1312" y="200"/>
+        <di:waypoint x="1400" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf16_di" bpmnElement="sf16">
+        <di:waypoint x="1520" y="90"/>
+        <di:waypoint x="1611" y="90"/>
+        <di:waypoint x="1611" y="178"/>
+        <di:waypoint x="1702" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf17_di" bpmnElement="sf17">
+        <di:waypoint x="1520" y="200"/>
+        <di:waypoint x="1611" y="200"/>
+        <di:waypoint x="1611" y="178"/>
+        <di:waypoint x="1702" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf19_di" bpmnElement="sf19">
+        <di:waypoint x="178" y="488"/>
+        <di:waypoint x="290" y="488"/>
+        <di:waypoint x="290" y="455"/>
+        <di:waypoint x="402" y="455"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf20_di" bpmnElement="sf20">
+        <di:waypoint x="1520" y="90"/>
+        <di:waypoint x="1611" y="90"/>
+        <di:waypoint x="1611" y="112"/>
+        <di:waypoint x="1702" y="112"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf21_di" bpmnElement="sf21">
+        <di:waypoint x="1520" y="200"/>
+        <di:waypoint x="1611" y="200"/>
+        <di:waypoint x="1611" y="112"/>
+        <di:waypoint x="1702" y="112"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="940" y="108"/>
+        <di:waypoint x="160" y="404"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="1720" y="196"/>
+        <di:waypoint x="160" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="940" y="108"/>
+        <di:waypoint x="160" y="404"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="160" y="404"/>
+        <di:waypoint x="160" y="163"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p2_di" bpmnElement="MsgFlow_p2">
+        <di:waypoint x="1720" y="196"/>
+        <di:waypoint x="160" y="470"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
