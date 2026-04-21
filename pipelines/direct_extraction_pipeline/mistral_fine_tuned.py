@@ -31,7 +31,7 @@ def load_model():
 
         llm = Llama(
             model_path=model_path,
-            n_ctx=8192,
+            n_ctx=16384,
             n_gpu_layers=-1,
             verbose=False
         )
@@ -578,7 +578,7 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_fine_tuned_mistral_bpmn.json")
+    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_mistral_finetuned.json")
 
     print("--- Fine-Tuned Pipeline Started ---")
     print(f"Case:          {case_name}")

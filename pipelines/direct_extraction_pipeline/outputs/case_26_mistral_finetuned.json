@@ -1,0 +1,202 @@
+{
+  "pools": [
+    {
+      "id": "HR_manager",
+      "name": "HR Manager"
+    },
+    {
+      "id": "Business_manager",
+      "name": "Business Manager"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "HR_manager_lane",
+      "name": "HR Manager Lane",
+      "pool": "HR_manager"
+    },
+    {
+      "id": "Business_manager_lane",
+      "name": "Business Manager Lane",
+      "pool": "Business_manager"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "introduction_interview",
+      "name": "Introduction Interview",
+      "type": "task",
+      "lane": "HR_manager_lane"
+    },
+    {
+      "id": "discuss_candidate",
+      "name": "Discuss Candidate with Business Manager",
+      "type": "task",
+      "lane": "HR_manager_lane"
+    },
+    {
+      "id": "inform_candidate",
+      "name": "Inform Candidate about Application",
+      "type": "task",
+      "lane": "HR_manager_lane"
+    },
+    {
+      "id": "prepare_contract",
+      "name": "Prepare Contract",
+      "type": "task",
+      "lane": "HR_manager_lane"
+    },
+    {
+      "id": "close_application",
+      "name": "Close Application Process",
+      "type": "task",
+      "lane": "HR_manager_lane"
+    },
+    {
+      "id": "second_assessment",
+      "name": "Second Assessment with Candidate",
+      "type": "task",
+      "lane": "Business_manager_lane"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_HR",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "HR_manager_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_HR",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "HR_manager_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_BM",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "Business_manager_lane",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_BM",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Business_manager_lane",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_parallel_split",
+      "name": "Start Concurrent Activities",
+      "type": "parallelGateway",
+      "lane": "HR_manager_lane",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Concurrent Activities Complete",
+      "type": "parallelGateway",
+      "lane": "HR_manager_lane",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_assessment_split",
+      "name": "Assessment Successful?",
+      "type": "exclusiveGateway",
+      "lane": "HR_manager_lane",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_assessment_join",
+      "name": "Assessment Decision Made",
+      "type": "exclusiveGateway",
+      "lane": "HR_manager_lane",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_HR",
+      "to": "introduction_interview"
+    },
+    {
+      "id": "sf2",
+      "from": "introduction_interview",
+      "to": "discuss_candidate"
+    },
+    {
+      "id": "sf3",
+      "from": "discuss_candidate",
+      "to": "gateway_parallel_split"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_parallel_split",
+      "to": "inform_candidate"
+    },
+    {
+      "id": "sf5",
+      "from": "gateway_parallel_split",
+      "to": "second_assessment"
+    },
+    {
+      "id": "sf6",
+      "from": "inform_candidate",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf7",
+      "from": "second_assessment",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_parallel_join",
+      "to": "gateway_assessment_split"
+    },
+    {
+      "id": "sf9",
+      "from": "gateway_assessment_split",
+      "to": "prepare_contract",
+      "condition": "Assessment successful"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_assessment_split",
+      "to": "close_application",
+      "condition": "Assessment not successful"
+    },
+    {
+      "id": "sf11",
+      "from": "prepare_contract",
+      "to": "gateway_assessment_join"
+    },
+    {
+      "id": "sf12",
+      "from": "close_application",
+      "to": "gateway_assessment_join"
+    },
+    {
+      "id": "sf13",
+      "from": "gateway_assessment_join",
+      "to": "end_HR"
+    },
+    {
+      "id": "sf14",
+      "from": "start_BM",
+      "to": "second_assessment"
+    },
+    {
+      "id": "sf15",
+      "from": "second_assessment",
+      "to": "end_BM"
+    }
+  ],
+  "message_flows": []
+}

@@ -1,0 +1,302 @@
+{
+  "pools": [
+    {
+      "id": "GovernmentAgency",
+      "name": "Government Agency Grants Office"
+    },
+    {
+      "id": "Applicant",
+      "name": "Applicant Organisation"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "GrantsAdmin",
+      "name": "Grants Administrator",
+      "pool": "GovernmentAgency"
+    },
+    {
+      "id": "TechnicalReview",
+      "name": "Technical Review Panel",
+      "pool": "GovernmentAgency"
+    },
+    {
+      "id": "FinanceDept",
+      "name": "Finance Department",
+      "pool": "GovernmentAgency"
+    },
+    {
+      "id": "ApplicantDept",
+      "name": "Applicant Department",
+      "pool": "Applicant"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "RegisterApplication",
+      "name": "Register Application",
+      "type": "userTask",
+      "lane": "GrantsAdmin"
+    },
+    {
+      "id": "CheckDocuments",
+      "name": "Check Documents",
+      "type": "userTask",
+      "lane": "GrantsAdmin"
+    },
+    {
+      "id": "NotifyMissingDocs",
+      "name": "Notify Missing Documents",
+      "type": "userTask",
+      "lane": "GrantsAdmin"
+    },
+    {
+      "id": "CollectMissingDocs",
+      "name": "Collect Missing Documents",
+      "type": "userTask",
+      "lane": "ApplicantDept"
+    },
+    {
+      "id": "ResubmitDocs",
+      "name": "Resubmit Documents",
+      "type": "userTask",
+      "lane": "ApplicantDept"
+    },
+    {
+      "id": "CheckCompleteness",
+      "name": "Check Completeness Again",
+      "type": "userTask",
+      "lane": "GrantsAdmin"
+    },
+    {
+      "id": "AssessFeasibility",
+      "name": "Assess Project Feasibility",
+      "type": "userTask",
+      "lane": "TechnicalReview"
+    },
+    {
+      "id": "ReviewBudget",
+      "name": "Review Proposed Budget",
+      "type": "userTask",
+      "lane": "FinanceDept"
+    },
+    {
+      "id": "ReviewOutcomes",
+      "name": "Review Combined Outcomes",
+      "type": "userTask",
+      "lane": "GrantsAdmin"
+    },
+    {
+      "id": "SendRejection",
+      "name": "Send Rejection Notice",
+      "type": "userTask",
+      "lane": "GrantsAdmin"
+    },
+    {
+      "id": "IssueApproval",
+      "name": "Issue Grant Approval Letter",
+      "type": "userTask",
+      "lane": "GrantsAdmin"
+    }
+  ],
+  "events": [
+    {
+      "id": "StartEvent",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "GrantsAdmin",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "GrantsAdmin",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEventApplicant",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "ApplicantDept",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "NotifyMissingDocsEvent",
+      "name": "Notify Missing Documents",
+      "type": "intermediateThrowEvent",
+      "lane": "GrantsAdmin",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ResubmitDocsEvent",
+      "name": "Resubmit Documents",
+      "type": "intermediateCatchEvent",
+      "lane": "ApplicantDept",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "AssessFeasibilityEvent",
+      "name": "Assess Feasibility",
+      "type": "intermediateThrowEvent",
+      "lane": "TechnicalReview",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ReviewBudgetEvent",
+      "name": "Review Budget",
+      "type": "intermediateThrowEvent",
+      "lane": "FinanceDept",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ReviewOutcomesEvent",
+      "name": "Review Outcomes",
+      "type": "intermediateCatchEvent",
+      "lane": "GrantsAdmin",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "ExclusiveGateway1",
+      "name": "Exclusive Gateway 1",
+      "type": "exclusiveGateway",
+      "lane": "GrantsAdmin",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "ExclusiveGateway2",
+      "name": "Exclusive Gateway 2",
+      "type": "exclusiveGateway",
+      "lane": "GrantsAdmin",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "ParallelGateway1",
+      "name": "Parallel Gateway 1",
+      "type": "parallelGateway",
+      "lane": "GrantsAdmin",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "ParallelGateway2",
+      "name": "Parallel Gateway 2",
+      "type": "parallelGateway",
+      "lane": "GrantsAdmin",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "StartToRegister",
+      "from": "StartEvent",
+      "to": "RegisterApplication"
+    },
+    {
+      "id": "RegisterToCheck",
+      "from": "RegisterApplication",
+      "to": "CheckDocuments"
+    },
+    {
+      "id": "CheckToNotify",
+      "from": "CheckDocuments",
+      "to": "ExclusiveGateway1"
+    },
+    {
+      "id": "NotifyToResubmit",
+      "from": "ExclusiveGateway1",
+      "to": "NotifyMissingDocsEvent"
+    },
+    {
+      "id": "ResubmitToCollect",
+      "from": "ResubmitDocsEvent",
+      "to": "CollectMissingDocs"
+    },
+    {
+      "id": "CollectToResubmit",
+      "from": "CollectMissingDocs",
+      "to": "ResubmitDocs"
+    },
+    {
+      "id": "ResubmitToCheckAgain",
+      "from": "ResubmitDocs",
+      "to": "ResubmitDocsEvent"
+    },
+    {
+      "id": "CheckAgainToCheckCompleteness",
+      "from": "ResubmitDocsEvent",
+      "to": "CheckCompleteness"
+    },
+    {
+      "id": "CheckCompletenessToParallel",
+      "from": "CheckCompleteness",
+      "to": "ParallelGateway1"
+    },
+    {
+      "id": "ParallelToAssess",
+      "from": "ParallelGateway1",
+      "to": "AssessFeasibilityEvent"
+    },
+    {
+      "id": "ParallelToReview",
+      "from": "ParallelGateway1",
+      "to": "ReviewBudgetEvent"
+    },
+    {
+      "id": "AssessToReviewOutcomes",
+      "from": "AssessFeasibilityEvent",
+      "to": "ReviewOutcomesEvent"
+    },
+    {
+      "id": "ReviewToReviewOutcomes",
+      "from": "ReviewBudgetEvent",
+      "to": "ReviewOutcomesEvent"
+    },
+    {
+      "id": "ReviewOutcomesToExclusive",
+      "from": "ReviewOutcomesEvent",
+      "to": "ReviewOutcomes"
+    },
+    {
+      "id": "ExclusiveToSendRejection",
+      "from": "ExclusiveGateway2",
+      "to": "SendRejection"
+    },
+    {
+      "id": "SendRejectionToEnd",
+      "from": "SendRejection",
+      "to": "EndEvent"
+    },
+    {
+      "id": "ExclusiveToIssueApproval",
+      "from": "ExclusiveGateway2",
+      "to": "IssueApproval"
+    },
+    {
+      "id": "IssueApprovalToEnd",
+      "from": "IssueApproval",
+      "to": "EndEvent"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "NotifyMissingDocsToResubmit",
+      "from": "NotifyMissingDocsEvent",
+      "to": "ResubmitDocsEvent",
+      "name": "Notify Missing Documents"
+    },
+    {
+      "id": "AssessFeasibilityToReviewOutcomes",
+      "from": "AssessFeasibilityEvent",
+      "to": "ReviewOutcomesEvent",
+      "name": "Assess Feasibility"
+    },
+    {
+      "id": "ReviewBudgetToReviewOutcomes",
+      "from": "ReviewBudgetEvent",
+      "to": "ReviewOutcomesEvent",
+      "name": "Review Budget"
+    }
+  ]
+}

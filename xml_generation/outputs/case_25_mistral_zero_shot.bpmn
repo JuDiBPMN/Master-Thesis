@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Library" name="Library, internal processes and systems" processRef="Process_Library"/>
+    <bpmn:participant id="actor_Requester" name="External requester" processRef="Process_Requester"/>
+    <bpmn:messageFlow id="CheckCatalogNotAvailable_Message" name="Message informing requester of book not being available" sourceRef="CheckCatalogNotAvailable" targetRef="InformRequester"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="RequestBook" targetRef="CheckCatalogAvailable"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Library" name="Library, internal processes and systems" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Library">
+      <bpmn:lane id="Library Staff" name="Library staff member">
+        <bpmn:flowNodeRef>CheckCatalogAvailable</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckCatalogNotAvailable</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckoutProcedureStarted</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckoutProcedureCompleted</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BookRetrieved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BookLoanedOrNotInCollection</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckCatalog</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>InformRequester</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:intermediateCatchEvent id="CheckCatalogAvailable" name="Book availability checked">
+      <bpmn:messageEventDefinition id="CheckCatalogAvailable_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="CheckCatalogNotAvailable" name="Book not available">
+      <bpmn:messageEventDefinition id="CheckCatalogNotAvailable_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="CheckoutProcedureStarted" name="Checkout procedure started"/>
+    <bpmn:endEvent id="CheckoutProcedureCompleted" name="Checkout procedure completed"/>
+    <bpmn:intermediateCatchEvent id="BookRetrieved" name="Book retrieved"/>
+    <bpmn:intermediateCatchEvent id="BookLoanedOrNotInCollection" name="Book loaned or not in collection">
+      <bpmn:messageEventDefinition id="BookLoanedOrNotInCollection_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="CheckCatalog" name="Check catalog for book availability"/>
+    <bpmn:task id="InformRequester" name="Inform requester of book availability"/>
+    <bpmn:sequenceFlow id="CheckCatalogAvailable_CheckCatalogNotAvailable" sourceRef="CheckCatalogAvailable" targetRef="CheckCatalogNotAvailable" name="xor">
+      <bpmn:conditionExpression>xor</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="CheckCatalogNotAvailable_End" sourceRef="CheckCatalogNotAvailable" targetRef="CheckoutProcedureCompleted"/>
+    <bpmn:sequenceFlow id="CheckCatalogAvailable_CheckoutProcedureStarted" sourceRef="CheckCatalogAvailable" targetRef="CheckoutProcedureStarted"/>
+    <bpmn:sequenceFlow id="CheckoutProcedureStarted_BookRetrieved" sourceRef="CheckoutProcedureStarted" targetRef="BookRetrieved"/>
+    <bpmn:sequenceFlow id="BookRetrieved_CheckoutProcedureCompleted" sourceRef="BookRetrieved" targetRef="CheckoutProcedureCompleted"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Requester" name="External requester" isExecutable="false">
+    <bpmn:startEvent id="RequestBook" name="Request for book"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Library_di" bpmnElement="actor_Library" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1280" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Requester_di" bpmnElement="actor_Requester" isHorizontal="true">
+        <dc:Bounds x="10" y="550" width="600" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Library Staff_di" bpmnElement="Library Staff" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1250" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckCatalogAvailable_di" bpmnElement="CheckCatalogAvailable">
+        <dc:Bounds x="172" y="94" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BookLoanedOrNotInCollection_di" bpmnElement="BookLoanedOrNotInCollection">
+        <dc:Bounds x="172" y="160" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckCatalog_di" bpmnElement="CheckCatalog">
+        <dc:Bounds x="130" y="226" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="InformRequester_di" bpmnElement="InformRequester">
+        <dc:Bounds x="130" y="336" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckCatalogNotAvailable_di" bpmnElement="CheckCatalogNotAvailable">
+        <dc:Bounds x="432" y="204" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckoutProcedureStarted_di" bpmnElement="CheckoutProcedureStarted">
+        <dc:Bounds x="432" y="270" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckoutProcedureCompleted_di" bpmnElement="CheckoutProcedureCompleted">
+        <dc:Bounds x="952" y="237" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BookRetrieved_di" bpmnElement="BookRetrieved">
+        <dc:Bounds x="692" y="237" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="RequestBook_di" bpmnElement="RequestBook">
+        <dc:Bounds x="142" y="657" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="CheckCatalogAvailable_CheckCatalogNotAvailable_di" bpmnElement="CheckCatalogAvailable_CheckCatalogNotAvailable">
+        <di:waypoint x="208" y="112"/>
+        <di:waypoint x="320" y="112"/>
+        <di:waypoint x="320" y="222"/>
+        <di:waypoint x="432" y="222"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckCatalogNotAvailable_End_di" bpmnElement="CheckCatalogNotAvailable_End">
+        <di:waypoint x="468" y="222"/>
+        <di:waypoint x="710" y="222"/>
+        <di:waypoint x="710" y="255"/>
+        <di:waypoint x="952" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckCatalogAvailable_CheckoutProcedureStarted_di" bpmnElement="CheckCatalogAvailable_CheckoutProcedureStarted">
+        <di:waypoint x="208" y="112"/>
+        <di:waypoint x="320" y="112"/>
+        <di:waypoint x="320" y="288"/>
+        <di:waypoint x="432" y="288"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckoutProcedureStarted_BookRetrieved_di" bpmnElement="CheckoutProcedureStarted_BookRetrieved">
+        <di:waypoint x="468" y="288"/>
+        <di:waypoint x="580" y="288"/>
+        <di:waypoint x="580" y="255"/>
+        <di:waypoint x="692" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BookRetrieved_CheckoutProcedureCompleted_di" bpmnElement="BookRetrieved_CheckoutProcedureCompleted">
+        <di:waypoint x="728" y="255"/>
+        <di:waypoint x="952" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckCatalogNotAvailable_Message_di" bpmnElement="CheckCatalogNotAvailable_Message">
+        <di:waypoint x="450" y="204"/>
+        <di:waypoint x="190" y="416"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="160" y="657"/>
+        <di:waypoint x="190" y="130"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

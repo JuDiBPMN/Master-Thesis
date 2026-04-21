@@ -1,0 +1,275 @@
+{
+  "pools": [
+    {
+      "id": "Pool_Client",
+      "name": "Client"
+    },
+    {
+      "id": "Pool_BrightWave_Energy",
+      "name": "BrightWave Energy"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Lane_Client",
+      "name": "Client",
+      "pool": "Pool_Client"
+    },
+    {
+      "id": "Lane_Customer_Service",
+      "name": "Customer Service",
+      "pool": "Pool_BrightWave_Energy"
+    },
+    {
+      "id": "Lane_Invoicing_Department",
+      "name": "Invoicing Department",
+      "pool": "Pool_BrightWave_Energy"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Task_Write_Complaint_Email",
+      "name": "Write Complaint Email",
+      "type": "userTask",
+      "lane": "Lane_Client"
+    },
+    {
+      "id": "Task_Receive_Complaint",
+      "name": "Receive Complaint",
+      "type": "userTask",
+      "lane": "Lane_Customer_Service"
+    },
+    {
+      "id": "Task_Lookup_Billing_Information",
+      "name": "Lookup Billing Information",
+      "type": "userTask",
+      "lane": "Lane_Customer_Service"
+    },
+    {
+      "id": "Task_Review_Invoice",
+      "name": "Review Invoice",
+      "type": "userTask",
+      "lane": "Lane_Customer_Service"
+    },
+    {
+      "id": "Task_Write_Explanation_Email",
+      "name": "Write Explanation Email",
+      "type": "userTask",
+      "lane": "Lane_Customer_Service"
+    },
+    {
+      "id": "Task_Create_Ticket",
+      "name": "Create Ticket",
+      "type": "userTask",
+      "lane": "Lane_Customer_Service"
+    },
+    {
+      "id": "Task_Assign_Ticket",
+      "name": "Assign Ticket",
+      "type": "userTask",
+      "lane": "Lane_Customer_Service"
+    },
+    {
+      "id": "Task_Investigate_Invoicing_Mistake",
+      "name": "Investigate Invoicing Mistake",
+      "type": "userTask",
+      "lane": "Lane_Invoicing_Department"
+    },
+    {
+      "id": "Task_Make_Correction",
+      "name": "Make Correction",
+      "type": "userTask",
+      "lane": "Lane_Invoicing_Department"
+    },
+    {
+      "id": "Task_Generate_New_Invoice",
+      "name": "Generate New Invoice",
+      "type": "userTask",
+      "lane": "Lane_Invoicing_Department"
+    },
+    {
+      "id": "Task_Send_New_Invoice_Email",
+      "name": "Send New Invoice Email",
+      "type": "userTask",
+      "lane": "Lane_Invoicing_Department"
+    }
+  ],
+  "events": [
+    {
+      "id": "StartEvent_Client",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "Lane_Client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent_Client",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Lane_Client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent_BrightWave_Energy",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Lane_Customer_Service",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "IntermediateThrowEvent_Send_Complaint",
+      "name": "Send Complaint",
+      "type": "intermediateThrowEvent",
+      "lane": "Lane_Client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "IntermediateCatchEvent_Receive_Complaint",
+      "name": "Receive Complaint",
+      "type": "intermediateCatchEvent",
+      "lane": "Lane_Customer_Service",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "IntermediateThrowEvent_Send_Explanation",
+      "name": "Send Explanation",
+      "type": "intermediateThrowEvent",
+      "lane": "Lane_Customer_Service",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "IntermediateCatchEvent_Receive_Explanation",
+      "name": "Receive Explanation",
+      "type": "intermediateCatchEvent",
+      "lane": "Lane_Client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "IntermediateThrowEvent_Send_New_Invoice",
+      "name": "Send New Invoice",
+      "type": "intermediateThrowEvent",
+      "lane": "Lane_Invoicing_Department",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "IntermediateCatchEvent_Receive_New_Invoice",
+      "name": "Receive New Invoice",
+      "type": "intermediateCatchEvent",
+      "lane": "Lane_Client",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "ExclusiveGateway_Check_Mistake",
+      "name": "Check Mistake",
+      "type": "exclusiveGateway",
+      "lane": "Lane_Customer_Service",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "SequenceFlow_1",
+      "from": "StartEvent_Client",
+      "to": "Task_Write_Complaint_Email"
+    },
+    {
+      "id": "SequenceFlow_2",
+      "from": "Task_Write_Complaint_Email",
+      "to": "IntermediateThrowEvent_Send_Complaint"
+    },
+    {
+      "id": "SequenceFlow_3",
+      "from": "IntermediateCatchEvent_Receive_Complaint",
+      "to": "Task_Receive_Complaint"
+    },
+    {
+      "id": "SequenceFlow_4",
+      "from": "Task_Receive_Complaint",
+      "to": "Task_Lookup_Billing_Information"
+    },
+    {
+      "id": "SequenceFlow_5",
+      "from": "Task_Lookup_Billing_Information",
+      "to": "Task_Review_Invoice"
+    },
+    {
+      "id": "SequenceFlow_6",
+      "from": "Task_Review_Invoice",
+      "to": "ExclusiveGateway_Check_Mistake"
+    },
+    {
+      "id": "SequenceFlow_7",
+      "from": "ExclusiveGateway_Check_Mistake",
+      "to": "Task_Write_Explanation_Email",
+      "condition": "no mistake"
+    },
+    {
+      "id": "SequenceFlow_8",
+      "from": "Task_Write_Explanation_Email",
+      "to": "IntermediateThrowEvent_Send_Explanation"
+    },
+    {
+      "id": "SequenceFlow_9",
+      "from": "IntermediateCatchEvent_Receive_Explanation",
+      "to": "EndEvent_Client"
+    },
+    {
+      "id": "SequenceFlow_10",
+      "from": "ExclusiveGateway_Check_Mistake",
+      "to": "Task_Create_Ticket",
+      "condition": "mistake found"
+    },
+    {
+      "id": "SequenceFlow_11",
+      "from": "Task_Create_Ticket",
+      "to": "Task_Assign_Ticket"
+    },
+    {
+      "id": "SequenceFlow_12",
+      "from": "Task_Assign_Ticket",
+      "to": "Task_Investigate_Invoicing_Mistake"
+    },
+    {
+      "id": "SequenceFlow_13",
+      "from": "Task_Investigate_Invoicing_Mistake",
+      "to": "Task_Make_Correction"
+    },
+    {
+      "id": "SequenceFlow_14",
+      "from": "Task_Make_Correction",
+      "to": "Task_Generate_New_Invoice"
+    },
+    {
+      "id": "SequenceFlow_15",
+      "from": "Task_Generate_New_Invoice",
+      "to": "IntermediateThrowEvent_Send_New_Invoice"
+    },
+    {
+      "id": "SequenceFlow_16",
+      "from": "IntermediateCatchEvent_Receive_New_Invoice",
+      "to": "EndEvent_Client"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "MessageFlow_1",
+      "from": "IntermediateThrowEvent_Send_Complaint",
+      "to": "IntermediateCatchEvent_Receive_Complaint",
+      "name": "Complaint Email"
+    },
+    {
+      "id": "MessageFlow_2",
+      "from": "IntermediateThrowEvent_Send_Explanation",
+      "to": "IntermediateCatchEvent_Receive_Explanation",
+      "name": "Explanation Email"
+    },
+    {
+      "id": "MessageFlow_3",
+      "from": "IntermediateThrowEvent_Send_New_Invoice",
+      "to": "IntermediateCatchEvent_Receive_New_Invoice",
+      "name": "New Invoice Email"
+    }
+  ]
+}

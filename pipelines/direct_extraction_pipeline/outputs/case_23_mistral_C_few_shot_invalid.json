@@ -1,0 +1,223 @@
+{
+  "pools": [
+    {
+      "id": "client",
+      "name": "Client"
+    },
+    {
+      "id": "brightwave_energy",
+      "name": "BrightWave Energy"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "client",
+      "name": "Client",
+      "pool": "client"
+    },
+    {
+      "id": "customer_service",
+      "name": "Customer Service",
+      "pool": "brightwave_energy"
+    },
+    {
+      "id": "invoicing",
+      "name": "Invoicing",
+      "pool": "brightwave_energy"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "write_complaint_email",
+      "name": "Write Complaint Email",
+      "type": "task",
+      "lane": "client"
+    },
+    {
+      "id": "receive_complaint",
+      "name": "Receive Complaint",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "lookup_billing_info",
+      "name": "Look Up Billing Info",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "review_invoice",
+      "name": "Review Invoice",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "no_mistake_found",
+      "name": "No Mistake Found",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "write_explanation_email",
+      "name": "Write Explanation Email",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "send_explanation_email",
+      "name": "Send Explanation Email",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "end_process",
+      "name": "End Process",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "create_ticket",
+      "name": "Create Ticket",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "assign_ticket",
+      "name": "Assign Ticket",
+      "type": "task",
+      "lane": "invoicing"
+    },
+    {
+      "id": "investigate_mistake",
+      "name": "Investigate Mistake",
+      "type": "task",
+      "lane": "invoicing"
+    },
+    {
+      "id": "make_correction",
+      "name": "Make Correction",
+      "type": "task",
+      "lane": "invoicing"
+    },
+    {
+      "id": "generate_new_invoice",
+      "name": "Generate New Invoice",
+      "type": "task",
+      "lane": "invoicing"
+    },
+    {
+      "id": "send_new_invoice",
+      "name": "Send New Invoice",
+      "type": "task",
+      "lane": "invoicing"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_client",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_process",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_mistake_found",
+      "name": "Mistake Found?",
+      "type": "exclusiveGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_client",
+      "to": "write_complaint_email"
+    },
+    {
+      "id": "sf2",
+      "from": "write_complaint_email",
+      "to": "receive_complaint"
+    },
+    {
+      "id": "sf3",
+      "from": "receive_complaint",
+      "to": "lookup_billing_info"
+    },
+    {
+      "id": "sf4",
+      "from": "lookup_billing_info",
+      "to": "review_invoice"
+    },
+    {
+      "id": "sf5",
+      "from": "review_invoice",
+      "to": "gateway_mistake_found"
+    },
+    {
+      "id": "sf6",
+      "from": "gateway_mistake_found",
+      "to": "no_mistake_found"
+    },
+    {
+      "id": "sf7",
+      "from": "no_mistake_found",
+      "to": "write_explanation_email"
+    },
+    {
+      "id": "sf8",
+      "from": "write_explanation_email",
+      "to": "send_explanation_email"
+    },
+    {
+      "id": "sf9",
+      "from": "send_explanation_email",
+      "to": "end_process"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_mistake_found",
+      "to": "create_ticket"
+    },
+    {
+      "id": "sf11",
+      "from": "create_ticket",
+      "to": "assign_ticket"
+    },
+    {
+      "id": "sf12",
+      "from": "assign_ticket",
+      "to": "investigate_mistake"
+    },
+    {
+      "id": "sf13",
+      "from": "investigate_mistake",
+      "to": "make_correction"
+    },
+    {
+      "id": "sf14",
+      "from": "make_correction",
+      "to": "generate_new_invoice"
+    },
+    {
+      "id": "sf15",
+      "from": "generate_new_invoice",
+      "to": "send_new_invoice"
+    },
+    {
+      "id": "sf16",
+      "from": "send_new_invoice",
+      "to": "end_process"
+    }
+  ],
+  "message_flows": []
+}

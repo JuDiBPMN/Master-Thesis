@@ -1,0 +1,140 @@
+{
+  "pools": [
+    {
+      "id": "Company",
+      "name": "Company"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "HR",
+      "name": "HR",
+      "pool": "Company"
+    },
+    {
+      "id": "Business",
+      "name": "Business",
+      "pool": "Company"
+    },
+    {
+      "id": "Customer Service",
+      "name": "Customer Service",
+      "pool": "Customer"
+    },
+    {
+      "id": "Operations",
+      "name": "Operations",
+      "pool": "Customer"
+    },
+    {
+      "id": "Finance",
+      "name": "Finance",
+      "pool": "Company"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "introductionInterview",
+      "name": "Introduction Interview",
+      "type": "task",
+      "lane": "HR"
+    },
+    {
+      "id": "discussWithBusinessManager",
+      "name": "Discuss with Business Manager",
+      "type": "task",
+      "lane": "Business"
+    },
+    {
+      "id": "informCandidate",
+      "name": "Inform Candidate",
+      "type": "task",
+      "lane": "HR"
+    },
+    {
+      "id": "secondAssessment",
+      "name": "Second Assessment",
+      "type": "task",
+      "lane": "Business"
+    },
+    {
+      "id": "prepareContract",
+      "name": "Prepare Contract",
+      "type": "task",
+      "lane": "HR"
+    }
+  ],
+  "events": [
+    {
+      "id": "intermediateThrowEvent",
+      "name": "Intermediate Throw Event",
+      "type": "intermediateThrowEvent",
+      "lane": "HR",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "intermediateCatchEvent",
+      "name": "Intermediate Catch Event",
+      "type": "intermediateCatchEvent",
+      "lane": "Business",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "endEvent",
+      "name": "End Event",
+      "type": "endEvent",
+      "lane": "HR",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "exclusiveGateway",
+      "name": "Exclusive Gateway",
+      "type": "exclusiveGateway",
+      "lane": "HR",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "parallelGateway",
+      "name": "Parallel Gateway",
+      "type": "parallelGateway",
+      "lane": "Business",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sequenceFlow_1",
+      "from": "introductionInterview",
+      "to": "discussWithBusinessManager"
+    },
+    {
+      "id": "sequenceFlow_2",
+      "from": "discussWithBusinessManager",
+      "to": "informCandidate"
+    },
+    {
+      "id": "sequenceFlow_3",
+      "from": "informCandidate",
+      "to": "secondAssessment"
+    },
+    {
+      "id": "sequenceFlow_4",
+      "from": "secondAssessment",
+      "to": "prepareContract"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "messageFlow_1",
+      "from": "intermediateThrowEvent",
+      "to": "intermediateCatchEvent",
+      "name": "Message Flow"
+    }
+  ]
+}

@@ -432,7 +432,7 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
     return json_result
 
 if __name__ == "__main__":
-    case_name = "case_21" 
+    case_name = "case_28" 
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -455,7 +455,7 @@ if __name__ == "__main__":
         bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=0)
 
         if bpmn_json:
-            print(f"Output saved to: outputs/{case_name}_fine_tuned_phi4.json")
+            print(f"Output saved to: outputs/{case_name}_fine_tuned_phi4_seed123.json")
         else:
             print("Model extraction failed. Check the logs above.")
     except FileNotFoundError:

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Company" name="Company, HR department and hiring managers pool”, " processRef="Process_Company"/>
+    <bpmn:participant id="actor_Candidate" name="Candidate pool" processRef="Process_Candidate"/>
+    <bpmn:messageFlow id="Personality_Assessment_Message_Flow" name="Personality assessment message flow" sourceRef="Technical_Interview_Scheduled" targetRef="Personality_Assessment_Received"/>
+    <bpmn:messageFlow id="Verdicts_Message_Flow" name="Verdicts message flow" sourceRef="Record_Verdicts" targetRef="Parallel_Join"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Company" name="Company, HR department and hiring managers pool”, " isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Company">
+      <bpmn:lane id="HR_Department" name="HR department">
+        <bpmn:flowNodeRef>Vacancy_Request_Received</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Application_Received</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Technical_Interview_Scheduled</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Personality_Assessment_Received</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Verdicts_Recorded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Job_Offer_Drafted</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Job_Offer_Sent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Rejection_Email_Sent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Register_Vacancy</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Post_Job_Advertisement</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Screen_Applications</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Schedule_Technical_Interview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Send_Personality_Assessment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Score_Personality_Assessment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Record_Verdicts</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Write_Rejection_Email</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Draft_Job_Offer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Send_Job_Offer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Parallel_Split</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Parallel_Join</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Hiring_Manager" name="Hiring manager">
+        <bpmn:flowNodeRef>Submit_Vacancy_Request</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Vacancy_Request_Received" name="Vacancy request received"/>
+    <bpmn:intermediateCatchEvent id="Application_Received" name="Application received">
+      <bpmn:messageEventDefinition id="Application_Received_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="Technical_Interview_Scheduled" name="Technical interview scheduled">
+      <bpmn:messageEventDefinition id="Technical_Interview_Scheduled_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Personality_Assessment_Received" name="Personality assessment received">
+      <bpmn:messageEventDefinition id="Personality_Assessment_Received_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="Verdicts_Recorded" name="Verdicts recorded"/>
+    <bpmn:intermediateThrowEvent id="Job_Offer_Drafted" name="Job offer drafted"/>
+    <bpmn:endEvent id="Job_Offer_Sent" name="Job offer sent"/>
+    <bpmn:endEvent id="Rejection_Email_Sent" name="Rejection email sent"/>
+    <bpmn:task id="Submit_Vacancy_Request" name="Submit vacancy request"/>
+    <bpmn:task id="Register_Vacancy" name="Register vacancy"/>
+    <bpmn:task id="Post_Job_Advertisement" name="Post job advertisement"/>
+    <bpmn:task id="Screen_Applications" name="Screen applications"/>
+    <bpmn:task id="Schedule_Technical_Interview" name="Schedule technical interview"/>
+    <bpmn:task id="Send_Personality_Assessment" name="Send personality assessment"/>
+    <bpmn:task id="Score_Personality_Assessment" name="Score personality assessment"/>
+    <bpmn:task id="Record_Verdicts" name="Record verdicts"/>
+    <bpmn:task id="Write_Rejection_Email" name="Write rejection email"/>
+    <bpmn:task id="Draft_Job_Offer" name="Draft job offer"/>
+    <bpmn:task id="Send_Job_Offer" name="Send job offer"/>
+    <bpmn:parallelGateway id="Parallel_Split" name="Parallel split" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="Parallel_Join" name="Parallel join" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="Vacancy_Request_Received_to_Register_Vacancy" sourceRef="Vacancy_Request_Received" targetRef="Register_Vacancy"/>
+    <bpmn:sequenceFlow id="Register_Vacancy_to_Post_Job_Advertisement" sourceRef="Register_Vacancy" targetRef="Post_Job_Advertisement"/>
+    <bpmn:sequenceFlow id="Post_Job_Advertisement_to_Screen_Applications" sourceRef="Post_Job_Advertisement" targetRef="Screen_Applications"/>
+    <bpmn:sequenceFlow id="Screen_Applications_to_Schedule_Technical_Interview" sourceRef="Screen_Applications" targetRef="Schedule_Technical_Interview"/>
+    <bpmn:sequenceFlow id="Schedule_Technical_Interview_to_Send_Personality_Assessment" sourceRef="Schedule_Technical_Interview" targetRef="Send_Personality_Assessment"/>
+    <bpmn:sequenceFlow id="Send_Personality_Assessment_to_Receive_Personality_Assessment" sourceRef="Send_Personality_Assessment" targetRef="Personality_Assessment_Received"/>
+    <bpmn:sequenceFlow id="Personality_Assessment_Received_to_Score_Personality_Assessment" sourceRef="Personality_Assessment_Received" targetRef="Score_Personality_Assessment"/>
+    <bpmn:sequenceFlow id="Score_Personality_Assessment_to_Record_Verdicts" sourceRef="Score_Personality_Assessment" targetRef="Record_Verdicts"/>
+    <bpmn:sequenceFlow id="Record_Verdicts_to_Parallel_Split" sourceRef="Record_Verdicts" targetRef="Parallel_Split"/>
+    <bpmn:sequenceFlow id="Parallel_Split_to_Write_Rejection_Email" sourceRef="Parallel_Split" targetRef="Write_Rejection_Email"/>
+    <bpmn:sequenceFlow id="Write_Rejection_Email_to_Rejection_Email_Sent" sourceRef="Write_Rejection_Email" targetRef="Rejection_Email_Sent"/>
+    <bpmn:sequenceFlow id="Parallel_Split_to_Draft_Job_Offer" sourceRef="Parallel_Split" targetRef="Draft_Job_Offer"/>
+    <bpmn:sequenceFlow id="Draft_Job_Offer_to_Send_Job_Offer" sourceRef="Draft_Job_Offer" targetRef="Send_Job_Offer"/>
+    <bpmn:sequenceFlow id="Send_Job_Offer_to_Job_Offer_Sent" sourceRef="Send_Job_Offer" targetRef="Job_Offer_Sent"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Candidate" name="Candidate pool" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Candidate">
+      <bpmn:lane id="Candidate" name="Candidate"/>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Candidate_Applied" name="Candidate applied"/>
+    <bpmn:intermediateThrowEvent id="Personality_Assessment_Completed" name="Personality assessment completed">
+      <bpmn:messageEventDefinition id="Personality_Assessment_Completed_def"/>
+    </bpmn:intermediateThrowEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Company_di" bpmnElement="actor_Company" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="3620" height="1380"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Candidate_di" bpmnElement="actor_Candidate" isHorizontal="true">
+        <dc:Bounds x="10" y="1460" width="600" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="HR_Department_di" bpmnElement="HR_Department" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="3590" height="690"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Hiring_Manager_di" bpmnElement="Hiring_Manager" isHorizontal="true">
+        <dc:Bounds x="40" y="710" width="3590" height="690"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Candidate_di" bpmnElement="Candidate" isHorizontal="true">
+        <dc:Bounds x="40" y="1460" width="570" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Vacancy_Request_Received_di" bpmnElement="Vacancy_Request_Received">
+        <dc:Bounds x="172" y="175" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Application_Received_di" bpmnElement="Application_Received">
+        <dc:Bounds x="172" y="241" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Technical_Interview_Scheduled_di" bpmnElement="Technical_Interview_Scheduled">
+        <dc:Bounds x="172" y="307" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Verdicts_Recorded_di" bpmnElement="Verdicts_Recorded">
+        <dc:Bounds x="172" y="373" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Job_Offer_Drafted_di" bpmnElement="Job_Offer_Drafted">
+        <dc:Bounds x="172" y="439" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Parallel_Join_di" bpmnElement="Parallel_Join" isMarkerVisible="true">
+        <dc:Bounds x="165" y="505" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Personality_Assessment_Received_di" bpmnElement="Personality_Assessment_Received">
+        <dc:Bounds x="1732" y="347" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Job_Offer_Sent_di" bpmnElement="Job_Offer_Sent">
+        <dc:Bounds x="3292" y="347" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Rejection_Email_Sent_di" bpmnElement="Rejection_Email_Sent">
+        <dc:Bounds x="3032" y="292" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Send_Job_Offer_di" bpmnElement="Send_Job_Offer">
+        <dc:Bounds x="2990" y="358" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Register_Vacancy_di" bpmnElement="Register_Vacancy">
+        <dc:Bounds x="390" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Post_Job_Advertisement_di" bpmnElement="Post_Job_Advertisement">
+        <dc:Bounds x="650" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Screen_Applications_di" bpmnElement="Screen_Applications">
+        <dc:Bounds x="910" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Schedule_Technical_Interview_di" bpmnElement="Schedule_Technical_Interview">
+        <dc:Bounds x="1170" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Send_Personality_Assessment_di" bpmnElement="Send_Personality_Assessment">
+        <dc:Bounds x="1430" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Score_Personality_Assessment_di" bpmnElement="Score_Personality_Assessment">
+        <dc:Bounds x="1950" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Record_Verdicts_di" bpmnElement="Record_Verdicts">
+        <dc:Bounds x="2210" y="325" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Write_Rejection_Email_di" bpmnElement="Write_Rejection_Email">
+        <dc:Bounds x="2730" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Draft_Job_Offer_di" bpmnElement="Draft_Job_Offer">
+        <dc:Bounds x="2730" y="380" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Parallel_Split_di" bpmnElement="Parallel_Split" isMarkerVisible="true">
+        <dc:Bounds x="2505" y="340" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Submit_Vacancy_Request_di" bpmnElement="Submit_Vacancy_Request">
+        <dc:Bounds x="130" y="1015" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Candidate_Applied_di" bpmnElement="Candidate_Applied">
+        <dc:Bounds x="172" y="1534" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Personality_Assessment_Completed_di" bpmnElement="Personality_Assessment_Completed">
+        <dc:Bounds x="172" y="1600" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Vacancy_Request_Received_to_Register_Vacancy_di" bpmnElement="Vacancy_Request_Received_to_Register_Vacancy">
+        <di:waypoint x="208" y="193"/>
+        <di:waypoint x="299" y="193"/>
+        <di:waypoint x="299" y="365"/>
+        <di:waypoint x="390" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Register_Vacancy_to_Post_Job_Advertisement_di" bpmnElement="Register_Vacancy_to_Post_Job_Advertisement">
+        <di:waypoint x="510" y="365"/>
+        <di:waypoint x="650" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Post_Job_Advertisement_to_Screen_Applications_di" bpmnElement="Post_Job_Advertisement_to_Screen_Applications">
+        <di:waypoint x="770" y="365"/>
+        <di:waypoint x="910" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Screen_Applications_to_Schedule_Technical_Interview_di" bpmnElement="Screen_Applications_to_Schedule_Technical_Interview">
+        <di:waypoint x="1030" y="365"/>
+        <di:waypoint x="1170" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Schedule_Technical_Interview_to_Send_Personality_Assessment_di" bpmnElement="Schedule_Technical_Interview_to_Send_Personality_Assessment">
+        <di:waypoint x="1290" y="365"/>
+        <di:waypoint x="1430" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Send_Personality_Assessment_to_Receive_Personality_Assessment_di" bpmnElement="Send_Personality_Assessment_to_Receive_Personality_Assessment">
+        <di:waypoint x="1550" y="365"/>
+        <di:waypoint x="1732" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Personality_Assessment_Received_to_Score_Personality_Assessment_di" bpmnElement="Personality_Assessment_Received_to_Score_Personality_Assessment">
+        <di:waypoint x="1768" y="365"/>
+        <di:waypoint x="1950" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Score_Personality_Assessment_to_Record_Verdicts_di" bpmnElement="Score_Personality_Assessment_to_Record_Verdicts">
+        <di:waypoint x="2070" y="365"/>
+        <di:waypoint x="2210" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Record_Verdicts_to_Parallel_Split_di" bpmnElement="Record_Verdicts_to_Parallel_Split">
+        <di:waypoint x="2330" y="365"/>
+        <di:waypoint x="2505" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Parallel_Split_to_Write_Rejection_Email_di" bpmnElement="Parallel_Split_to_Write_Rejection_Email">
+        <di:waypoint x="2555" y="365"/>
+        <di:waypoint x="2642" y="365"/>
+        <di:waypoint x="2642" y="310"/>
+        <di:waypoint x="2730" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Write_Rejection_Email_to_Rejection_Email_Sent_di" bpmnElement="Write_Rejection_Email_to_Rejection_Email_Sent">
+        <di:waypoint x="2850" y="310"/>
+        <di:waypoint x="3032" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Parallel_Split_to_Draft_Job_Offer_di" bpmnElement="Parallel_Split_to_Draft_Job_Offer">
+        <di:waypoint x="2555" y="365"/>
+        <di:waypoint x="2642" y="365"/>
+        <di:waypoint x="2642" y="420"/>
+        <di:waypoint x="2730" y="420"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Draft_Job_Offer_to_Send_Job_Offer_di" bpmnElement="Draft_Job_Offer_to_Send_Job_Offer">
+        <di:waypoint x="2850" y="420"/>
+        <di:waypoint x="2920" y="420"/>
+        <di:waypoint x="2920" y="398"/>
+        <di:waypoint x="2990" y="398"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Send_Job_Offer_to_Job_Offer_Sent_di" bpmnElement="Send_Job_Offer_to_Job_Offer_Sent">
+        <di:waypoint x="3110" y="398"/>
+        <di:waypoint x="3201" y="398"/>
+        <di:waypoint x="3201" y="365"/>
+        <di:waypoint x="3292" y="365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Personality_Assessment_Message_Flow_di" bpmnElement="Personality_Assessment_Message_Flow">
+        <di:waypoint x="190" y="307"/>
+        <di:waypoint x="1750" y="383"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Verdicts_Message_Flow_di" bpmnElement="Verdicts_Message_Flow">
+        <di:waypoint x="2270" y="325"/>
+        <di:waypoint x="190" y="555"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

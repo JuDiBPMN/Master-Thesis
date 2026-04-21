@@ -1,0 +1,154 @@
+{
+  "pools": [
+    {
+      "id": "zarkan_industries_pool",
+      "name": "Zarkan Industries"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "csr",
+      "name": "Customer Service Representative",
+      "pool": "zarkan_industries_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "handle_complaint",
+      "name": "Handle Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "record_call_details",
+      "name": "Record Call Details",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "document_concerns",
+      "name": "Document Customer Concerns",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "note_letter_receipt",
+      "name": "Note Letter Receipt Date",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "analyze_complaint",
+      "name": "Analyze Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "consult_departments",
+      "name": "Consult Other Departments",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "resolve_complaint",
+      "name": "Resolve Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "archive_complaint",
+      "name": "Archive Complaint Details",
+      "type": "task",
+      "lane": "csr"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_complaint",
+      "name": "Receive Complaint",
+      "type": "startEvent",
+      "lane": "csr",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1rw3a6w",
+      "name": "Complaint Received",
+      "type": "intermediateThrowEvent",
+      "lane": "csr",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0lnnv01",
+      "name": "Complaint Closed",
+      "type": "endEvent",
+      "lane": "csr",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [],
+  "sequence_flows": [
+    {
+      "id": "Flow_1kd72rx",
+      "from": "start_complaint",
+      "to": "handle_complaint"
+    },
+    {
+      "id": "Flow_0pujo55",
+      "from": "handle_complaint",
+      "to": "Event_1rw3a6w"
+    },
+    {
+      "id": "sf1",
+      "from": "Event_1rw3a6w",
+      "to": "record_call_details"
+    },
+    {
+      "id": "sf2",
+      "from": "Event_1rw3a6w",
+      "to": "document_concerns"
+    },
+    {
+      "id": "sf3",
+      "from": "Event_1rw3a6w",
+      "to": "note_letter_receipt"
+    },
+    {
+      "id": "sf4",
+      "from": "record_call_details",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf5",
+      "from": "document_concerns",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf6",
+      "from": "note_letter_receipt",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf7",
+      "from": "analyze_complaint",
+      "to": "consult_departments"
+    },
+    {
+      "id": "sf8",
+      "from": "consult_departments",
+      "to": "resolve_complaint"
+    },
+    {
+      "id": "sf9",
+      "from": "resolve_complaint",
+      "to": "archive_complaint"
+    },
+    {
+      "id": "Flow_05053kn",
+      "from": "archive_complaint",
+      "to": "Event_0lnnv01"
+    }
+  ],
+  "message_flows": [],
+  "data": [],
+  "data_associations": []
+}

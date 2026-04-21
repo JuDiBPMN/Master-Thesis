@@ -1,0 +1,242 @@
+{
+  "pools": [
+    {
+      "id": "library_pool",
+      "name": "Library"
+    },
+    {
+      "id": "requester_pool",
+      "name": "Requester"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "library_staff",
+      "name": "Library Staff",
+      "pool": "library_pool"
+    },
+    {
+      "id": "requester",
+      "name": "Requester",
+      "pool": "requester_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "consult_catalog",
+      "name": "Consult Digital Catalog",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "start_checkout",
+      "name": "Start Checkout Procedure",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "retrieve_book",
+      "name": "Retrieve Book",
+      "type": "task",
+      "lane": "library_staff"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_request",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "requester",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1rw3a6w",
+      "name": "Send Book Request",
+      "type": "intermediateThrowEvent",
+      "lane": "requester",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0muyk3x",
+      "name": "Receive Book Unavailability",
+      "type": "intermediateCatchEvent",
+      "lane": "requester",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0lnnv01",
+      "name": "End Unavailability",
+      "type": "endEvent",
+      "lane": "requester",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0tpcr9s",
+      "name": "Receive Book Availability",
+      "type": "intermediateCatchEvent",
+      "lane": "requester",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1r6yhp5",
+      "name": "End Availability",
+      "type": "endEvent",
+      "lane": "requester",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_library",
+      "name": "Receive Book Request",
+      "type": "startEvent",
+      "lane": "library_staff",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0dnvjd7",
+      "name": "Notify Requester of Unavailability",
+      "type": "intermediateThrowEvent",
+      "lane": "library_staff",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_library_unavailable",
+      "name": "End Unavailable",
+      "type": "endEvent",
+      "lane": "library_staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1k3bfa7",
+      "name": "Notify Requester of Availability",
+      "type": "intermediateThrowEvent",
+      "lane": "library_staff",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_library",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "library_staff",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_availability",
+      "name": "Is Book Available?",
+      "type": "exclusiveGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "split_parallel",
+      "name": "Start Parallel Processing",
+      "type": "parallelGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Both Tasks Complete",
+      "type": "parallelGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Flow_1kd72rx",
+      "from": "start_request",
+      "to": "Event_1rw3a6w"
+    },
+    {
+      "id": "sf1",
+      "from": "start_library",
+      "to": "consult_catalog"
+    },
+    {
+      "id": "sf2",
+      "from": "consult_catalog",
+      "to": "split_availability"
+    },
+    {
+      "id": "sf3",
+      "from": "split_availability",
+      "to": "Event_0dnvjd7",
+      "condition": "Not Available"
+    },
+    {
+      "id": "Flow_1rvyt90",
+      "from": "Event_0dnvjd7",
+      "to": "end_library_unavailable"
+    },
+    {
+      "id": "sf4",
+      "from": "split_availability",
+      "to": "split_parallel",
+      "condition": "Available"
+    },
+    {
+      "id": "sf6",
+      "from": "split_parallel",
+      "to": "start_checkout"
+    },
+    {
+      "id": "sf7",
+      "from": "split_parallel",
+      "to": "retrieve_book"
+    },
+    {
+      "id": "sf8",
+      "from": "start_checkout",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf9",
+      "from": "retrieve_book",
+      "to": "join_parallel"
+    },
+    {
+      "id": "Flow_05053kn",
+      "from": "join_parallel",
+      "to": "Event_1k3bfa7"
+    },
+    {
+      "id": "Flow_057oclr",
+      "from": "Event_1k3bfa7",
+      "to": "end_library"
+    },
+    {
+      "id": "Flow_0vatbql",
+      "from": "Event_0muyk3x",
+      "to": "Event_0lnnv01"
+    },
+    {
+      "id": "Flow_1kdv6t5",
+      "from": "Event_0tpcr9s",
+      "to": "Event_1r6yhp5"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Event_1rw3a6w",
+      "to": "start_library",
+      "name": "Send Book Request"
+    },
+    {
+      "id": "Flow_1nrpm8z",
+      "from": "Event_1k3bfa7",
+      "to": "Event_0tpcr9s",
+      "name": "Notify Requester of Availability"
+    },
+    {
+      "id": "Flow_0fx4d6n",
+      "from": "Event_0dnvjd7",
+      "to": "Event_0muyk3x",
+      "name": "Notify Requester of Unavailability"
+    }
+  ],
+  "data": [],
+  "data_associations": []
+}

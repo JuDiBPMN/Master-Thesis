@@ -1,0 +1,396 @@
+{
+  "pools": [
+    {
+      "id": "Retailer",
+      "name": "Retailer Company Pool"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer Pool"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "CustomerService",
+      "name": "Customer Service",
+      "pool": "Retailer"
+    },
+    {
+      "id": "Warehouse",
+      "name": "Warehouse",
+      "pool": "Retailer"
+    },
+    {
+      "id": "Finance",
+      "name": "Finance",
+      "pool": "Retailer"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "pool": "Customer"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "RegisterReturnRequest",
+      "name": "Register Return Request",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "CheckInformation",
+      "name": "Check Information Completeness",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "NotifyCustomerMissingInfo",
+      "name": "Notify Customer of Missing Information",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "ForwardToWarehouse",
+      "name": "Forward to Warehouse",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "ForwardToFinance",
+      "name": "Forward to Finance",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "InspectProduct",
+      "name": "Inspect Product",
+      "type": "userTask",
+      "lane": "Warehouse"
+    },
+    {
+      "id": "RecordWarehouseVerdict",
+      "name": "Record Warehouse Verdict",
+      "type": "userTask",
+      "lane": "Warehouse"
+    },
+    {
+      "id": "CheckPaymentEligibility",
+      "name": "Check Payment Eligibility",
+      "type": "userTask",
+      "lane": "Finance"
+    },
+    {
+      "id": "RecordFinanceVerdict",
+      "name": "Record Finance Verdict",
+      "type": "userTask",
+      "lane": "Finance"
+    },
+    {
+      "id": "ReviewOutcomes",
+      "name": "Review Outcomes",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "SendRejectionNotice",
+      "name": "Send Return Rejection Notice",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "ApproveReturn",
+      "name": "Approve Return",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "ProcessRefund",
+      "name": "Process Refund",
+      "type": "userTask",
+      "lane": "CustomerService"
+    },
+    {
+      "id": "SendRefundConfirmation",
+      "name": "Send Refund Confirmation",
+      "type": "userTask",
+      "lane": "CustomerService"
+    }
+  ],
+  "events": [
+    {
+      "id": "StartEvent",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent_Warehouse",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Warehouse",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent_Finance",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Finance",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent_Customer",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ThrowEvent_MissingInfo",
+      "name": "Notify Customer of Missing Information",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchEvent_MissingInfo",
+      "name": "Catch Missing Info Notification",
+      "type": "intermediateCatchEvent",
+      "lane": "Customer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ThrowEvent_Warehouse",
+      "name": "Forward to Warehouse",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchEvent_Warehouse",
+      "name": "Catch Warehouse Request",
+      "type": "intermediateCatchEvent",
+      "lane": "Warehouse",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ThrowEvent_Finance",
+      "name": "Forward to Finance",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchEvent_Finance",
+      "name": "Catch Finance Request",
+      "type": "intermediateCatchEvent",
+      "lane": "Finance",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ThrowEvent_RejectionNotice",
+      "name": "Send Return Rejection Notice",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchEvent_RejectionNotice",
+      "name": "Catch Rejection Notice",
+      "type": "intermediateCatchEvent",
+      "lane": "Customer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ThrowEvent_RefundConfirmation",
+      "name": "Send Refund Confirmation",
+      "type": "intermediateThrowEvent",
+      "lane": "CustomerService",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchEvent_RefundConfirmation",
+      "name": "Catch Refund Confirmation",
+      "type": "intermediateCatchEvent",
+      "lane": "Customer",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "ExclusiveGateway_CheckInfo",
+      "name": "Check Information Completeness",
+      "type": "exclusiveGateway",
+      "lane": "CustomerService",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "ParallelGateway_Forward",
+      "name": "Forward to Departments",
+      "type": "parallelGateway",
+      "lane": "CustomerService",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "ParallelGateway_WaitForVerdicts",
+      "name": "Wait for Verdicts",
+      "type": "parallelGateway",
+      "lane": "CustomerService",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "ExclusiveGateway_OutcomeReview",
+      "name": "Review Outcomes",
+      "type": "exclusiveGateway",
+      "lane": "CustomerService",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "StartToRegister",
+      "from": "StartEvent",
+      "to": "RegisterReturnRequest"
+    },
+    {
+      "id": "RegisterToCheckInfo",
+      "from": "RegisterReturnRequest",
+      "to": "CheckInformation"
+    },
+    {
+      "id": "CheckInfoToNotify",
+      "from": "CheckInformation",
+      "to": "NotifyCustomerMissingInfo"
+    },
+    {
+      "id": "CheckInfoToForward",
+      "from": "CheckInformation",
+      "to": "ParallelGateway_Forward"
+    },
+    {
+      "id": "NotifyToEnd",
+      "from": "NotifyCustomerMissingInfo",
+      "to": "EndEvent"
+    },
+    {
+      "id": "ForwardToWarehouse",
+      "from": "ParallelGateway_Forward",
+      "to": "ForwardToWarehouse"
+    },
+    {
+      "id": "ForwardToFinance",
+      "from": "ParallelGateway_Forward",
+      "to": "ForwardToFinance"
+    },
+    {
+      "id": "WarehouseToRecord",
+      "from": "ForwardToWarehouse",
+      "to": "InspectProduct"
+    },
+    {
+      "id": "RecordToCatchWarehouse",
+      "from": "RecordWarehouseVerdict",
+      "to": "CatchEvent_Warehouse"
+    },
+    {
+      "id": "FinanceToRecord",
+      "from": "ForwardToFinance",
+      "to": "CheckPaymentEligibility"
+    },
+    {
+      "id": "RecordToCatchFinance",
+      "from": "RecordFinanceVerdict",
+      "to": "CatchEvent_Finance"
+    },
+    {
+      "id": "CatchWarehouseToWait",
+      "from": "CatchEvent_Warehouse",
+      "to": "ParallelGateway_WaitForVerdicts"
+    },
+    {
+      "id": "CatchFinanceToWait",
+      "from": "CatchEvent_Finance",
+      "to": "ParallelGateway_WaitForVerdicts"
+    },
+    {
+      "id": "WaitToReview",
+      "from": "ParallelGateway_WaitForVerdicts",
+      "to": "ReviewOutcomes"
+    },
+    {
+      "id": "ReviewToOutcome",
+      "from": "ReviewOutcomes",
+      "to": "ExclusiveGateway_OutcomeReview"
+    },
+    {
+      "id": "OutcomeToRejection",
+      "from": "ExclusiveGateway_OutcomeReview",
+      "to": "SendRejectionNotice"
+    },
+    {
+      "id": "RejectionToEnd",
+      "from": "SendRejectionNotice",
+      "to": "EndEvent"
+    },
+    {
+      "id": "OutcomeToApproval",
+      "from": "ExclusiveGateway_OutcomeReview",
+      "to": "ApproveReturn"
+    },
+    {
+      "id": "ApprovalToProcess",
+      "from": "ApproveReturn",
+      "to": "ProcessRefund"
+    },
+    {
+      "id": "ProcessToEnd",
+      "from": "ProcessRefund",
+      "to": "SendRefundConfirmation"
+    },
+    {
+      "id": "RefundToEnd",
+      "from": "SendRefundConfirmation",
+      "to": "EndEvent"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "MissingInfoToCustomer",
+      "from": "ThrowEvent_MissingInfo",
+      "to": "CatchEvent_MissingInfo",
+      "name": "Notify Missing Info"
+    },
+    {
+      "id": "WarehouseToCustomerService",
+      "from": "ThrowEvent_Warehouse",
+      "to": "CatchEvent_Warehouse",
+      "name": "Forward to Warehouse"
+    },
+    {
+      "id": "FinanceToCustomerService",
+      "from": "ThrowEvent_Finance",
+      "to": "CatchEvent_Finance",
+      "name": "Forward to Finance"
+    },
+    {
+      "id": "RejectionToCustomer",
+      "from": "ThrowEvent_RejectionNotice",
+      "to": "CatchEvent_RejectionNotice",
+      "name": "Send Rejection Notice"
+    },
+    {
+      "id": "RefundToCustomer",
+      "from": "ThrowEvent_RefundConfirmation",
+      "to": "CatchEvent_RefundConfirmation",
+      "name": "Send Refund Confirmation"
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "pools": [
+    {
+      "id": "Customer",
+      "name": "Customer"
+    },
+    {
+      "id": "Company",
+      "name": "Company"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "pool": "Customer"
+    },
+    {
+      "id": "Company",
+      "name": "Company",
+      "pool": "Company"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Submit Return Request",
+      "name": "Submit Return Request",
+      "type": "task",
+      "lane": "Customer"
+    },
+    {
+      "id": "Register Return Request",
+      "name": "Register Return Request",
+      "type": "task",
+      "lane": "Customer"
+    },
+    {
+      "id": "Check Information",
+      "name": "Check Information",
+      "type": "task",
+      "lane": "Customer"
+    },
+    {
+      "id": "Forward Return Request",
+      "name": "Forward Return Request",
+      "type": "task",
+      "lane": "Customer"
+    },
+    {
+      "id": "Inspect Product",
+      "name": "Inspect Product",
+      "type": "task",
+      "lane": "Company"
+    },
+    {
+      "id": "Check Payment Eligibility",
+      "name": "Check Payment Eligibility",
+      "type": "task",
+      "lane": "Company"
+    },
+    {
+      "id": "Combine Outcomes",
+      "name": "Combine Outcomes",
+      "type": "task",
+      "lane": "Customer"
+    }
+  ],
+  "events": [
+    {
+      "id": "IntermediateThrowEvent",
+      "name": "IntermediateThrowEvent",
+      "type": "intermediateThrowEvent",
+      "lane": "Customer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "IntermediateCatchEvent",
+      "name": "IntermediateCatchEvent",
+      "type": "intermediateCatchEvent",
+      "lane": "Company",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "EndEvent",
+      "name": "EndEvent",
+      "type": "endEvent",
+      "lane": "Customer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "StartEvent",
+      "name": "StartEvent",
+      "type": "startEvent",
+      "lane": "Company",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ExclusiveGateway",
+      "name": "ExclusiveGateway",
+      "type": "intermediateThrowEvent",
+      "lane": "Customer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "ExclusiveGateway",
+      "name": "ExclusiveGateway",
+      "type": "intermediateCatchEvent",
+      "lane": "Company",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "MessageFlow",
+      "name": "MessageFlow",
+      "type": "intermediateThrowEvent",
+      "lane": "Customer",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "MessageFlow",
+      "name": "MessageFlow",
+      "type": "intermediateCatchEvent",
+      "lane": "Company",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "ExclusiveGateway",
+      "name": "ExclusiveGateway",
+      "type": "exclusiveGateway",
+      "lane": "Customer",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "ExclusiveGateway",
+      "name": "ExclusiveGateway",
+      "type": "exclusiveGateway",
+      "lane": "Company",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Submit Return Request",
+      "from": "Submit Return Request",
+      "to": "Register Return Request",
+      "condition": "true"
+    },
+    {
+      "id": "Register Return Request",
+      "from": "Submit Return Request",
+      "to": "Check Information",
+      "condition": "true"
+    },
+    {
+      "id": "Check Information",
+      "from": "Register Return Request",
+      "to": "Forward Return Request",
+      "condition": "true"
+    },
+    {
+      "id": "Forward Return Request",
+      "from": "Check Information",
+      "to": "Inspect Product",
+      "condition": "true"
+    },
+    {
+      "id": "Inspect Product",
+      "from": "Forward Return Request",
+      "to": "Check Payment Eligibility",
+      "condition": "true"
+    },
+    {
+      "id": "Check Payment Eligibility",
+      "from": "Inspect Product",
+      "to": "Combine Outcomes",
+      "condition": "true"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "IntermediateThrowEvent",
+      "from": "Submit Return Request",
+      "to": "IntermediateThrowEvent",
+      "name": "message flow"
+    }
+  ]
+}

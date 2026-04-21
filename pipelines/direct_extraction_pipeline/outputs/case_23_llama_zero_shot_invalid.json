@@ -1,0 +1,101 @@
+{
+  "pools": [
+    {
+      "id": "Company",
+      "name": "Company"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Customer Service",
+      "name": "Customer Service",
+      "pool": "Company"
+    },
+    {
+      "id": "Operations",
+      "name": "Operations",
+      "pool": "Company"
+    },
+    {
+      "id": "Finance",
+      "name": "Finance",
+      "pool": "Company"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Write Complaint Email",
+      "name": "Write Complaint Email",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Look Up Billing Information",
+      "name": "Look Up Billing Information",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Review Invoice",
+      "name": "Review Invoice",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Create Ticket",
+      "name": "Create Ticket",
+      "type": "task",
+      "lane": "Invoicing Department"
+    },
+    {
+      "id": "Investigate Invoicing Mistake",
+      "name": "Investigate Invoicing Mistake",
+      "type": "task",
+      "lane": "Invoicing Department"
+    },
+    {
+      "id": "Generate New Invoice",
+      "name": "Generate New Invoice",
+      "type": "task",
+      "lane": "Invoicing Department"
+    }
+  ],
+  "events": [
+    {
+      "id": "IntermediateThrowEvent",
+      "name": "IntermediateThrowEvent",
+      "type": "intermediateThrowEvent",
+      "lane": "Customer Service",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "ExclusiveGateway",
+      "name": "ExclusiveGateway",
+      "type": "exclusiveGateway",
+      "lane": "Customer Service",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Sequence Flow 1",
+      "from": "Write Complaint Email",
+      "to": "Look Up Billing Information",
+      "condition": "None"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "Message Flow 1",
+      "from": "IntermediateThrowEvent",
+      "to": "Create Ticket",
+      "name": "Create Ticket"
+    }
+  ]
+}

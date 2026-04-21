@@ -1,0 +1,227 @@
+{
+  "pools": [
+    {
+      "id": "Zarkan_Industries",
+      "name": "Zarkan Industries"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "CSR",
+      "name": "CSR",
+      "pool": "Zarkan_Industries"
+    },
+    {
+      "id": "Customer",
+      "name": "Customer",
+      "pool": "Customer"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "handle_complaint",
+      "name": "Handle Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "record_call_details",
+      "name": "Record Call Details",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "document_concerns",
+      "name": "Document Customer Concerns",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "note_receipt_date",
+      "name": "Note Letter Receipt Date",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "analyze_complaint",
+      "name": "Analyze Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "consult_departments",
+      "name": "Consult Other Departments",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "resolve_complaint",
+      "name": "Resolve Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "archive_complaint",
+      "name": "Archive Complaint",
+      "type": "task",
+      "lane": "CSR"
+    },
+    {
+      "id": "close_complaint",
+      "name": "Close Complaint",
+      "type": "task",
+      "lane": "CSR"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_Zarkan_Industries",
+      "name": "Complaint Received",
+      "type": "startEvent",
+      "lane": "CSR",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_Zarkan_Industries",
+      "name": "Complaint Closed",
+      "type": "endEvent",
+      "lane": "CSR",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_Customer",
+      "name": "Complaint Sent",
+      "type": "startEvent",
+      "lane": "Customer",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_Customer",
+      "name": "Complaint Handled",
+      "type": "endEvent",
+      "lane": "Customer",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "parallel_split",
+      "name": "Start Concurrent Analysis and Consultation",
+      "type": "parallelGateway",
+      "lane": "CSR",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "parallel_join",
+      "name": "Both Analysis and Consultation Complete",
+      "type": "parallelGateway",
+      "lane": "CSR",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_Zarkan_Industries",
+      "to": "handle_complaint"
+    },
+    {
+      "id": "sf2",
+      "from": "handle_complaint",
+      "to": "record_call_details"
+    },
+    {
+      "id": "sf3",
+      "from": "record_call_details",
+      "to": "document_concerns"
+    },
+    {
+      "id": "sf4",
+      "from": "document_concerns",
+      "to": "note_receipt_date"
+    },
+    {
+      "id": "sf5",
+      "from": "note_receipt_date",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf6",
+      "from": "analyze_complaint",
+      "to": "parallel_split"
+    },
+    {
+      "id": "sf7",
+      "from": "parallel_split",
+      "to": "consult_departments"
+    },
+    {
+      "id": "sf8",
+      "from": "parallel_split",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf9",
+      "from": "consult_departments",
+      "to": "parallel_join"
+    },
+    {
+      "id": "sf10",
+      "from": "analyze_complaint",
+      "to": "parallel_join"
+    },
+    {
+      "id": "sf11",
+      "from": "parallel_join",
+      "to": "resolve_complaint"
+    },
+    {
+      "id": "sf12",
+      "from": "resolve_complaint",
+      "to": "archive_complaint"
+    },
+    {
+      "id": "sf13",
+      "from": "archive_complaint",
+      "to": "close_complaint"
+    },
+    {
+      "id": "sf14",
+      "from": "close_complaint",
+      "to": "end_Zarkan_Industries"
+    },
+    {
+      "id": "mf1",
+      "from": "start_Customer",
+      "to": "throw_Customer"
+    },
+    {
+      "id": "mf2",
+      "from": "throw_Customer",
+      "to": "catch_Zarkan_Industries"
+    },
+    {
+      "id": "sf15",
+      "from": "catch_Zarkan_Industries",
+      "to": "end_Zarkan_Industries"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "throw_Customer",
+      "from": "start_Customer",
+      "to": "throw_Customer",
+      "name": "Complaint Sent"
+    },
+    {
+      "id": "catch_Zarkan_Industries",
+      "from": "throw_Customer",
+      "to": "catch_Zarkan_Industries",
+      "name": "Complaint Received"
+    }
+  ]
+}

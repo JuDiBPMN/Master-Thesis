@@ -1,0 +1,107 @@
+{
+  "pools": [
+    {
+      "id": "Library",
+      "name": "Library"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "library_staff",
+      "name": "Library Staff",
+      "pool": "Library"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "check_book_availability",
+      "name": "Check Book Availability",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "inform_requester",
+      "name": "Inform Requester",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "log_book_against_requester",
+      "name": "Log Book Against Requester",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "retrieve_book",
+      "name": "Retrieve Book",
+      "type": "task",
+      "lane": "library_staff"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_library_staff",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "library_staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_library_staff",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "library_staff",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_book_availability",
+      "name": "Book Availability?",
+      "type": "exclusiveGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_book_availability_join",
+      "name": "Procedure Complete",
+      "type": "exclusiveGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_library_staff",
+      "to": "check_book_availability"
+    },
+    {
+      "id": "sf2",
+      "from": "check_book_availability",
+      "to": "gateway_book_availability"
+    },
+    {
+      "id": "sf3",
+      "from": "gateway_book_availability",
+      "to": "inform_requester",
+      "condition": "book not available"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_book_availability",
+      "to": "log_book_against_requester"
+    },
+    {
+      "id": "sf5",
+      "from": "log_book_against_requester",
+      "to": "retrieve_book"
+    },
+    {
+      "id": "sf6",
+      "from": "retrieve_book",
+      "to": "gateway_book_availability_join"
+    }
+  ],
+  "message_flows": []
+}

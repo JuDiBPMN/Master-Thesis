@@ -1,0 +1,327 @@
+{
+  "pools": [
+    {
+      "id": "applicant_pool",
+      "name": "Applicant"
+    },
+    {
+      "id": "grants_office_pool",
+      "name": "Grants Office"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "applicant",
+      "name": "Applicant",
+      "pool": "applicant_pool"
+    },
+    {
+      "id": "grants_administrator",
+      "name": "Grants Administrator",
+      "pool": "grants_office_pool"
+    },
+    {
+      "id": "technical_reviewer",
+      "name": "Technical Reviewer",
+      "pool": "grants_office_pool"
+    },
+    {
+      "id": "finance_officer",
+      "name": "Finance Officer",
+      "pool": "grants_office_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_application",
+      "name": "Submit Grant Application",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "register_application",
+      "name": "Register Application",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "check_completeness",
+      "name": "Check Application Completeness",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "notify_incomplete",
+      "name": "Notify Applicant of Missing Docs",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "collect_docs",
+      "name": "Collect Missing Docs",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "resubmit_docs",
+      "name": "Resubmit Docs",
+      "type": "task",
+      "lane": "applicant"
+    },
+    {
+      "id": "check_completeness_again",
+      "name": "Check Application Completeness Again",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "technical_review",
+      "name": "Assess Project Feasibility",
+      "type": "task",
+      "lane": "technical_reviewer"
+    },
+    {
+      "id": "record_technical_verdict",
+      "name": "Record Technical Verdict",
+      "type": "task",
+      "lane": "technical_reviewer"
+    },
+    {
+      "id": "budget_review",
+      "name": "Review Proposed Budget",
+      "type": "task",
+      "lane": "finance_officer"
+    },
+    {
+      "id": "record_finance_verdict",
+      "name": "Record Finance Verdict",
+      "type": "task",
+      "lane": "finance_officer"
+    },
+    {
+      "id": "review_outcomes",
+      "name": "Review Combined Outcomes",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "issue_rejection",
+      "name": "Issue Rejection Notice",
+      "type": "task",
+      "lane": "grants_administrator"
+    },
+    {
+      "id": "issue_grant_approval",
+      "name": "Issue Grant Approval Letter",
+      "type": "task",
+      "lane": "grants_administrator"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_applicant",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_applicant",
+      "name": "Application Process Ends",
+      "type": "endEvent",
+      "lane": "applicant",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_grants_office",
+      "name": "Application Received",
+      "type": "startEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_incomplete",
+      "name": "Applicant Notified",
+      "type": "endEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_rejected",
+      "name": "Rejection Issued",
+      "type": "endEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_approved",
+      "name": "Grant Approved",
+      "type": "endEvent",
+      "lane": "grants_administrator",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_complete",
+      "name": "Application Complete?",
+      "type": "exclusiveGateway",
+      "lane": "grants_administrator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "split_parallel",
+      "name": "Forward for Review",
+      "type": "parallelGateway",
+      "lane": "grants_administrator",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "Both Verdicts Recorded",
+      "type": "parallelGateway",
+      "lane": "grants_administrator",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "split_outcome",
+      "name": "Both Verdicts Positive?",
+      "type": "exclusiveGateway",
+      "lane": "grants_administrator",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_applicant",
+      "to": "submit_application"
+    },
+    {
+      "id": "sf2",
+      "from": "start_grants_office",
+      "to": "register_application"
+    },
+    {
+      "id": "sf3",
+      "from": "register_application",
+      "to": "check_completeness"
+    },
+    {
+      "id": "sf4",
+      "from": "check_completeness",
+      "to": "split_complete"
+    },
+    {
+      "id": "sf5",
+      "from": "split_complete",
+      "to": "notify_incomplete",
+      "condition": "Incomplete"
+    },
+    {
+      "id": "sf6",
+      "from": "split_complete",
+      "to": "split_parallel",
+      "condition": "Complete"
+    },
+    {
+      "id": "sf7",
+      "from": "notify_incomplete",
+      "to": "end_incomplete"
+    },
+    {
+      "id": "sf8",
+      "from": "split_parallel",
+      "to": "technical_review"
+    },
+    {
+      "id": "sf9",
+      "from": "split_parallel",
+      "to": "budget_review"
+    },
+    {
+      "id": "sf10",
+      "from": "technical_review",
+      "to": "record_technical_verdict"
+    },
+    {
+      "id": "sf11",
+      "from": "record_technical_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf12",
+      "from": "budget_review",
+      "to": "record_finance_verdict"
+    },
+    {
+      "id": "sf13",
+      "from": "record_finance_verdict",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf14",
+      "from": "join_parallel",
+      "to": "review_outcomes"
+    },
+    {
+      "id": "sf15",
+      "from": "review_outcomes",
+      "to": "split_outcome"
+    },
+    {
+      "id": "sf16",
+      "from": "split_outcome",
+      "to": "issue_rejection",
+      "condition": "One or more verdicts negative"
+    },
+    {
+      "id": "sf17",
+      "from": "split_outcome",
+      "to": "issue_grant_approval",
+      "condition": "Both verdicts positive"
+    },
+    {
+      "id": "sf18",
+      "from": "issue_rejection",
+      "to": "end_rejected"
+    },
+    {
+      "id": "sf19",
+      "from": "issue_grant_approval",
+      "to": "end_approved"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "submit_application",
+      "to": "start_grants_office",
+      "name": "Grant Application"
+    },
+    {
+      "id": "mf2",
+      "from": "grants_administrator",
+      "to": "applicant",
+      "name": "Missing Docs Notification"
+    },
+    {
+      "id": "mf3",
+      "from": "applicant",
+      "to": "grants_administrator",
+      "name": "Docs Resubmission"
+    },
+    {
+      "id": "mf4",
+      "from": "technical_reviewer",
+      "to": "grants_administrator",
+      "name": "Technical Verdict"
+    },
+    {
+      "id": "mf5",
+      "from": "finance_officer",
+      "to": "grants_administrator",
+      "name": "Finance Verdict"
+    }
+  ]
+}

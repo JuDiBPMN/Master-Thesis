@@ -1,0 +1,193 @@
+{
+  "pools": [
+    {
+      "id": "library_pool",
+      "name": "Library Pool"
+    },
+    {
+      "id": "requester_pool",
+      "name": "Requester Pool"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "library_staff",
+      "name": "Library Staff",
+      "pool": "library_pool"
+    },
+    {
+      "id": "requester",
+      "name": "Requester",
+      "pool": "requester_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "consult_catalog",
+      "name": "Consult Digital Catalog",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "checkout_procedure",
+      "name": "Start Checkout Procedure",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "inform_requester",
+      "name": "Inform Requester",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "retrieve_book",
+      "name": "Retrieve Book",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "request_book",
+      "name": "Request for a Book",
+      "type": "task",
+      "lane": "requester"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_library",
+      "name": "Request for a Book Received",
+      "type": "startEvent",
+      "lane": "library_staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_library",
+      "name": "Book Request Handled",
+      "type": "endEvent",
+      "lane": "library_staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_requester",
+      "name": "Request for a Book Sent",
+      "type": "startEvent",
+      "lane": "requester",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_requester",
+      "name": "Book Request Acknowledged",
+      "type": "endEvent",
+      "lane": "requester",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_book_availability",
+      "name": "Book Available?",
+      "type": "exclusiveGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_split",
+      "name": "Start Parallel Activities",
+      "type": "parallelGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Both Activities Completed",
+      "type": "parallelGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_loan_or_not_in_stock",
+      "name": "Book on Loan or Not in Stock?",
+      "type": "exclusiveGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_library",
+      "to": "request_book"
+    },
+    {
+      "id": "sf2",
+      "from": "request_book",
+      "to": "consult_catalog"
+    },
+    {
+      "id": "sf3",
+      "from": "consult_catalog",
+      "to": "gateway_book_availability"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_book_availability",
+      "to": "inform_requester",
+      "condition": "Book is currently on loan or not in the library's collection"
+    },
+    {
+      "id": "sf5",
+      "from": "gateway_book_availability",
+      "to": "checkout_procedure",
+      "condition": "Book is available"
+    },
+    {
+      "id": "sf6",
+      "from": "inform_requester",
+      "to": "end_library"
+    },
+    {
+      "id": "sf7",
+      "from": "checkout_procedure",
+      "to": "gateway_parallel_split"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_parallel_split",
+      "to": "log_book"
+    },
+    {
+      "id": "sf9",
+      "from": "gateway_parallel_split",
+      "to": "retrieve_book"
+    },
+    {
+      "id": "sf10",
+      "from": "log_book",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf11",
+      "from": "retrieve_book",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf12",
+      "from": "gateway_parallel_join",
+      "to": "end_library"
+    },
+    {
+      "id": "sf13",
+      "from": "start_requester",
+      "to": "end_requester"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "end_library",
+      "to": "end_requester",
+      "name": "Book Request Acknowledged"
+    }
+  ]
+}

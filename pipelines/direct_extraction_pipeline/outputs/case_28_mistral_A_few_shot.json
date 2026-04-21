@@ -1,0 +1,133 @@
+{
+  "pools": [
+    {
+      "id": "Zarkan_Industries",
+      "name": "Zarkan Industries"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "csr",
+      "name": "CSR",
+      "pool": "Zarkan_Industries"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "register_complaint",
+      "name": "Register Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "analyze_complaint",
+      "name": "Analyze Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "consult_departments",
+      "name": "Consult Departments",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "resolve_complaint",
+      "name": "Resolve Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "archive_complaint",
+      "name": "Archive Complaint",
+      "type": "task",
+      "lane": "csr"
+    },
+    {
+      "id": "close_complaint",
+      "name": "Close Complaint",
+      "type": "task",
+      "lane": "csr"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_csr",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "csr",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_csr",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "csr",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_complaint_type",
+      "name": "Complaint Type",
+      "type": "exclusiveGateway",
+      "lane": "csr",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_complaint_analysis",
+      "name": "Analysis Complete",
+      "type": "exclusiveGateway",
+      "lane": "csr",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_csr",
+      "to": "register_complaint"
+    },
+    {
+      "id": "sf2",
+      "from": "register_complaint",
+      "to": "gateway_complaint_type"
+    },
+    {
+      "id": "sf3",
+      "from": "gateway_complaint_type",
+      "to": "analyze_complaint"
+    },
+    {
+      "id": "sf4",
+      "from": "analyze_complaint",
+      "to": "consult_departments"
+    },
+    {
+      "id": "sf5",
+      "from": "consult_departments",
+      "to": "gateway_complaint_analysis"
+    },
+    {
+      "id": "sf6",
+      "from": "gateway_complaint_analysis",
+      "to": "resolve_complaint"
+    },
+    {
+      "id": "sf7",
+      "from": "resolve_complaint",
+      "to": "archive_complaint"
+    },
+    {
+      "id": "sf8",
+      "from": "archive_complaint",
+      "to": "close_complaint"
+    },
+    {
+      "id": "sf9",
+      "from": "close_complaint",
+      "to": "end_csr"
+    }
+  ],
+  "message_flows": []
+}

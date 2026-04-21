@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Retailer" name="Retailer" processRef="Process_Retailer"/>
+    <bpmn:participant id="actor_Customer" name="Customer" processRef="Process_Customer"/>
+    <bpmn:messageFlow id="CustomerService_Warehouse" name="Product Inspection Verdict" sourceRef="CheckReturnInformation" targetRef="ProductVerdictRecorded"/>
+    <bpmn:messageFlow id="CustomerService_Finance" name="Payment Eligibility Verdict" sourceRef="CheckReturnInformation" targetRef="PaymentVerdictRecorded"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Retailer" name="Retailer" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Retailer">
+      <bpmn:lane id="CustomerService" name="Customer Service">
+        <bpmn:flowNodeRef>CustomerSubmitsReturnRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ReturnRequestInformationComplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ReturnRequestInformationIncomplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ReturnApproved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ReturnRejected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>RegisterReturnRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckReturnInformation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ReviewCombinedOutcomes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>CheckReturnInformationComplete</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Warehouse" name="Warehouse">
+        <bpmn:flowNodeRef>ProductVerdictRecorded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PhysicalProductInspection</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Finance" name="Finance">
+        <bpmn:flowNodeRef>PaymentVerdictRecorded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>PaymentEligibilityCheck</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="CustomerSubmitsReturnRequest" name="Customer Submits Return Request"/>
+    <bpmn:intermediateCatchEvent id="ReturnRequestInformationComplete" name="Return Request Information Complete"/>
+    <bpmn:intermediateThrowEvent id="ReturnRequestInformationIncomplete" name="Return Request Information Incomplete"/>
+    <bpmn:intermediateCatchEvent id="ProductVerdictRecorded" name="Product Verdict Recorded"/>
+    <bpmn:intermediateCatchEvent id="PaymentVerdictRecorded" name="Payment Verdict Recorded"/>
+    <bpmn:endEvent id="ReturnApproved" name="Return Approved"/>
+    <bpmn:endEvent id="ReturnRejected" name="Return Rejected"/>
+    <bpmn:task id="RegisterReturnRequest" name="Register Return Request"/>
+    <bpmn:task id="CheckReturnInformation" name="Check Return Information"/>
+    <bpmn:task id="PhysicalProductInspection" name="Physical Product Inspection"/>
+    <bpmn:task id="PaymentEligibilityCheck" name="Payment Eligibility Check"/>
+    <bpmn:task id="ReviewCombinedOutcomes" name="Review Combined Outcomes"/>
+    <bpmn:exclusiveGateway id="CheckReturnInformationComplete" name="Check Return Information Complete" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="CustomerSubmitsReturnRequest_RegisterReturnRequest" sourceRef="CustomerSubmitsReturnRequest" targetRef="RegisterReturnRequest"/>
+    <bpmn:sequenceFlow id="RegisterReturnRequest_CheckReturnInformation" sourceRef="RegisterReturnRequest" targetRef="CheckReturnInformation"/>
+    <bpmn:sequenceFlow id="CheckReturnInformation_ProductVerdictRecorded" sourceRef="CheckReturnInformation" targetRef="ProductVerdictRecorded"/>
+    <bpmn:sequenceFlow id="ProductVerdictRecorded_PaymentVerdictRecorded" sourceRef="ProductVerdictRecorded" targetRef="PaymentVerdictRecorded"/>
+    <bpmn:sequenceFlow id="PaymentVerdictRecorded_ReviewCombinedOutcomes" sourceRef="PaymentVerdictRecorded" targetRef="ReviewCombinedOutcomes"/>
+    <bpmn:sequenceFlow id="ReviewCombinedOutcomes_ReturnApproved" sourceRef="ReviewCombinedOutcomes" targetRef="ReturnApproved"/>
+    <bpmn:sequenceFlow id="ReviewCombinedOutcomes_ReturnRejected" sourceRef="ReviewCombinedOutcomes" targetRef="ReturnRejected"/>
+    <bpmn:sequenceFlow id="CheckReturnInformationComplete_ProductVerdictRecorded" sourceRef="CheckReturnInformationComplete" targetRef="ProductVerdictRecorded"/>
+    <bpmn:sequenceFlow id="CheckReturnInformationComplete_ReturnRejected" sourceRef="CheckReturnInformationComplete" targetRef="ReturnRejected"/>
+    <bpmn:sequenceFlow id="CheckReturnInformationComplete_ReturnApproved" sourceRef="CheckReturnInformationComplete" targetRef="ReviewCombinedOutcomes"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Customer" name="Customer" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Customer">
+      <bpmn:lane id="Customer" name="Customer"/>
+    </bpmn:laneSet>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Retailer_di" bpmnElement="actor_Retailer" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="2060" height="1410"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Customer_di" bpmnElement="actor_Customer" isHorizontal="true">
+        <dc:Bounds x="10" y="1490" width="400" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CustomerService_di" bpmnElement="CustomerService" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="2030" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Warehouse_di" bpmnElement="Warehouse" isHorizontal="true">
+        <dc:Bounds x="40" y="490" width="2030" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Finance_di" bpmnElement="Finance" isHorizontal="true">
+        <dc:Bounds x="40" y="960" width="2030" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CustomerSubmitsReturnRequest_di" bpmnElement="CustomerSubmitsReturnRequest">
+        <dc:Bounds x="172" y="131" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReturnRequestInformationComplete_di" bpmnElement="ReturnRequestInformationComplete">
+        <dc:Bounds x="172" y="197" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReturnRequestInformationIncomplete_di" bpmnElement="ReturnRequestInformationIncomplete">
+        <dc:Bounds x="172" y="263" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckReturnInformationComplete_di" bpmnElement="CheckReturnInformationComplete" isMarkerVisible="true">
+        <dc:Bounds x="165" y="329" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReturnApproved_di" bpmnElement="ReturnApproved">
+        <dc:Bounds x="1732" y="204" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReturnRejected_di" bpmnElement="ReturnRejected">
+        <dc:Bounds x="1732" y="270" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="RegisterReturnRequest_di" bpmnElement="RegisterReturnRequest">
+        <dc:Bounds x="390" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CheckReturnInformation_di" bpmnElement="CheckReturnInformation">
+        <dc:Bounds x="650" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReviewCombinedOutcomes_di" bpmnElement="ReviewCombinedOutcomes">
+        <dc:Bounds x="1430" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ProductVerdictRecorded_di" bpmnElement="ProductVerdictRecorded">
+        <dc:Bounds x="952" y="707" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="PhysicalProductInspection_di" bpmnElement="PhysicalProductInspection">
+        <dc:Bounds x="130" y="685" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="PaymentVerdictRecorded_di" bpmnElement="PaymentVerdictRecorded">
+        <dc:Bounds x="1212" y="1177" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="PaymentEligibilityCheck_di" bpmnElement="PaymentEligibilityCheck">
+        <dc:Bounds x="130" y="1155" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="CustomerSubmitsReturnRequest_RegisterReturnRequest_di" bpmnElement="CustomerSubmitsReturnRequest_RegisterReturnRequest">
+        <di:waypoint x="208" y="149"/>
+        <di:waypoint x="299" y="149"/>
+        <di:waypoint x="299" y="255"/>
+        <di:waypoint x="390" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="RegisterReturnRequest_CheckReturnInformation_di" bpmnElement="RegisterReturnRequest_CheckReturnInformation">
+        <di:waypoint x="510" y="255"/>
+        <di:waypoint x="650" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckReturnInformation_ProductVerdictRecorded_di" bpmnElement="CheckReturnInformation_ProductVerdictRecorded">
+        <di:waypoint x="770" y="255"/>
+        <di:waypoint x="861" y="255"/>
+        <di:waypoint x="861" y="725"/>
+        <di:waypoint x="952" y="725"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ProductVerdictRecorded_PaymentVerdictRecorded_di" bpmnElement="ProductVerdictRecorded_PaymentVerdictRecorded">
+        <di:waypoint x="988" y="725"/>
+        <di:waypoint x="1100" y="725"/>
+        <di:waypoint x="1100" y="1195"/>
+        <di:waypoint x="1212" y="1195"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="PaymentVerdictRecorded_ReviewCombinedOutcomes_di" bpmnElement="PaymentVerdictRecorded_ReviewCombinedOutcomes">
+        <di:waypoint x="1248" y="1195"/>
+        <di:waypoint x="1339" y="1195"/>
+        <di:waypoint x="1339" y="255"/>
+        <di:waypoint x="1430" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ReviewCombinedOutcomes_ReturnApproved_di" bpmnElement="ReviewCombinedOutcomes_ReturnApproved">
+        <di:waypoint x="1550" y="255"/>
+        <di:waypoint x="1641" y="255"/>
+        <di:waypoint x="1641" y="222"/>
+        <di:waypoint x="1732" y="222"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ReviewCombinedOutcomes_ReturnRejected_di" bpmnElement="ReviewCombinedOutcomes_ReturnRejected">
+        <di:waypoint x="1550" y="255"/>
+        <di:waypoint x="1641" y="255"/>
+        <di:waypoint x="1641" y="288"/>
+        <di:waypoint x="1732" y="288"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckReturnInformationComplete_ProductVerdictRecorded_di" bpmnElement="CheckReturnInformationComplete_ProductVerdictRecorded">
+        <di:waypoint x="215" y="354"/>
+        <di:waypoint x="583" y="354"/>
+        <di:waypoint x="583" y="725"/>
+        <di:waypoint x="952" y="725"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckReturnInformationComplete_ReturnRejected_di" bpmnElement="CheckReturnInformationComplete_ReturnRejected">
+        <di:waypoint x="215" y="354"/>
+        <di:waypoint x="973" y="354"/>
+        <di:waypoint x="973" y="288"/>
+        <di:waypoint x="1732" y="288"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CheckReturnInformationComplete_ReturnApproved_di" bpmnElement="CheckReturnInformationComplete_ReturnApproved">
+        <di:waypoint x="215" y="354"/>
+        <di:waypoint x="822" y="354"/>
+        <di:waypoint x="822" y="255"/>
+        <di:waypoint x="1430" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CustomerService_Warehouse_di" bpmnElement="CustomerService_Warehouse">
+        <di:waypoint x="710" y="215"/>
+        <di:waypoint x="970" y="743"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="CustomerService_Finance_di" bpmnElement="CustomerService_Finance">
+        <di:waypoint x="710" y="215"/>
+        <di:waypoint x="1230" y="1213"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

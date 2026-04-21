@@ -1,0 +1,347 @@
+{
+  "pools": [
+    {
+      "id": "Company",
+      "name": "Company Pool"
+    },
+    {
+      "id": "Candidate",
+      "name": "Candidate Pool"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "HiringManager",
+      "name": "Hiring Manager",
+      "pool": "Company"
+    },
+    {
+      "id": "HRRecruiter",
+      "name": "HR Recruiter",
+      "pool": "Company"
+    },
+    {
+      "id": "Candidate",
+      "name": "Candidate",
+      "pool": "Candidate"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "SubmitVacancyRequest",
+      "name": "Submit Vacancy Request",
+      "type": "userTask",
+      "lane": "HiringManager"
+    },
+    {
+      "id": "RegisterVacancy",
+      "name": "Register Vacancy",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "PostJobAdvertisement",
+      "name": "Post Job Advertisement",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "ApplyForVacancy",
+      "name": "Apply for Vacancy",
+      "type": "userTask",
+      "lane": "Candidate"
+    },
+    {
+      "id": "ScreenApplications",
+      "name": "Screen Applications",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "SelectShortlist",
+      "name": "Select Shortlist",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "ScheduleTechnicalInterview",
+      "name": "Schedule Technical Interview",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "SendPersonalityAssessment",
+      "name": "Send Personality Assessment",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "ConductTechnicalInterview",
+      "name": "Conduct Technical Interview",
+      "type": "userTask",
+      "lane": "HiringManager"
+    },
+    {
+      "id": "RecordTechnicalVerdict",
+      "name": "Record Technical Verdict",
+      "type": "userTask",
+      "lane": "HiringManager"
+    },
+    {
+      "id": "CompletePersonalityAssessment",
+      "name": "Complete Personality Assessment",
+      "type": "userTask",
+      "lane": "Candidate"
+    },
+    {
+      "id": "SubmitPersonalityAssessment",
+      "name": "Submit Personality Assessment",
+      "type": "userTask",
+      "lane": "Candidate"
+    },
+    {
+      "id": "ScorePersonalityAssessment",
+      "name": "Score Personality Assessment",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "RecordPersonalityVerdict",
+      "name": "Record Personality Verdict",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "ReviewOutcomes",
+      "name": "Review Outcomes",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "WriteRejectionEmail",
+      "name": "Write Rejection Email",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "SendRejectionEmail",
+      "name": "Send Rejection Email",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "DraftJobOffer",
+      "name": "Draft Job Offer",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    },
+    {
+      "id": "SendJobOffer",
+      "name": "Send Job Offer",
+      "type": "userTask",
+      "lane": "HRRecruiter"
+    }
+  ],
+  "events": [
+    {
+      "id": "StartProcess",
+      "name": "Start Process",
+      "type": "startEvent",
+      "lane": "HiringManager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndProcess",
+      "name": "End Process",
+      "type": "endEvent",
+      "lane": "HRRecruiter",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndProcessCandidate",
+      "name": "End Process Candidate",
+      "type": "endEvent",
+      "lane": "Candidate",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "ThrowMessageToCandidate",
+      "name": "Throw Message to Candidate",
+      "type": "intermediateThrowEvent",
+      "lane": "HRRecruiter",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "CatchMessageFromCandidate",
+      "name": "Catch Message from Candidate",
+      "type": "intermediateCatchEvent",
+      "lane": "HRRecruiter",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "ParallelGateway",
+      "name": "Parallel Gateway",
+      "type": "parallelGateway",
+      "lane": "HRRecruiter",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "ParallelJoinGateway",
+      "name": "Parallel Join Gateway",
+      "type": "parallelGateway",
+      "lane": "HRRecruiter",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "ExclusiveGateway",
+      "name": "Exclusive Gateway",
+      "type": "exclusiveGateway",
+      "lane": "HRRecruiter",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "ExclusiveJoinGateway",
+      "name": "Exclusive Join Gateway",
+      "type": "exclusiveGateway",
+      "lane": "HRRecruiter",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "StartToSubmitVacancyRequest",
+      "from": "StartProcess",
+      "to": "SubmitVacancyRequest"
+    },
+    {
+      "id": "SubmitVacancyRequestToRegisterVacancy",
+      "from": "SubmitVacancyRequest",
+      "to": "RegisterVacancy"
+    },
+    {
+      "id": "RegisterVacancyToPostJobAdvertisement",
+      "from": "RegisterVacancy",
+      "to": "PostJobAdvertisement"
+    },
+    {
+      "id": "PostJobAdvertisementToApplyForVacancy",
+      "from": "PostJobAdvertisement",
+      "to": "ApplyForVacancy"
+    },
+    {
+      "id": "ApplyForVacancyToScreenApplications",
+      "from": "ApplyForVacancy",
+      "to": "ScreenApplications"
+    },
+    {
+      "id": "ScreenApplicationsToSelectShortlist",
+      "from": "ScreenApplications",
+      "to": "SelectShortlist"
+    },
+    {
+      "id": "SelectShortlistToParallelGateway",
+      "from": "SelectShortlist",
+      "to": "ParallelGateway"
+    },
+    {
+      "id": "ParallelGatewayToScheduleTechnicalInterview",
+      "from": "ParallelGateway",
+      "to": "ScheduleTechnicalInterview"
+    },
+    {
+      "id": "ParallelGatewayToSendPersonalityAssessment",
+      "from": "ParallelGateway",
+      "to": "SendPersonalityAssessment"
+    },
+    {
+      "id": "ScheduleTechnicalInterviewToConductTechnicalInterview",
+      "from": "ScheduleTechnicalInterview",
+      "to": "ConductTechnicalInterview"
+    },
+    {
+      "id": "ConductTechnicalInterviewToRecordTechnicalVerdict",
+      "from": "ConductTechnicalInterview",
+      "to": "RecordTechnicalVerdict"
+    },
+    {
+      "id": "RecordTechnicalVerdictToParallelJoinGateway",
+      "from": "RecordTechnicalVerdict",
+      "to": "ParallelJoinGateway"
+    },
+    {
+      "id": "SendPersonalityAssessmentToCompletePersonalityAssessment",
+      "from": "SendPersonalityAssessment",
+      "to": "CompletePersonalityAssessment"
+    },
+    {
+      "id": "CompletePersonalityAssessmentToSubmitPersonalityAssessment",
+      "from": "CompletePersonalityAssessment",
+      "to": "SubmitPersonalityAssessment"
+    },
+    {
+      "id": "SubmitPersonalityAssessmentToScorePersonalityAssessment",
+      "from": "SubmitPersonalityAssessment",
+      "to": "ScorePersonalityAssessment"
+    },
+    {
+      "id": "ScorePersonalityAssessmentToRecordPersonalityVerdict",
+      "from": "ScorePersonalityAssessment",
+      "to": "RecordPersonalityVerdict"
+    },
+    {
+      "id": "RecordPersonalityVerdictToParallelJoinGateway",
+      "from": "RecordPersonalityVerdict",
+      "to": "ParallelJoinGateway"
+    },
+    {
+      "id": "ParallelJoinGatewayToReviewOutcomes",
+      "from": "ParallelJoinGateway",
+      "to": "ReviewOutcomes"
+    },
+    {
+      "id": "ReviewOutcomesToExclusiveGateway",
+      "from": "ReviewOutcomes",
+      "to": "ExclusiveGateway"
+    },
+    {
+      "id": "ExclusiveGatewayToWriteRejectionEmail",
+      "from": "ExclusiveGateway",
+      "to": "WriteRejectionEmail"
+    },
+    {
+      "id": "WriteRejectionEmailToSendRejectionEmail",
+      "from": "WriteRejectionEmail",
+      "to": "SendRejectionEmail"
+    },
+    {
+      "id": "SendRejectionEmailToEndProcessCandidate",
+      "from": "SendRejectionEmail",
+      "to": "EndProcessCandidate"
+    },
+    {
+      "id": "ExclusiveGatewayToDraftJobOffer",
+      "from": "ExclusiveGateway",
+      "to": "DraftJobOffer"
+    },
+    {
+      "id": "DraftJobOfferToSendJobOffer",
+      "from": "DraftJobOffer",
+      "to": "SendJobOffer"
+    },
+    {
+      "id": "SendJobOfferToEndProcess",
+      "from": "SendJobOffer",
+      "to": "EndProcess"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "SendRejectionEmailToCandidate",
+      "from": "ThrowMessageToCandidate",
+      "to": "CatchMessageFromCandidate",
+      "name": "Send Rejection Email to Candidate"
+    }
+  ]
+}

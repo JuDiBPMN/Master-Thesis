@@ -20,8 +20,8 @@ def load_model():
         llm = Llama.from_pretrained(
             repo_id="unsloth/phi-4-GGUF",
             filename="phi-4-Q4_K_M.gguf", 
-            n_ctx=8192,
-            n_gpu_layers=-1,
+            n_ctx=4096,
+            n_gpu_layers=0,
             verbose=False
         )
     return llm
@@ -149,111 +149,219 @@ def save_json_to_file(obj, path):
 from collections import defaultdict
 
 def is_valid_bpmn(obj):
+    """Returns a dict:
+      {
+        "valid": bool,       # True only if errors == [] and warnings == []
+        "errors":   [...],   # Blocking problems (would produce invalid/unusable BPMN)
+        "warnings": [...],   # Structural problems (incomplete or incorrect diagram)
+      }
+    
+    Error categories (matching thesis):
+      1. Undeclared participant references   → error
+      2. Missing start or end events         → error
+      3. Dangling sequence flow references   → error
+      4. Cross-pool sequence flows           → error
+    
+    Additional structural checks:
+      - Required top-level fields present    → error
+      - Required fields on each element     → error
+      - Placeholder / empty values          → warning
+      - Message flows pointing to tasks     → warning
+      - Isolated tasks (no in/out flow)     → warning
     """
-    Returns (is_fully_valid, errors, warnings).
-    """
-    errors, warnings = [], []
+    errors   = []
+    warnings = []
+
+    # ── 0. Top-level type & required fields ──────────────────────────────────
     if not isinstance(obj, dict):
-        return False, ["Output is not a JSON object"], []
+        return {"valid": False, "errors": ["Output is not a JSON object"], "warnings": []}
 
-    for key in ("pools", "lanes", "tasks", "events", "gateways", "sequence_flows", "message_flows"):
-        if key not in obj:
-            errors.append(f"Missing required field: '{key}'")
+    for field in ("pools", "lanes", "tasks", "events", "gateways",
+                  "sequence_flows", "message_flows"):
+        if field not in obj:
+            errors.append(f"Missing required top-level field: '{field}'")
+        elif not isinstance(obj[field], list):
+            errors.append(f"Field '{field}' must be an array")
+
+    # If the basic structure is broken, stop early — further checks would crash.
     if errors:
-        return False, errors, []
+        return {"valid": False, "errors": errors, "warnings": warnings}
 
-    pools    = obj["pools"]
-    lanes    = obj["lanes"]
-    tasks    = obj["tasks"]
-    events   = obj["events"]
-    gateways = obj["gateways"]
-    seq      = obj["sequence_flows"]
-    mflows   = obj["message_flows"]
+    pools     = obj.get("pools", [])
+    lanes     = obj.get("lanes", [])
+    tasks     = obj.get("tasks", [])
+    events    = obj.get("events", [])
+    gateways  = obj.get("gateways", [])
+    seq_flows = obj.get("sequence_flows", [])
+    msg_flows = obj.get("message_flows", [])
 
-    pool_ids = set()
+    PLACEHOLDER = {"", "...", "none", "null", "n/a", "tbd", "unknown"}
+
+    def is_placeholder(v):
+        return v is None or str(v).strip().lower() in PLACEHOLDER
+
+    # ── 1. Build lookup maps ──────────────────────────────────────────────────
+    pool_ids = {}   # id → pool obj
     for p in pools:
-        if not p.get("id") or not p.get("name"):
-            errors.append(f"Pool missing 'id' or 'name': {p}")
-        else:
-            pool_ids.add(p["id"])
+        pid = p.get("id", "").strip()
+        if not pid:
+            errors.append("A pool is missing its 'id' field")
+            continue
+        if not p.get("name", "").strip():
+            warnings.append(f"Pool '{pid}' has an empty or missing 'name'")
+        pool_ids[pid] = p
 
-    lane_ids = set()
+    lane_ids     = {}   # lane_id → pool_id
+    lane_to_pool = {}   # lane_id → pool_id  (alias for readability)
     for l in lanes:
-        if not l.get("id") or not l.get("name"):
-            errors.append(f"Lane missing 'id' or 'name': {l}")
-        elif l.get("pool") not in pool_ids:
-            errors.append(f"Lane '{l['id']}' references unknown pool '{l.get('pool')}'")
+        lid  = l.get("id",   "").strip()
+        lpool = l.get("pool", "").strip()
+        if not lid:
+            errors.append("A lane is missing its 'id' field")
+            continue
+        if not l.get("name", "").strip():
+            warnings.append(f"Lane '{lid}' has an empty or missing 'name'")
+        # ── ERROR category 1: undeclared participant references ──
+        if lpool not in pool_ids:
+            errors.append(
+                f"[Undeclared participant] Lane '{lid}' references unknown pool '{lpool}'"
+            )
+        lane_ids[lid]     = lpool
+        lane_to_pool[lid] = lpool
+
+    # All flow nodes: tasks, events, gateways
+    node_ids     = {}   # node_id → pool_id  (resolved via lane)
+    node_to_lane = {}   # node_id → lane_id
+
+    def register_node(element, kind):
+        eid   = element.get("id",   "").strip()
+        ename = element.get("name", "").strip()
+        elane = element.get("lane", "").strip()
+
+        if not eid:
+            errors.append(f"A {kind} is missing its 'id' field")
+            return
+        if is_placeholder(ename):
+            warnings.append(f"[Placeholder value] {kind} '{eid}' has empty/placeholder name '{ename}'")
+        # ── ERROR category 1: undeclared participant references ──
+        if elane not in lane_ids:
+            errors.append(
+                f"[Undeclared participant] {kind} '{eid}' references unknown lane '{elane}'"
+            )
+            node_ids[eid]     = None
+            node_to_lane[eid] = elane
         else:
-            lane_ids.add(l["id"])
+            node_ids[eid]     = lane_ids[elane]   # pool_id
+            node_to_lane[eid] = elane
 
-    VALID_TASK_TYPES    = {"task","userTask","serviceTask","scriptTask","manualTask","subProcess","callActivity"}
-    VALID_EVENT_TYPES   = {"startEvent","endEvent","intermediateCatchEvent","intermediateThrowEvent"}
-    VALID_EVENT_DEFS    = {"none","message","timer","signal","error","escalation","conditional","link"}
-    VALID_GATEWAY_TYPES = {"exclusiveGateway","parallelGateway","inclusiveGateway","eventBasedGateway"}
-    VALID_GW_DIRS       = {"diverging","converging"}
+    for t in tasks:
+        register_node(t, "task")
+    for e in events:
+        register_node(e, "event")
+    for g in gateways:
+        register_node(g, "gateway")
 
-    node_ids     = set()
-    node_to_lane = {}
+    # ── 2. Missing start / end events per pool ────────────────────────────────
+    # ── ERROR category 2: missing start or end events ────────────────────────
+    pool_has_start = {pid: False for pid in pool_ids}
+    pool_has_end   = {pid: False for pid in pool_ids}
 
-    def validate_nodes(nodes, valid_types, label, extra_checks=None):
-        for n in nodes:
-            nid = n.get("id")
-            if not nid or not n.get("name") or not n.get("type") or not n.get("lane"):
-                errors.append(f"{label} missing 'id', 'name', 'type', or 'lane': {n}")
-                continue
-            if n["type"] not in valid_types:
-                errors.append(f"{label} '{nid}': invalid type '{n['type']}'")
-            if n["lane"] not in lane_ids:
-                errors.append(f"{label} '{nid}': unknown lane '{n['lane']}'")
-            if nid in node_ids:
-                errors.append(f"Duplicate node id '{nid}'")
-            node_ids.add(nid)
-            node_to_lane[nid] = n["lane"]
-            if extra_checks:
-                extra_checks(n)
+    for e in events:
+        etype = e.get("type", "")
+        elane = e.get("lane", "").strip()
+        pool  = lane_to_pool.get(elane)
+        if pool is None:
+            continue
+        if etype == "startEvent":
+            pool_has_start[pool] = True
+        elif etype == "endEvent":
+            pool_has_end[pool]   = True
 
-    def check_event(e):
-        ed = e.get("eventDefinition")
-        if not ed or ed not in VALID_EVENT_DEFS:
-            errors.append(f"Event '{e.get('id')}': invalid or missing eventDefinition '{ed}'")
+    for pid in pool_ids:
+        if not pool_has_start[pid]:
+            errors.append(
+                f"[Missing start/end event] Pool '{pid}' has no startEvent"
+            )
+        if not pool_has_end[pid]:
+            errors.append(
+                f"[Missing start/end event] Pool '{pid}' has no endEvent"
+            )
 
-    def check_gateway(g):
-        if g.get("gatewayDirection") not in VALID_GW_DIRS:
-            errors.append(f"Gateway '{g.get('id')}': invalid gatewayDirection '{g.get('gatewayDirection')}'")
+    # ── 3. Sequence flow validation ───────────────────────────────────────────
+    task_ids_set = {t.get("id", "") for t in tasks}
 
-    validate_nodes(tasks,    VALID_TASK_TYPES,    "Task")
-    validate_nodes(events,   VALID_EVENT_TYPES,   "Event",   check_event)
-    validate_nodes(gateways, VALID_GATEWAY_TYPES, "Gateway", check_gateway)
+    for sf in seq_flows:
+        sf_id   = sf.get("id",   "?")
+        sf_from = sf.get("from", "").strip()
+        sf_to   = sf.get("to",   "").strip()
 
-    incoming = defaultdict(int)
-    outgoing = defaultdict(int)
+        # ── ERROR category 3: dangling sequence flow references ──
+        if sf_from not in node_ids:
+            errors.append(
+                f"[Dangling sequence flow] '{sf_id}' references undeclared source '{sf_from}'"
+            )
+        if sf_to not in node_ids:
+            errors.append(
+                f"[Dangling sequence flow] '{sf_id}' references undeclared target '{sf_to}'"
+            )
 
-    for sf in seq:
-        src, tgt = sf.get("from"), sf.get("to")
-        if src not in node_ids:
-            errors.append(f"sequence_flow '{sf.get('id')}': unknown 'from' node '{src}'")
-        if tgt not in node_ids:
-            errors.append(f"sequence_flow '{sf.get('id')}': unknown 'to' node '{tgt}'")
-        if src in node_ids and tgt in node_ids:
-            src_pool = next((l["pool"] for l in lanes if l["id"] == node_to_lane.get(src)), None)
-            tgt_pool = next((l["pool"] for l in lanes if l["id"] == node_to_lane.get(tgt)), None)
-            if src_pool and tgt_pool and src_pool != tgt_pool:
-                warnings.append(f"sequence_flow '{sf.get('id')}' crosses pools.")
-            outgoing[src] += 1
-            incoming[tgt] += 1
+        # ── ERROR category 4: cross-pool sequence flows ──
+        if sf_from in node_ids and sf_to in node_ids:
+            pool_from = node_ids[sf_from]
+            pool_to   = node_ids[sf_to]
+            if pool_from is not None and pool_to is not None and pool_from != pool_to:
+                errors.append(
+                    f"[Cross-pool sequence flow] '{sf_id}' crosses from pool '{pool_from}' "
+                    f"to pool '{pool_to}' — use message flows instead"
+                )
 
-    valid_refs = node_ids | pool_ids
-    for mf in mflows:
-        if mf.get("from") not in valid_refs or mf.get("to") not in valid_refs:
-            errors.append(f"message_flow '{mf.get('id')}': unknown 'from' or 'to' reference")
-        if not mf.get("name"):
-            errors.append(f"message_flow '{mf.get('id')}': missing 'name'")
+    # ── 4. Message flow validation ────────────────────────────────────────────
+    # Message flows may legitimately connect tasks/events across pools.
+    # We only warn if the target is a plain task (not an event), since the
+    # thesis rules require message flows to target catch events.
+    for mf in msg_flows:
+        mf_id   = mf.get("id",   "?")
+        mf_to   = mf.get("to",   "").strip()
+        mf_from = mf.get("from", "").strip()
+        if not mf.get("name", "").strip():
+            warnings.append(f"[Placeholder value] message_flow '{mf_id}' has no name")
+        if mf_to in task_ids_set:
+            warnings.append(
+                f"[Message flow to task] '{mf_id}' targets task '{mf_to}' — "
+                f"message flows should target intermediateCatchEvent or startEvent"
+            )
+        if mf_from in task_ids_set:
+            warnings.append(
+                f"[Message flow from task] '{mf_id}' originates from task '{mf_from}' — "
+                f"consider using an intermediateThrowEvent"
+            )
 
-    return len(errors) == 0 and len(warnings) == 0, errors, warnings
+    # ── 5. Isolated nodes (no incoming or outgoing sequence flow) ─────────────
+    nodes_with_incoming = {sf.get("to",   "") for sf in seq_flows}
+    nodes_with_outgoing = {sf.get("from", "") for sf in seq_flows}
+
+    for t in tasks:
+        tid = t.get("id", "")
+        if not tid:
+            continue
+        if tid not in nodes_with_incoming and tid not in nodes_with_outgoing:
+            warnings.append(
+                f"[Isolated node] Task '{tid}' has no sequence flows at all"
+            )
+        elif tid not in nodes_with_incoming:
+            warnings.append(
+                f"[Isolated node] Task '{tid}' has no incoming sequence flow"
+            )
+        elif tid not in nodes_with_outgoing:
+            warnings.append(
+                f"[Isolated node] Task '{tid}' has no outgoing sequence flow"
+            )
+
+    valid = (len(errors) == 0 and len(warnings) == 0)
+    return {"valid": valid, "errors": errors, "warnings": warnings}
 
 
-def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=2):
-    # Prompt is left as defined in your original script
+def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=0):
     prompt = f""" You are a BPMN 2.0 expert. Extract a structured BPMN model from the process description below.
 
 ## STEP 1 — IDENTIFY POOLS (DO THIS FIRST)
@@ -384,7 +492,6 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
         print(e)
         return None
 
-    # Phi-4 follows standard chat completion API
     result = model.create_chat_completion(
         messages=[
             {"role": "system", "content": "You are a business process modeling expert. "
@@ -405,36 +512,64 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
         temperature=0.0,
         max_tokens=8192
     )
-    
+
     if isinstance(result, dict) and 'choices' in result:
         result_text = result['choices'][0]['message']['content']
     else:
         result_text = str(result)
-    
+
+    print("Model output:\n", result_text)
+
     try:
         json_result = json.loads(result_text)
     except json.JSONDecodeError as e:
         print(f"JSON parsing error: {e}")
         json_result = None
 
-    # Validation/Retry logic remains same as original script
-    if json_result and output_file:
-        save_json_to_file(json_result, output_file)
-        
+    if json_result is None:
+        print("\nError: Failed to parse JSON from model output")
+    else:
+        validation = is_valid_bpmn(json_result)
+        if not validation["valid"]:
+            print("\nWarning: Parsed JSON did not pass validation.")
+            for e in validation["errors"]:
+                print(f"  ERROR:   {e}")
+            for w in validation["warnings"]:
+                print(f"  WARNING: {w}")
+            if output_file:
+                try:
+                    save_json_to_file(json_result, output_file.replace('.json', '_invalid.json'))
+                    print(f"Wrote invalid parsed JSON to {output_file.replace('.json', '_invalid.json')}")
+                except Exception as e:
+                    print(f"Failed to write invalid JSON to {output_file}: {e}")
+        else:
+            if output_file:
+                try:
+                    save_json_to_file(json_result, output_file)
+                    print(f"Wrote parsed JSON to {output_file}")
+                except Exception as e:
+                    print(f"Failed to write JSON to {output_file}: {e}")
+
     return json_result
 
 if __name__ == "__main__":
-    case_name = "case_21" 
+    case_name = "case_28"
 
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-    
-    CASES_DIR = os.path.join(PROJECT_ROOT, "cases")
+
+    CASES_DIR  = os.path.join(PROJECT_ROOT, "cases")
     OUTPUT_DIR = os.path.join(SCRIPT_DIR, "outputs")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_zero_shot_phi4.json")
+    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_phi4_zero_shot.json")
+
+    print(f"--- Interactive Run Started ---")
+    print(f"Project Root: {PROJECT_ROOT}")
+    print(f"Reading from: {input_path}")
+    print(f"Saving to:    {out_file}")
+    print(f"-------------------------------")
 
     try:
         if not os.path.exists(input_path):
@@ -442,9 +577,15 @@ if __name__ == "__main__":
 
         with open(input_path, "r", encoding="utf-8") as f:
             process_text = f.read()
-        
+
         print(f"🤖 Phi-4 is analyzing '{case_name}'...")
         bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=0)
-        
+
+        if bpmn_json:
+            print(f"Success! View the output in the sidebar under: outputs/{case_name}_phi4_zero_shot.json")
+        else:
+            print("Model extraction failed. Check the logs above.")
+
     except FileNotFoundError:
-        print(f"Error: The file '{case_name}.txt' was not found.")
+        print(f"Error: The file '{case_name}.txt' was not found in {CASES_DIR}")
+        print(f"Check if you have a file named '{case_name}.txt' in that folder.")

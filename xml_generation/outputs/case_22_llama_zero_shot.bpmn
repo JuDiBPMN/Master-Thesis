@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Company" name="Company" processRef="Process_Company"/>
+    <bpmn:participant id="actor_HR" name="HR" processRef="Process_HR"/>
+    <bpmn:messageFlow id="Message Flow" name="message flow" sourceRef="Throw Event" targetRef="Catch Event"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Company" name="Company" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Company">
+      <bpmn:lane id="Customer Service" name="Customer Service">
+        <bpmn:flowNodeRef>Apply for Vacancy</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Operations" name="Operations"/>
+      <bpmn:lane id="Finance" name="Finance"/>
+    </bpmn:laneSet>
+    <bpmn:task id="Apply for Vacancy" name="Apply for Vacancy"/>
+  </bpmn:process>
+  <bpmn:process id="Process_HR" name="HR" isExecutable="false">
+    <bpmn:intermediateThrowEvent id="Throw Event" name="Throw Event">
+      <bpmn:messageEventDefinition id="Throw Event_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Catch Event" name="Catch Event">
+      <bpmn:messageEventDefinition id="Catch Event_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="End Event" name="End Event">
+      <bpmn:messageEventDefinition id="End Event_def"/>
+    </bpmn:endEvent>
+    <bpmn:task id="Submit Vacancy Request" name="Submit Vacancy Request"/>
+    <bpmn:task id="Register Vacancy" name="Register Vacancy"/>
+    <bpmn:task id="Post Job Advertisement" name="Post Job Advertisement"/>
+    <bpmn:task id="Screen Applications" name="Screen Applications"/>
+    <bpmn:task id="Schedule Technical Interview" name="Schedule Technical Interview"/>
+    <bpmn:task id="Score Personality Assessment" name="Score Personality Assessment"/>
+    <bpmn:task id="Record Verdict" name="Record Verdict"/>
+    <bpmn:exclusiveGateway id="Exclusive Gateway" name="Exclusive Gateway" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="Sequence Flow" sourceRef="Submit Vacancy Request" targetRef="Register Vacancy" name="true">
+      <bpmn:conditionExpression>true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Company_di" bpmnElement="actor_Company" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="600" height="660"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_HR_di" bpmnElement="actor_HR" isHorizontal="true">
+        <dc:Bounds x="10" y="740" width="730" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Customer Service_di" bpmnElement="Customer Service" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="570" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Operations_di" bpmnElement="Operations" isHorizontal="true">
+        <dc:Bounds x="40" y="240" width="570" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Finance_di" bpmnElement="Finance" isHorizontal="true">
+        <dc:Bounds x="40" y="460" width="570" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Apply for Vacancy_di" bpmnElement="Apply for Vacancy">
+        <dc:Bounds x="130" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Throw Event_di" bpmnElement="Throw Event">
+        <dc:Bounds x="142" y="411" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Catch Event_di" bpmnElement="Catch Event">
+        <dc:Bounds x="142" y="477" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End Event_di" bpmnElement="End Event">
+        <dc:Bounds x="142" y="543" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Submit Vacancy Request_di" bpmnElement="Submit Vacancy Request">
+        <dc:Bounds x="100" y="609" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Post Job Advertisement_di" bpmnElement="Post Job Advertisement">
+        <dc:Bounds x="100" y="719" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Screen Applications_di" bpmnElement="Screen Applications">
+        <dc:Bounds x="100" y="829" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Schedule Technical Interview_di" bpmnElement="Schedule Technical Interview">
+        <dc:Bounds x="100" y="939" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Score Personality Assessment_di" bpmnElement="Score Personality Assessment">
+        <dc:Bounds x="100" y="1049" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Record Verdict_di" bpmnElement="Record Verdict">
+        <dc:Bounds x="100" y="1159" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Exclusive Gateway_di" bpmnElement="Exclusive Gateway" isMarkerVisible="true">
+        <dc:Bounds x="135" y="1269" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Register Vacancy_di" bpmnElement="Register Vacancy">
+        <dc:Bounds x="360" y="825" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Sequence Flow_di" bpmnElement="Sequence Flow">
+        <di:waypoint x="220" y="649"/>
+        <di:waypoint x="290" y="649"/>
+        <di:waypoint x="290" y="865"/>
+        <di:waypoint x="360" y="865"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Message Flow_di" bpmnElement="Message Flow">
+        <di:waypoint x="160" y="411"/>
+        <di:waypoint x="160" y="513"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

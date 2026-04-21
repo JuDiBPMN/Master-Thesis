@@ -1,0 +1,272 @@
+{
+  "pools": [
+    {
+      "id": "Bank",
+      "name": "Bank"
+    },
+    {
+      "id": "Client",
+      "name": "Client"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Client",
+      "name": "Client",
+      "pool": "Client"
+    },
+    {
+      "id": "Bank_Customer_Service",
+      "name": "Bank Customer Service",
+      "pool": "Bank"
+    },
+    {
+      "id": "Bank_Operations",
+      "name": "Bank Operations",
+      "pool": "Bank"
+    },
+    {
+      "id": "Bank_Finance",
+      "name": "Bank Finance",
+      "pool": "Bank"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Receive_Mortgage_Application",
+      "name": "Receive Mortgage Application",
+      "type": "task",
+      "lane": "Client"
+    },
+    {
+      "id": "Create_Mortgage_File",
+      "name": "Create Mortgage File",
+      "type": "task",
+      "lane": "Bank_Customer_Service"
+    },
+    {
+      "id": "Evaluate_Financial_Stability",
+      "name": "Evaluate Financial Stability",
+      "type": "task",
+      "lane": "Bank_Operations"
+    },
+    {
+      "id": "Gather_Income_Statements",
+      "name": "Gather Income Statements",
+      "type": "task",
+      "lane": "Bank_Operations"
+    },
+    {
+      "id": "Check_for_Credit_Applications",
+      "name": "Check for Credit Applications",
+      "type": "task",
+      "lane": "Bank_Operations"
+    },
+    {
+      "id": "Perform_Risk_Analysis",
+      "name": "Perform In-depth Risk Analysis",
+      "type": "task",
+      "lane": "Bank_Finance"
+    },
+    {
+      "id": "Grant_Line_of_Credit",
+      "name": "Grant Line of Credit",
+      "type": "task",
+      "lane": "Bank_Finance"
+    },
+    {
+      "id": "Decline_Mortgage_Application",
+      "name": "Decline Mortgage Application",
+      "type": "task",
+      "lane": "Bank_Finance"
+    }
+  ],
+  "events": [
+    {
+      "id": "Start_Client",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "Client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "End_Client_Declined",
+      "name": "Mortgage Application Declined",
+      "type": "endEvent",
+      "lane": "Client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "End_Client_Granted",
+      "name": "Line of Credit Granted",
+      "type": "endEvent",
+      "lane": "Client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Start_Bank",
+      "name": "Mortgage Assessment Start",
+      "type": "startEvent",
+      "lane": "Bank_Customer_Service",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "End_Bank_Declined",
+      "name": "Mortgage Assessment End (Declined)",
+      "type": "endEvent",
+      "lane": "Bank_Finance",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "End_Bank_Granted",
+      "name": "Mortgage Assessment End (Granted)",
+      "type": "endEvent",
+      "lane": "Bank_Finance",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Parallel_Split",
+      "name": "Concurrent Evaluation Start",
+      "type": "parallelGateway",
+      "lane": "Bank_Operations",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "Parallel_Join",
+      "name": "Concurrent Evaluation Complete",
+      "type": "parallelGateway",
+      "lane": "Bank_Operations",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "Exclusive_Split",
+      "name": "Assessment Outcome?",
+      "type": "exclusiveGateway",
+      "lane": "Bank_Finance",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "Exclusive_Join",
+      "name": "Assessment Complete",
+      "type": "exclusiveGateway",
+      "lane": "Bank_Finance",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "Start_Client",
+      "to": "Receive_Mortgage_Application"
+    },
+    {
+      "id": "sf2",
+      "from": "Receive_Mortgage_Application",
+      "to": "End_Client_Declined"
+    },
+    {
+      "id": "sf3",
+      "from": "Start_Bank",
+      "to": "Create_Mortgage_File"
+    },
+    {
+      "id": "sf4",
+      "from": "Create_Mortgage_File",
+      "to": "Parallel_Split"
+    },
+    {
+      "id": "sf5",
+      "from": "Parallel_Split",
+      "to": "Evaluate_Financial_Stability"
+    },
+    {
+      "id": "sf6",
+      "from": "Parallel_Split",
+      "to": "Gather_Income_Statements"
+    },
+    {
+      "id": "sf7",
+      "from": "Parallel_Split",
+      "to": "Check_for_Credit_Applications"
+    },
+    {
+      "id": "sf8",
+      "from": "Evaluate_Financial_Stability",
+      "to": "Parallel_Join"
+    },
+    {
+      "id": "sf9",
+      "from": "Gather_Income_Statements",
+      "to": "Parallel_Join"
+    },
+    {
+      "id": "sf10",
+      "from": "Check_for_Credit_Applications",
+      "to": "Parallel_Join"
+    },
+    {
+      "id": "sf11",
+      "from": "Parallel_Join",
+      "to": "Perform_Risk_Analysis"
+    },
+    {
+      "id": "sf12",
+      "from": "Perform_Risk_Analysis",
+      "to": "Exclusive_Split"
+    },
+    {
+      "id": "sf13",
+      "from": "Exclusive_Split",
+      "to": "Grant_Line_of_Credit",
+      "condition": "Assessment is positive"
+    },
+    {
+      "id": "sf14",
+      "from": "Exclusive_Split",
+      "to": "Decline_Mortgage_Application",
+      "condition": "Assessment is negative"
+    },
+    {
+      "id": "sf15",
+      "from": "Grant_Line_of_Credit",
+      "to": "End_Client_Granted"
+    },
+    {
+      "id": "sf16",
+      "from": "Decline_Mortgage_Application",
+      "to": "End_Client_Declined"
+    },
+    {
+      "id": "sf17",
+      "from": "Start_Bank",
+      "to": "End_Bank_Declined"
+    },
+    {
+      "id": "sf18",
+      "from": "Start_Bank",
+      "to": "End_Bank_Granted"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Receive_Mortgage_Application",
+      "to": "Start_Bank",
+      "name": "Mortgage Application"
+    },
+    {
+      "id": "mf2",
+      "from": "Grant_Line_of_Credit",
+      "to": "End_Client_Granted",
+      "name": "Line of Credit"
+    },
+    {
+      "id": "mf3",
+      "from": "Decline_Mortgage_Application",
+      "to": "End_Client_Declined",
+      "name": "Mortgage Application Declined"
+    }
+  ]
+}

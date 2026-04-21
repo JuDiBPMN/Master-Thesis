@@ -1,0 +1,157 @@
+{
+  "pools": [
+    {
+      "id": "Library",
+      "name": "Library System"
+    },
+    {
+      "id": "Requester",
+      "name": "Requester"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Library_Staff",
+      "name": "Library Staff",
+      "pool": "Library"
+    },
+    {
+      "id": "Requester",
+      "name": "Requester",
+      "pool": "Requester"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Check_Catalog",
+      "name": "Check Catalog for Book Availability",
+      "type": "userTask",
+      "lane": "Library_Staff"
+    },
+    {
+      "id": "Inform_Requester",
+      "name": "Inform Requester of Unavailability",
+      "type": "userTask",
+      "lane": "Library_Staff"
+    },
+    {
+      "id": "Start_Checkout",
+      "name": "Start Checkout Procedure",
+      "type": "userTask",
+      "lane": "Library_Staff"
+    },
+    {
+      "id": "Log_Book",
+      "name": "Log Book Against Requester's Account",
+      "type": "userTask",
+      "lane": "Library_Staff"
+    },
+    {
+      "id": "Retrieve_Book",
+      "name": "Retrieve Book Using Automatic System",
+      "type": "userTask",
+      "lane": "Library_Staff"
+    }
+  ],
+  "events": [
+    {
+      "id": "StartEvent",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "Library_Staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Library_Staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "EndEvent_Requester",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Requester",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Book_Not_Available",
+      "name": "Book Not Available",
+      "type": "intermediateThrowEvent",
+      "lane": "Library_Staff",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Catch_Book_Not_Available",
+      "name": "Catch Book Not Available",
+      "type": "intermediateCatchEvent",
+      "lane": "Requester",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "ExclusiveGateway",
+      "name": "Check Book Availability",
+      "type": "exclusiveGateway",
+      "lane": "Library_Staff",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Start_to_Check_Catalog",
+      "from": "StartEvent",
+      "to": "Check_Catalog"
+    },
+    {
+      "id": "Check_Catalog_to_ExclusiveGateway",
+      "from": "Check_Catalog",
+      "to": "ExclusiveGateway"
+    },
+    {
+      "id": "ExclusiveGateway_to_Inform_Requester",
+      "from": "ExclusiveGateway",
+      "to": "Inform_Requester"
+    },
+    {
+      "id": "Inform_Requester_to_Book_Not_Available",
+      "from": "Inform_Requester",
+      "to": "Book_Not_Available"
+    },
+    {
+      "id": "Catch_Book_Not_Available_to_EndEvent_Requester",
+      "from": "Catch_Book_Not_Available",
+      "to": "EndEvent_Requester"
+    },
+    {
+      "id": "ExclusiveGateway_to_Start_Checkout",
+      "from": "ExclusiveGateway",
+      "to": "Start_Checkout"
+    },
+    {
+      "id": "Start_Checkout_to_Log_Book",
+      "from": "Start_Checkout",
+      "to": "Log_Book"
+    },
+    {
+      "id": "Log_Book_to_Retrieve_Book",
+      "from": "Log_Book",
+      "to": "Retrieve_Book"
+    },
+    {
+      "id": "Retrieve_Book_to_EndEvent",
+      "from": "Retrieve_Book",
+      "to": "EndEvent"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "Book_Not_Available_to_Catch_Book_Not_Available",
+      "from": "Book_Not_Available",
+      "to": "Catch_Book_Not_Available",
+      "name": "Inform Requester of Unavailability"
+    }
+  ]
+}

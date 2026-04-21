@@ -1,0 +1,201 @@
+{
+  "pools": [
+    {
+      "id": "Retailer",
+      "name": "Retailer"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "customer_service",
+      "name": "Customer Service",
+      "pool": "Retailer"
+    },
+    {
+      "id": "warehouse_team",
+      "name": "Warehouse Team",
+      "pool": "Retailer"
+    },
+    {
+      "id": "finance_department",
+      "name": "Finance Department",
+      "pool": "Retailer"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "submit_return_request",
+      "name": "Submit Return Request",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "check_return_information",
+      "name": "Check Return Information",
+      "type": "task",
+      "lane": "customer_service"
+    },
+    {
+      "id": "inspect_product",
+      "name": "Inspect Product",
+      "type": "task",
+      "lane": "warehouse_team"
+    },
+    {
+      "id": "check_payment_eligibility",
+      "name": "Check Payment Eligibility",
+      "type": "task",
+      "lane": "finance_department"
+    },
+    {
+      "id": "review_verdicts",
+      "name": "Review Verdicts",
+      "type": "task",
+      "lane": "customer_service"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_customer_service",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_customer_service",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "customer_service",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_warehouse_team",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "warehouse_team",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_warehouse_team",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "warehouse_team",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_finance_department",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "finance_department",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_finance_department",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "finance_department",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_parallel_split",
+      "name": "Start Concurrent Verdicts",
+      "type": "parallelGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Verdicts Complete",
+      "type": "parallelGateway",
+      "lane": "customer_service",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_customer_service",
+      "to": "submit_return_request"
+    },
+    {
+      "id": "sf2",
+      "from": "submit_return_request",
+      "to": "check_return_information"
+    },
+    {
+      "id": "sf3",
+      "from": "check_return_information",
+      "to": "gateway_parallel_split"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_parallel_split",
+      "to": "inspect_product"
+    },
+    {
+      "id": "sf5",
+      "from": "gateway_parallel_split",
+      "to": "check_payment_eligibility"
+    },
+    {
+      "id": "sf6",
+      "from": "inspect_product",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf7",
+      "from": "check_payment_eligibility",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_parallel_join",
+      "to": "review_verdicts"
+    },
+    {
+      "id": "sf9",
+      "from": "review_verdicts",
+      "to": "gateway_assessment_split"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_assessment_split",
+      "to": "end_customer_service",
+      "condition": "both verdicts are positive"
+    },
+    {
+      "id": "sf11",
+      "from": "gateway_assessment_split",
+      "to": "return_rejection_notice",
+      "condition": "either verdict is negative"
+    },
+    {
+      "id": "sf12",
+      "from": "return_rejection_notice",
+      "to": "end_customer_service"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "check_return_information",
+      "to": "inspect_product",
+      "name": "Product Information"
+    },
+    {
+      "id": "mf2",
+      "from": "inspect_product",
+      "to": "check_payment_eligibility",
+      "name": "Product Verdict"
+    },
+    {
+      "id": "mf3",
+      "from": "check_payment_eligibility",
+      "to": "review_verdicts",
+      "name": "Payment Eligibility"
+    }
+  ]
+}

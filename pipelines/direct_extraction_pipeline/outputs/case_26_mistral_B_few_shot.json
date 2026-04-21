@@ -1,0 +1,188 @@
+{
+  "pools": [
+    {
+      "id": "hr_manager_pool",
+      "name": "HR Manager"
+    },
+    {
+      "id": "business_manager_pool",
+      "name": "Business Manager"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "hr_manager",
+      "name": "HR Manager",
+      "pool": "hr_manager_pool"
+    },
+    {
+      "id": "business_manager",
+      "name": "Business Manager",
+      "pool": "business_manager_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "introduction_interview",
+      "name": "Introduction Interview",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "discuss_candidate",
+      "name": "Discuss Candidate",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "inform_candidate",
+      "name": "Inform Candidate",
+      "type": "task",
+      "lane": "hr_manager"
+    },
+    {
+      "id": "second_assessment",
+      "name": "Second Assessment",
+      "type": "task",
+      "lane": "business_manager"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_hr",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_0j3q3w",
+      "name": "Introduction Interview Finished",
+      "type": "intermediateThrowEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1q3x2v",
+      "name": "Discuss Candidate with Business Manager",
+      "type": "intermediateCatchEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0x3w5e",
+      "name": "Business Manager Decision",
+      "type": "intermediateThrowEvent",
+      "lane": "business_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_1k3yhg",
+      "name": "Contract Preparation",
+      "type": "intermediateThrowEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_hr",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "hr_manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_bm",
+      "name": "Receive Candidate Information",
+      "type": "startEvent",
+      "lane": "business_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0v3xzr",
+      "name": "Second Assessment Finished",
+      "type": "intermediateCatchEvent",
+      "lane": "business_manager",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_bm",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "business_manager",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_discuss",
+      "name": "Discuss with Business Manager?",
+      "type": "exclusiveGateway",
+      "lane": "hr_manager",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_assessment",
+      "name": "Assessment Completed",
+      "type": "parallelGateway",
+      "lane": "business_manager",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Flow_1j3q3w0",
+      "from": "start_hr",
+      "to": "introduction_interview"
+    },
+    {
+      "id": "Flow_03xzr1",
+      "from": "introduction_interview",
+      "to": "Event_0j3q3w"
+    },
+    {
+      "id": "Flow_1q3x2v0",
+      "from": "Event_1q3x2v",
+      "to": "split_discuss"
+    },
+    {
+      "id": "Flow_0x3w5e0",
+      "from": "split_discuss",
+      "to": "discuss_candidate"
+    },
+    {
+      "id": "Flow_1k3yhg0",
+      "from": "discuss_candidate",
+      "to": "join_assessment"
+    },
+    {
+      "id": "Flow_0v3xzr1",
+      "from": "join_assessment",
+      "to": "Event_0v3xzr"
+    },
+    {
+      "id": "Flow_1k3yhg1",
+      "from": "Event_0v3xzr",
+      "to": "Event_1k3yhg"
+    },
+    {
+      "id": "Flow_03xw5e1",
+      "from": "split_discuss",
+      "to": "end_hr",
+      "condition": "Not discussed with Business Manager"
+    },
+    {
+      "id": "Flow_03xw5e2",
+      "from": "split_discuss",
+      "to": "end_bm",
+      "condition": "Discussed with Business Manager"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Event_0j3q3w",
+      "to": "start_bm",
+      "name": "Send Candidate Information"
+    }
+  ]
+}

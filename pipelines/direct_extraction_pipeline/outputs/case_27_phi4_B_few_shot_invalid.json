@@ -1,0 +1,227 @@
+{
+  "pools": [
+    {
+      "id": "bank_pool",
+      "name": "Bank"
+    },
+    {
+      "id": "client_pool",
+      "name": "Client"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "mortgage_assessment",
+      "name": "Mortgage Assessment",
+      "pool": "bank_pool"
+    },
+    {
+      "id": "client",
+      "name": "Client",
+      "pool": "client_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "create_mortgage_file",
+      "name": "Create Mortgage File",
+      "type": "task",
+      "lane": "mortgage_assessment"
+    },
+    {
+      "id": "evaluate_financial_stability",
+      "name": "Evaluate Financial Stability",
+      "type": "task",
+      "lane": "mortgage_assessment"
+    },
+    {
+      "id": "gather_income_statements",
+      "name": "Gather Income Statements",
+      "type": "task",
+      "lane": "mortgage_assessment"
+    },
+    {
+      "id": "check_credit_applications",
+      "name": "Check Other Credit Applications",
+      "type": "task",
+      "lane": "mortgage_assessment"
+    },
+    {
+      "id": "perform_risk_analysis",
+      "name": "Perform Risk Analysis",
+      "type": "task",
+      "lane": "mortgage_assessment"
+    },
+    {
+      "id": "grant_line_of_credit",
+      "name": "Grant Line of Credit",
+      "type": "task",
+      "lane": "mortgage_assessment"
+    },
+    {
+      "id": "decline_application",
+      "name": "Decline Mortgage Application",
+      "type": "task",
+      "lane": "mortgage_assessment"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_mortgage_assessment",
+      "name": "Start Mortgage Assessment",
+      "type": "startEvent",
+      "lane": "mortgage_assessment",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Event_1rw3a6w",
+      "name": "Send Assessment Result",
+      "type": "intermediateThrowEvent",
+      "lane": "mortgage_assessment",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Event_0muyk3x",
+      "name": "Receive Assessment Result",
+      "type": "intermediateCatchEvent",
+      "lane": "client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_positive",
+      "name": "End Positive",
+      "type": "endEvent",
+      "lane": "mortgage_assessment",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_negative",
+      "name": "End Negative",
+      "type": "endEvent",
+      "lane": "mortgage_assessment",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "split_parallel",
+      "name": "Start Parallel Processing",
+      "type": "parallelGateway",
+      "lane": "mortgage_assessment",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "join_parallel",
+      "name": "All Tasks Complete",
+      "type": "parallelGateway",
+      "lane": "mortgage_assessment",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "split_decision",
+      "name": "Assessment Positive?",
+      "type": "exclusiveGateway",
+      "lane": "mortgage_assessment",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Flow_1kd72rx",
+      "from": "start_mortgage_assessment",
+      "to": "create_mortgage_file"
+    },
+    {
+      "id": "sf1",
+      "from": "create_mortgage_file",
+      "to": "split_parallel"
+    },
+    {
+      "id": "sf2",
+      "from": "split_parallel",
+      "to": "evaluate_financial_stability"
+    },
+    {
+      "id": "sf3",
+      "from": "split_parallel",
+      "to": "gather_income_statements"
+    },
+    {
+      "id": "sf4",
+      "from": "split_parallel",
+      "to": "check_credit_applications"
+    },
+    {
+      "id": "sf5",
+      "from": "evaluate_financial_stability",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf6",
+      "from": "gather_income_statements",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf7",
+      "from": "check_credit_applications",
+      "to": "join_parallel"
+    },
+    {
+      "id": "sf8",
+      "from": "join_parallel",
+      "to": "perform_risk_analysis"
+    },
+    {
+      "id": "sf9",
+      "from": "perform_risk_analysis",
+      "to": "split_decision"
+    },
+    {
+      "id": "sf10",
+      "from": "split_decision",
+      "to": "grant_line_of_credit",
+      "condition": "Positive"
+    },
+    {
+      "id": "sf11",
+      "from": "grant_line_of_credit",
+      "to": "Event_1rw3a6w"
+    },
+    {
+      "id": "sf12",
+      "from": "Event_1rw3a6w",
+      "to": "end_positive"
+    },
+    {
+      "id": "sf13",
+      "from": "split_decision",
+      "to": "decline_application",
+      "condition": "Negative"
+    },
+    {
+      "id": "sf14",
+      "from": "decline_application",
+      "to": "Event_1rw3a6w"
+    },
+    {
+      "id": "sf15",
+      "from": "Event_1rw3a6w",
+      "to": "end_negative"
+    },
+    {
+      "id": "Flow_0vatbql",
+      "from": "Event_0muyk3x",
+      "to": "end_positive"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "Event_1rw3a6w",
+      "to": "Event_0muyk3x",
+      "name": "Send Assessment Result"
+    }
+  ],
+  "data": [],
+  "data_associations": []
+}

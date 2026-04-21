@@ -1,0 +1,95 @@
+{
+  "pools": [
+    { "id": "pool_customer", "name": "Customer" },
+    { "id": "pool_retailer", "name": "Retailer" }
+  ],
+  "lanes": [
+    { "id": "lane_customer",          "name": "Customer",          "pool": "pool_customer" },
+    { "id": "lane_cs",                "name": "Customer Service",  "pool": "pool_retailer" },
+    { "id": "lane_warehouse",         "name": "Warehouse",         "pool": "pool_retailer" },
+    { "id": "lane_finance",           "name": "Finance",           "pool": "pool_retailer" }
+  ],
+  "tasks": [
+    { "id": "task_register",          "name": "Register return request",       "type": "userTask",    "lane": "lane_cs" },
+    { "id": "task_check_info",        "name": "Check information completeness","type": "userTask",    "lane": "lane_cs" },
+    { "id": "task_notify_missing",    "name": "Notify customer of missing information", "type": "userTask", "lane": "lane_cs" },
+    { "id": "task_review_outcomes",   "name": "Review combined outcomes",      "type": "userTask",    "lane": "lane_cs" },
+    { "id": "task_approve_refund",    "name": "Approve return and process refund", "type": "userTask","lane": "lane_cs" },
+    { "id": "task_inspect_product",   "name": "Inspect returned product",      "type": "manualTask",  "lane": "lane_warehouse" },
+    { "id": "task_record_wh_verdict", "name": "Record warehouse verdict",      "type": "userTask",    "lane": "lane_warehouse" },
+    { "id": "task_check_eligibility", "name": "Check refund eligibility",      "type": "userTask",    "lane": "lane_finance" },
+    { "id": "task_record_fin_verdict","name": "Record finance verdict",        "type": "userTask",    "lane": "lane_finance" }
+  ],
+  "events": [
+    { "id": "start_customer",         "name": "Return request submitted",       "type": "startEvent",               "lane": "lane_customer",  "eventDefinition": "none" },
+    { "id": "throw_customer_request", "name": "Send return request",            "type": "intermediateThrowEvent",   "lane": "lane_customer",  "eventDefinition": "message" },
+    { "id": "catch_customer_outcome", "name": "Receive outcome from retailer",  "type": "intermediateCatchEvent",   "lane": "lane_customer",  "eventDefinition": "message" },
+    { "id": "end_customer",           "name": "End",                            "type": "endEvent",                 "lane": "lane_customer",  "eventDefinition": "none" },
+
+    { "id": "start_cs",               "name": "Receive return request",         "type": "startEvent",               "lane": "lane_cs",        "eventDefinition": "message" },
+    { "id": "throw_cs_to_warehouse",  "name": "Forward request to warehouse",   "type": "intermediateThrowEvent",   "lane": "lane_cs",        "eventDefinition": "message" },
+    { "id": "throw_cs_to_finance",    "name": "Forward request to finance",     "type": "intermediateThrowEvent",   "lane": "lane_cs",        "eventDefinition": "message" },
+    { "id": "catch_cs_wh_verdict",    "name": "Receive warehouse verdict",      "type": "intermediateCatchEvent",   "lane": "lane_cs",        "eventDefinition": "message" },
+    { "id": "catch_cs_fin_verdict",   "name": "Receive finance verdict",        "type": "intermediateCatchEvent",   "lane": "lane_cs",        "eventDefinition": "message" },
+    { "id": "throw_cs_rejection",     "name": "Send return rejection notice",   "type": "intermediateThrowEvent",   "lane": "lane_cs",        "eventDefinition": "message" },
+    { "id": "throw_cs_confirmation",  "name": "Send refund confirmation",       "type": "intermediateThrowEvent",   "lane": "lane_cs",        "eventDefinition": "message" },
+    { "id": "end_cs_incomplete",      "name": "End – incomplete submission",    "type": "endEvent",                 "lane": "lane_cs",        "eventDefinition": "none" },
+    { "id": "end_cs_rejected",        "name": "End – return rejected",          "type": "endEvent",                 "lane": "lane_cs",        "eventDefinition": "none" },
+    { "id": "end_cs_refunded",        "name": "End – refund confirmed",         "type": "endEvent",                 "lane": "lane_cs",        "eventDefinition": "none" },
+
+    { "id": "catch_wh_request",       "name": "Receive request for inspection", "type": "intermediateCatchEvent",   "lane": "lane_warehouse", "eventDefinition": "message" },
+    { "id": "throw_wh_verdict",       "name": "Send warehouse verdict",         "type": "intermediateThrowEvent",   "lane": "lane_warehouse", "eventDefinition": "message" },
+    { "id": "end_warehouse",          "name": "End",                            "type": "endEvent",                 "lane": "lane_warehouse", "eventDefinition": "none" },
+
+    { "id": "catch_fin_request",      "name": "Receive request for eligibility check", "type": "intermediateCatchEvent", "lane": "lane_finance", "eventDefinition": "message" },
+    { "id": "throw_fin_verdict",      "name": "Send finance verdict",           "type": "intermediateThrowEvent",   "lane": "lane_finance",   "eventDefinition": "message" },
+    { "id": "end_finance",            "name": "End",                            "type": "endEvent",                 "lane": "lane_finance",   "eventDefinition": "none" }
+  ],
+  "gateways": [
+    { "id": "gw_complete_split",  "name": "Information complete?",   "type": "exclusiveGateway", "lane": "lane_cs",        "gatewayDirection": "diverging" },
+    { "id": "gw_parallel_split",  "name": "Forward to departments",  "type": "parallelGateway",  "lane": "lane_cs",        "gatewayDirection": "diverging" },
+    { "id": "gw_parallel_join",   "name": "Wait for both verdicts",  "type": "parallelGateway",  "lane": "lane_cs",        "gatewayDirection": "converging" },
+    { "id": "gw_verdicts_split",  "name": "Both verdicts positive?", "type": "exclusiveGateway", "lane": "lane_cs",        "gatewayDirection": "diverging" }
+  ],
+  "sequence_flows": [
+    { "id": "sf01", "from": "start_customer",         "to": "throw_customer_request" },
+    { "id": "sf02", "from": "catch_customer_outcome", "to": "end_customer" },
+
+    { "id": "sf03", "from": "start_cs",               "to": "task_register" },
+    { "id": "sf04", "from": "task_register",          "to": "task_check_info" },
+    { "id": "sf05", "from": "task_check_info",        "to": "gw_complete_split" },
+    { "id": "sf06", "from": "gw_complete_split",      "to": "task_notify_missing",   "condition": "Information incomplete" },
+    { "id": "sf07", "from": "task_notify_missing",    "to": "end_cs_incomplete" },
+    { "id": "sf08", "from": "gw_complete_split",      "to": "gw_parallel_split",     "condition": "Information complete" },
+    { "id": "sf09", "from": "gw_parallel_split",      "to": "throw_cs_to_warehouse" },
+    { "id": "sf10", "from": "gw_parallel_split",      "to": "throw_cs_to_finance" },
+    { "id": "sf11", "from": "catch_cs_wh_verdict",    "to": "gw_parallel_join" },
+    { "id": "sf12", "from": "catch_cs_fin_verdict",   "to": "gw_parallel_join" },
+    { "id": "sf13", "from": "gw_parallel_join",       "to": "task_review_outcomes" },
+    { "id": "sf14", "from": "task_review_outcomes",   "to": "gw_verdicts_split" },
+    { "id": "sf15", "from": "gw_verdicts_split",      "to": "throw_cs_rejection",    "condition": "Either verdict is negative" },
+    { "id": "sf16", "from": "throw_cs_rejection",     "to": "end_cs_rejected" },
+    { "id": "sf17", "from": "gw_verdicts_split",      "to": "task_approve_refund",   "condition": "Both verdicts positive" },
+    { "id": "sf18", "from": "task_approve_refund",    "to": "throw_cs_confirmation" },
+    { "id": "sf19", "from": "throw_cs_confirmation",  "to": "end_cs_refunded" },
+
+    { "id": "sf20", "from": "catch_wh_request",       "to": "task_inspect_product" },
+    { "id": "sf21", "from": "task_inspect_product",   "to": "task_record_wh_verdict" },
+    { "id": "sf22", "from": "task_record_wh_verdict", "to": "throw_wh_verdict" },
+    { "id": "sf23", "from": "throw_wh_verdict",       "to": "end_warehouse" },
+
+    { "id": "sf24", "from": "catch_fin_request",      "to": "task_check_eligibility" },
+    { "id": "sf25", "from": "task_check_eligibility", "to": "task_record_fin_verdict" },
+    { "id": "sf26", "from": "task_record_fin_verdict","to": "throw_fin_verdict" },
+    { "id": "sf27", "from": "throw_fin_verdict",      "to": "end_finance" }
+  ],
+  "message_flows": [
+    { "id": "mf01", "from": "throw_customer_request", "to": "start_cs",             "name": "Return request" },
+    { "id": "mf02", "from": "throw_cs_to_warehouse",  "to": "catch_wh_request",     "name": "Inspection request" },
+    { "id": "mf03", "from": "throw_cs_to_finance",    "to": "catch_fin_request",    "name": "Eligibility check request" },
+    { "id": "mf04", "from": "throw_wh_verdict",       "to": "catch_cs_wh_verdict",  "name": "Warehouse verdict" },
+    { "id": "mf05", "from": "throw_fin_verdict",      "to": "catch_cs_fin_verdict", "name": "Finance verdict" },
+    { "id": "mf06", "from": "throw_cs_rejection",     "to": "catch_customer_outcome","name": "Return rejection notice" },
+    { "id": "mf07", "from": "throw_cs_confirmation",  "to": "catch_customer_outcome","name": "Refund confirmation" }
+  ]
+}

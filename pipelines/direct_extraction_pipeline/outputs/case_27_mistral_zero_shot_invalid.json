@@ -1,0 +1,131 @@
+{
+  "pools": [
+    {
+      "id": "Bank",
+      "name": "Bank, internal processes and departments, no external parties involved"
+    },
+    {
+      "id": "Client",
+      "name": "Client, external party"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Bank",
+      "name": "Mortgage Assessment",
+      "pool": "Bank"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "CreateMortgageFile",
+      "name": "Create Mortgage File",
+      "type": "task",
+      "lane": "Mortgage Assessment"
+    },
+    {
+      "id": "EvaluateFinancialStability",
+      "name": "Evaluate Financial Stability",
+      "type": "task",
+      "lane": "Mortgage Assessment"
+    },
+    {
+      "id": "GatherIncomeStatements",
+      "name": "Gather Income Statements",
+      "type": "task",
+      "lane": "Mortgage Assessment"
+    },
+    {
+      "id": "CheckCreditApplications",
+      "name": "Check for Other Credit Applications",
+      "type": "task",
+      "lane": "Mortgage Assessment"
+    },
+    {
+      "id": "PerformRiskAnalysis",
+      "name": "Perform In-depth Risk Analysis",
+      "type": "task",
+      "lane": "Mortgage Assessment"
+    },
+    {
+      "id": "GrantLineOfCredit",
+      "name": "Grant Line of Credit",
+      "type": "task",
+      "lane": "Mortgage Assessment"
+    },
+    {
+      "id": "DeclineMortgageApplication",
+      "name": "Decline Mortgage Application",
+      "type": "task",
+      "lane": "Mortgage Assessment"
+    }
+  ],
+  "events": [
+    {
+      "id": "MortgageApplicationReceived",
+      "name": "Mortgage Application Received",
+      "type": "startEvent",
+      "lane": "Mortgage Assessment",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "AssessmentCompleted",
+      "name": "Assessment Completed",
+      "type": "endEvent",
+      "lane": "Mortgage Assessment",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [],
+  "sequence_flows": [],
+  "message_flows": [
+    {
+      "id": "ReceiveMortgageApplication",
+      "from": "MortgageApplicationReceived",
+      "to": "CreateMortgageFile",
+      "name": "Receive Mortgage Application"
+    },
+    {
+      "id": "FinancialStabilityAssessment",
+      "from": "CreateMortgageFile",
+      "to": "EvaluateFinancialStability",
+      "name": "Financial Stability Assessment"
+    },
+    {
+      "id": "IncomeStatementsGathered",
+      "from": "EvaluateFinancialStability",
+      "to": "GatherIncomeStatements",
+      "name": "Income Statements Gathered"
+    },
+    {
+      "id": "CreditApplicationsChecked",
+      "from": "GatherIncomeStatements",
+      "to": "CheckCreditApplications",
+      "name": "Credit Applications Checked"
+    },
+    {
+      "id": "RiskAnalysisPerformed",
+      "from": "CheckCreditApplications",
+      "to": "PerformRiskAnalysis",
+      "name": "Risk Analysis Performed"
+    },
+    {
+      "id": "CreditLineGranted",
+      "from": "PerformRiskAnalysis",
+      "to": "GrantLineOfCredit",
+      "name": "Credit Line Granted"
+    },
+    {
+      "id": "MortgageApplicationDeclined",
+      "from": "PerformRiskAnalysis",
+      "to": "DeclineMortgageApplication",
+      "name": "Mortgage Application Declined"
+    },
+    {
+      "id": "SendAssessmentResultToClient",
+      "from": "GrantLineOfCredit",
+      "to": "AssessmentCompleted",
+      "name": "Send Assessment Result to Client"
+    }
+  ]
+}

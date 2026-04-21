@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_government_agency" name="Government Agency" processRef="Process_government_agency"/>
+    <bpmn:participant id="actor_applicant_organisation" name="Applicant Organisation" processRef="Process_applicant_organisation"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="submit_application" targetRef="register_application"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="notify_missing_documents" targetRef="collect_missing_documents"/>
+    <bpmn:messageFlow id="MsgFlow_p2" name="" sourceRef="resubmit_documents" targetRef="check_documentation_again"/>
+    <bpmn:messageFlow id="MsgFlow_p3" name="" sourceRef="send_rejection_notice" targetRef="end_applicant"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_government_agency" name="Government Agency" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_government_agency">
+      <bpmn:lane id="grants_office" name="Grants Office">
+        <bpmn:flowNodeRef>end_grants_office</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>register_application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_documentation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>notify_missing_documents</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>check_documentation_again</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>forward_to_review_panels</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_combined_outcomes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_rejection_notice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>issue_grant_approval</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_documentation_check</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_documentation_check_join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_parallel_split</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_parallel_join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_outcome_review</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>gateway_outcome_review_join</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="technical_review_panel" name="Technical Review Panel">
+        <bpmn:flowNodeRef>assess_project_feasibility</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_technical_verdict</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="finance_department" name="Finance Department">
+        <bpmn:flowNodeRef>review_proposed_budget</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_finance_verdict</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:endEvent id="end_grants_office" name="End"/>
+    <bpmn:task id="register_application" name="Register Application"/>
+    <bpmn:task id="check_documentation" name="Check Documentation"/>
+    <bpmn:task id="notify_missing_documents" name="Notify Missing Documents"/>
+    <bpmn:task id="check_documentation_again" name="Check Documentation Again"/>
+    <bpmn:task id="forward_to_review_panels" name="Forward to Review Panels"/>
+    <bpmn:task id="assess_project_feasibility" name="Assess Project Feasibility"/>
+    <bpmn:task id="record_technical_verdict" name="Record Technical Verdict"/>
+    <bpmn:task id="review_proposed_budget" name="Review Proposed Budget"/>
+    <bpmn:task id="record_finance_verdict" name="Record Finance Verdict"/>
+    <bpmn:task id="review_combined_outcomes" name="Review Combined Outcomes"/>
+    <bpmn:task id="send_rejection_notice" name="Send Rejection Notice"/>
+    <bpmn:task id="issue_grant_approval" name="Issue Grant Approval"/>
+    <bpmn:exclusiveGateway id="gateway_documentation_check" name="Documentation Complete?" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="gateway_documentation_check_join" name="Documentation Check Complete" gatewayDirection="converging"/>
+    <bpmn:parallelGateway id="gateway_parallel_split" name="Start Concurrent Reviews" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="gateway_parallel_join" name="Reviews Complete" gatewayDirection="converging"/>
+    <bpmn:exclusiveGateway id="gateway_outcome_review" name="Review Outcomes" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="gateway_outcome_review_join" name="Outcome Review Complete" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="register_application" targetRef="check_documentation"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="check_documentation" targetRef="gateway_documentation_check"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="gateway_documentation_check" targetRef="notify_missing_documents" name="documentation is incomplete">
+      <bpmn:conditionExpression>documentation is incomplete</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf9" sourceRef="check_documentation_again" targetRef="gateway_documentation_check_join"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="gateway_documentation_check" targetRef="forward_to_review_panels" name="documentation is complete">
+      <bpmn:conditionExpression>documentation is complete</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf11" sourceRef="forward_to_review_panels" targetRef="gateway_parallel_split"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="gateway_parallel_split" targetRef="assess_project_feasibility"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="gateway_parallel_split" targetRef="review_proposed_budget"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="assess_project_feasibility" targetRef="record_technical_verdict"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="review_proposed_budget" targetRef="record_finance_verdict"/>
+    <bpmn:sequenceFlow id="sf16" sourceRef="record_technical_verdict" targetRef="gateway_parallel_join"/>
+    <bpmn:sequenceFlow id="sf17" sourceRef="record_finance_verdict" targetRef="gateway_parallel_join"/>
+    <bpmn:sequenceFlow id="sf18" sourceRef="gateway_parallel_join" targetRef="review_combined_outcomes"/>
+    <bpmn:sequenceFlow id="sf19" sourceRef="review_combined_outcomes" targetRef="gateway_outcome_review"/>
+    <bpmn:sequenceFlow id="sf20" sourceRef="gateway_outcome_review" targetRef="send_rejection_notice" name="either verdict is negative">
+      <bpmn:conditionExpression>either verdict is negative</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf22" sourceRef="gateway_outcome_review" targetRef="issue_grant_approval" name="both verdicts are positive">
+      <bpmn:conditionExpression>both verdicts are positive</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf23" sourceRef="issue_grant_approval" targetRef="end_grants_office"/>
+    <bpmn:sequenceFlow id="sf24" sourceRef="gateway_outcome_review" targetRef="gateway_outcome_review_join" name="either verdict is negative">
+      <bpmn:conditionExpression>either verdict is negative</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf25" sourceRef="issue_grant_approval" targetRef="gateway_outcome_review_join"/>
+    <bpmn:sequenceFlow id="sf26" sourceRef="gateway_outcome_review_join" targetRef="end_grants_office"/>
+  </bpmn:process>
+  <bpmn:process id="Process_applicant_organisation" name="Applicant Organisation" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_applicant_organisation">
+      <bpmn:lane id="applicant" name="Applicant">
+        <bpmn:flowNodeRef>start_application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_applicant</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>submit_application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>collect_missing_documents</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>resubmit_documents</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_application" name="Start Application"/>
+    <bpmn:endEvent id="end_applicant" name="End"/>
+    <bpmn:task id="submit_application" name="Submit Application"/>
+    <bpmn:task id="collect_missing_documents" name="Collect Missing Documents"/>
+    <bpmn:task id="resubmit_documents" name="Resubmit Documents"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_application" targetRef="submit_application"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="collect_missing_documents" targetRef="resubmit_documents"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_government_agency_di" bpmnElement="actor_government_agency" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="3620" height="750"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_applicant_organisation_di" bpmnElement="actor_applicant_organisation" isHorizontal="true">
+        <dc:Bounds x="10" y="830" width="760" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="grants_office_di" bpmnElement="grants_office" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="3590" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="technical_review_panel_di" bpmnElement="technical_review_panel" isHorizontal="true">
+        <dc:Bounds x="40" y="270" width="3590" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="finance_department_di" bpmnElement="finance_department" isHorizontal="true">
+        <dc:Bounds x="40" y="520" width="3590" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="applicant_di" bpmnElement="applicant" isHorizontal="true">
+        <dc:Bounds x="40" y="830" width="730" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_grants_office_di" bpmnElement="end_grants_office">
+        <dc:Bounds x="3292" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="register_application_di" bpmnElement="register_application">
+        <dc:Bounds x="130" y="50" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_documentation_again_di" bpmnElement="check_documentation_again">
+        <dc:Bounds x="130" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="check_documentation_di" bpmnElement="check_documentation">
+        <dc:Bounds x="390" y="65" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_documentation_check_join_di" bpmnElement="gateway_documentation_check_join" isMarkerVisible="true">
+        <dc:Bounds x="425" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_missing_documents_di" bpmnElement="notify_missing_documents">
+        <dc:Bounds x="910" y="50" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="forward_to_review_panels_di" bpmnElement="forward_to_review_panels">
+        <dc:Bounds x="910" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_combined_outcomes_di" bpmnElement="review_combined_outcomes">
+        <dc:Bounds x="2210" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_rejection_notice_di" bpmnElement="send_rejection_notice">
+        <dc:Bounds x="2730" y="50" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="issue_grant_approval_di" bpmnElement="issue_grant_approval">
+        <dc:Bounds x="2730" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_documentation_check_di" bpmnElement="gateway_documentation_check" isMarkerVisible="true">
+        <dc:Bounds x="685" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_parallel_split_di" bpmnElement="gateway_parallel_split" isMarkerVisible="true">
+        <dc:Bounds x="1205" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_parallel_join_di" bpmnElement="gateway_parallel_join" isMarkerVisible="true">
+        <dc:Bounds x="1985" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_outcome_review_di" bpmnElement="gateway_outcome_review" isMarkerVisible="true">
+        <dc:Bounds x="2505" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gateway_outcome_review_join_di" bpmnElement="gateway_outcome_review_join" isMarkerVisible="true">
+        <dc:Bounds x="3025" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="assess_project_feasibility_di" bpmnElement="assess_project_feasibility">
+        <dc:Bounds x="1430" y="355" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_technical_verdict_di" bpmnElement="record_technical_verdict">
+        <dc:Bounds x="1690" y="355" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_proposed_budget_di" bpmnElement="review_proposed_budget">
+        <dc:Bounds x="1430" y="605" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_finance_verdict_di" bpmnElement="record_finance_verdict">
+        <dc:Bounds x="1690" y="605" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_application_di" bpmnElement="start_application">
+        <dc:Bounds x="172" y="904" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_applicant_di" bpmnElement="end_applicant">
+        <dc:Bounds x="172" y="970" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="collect_missing_documents_di" bpmnElement="collect_missing_documents">
+        <dc:Bounds x="130" y="1036" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="submit_application_di" bpmnElement="submit_application">
+        <dc:Bounds x="390" y="915" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="resubmit_documents_di" bpmnElement="resubmit_documents">
+        <dc:Bounds x="390" y="1025" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="208" y="922"/>
+        <di:waypoint x="299" y="922"/>
+        <di:waypoint x="299" y="955"/>
+        <di:waypoint x="390" y="955"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="250" y="90"/>
+        <di:waypoint x="320" y="90"/>
+        <di:waypoint x="320" y="105"/>
+        <di:waypoint x="390" y="105"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="510" y="105"/>
+        <di:waypoint x="597" y="105"/>
+        <di:waypoint x="597" y="145"/>
+        <di:waypoint x="685" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="735" y="145"/>
+        <di:waypoint x="822" y="145"/>
+        <di:waypoint x="822" y="90"/>
+        <di:waypoint x="910" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="250" y="1076"/>
+        <di:waypoint x="320" y="1076"/>
+        <di:waypoint x="320" y="1065"/>
+        <di:waypoint x="390" y="1065"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="250" y="200"/>
+        <di:waypoint x="425" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="735" y="145"/>
+        <di:waypoint x="822" y="145"/>
+        <di:waypoint x="822" y="200"/>
+        <di:waypoint x="910" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="1030" y="200"/>
+        <di:waypoint x="1117" y="200"/>
+        <di:waypoint x="1117" y="145"/>
+        <di:waypoint x="1205" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="1255" y="145"/>
+        <di:waypoint x="1342" y="145"/>
+        <di:waypoint x="1342" y="395"/>
+        <di:waypoint x="1430" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="1255" y="145"/>
+        <di:waypoint x="1342" y="145"/>
+        <di:waypoint x="1342" y="645"/>
+        <di:waypoint x="1430" y="645"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="1550" y="395"/>
+        <di:waypoint x="1690" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="1550" y="645"/>
+        <di:waypoint x="1690" y="645"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf16_di" bpmnElement="sf16">
+        <di:waypoint x="1810" y="395"/>
+        <di:waypoint x="1897" y="395"/>
+        <di:waypoint x="1897" y="145"/>
+        <di:waypoint x="1985" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf17_di" bpmnElement="sf17">
+        <di:waypoint x="1810" y="645"/>
+        <di:waypoint x="1897" y="645"/>
+        <di:waypoint x="1897" y="145"/>
+        <di:waypoint x="1985" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf18_di" bpmnElement="sf18">
+        <di:waypoint x="2035" y="145"/>
+        <di:waypoint x="2210" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf19_di" bpmnElement="sf19">
+        <di:waypoint x="2330" y="145"/>
+        <di:waypoint x="2505" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf20_di" bpmnElement="sf20">
+        <di:waypoint x="2555" y="145"/>
+        <di:waypoint x="2642" y="145"/>
+        <di:waypoint x="2642" y="90"/>
+        <di:waypoint x="2730" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf22_di" bpmnElement="sf22">
+        <di:waypoint x="2555" y="145"/>
+        <di:waypoint x="2642" y="145"/>
+        <di:waypoint x="2642" y="200"/>
+        <di:waypoint x="2730" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf23_di" bpmnElement="sf23">
+        <di:waypoint x="2850" y="200"/>
+        <di:waypoint x="3071" y="200"/>
+        <di:waypoint x="3071" y="145"/>
+        <di:waypoint x="3292" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf24_di" bpmnElement="sf24">
+        <di:waypoint x="2555" y="145"/>
+        <di:waypoint x="3025" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf25_di" bpmnElement="sf25">
+        <di:waypoint x="2850" y="200"/>
+        <di:waypoint x="2937" y="200"/>
+        <di:waypoint x="2937" y="145"/>
+        <di:waypoint x="3025" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf26_di" bpmnElement="sf26">
+        <di:waypoint x="3075" y="145"/>
+        <di:waypoint x="3292" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="450" y="915"/>
+        <di:waypoint x="190" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="970" y="130"/>
+        <di:waypoint x="190" y="1036"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p2_di" bpmnElement="MsgFlow_p2">
+        <di:waypoint x="450" y="1025"/>
+        <di:waypoint x="190" y="240"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p3_di" bpmnElement="MsgFlow_p3">
+        <di:waypoint x="2790" y="130"/>
+        <di:waypoint x="190" y="970"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

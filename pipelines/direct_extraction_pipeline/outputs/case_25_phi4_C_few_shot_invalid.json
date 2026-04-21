@@ -1,0 +1,183 @@
+{
+  "pools": [
+    {
+      "id": "library",
+      "name": "Library"
+    },
+    {
+      "id": "requester",
+      "name": "Requester"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "library_staff",
+      "name": "Library Staff",
+      "pool": "library"
+    },
+    {
+      "id": "requester",
+      "name": "Requester",
+      "pool": "requester"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "consult_catalog",
+      "name": "Consult Digital Catalog",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "inform_unavailable",
+      "name": "Inform Requester of Unavailability",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "start_checkout",
+      "name": "Start Checkout Procedure",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "log_book",
+      "name": "Log Book Against Library Account",
+      "type": "task",
+      "lane": "library_staff"
+    },
+    {
+      "id": "retrieve_book",
+      "name": "Retrieve Book Using Automatic System",
+      "type": "task",
+      "lane": "library_staff"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_library",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "library_staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_requester_unavailable",
+      "name": "End Unavailable",
+      "type": "endEvent",
+      "lane": "requester",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_library_checkout",
+      "name": "End Checkout",
+      "type": "endEvent",
+      "lane": "library_staff",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_availability",
+      "name": "Book Availability Check",
+      "type": "exclusiveGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel",
+      "name": "Parallel Checkout Actions",
+      "type": "parallelGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "Checkout Complete",
+      "type": "parallelGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_availability_join",
+      "name": "Availability Decision Complete",
+      "type": "exclusiveGateway",
+      "lane": "library_staff",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_library",
+      "to": "consult_catalog"
+    },
+    {
+      "id": "sf2",
+      "from": "consult_catalog",
+      "to": "gateway_availability"
+    },
+    {
+      "id": "sf3",
+      "from": "gateway_availability",
+      "to": "inform_unavailable",
+      "condition": "Unavailable"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_availability",
+      "to": "start_checkout",
+      "condition": "Available"
+    },
+    {
+      "id": "sf5",
+      "from": "inform_unavailable",
+      "to": "end_requester_unavailable"
+    },
+    {
+      "id": "sf6",
+      "from": "start_checkout",
+      "to": "gateway_parallel"
+    },
+    {
+      "id": "sf7",
+      "from": "gateway_parallel",
+      "to": "log_book"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_parallel",
+      "to": "retrieve_book"
+    },
+    {
+      "id": "sf9",
+      "from": "log_book",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf10",
+      "from": "retrieve_book",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf11",
+      "from": "gateway_parallel_join",
+      "to": "gateway_availability_join"
+    },
+    {
+      "id": "sf12",
+      "from": "gateway_availability_join",
+      "to": "end_library_checkout"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "inform_unavailable",
+      "to": "end_requester_unavailable",
+      "name": "Unavailability Notification"
+    }
+  ],
+  "data": [],
+  "data_associations": []
+}

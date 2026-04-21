@@ -1,0 +1,151 @@
+{
+  "pools": [
+    {
+      "id": "Company",
+      "name": "Company"
+    },
+    {
+      "id": "HR",
+      "name": "HR"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Customer Service",
+      "name": "Customer Service",
+      "pool": "Company"
+    },
+    {
+      "id": "Operations",
+      "name": "Operations",
+      "pool": "Company"
+    },
+    {
+      "id": "Finance",
+      "name": "Finance",
+      "pool": "Company"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Submit Vacancy Request",
+      "name": "Submit Vacancy Request",
+      "type": "task",
+      "lane": "HR"
+    },
+    {
+      "id": "Register Vacancy",
+      "name": "Register Vacancy",
+      "type": "task",
+      "lane": "HR"
+    },
+    {
+      "id": "Post Job Advertisement",
+      "name": "Post Job Advertisement",
+      "type": "task",
+      "lane": "HR"
+    },
+    {
+      "id": "Apply for Vacancy",
+      "name": "Apply for Vacancy",
+      "type": "task",
+      "lane": "Customer Service"
+    },
+    {
+      "id": "Screen Applications",
+      "name": "Screen Applications",
+      "type": "task",
+      "lane": "HR"
+    },
+    {
+      "id": "Schedule Technical Interview",
+      "name": "Schedule Technical Interview",
+      "type": "task",
+      "lane": "HR"
+    },
+    {
+      "id": "Conduct Technical Interview",
+      "name": "Conduct Technical Interview",
+      "type": "task",
+      "lane": "Hiring Manager"
+    },
+    {
+      "id": "Record Verdict",
+      "name": "Record Verdict",
+      "type": "task",
+      "lane": "Hiring Manager"
+    },
+    {
+      "id": "Complete Personality Assessment",
+      "name": "Complete Personality Assessment",
+      "type": "task",
+      "lane": "Candidate"
+    },
+    {
+      "id": "Submit Personality Assessment",
+      "name": "Submit Personality Assessment",
+      "type": "task",
+      "lane": "Candidate"
+    },
+    {
+      "id": "Score Personality Assessment",
+      "name": "Score Personality Assessment",
+      "type": "task",
+      "lane": "HR"
+    },
+    {
+      "id": "Record Verdict",
+      "name": "Record Verdict",
+      "type": "task",
+      "lane": "HR"
+    }
+  ],
+  "events": [
+    {
+      "id": "Throw Event",
+      "name": "Throw Event",
+      "type": "intermediateThrowEvent",
+      "lane": "HR",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Catch Event",
+      "name": "Catch Event",
+      "type": "intermediateCatchEvent",
+      "lane": "HR",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "End Event",
+      "name": "End Event",
+      "type": "endEvent",
+      "lane": "HR",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Exclusive Gateway",
+      "name": "Exclusive Gateway",
+      "type": "exclusiveGateway",
+      "lane": "HR",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Sequence Flow",
+      "from": "Submit Vacancy Request",
+      "to": "Register Vacancy",
+      "condition": "true"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "Message Flow",
+      "from": "Throw Event",
+      "to": "Catch Event",
+      "name": "message flow"
+    }
+  ]
+}

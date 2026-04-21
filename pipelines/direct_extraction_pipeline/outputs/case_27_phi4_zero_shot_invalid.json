@@ -1,0 +1,188 @@
+{
+  "pools": [
+    {
+      "id": "Bank",
+      "name": "Bank Process Flow"
+    },
+    {
+      "id": "Client",
+      "name": "Client Process Flow"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Bank",
+      "name": "Bank",
+      "pool": "Bank Process Flow"
+    },
+    {
+      "id": "Client",
+      "name": "Client",
+      "pool": "Client Process Flow"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "create_mortgage_file",
+      "name": "Create Mortgage File",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "evaluate_financial_stability",
+      "name": "Evaluate Financial Stability",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "gather_income_statements",
+      "name": "Gather Income Statements",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "check_other_credit_applications",
+      "name": "Check Other Credit Applications",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "perform_risk_analysis",
+      "name": "Perform Risk Analysis",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "grant_line_of_credit",
+      "name": "Grant Line of Credit",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "decline_mortgage_application",
+      "name": "Decline Mortgage Application",
+      "type": "task",
+      "lane": "Bank"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_event",
+      "name": "Start Mortgage Assessment",
+      "type": "startEvent",
+      "lane": "Bank",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_event_positive",
+      "name": "End Positive Assessment",
+      "type": "endEvent",
+      "lane": "Bank",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_event_negative",
+      "name": "End Negative Assessment",
+      "type": "endEvent",
+      "lane": "Bank",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "intermediate_catch_event",
+      "name": "Catch Event for Risk Analysis",
+      "type": "intermediateCatchEvent",
+      "lane": "Bank",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "parallel_gateway",
+      "name": "Parallel Gateway",
+      "type": "parallelGateway",
+      "lane": "Bank",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "parallel_join_gateway",
+      "name": "Parallel Join Gateway",
+      "type": "parallelGateway",
+      "lane": "Bank",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "exclusive_gateway",
+      "name": "Exclusive Gateway",
+      "type": "exclusiveGateway",
+      "lane": "Bank",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "exclusive_join_gateway",
+      "name": "Exclusive Join Gateway",
+      "type": "exclusiveGateway",
+      "lane": "converging",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "start_to_create",
+      "from": "start_event",
+      "to": "create_mortgage_file"
+    },
+    {
+      "id": "create_to_parallel",
+      "from": "create_mortgage_file",
+      "to": "parallel_gateway"
+    },
+    {
+      "id": "parallel_to_evaluate",
+      "from": "parallel_gateway",
+      "to": "evaluate_financial_stability"
+    },
+    {
+      "id": "parallel_to_gather",
+      "from": "parallel_gateway",
+      "to": "gather_income_statements"
+    },
+    {
+      "id": "parallel_to_check",
+      "from": "parallel_gateway",
+      "to": "check_other_credit_applications"
+    },
+    {
+      "id": "parallel_join_to_risk",
+      "from": "parallel_join_gateway",
+      "to": "perform_risk_analysis"
+    },
+    {
+      "id": "risk_to_exclusive",
+      "from": "perform_risk_analysis",
+      "to": "exclusive_gateway"
+    },
+    {
+      "id": "exclusive_to_grant",
+      "from": "exclusive_gateway",
+      "to": "grant_line_of_credit",
+      "condition": "positive"
+    },
+    {
+      "id": "exclusive_to_decline",
+      "from": "exclusive_gateway",
+      "to": "decline_mortgage_application",
+      "condition": "negative"
+    },
+    {
+      "id": "grant_to_end_positive",
+      "from": "grant_line_of_credit",
+      "to": "end_event_positive"
+    },
+    {
+      "id": "decline_to_end_negative",
+      "from": "decline_mortgage_application",
+      "to": "end_event_negative"
+    }
+  ],
+  "message_flows": []
+}
