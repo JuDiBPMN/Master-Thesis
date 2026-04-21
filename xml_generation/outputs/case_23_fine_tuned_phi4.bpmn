@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_BrightWave_Energy" name="BrightWave Energy" processRef="Process_BrightWave_Energy"/>
+    <bpmn:participant id="actor_Client" name="Client" processRef="Process_Client"/>
+    <bpmn:messageFlow id="mf1" name="Complaint Email" sourceRef="write_complaint_email" targetRef="start_bwe"/>
+    <bpmn:messageFlow id="mf2" name="Explanation Email" sourceRef="write_explanation_email" targetRef="end_bwe_no_mistake"/>
+    <bpmn:messageFlow id="mf3" name="New Invoice Email" sourceRef="send_new_invoice_email" targetRef="end_bwe_mistake_corrected"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_BrightWave_Energy" name="BrightWave Energy" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_BrightWave_Energy">
+      <bpmn:lane id="Customer_Service" name="Customer Service">
+        <bpmn:flowNodeRef>start_bwe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_bwe_no_mistake</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_bwe_mistake_corrected</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_invoice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>determine_mistake</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>write_explanation_email</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_mistake</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>join_mistake</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Invoicing" name="Invoicing">
+        <bpmn:flowNodeRef>create_ticket</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>investigate_invoicing_mistake</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>make_correction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>generate_new_invoice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>send_new_invoice_email</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_invoicing</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>join_invoicing</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_bwe" name="Receive Complaint">
+      <bpmn:messageEventDefinition id="start_bwe_def"/>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="end_bwe_no_mistake" name="Send Explanation">
+      <bpmn:messageEventDefinition id="end_bwe_no_mistake_def"/>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="end_bwe_mistake_corrected" name="Send New Invoice">
+      <bpmn:messageEventDefinition id="end_bwe_mistake_corrected_def"/>
+    </bpmn:endEvent>
+    <bpmn:task id="review_invoice" name="Review Invoice"/>
+    <bpmn:task id="determine_mistake" name="Determine Mistake?"/>
+    <bpmn:task id="write_explanation_email" name="Write Explanation Email"/>
+    <bpmn:task id="create_ticket" name="Create Ticket"/>
+    <bpmn:task id="investigate_invoicing_mistake" name="Investigate Invoicing Mistake"/>
+    <bpmn:task id="make_correction" name="Make Correction"/>
+    <bpmn:task id="generate_new_invoice" name="Generate New Invoice"/>
+    <bpmn:task id="send_new_invoice_email" name="Send New Invoice Email"/>
+    <bpmn:exclusiveGateway id="split_mistake" name="Mistake Found?" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="join_mistake" name="Join Mistake Decision" gatewayDirection="converging"/>
+    <bpmn:parallelGateway id="split_invoicing" name="Split Invoicing Work" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="join_invoicing" name="Join Invoicing Work" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="start_bwe" targetRef="review_invoice"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="review_invoice" targetRef="determine_mistake"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="determine_mistake" targetRef="split_mistake"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="split_mistake" targetRef="write_explanation_email" name="No mistake">
+      <bpmn:conditionExpression>No mistake</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf7" sourceRef="split_mistake" targetRef="create_ticket" name="Mistake found">
+      <bpmn:conditionExpression>Mistake found</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf8" sourceRef="write_explanation_email" targetRef="end_bwe_no_mistake"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="create_ticket" targetRef="investigate_invoicing_mistake"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="investigate_invoicing_mistake" targetRef="make_correction"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="make_correction" targetRef="generate_new_invoice"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="generate_new_invoice" targetRef="send_new_invoice_email"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="send_new_invoice_email" targetRef="join_invoicing"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="join_invoicing" targetRef="end_bwe_mistake_corrected"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="join_mistake" targetRef="end_bwe_mistake_corrected"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Client" name="Client" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Client">
+      <bpmn:lane id="Client" name="Client"/>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_client" name="Receive Monthly Bill"/>
+    <bpmn:endEvent id="end_client_no_mistake" name="Receive Explanation"/>
+    <bpmn:endEvent id="end_client_mistake_corrected" name="Receive New Invoice"/>
+    <bpmn:task id="write_complaint_email" name="Write Complaint Email"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_client" targetRef="write_complaint_email"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="write_complaint_email" targetRef="end_client_no_mistake"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_BrightWave_Energy_di" bpmnElement="actor_BrightWave_Energy" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="3100" height="500"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Client_di" bpmnElement="actor_Client" isHorizontal="true">
+        <dc:Bounds x="10" y="580" width="1020" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Customer_Service_di" bpmnElement="Customer_Service" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="3070" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Invoicing_di" bpmnElement="Invoicing" isHorizontal="true">
+        <dc:Bounds x="40" y="270" width="3070" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Client_di" bpmnElement="Client" isHorizontal="true">
+        <dc:Bounds x="40" y="580" width="990" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_bwe_di" bpmnElement="start_bwe">
+        <dc:Bounds x="172" y="87" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="join_mistake_di" bpmnElement="join_mistake" isMarkerVisible="true">
+        <dc:Bounds x="165" y="153" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_bwe_no_mistake_di" bpmnElement="end_bwe_no_mistake">
+        <dc:Bounds x="1472" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_bwe_mistake_corrected_di" bpmnElement="end_bwe_mistake_corrected">
+        <dc:Bounds x="2772" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_invoice_di" bpmnElement="review_invoice">
+        <dc:Bounds x="390" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="determine_mistake_di" bpmnElement="determine_mistake">
+        <dc:Bounds x="650" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="write_explanation_email_di" bpmnElement="write_explanation_email">
+        <dc:Bounds x="1170" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_mistake_di" bpmnElement="split_mistake" isMarkerVisible="true">
+        <dc:Bounds x="945" y="120" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="create_ticket_di" bpmnElement="create_ticket">
+        <dc:Bounds x="1170" y="355" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="investigate_invoicing_mistake_di" bpmnElement="investigate_invoicing_mistake">
+        <dc:Bounds x="1430" y="355" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="make_correction_di" bpmnElement="make_correction">
+        <dc:Bounds x="1690" y="355" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="generate_new_invoice_di" bpmnElement="generate_new_invoice">
+        <dc:Bounds x="1950" y="355" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="send_new_invoice_email_di" bpmnElement="send_new_invoice_email">
+        <dc:Bounds x="2210" y="355" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_invoicing_di" bpmnElement="split_invoicing" isMarkerVisible="true">
+        <dc:Bounds x="165" y="370" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="join_invoicing_di" bpmnElement="join_invoicing" isMarkerVisible="true">
+        <dc:Bounds x="2505" y="370" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_client_di" bpmnElement="start_client">
+        <dc:Bounds x="172" y="654" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_client_mistake_corrected_di" bpmnElement="end_client_mistake_corrected">
+        <dc:Bounds x="172" y="720" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_client_no_mistake_di" bpmnElement="end_client_no_mistake">
+        <dc:Bounds x="692" y="687" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="write_complaint_email_di" bpmnElement="write_complaint_email">
+        <dc:Bounds x="390" y="665" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="208" y="672"/>
+        <di:waypoint x="299" y="672"/>
+        <di:waypoint x="299" y="705"/>
+        <di:waypoint x="390" y="705"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="510" y="705"/>
+        <di:waypoint x="692" y="705"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="208" y="105"/>
+        <di:waypoint x="299" y="105"/>
+        <di:waypoint x="299" y="145"/>
+        <di:waypoint x="390" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="510" y="145"/>
+        <di:waypoint x="650" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="770" y="145"/>
+        <di:waypoint x="945" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="995" y="145"/>
+        <di:waypoint x="1170" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="995" y="145"/>
+        <di:waypoint x="1082" y="145"/>
+        <di:waypoint x="1082" y="395"/>
+        <di:waypoint x="1170" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="1290" y="145"/>
+        <di:waypoint x="1472" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="1290" y="395"/>
+        <di:waypoint x="1430" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="1550" y="395"/>
+        <di:waypoint x="1690" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="1810" y="395"/>
+        <di:waypoint x="1950" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="2070" y="395"/>
+        <di:waypoint x="2210" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="2330" y="395"/>
+        <di:waypoint x="2505" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="2555" y="395"/>
+        <di:waypoint x="2663" y="395"/>
+        <di:waypoint x="2663" y="145"/>
+        <di:waypoint x="2772" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="215" y="178"/>
+        <di:waypoint x="1493" y="178"/>
+        <di:waypoint x="1493" y="145"/>
+        <di:waypoint x="2772" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="450" y="665"/>
+        <di:waypoint x="190" y="123"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf2_di" bpmnElement="mf2">
+        <di:waypoint x="1230" y="105"/>
+        <di:waypoint x="1490" y="163"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
+        <di:waypoint x="2270" y="355"/>
+        <di:waypoint x="2790" y="163"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

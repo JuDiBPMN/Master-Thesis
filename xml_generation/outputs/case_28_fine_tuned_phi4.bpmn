@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Zarkan_Industries" name="Zarkan Industries" processRef="Process_Zarkan_Industries"/>
+    <bpmn:participant id="actor_Customer" name="Customer" processRef="Process_Customer"/>
+    <bpmn:messageFlow id="throw_Customer" name="Complaint Sent" sourceRef="start_Customer" targetRef="throw_Customer"/>
+    <bpmn:messageFlow id="catch_Zarkan_Industries" name="Complaint Received" sourceRef="throw_Customer" targetRef="catch_Zarkan_Industries"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="start_Customer" targetRef="throw_Customer"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="catch_Zarkan_Industries" targetRef="end_Zarkan_Industries"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Zarkan_Industries" name="Zarkan Industries" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Zarkan_Industries">
+      <bpmn:lane id="CSR" name="CSR">
+        <bpmn:flowNodeRef>start_Zarkan_Industries</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_Zarkan_Industries</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>handle_complaint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_call_details</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>document_concerns</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>note_receipt_date</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>analyze_complaint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>consult_departments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>resolve_complaint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>archive_complaint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>close_complaint</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>parallel_split</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>parallel_join</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_Zarkan_Industries" name="Complaint Received"/>
+    <bpmn:endEvent id="end_Zarkan_Industries" name="Complaint Closed"/>
+    <bpmn:task id="handle_complaint" name="Handle Complaint"/>
+    <bpmn:task id="record_call_details" name="Record Call Details"/>
+    <bpmn:task id="document_concerns" name="Document Customer Concerns"/>
+    <bpmn:task id="note_receipt_date" name="Note Letter Receipt Date"/>
+    <bpmn:task id="analyze_complaint" name="Analyze Complaint"/>
+    <bpmn:task id="consult_departments" name="Consult Other Departments"/>
+    <bpmn:task id="resolve_complaint" name="Resolve Complaint"/>
+    <bpmn:task id="archive_complaint" name="Archive Complaint"/>
+    <bpmn:task id="close_complaint" name="Close Complaint"/>
+    <bpmn:parallelGateway id="parallel_split" name="Start Concurrent Analysis and Consultation" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="parallel_join" name="Both Analysis and Consultation Complete" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_Zarkan_Industries" targetRef="handle_complaint"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="handle_complaint" targetRef="record_call_details"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="record_call_details" targetRef="document_concerns"/>
+    <bpmn:sequenceFlow id="sf4" sourceRef="document_concerns" targetRef="note_receipt_date"/>
+    <bpmn:sequenceFlow id="sf5" sourceRef="note_receipt_date" targetRef="analyze_complaint"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="analyze_complaint" targetRef="parallel_split"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="parallel_split" targetRef="consult_departments"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="parallel_split" targetRef="analyze_complaint"/>
+    <bpmn:sequenceFlow id="sf9" sourceRef="consult_departments" targetRef="parallel_join"/>
+    <bpmn:sequenceFlow id="sf10" sourceRef="analyze_complaint" targetRef="parallel_join"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="parallel_join" targetRef="resolve_complaint"/>
+    <bpmn:sequenceFlow id="sf12" sourceRef="resolve_complaint" targetRef="archive_complaint"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="archive_complaint" targetRef="close_complaint"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="close_complaint" targetRef="end_Zarkan_Industries"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Customer" name="Customer" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Customer">
+      <bpmn:lane id="Customer" name="Customer"/>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_Customer" name="Complaint Sent"/>
+    <bpmn:endEvent id="end_Customer" name="Complaint Handled"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Zarkan_Industries_di" bpmnElement="actor_Zarkan_Industries" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="3620" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Customer_di" bpmnElement="actor_Customer" isHorizontal="true">
+        <dc:Bounds x="10" y="300" width="600" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CSR_di" bpmnElement="CSR" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="3590" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Customer_di" bpmnElement="Customer" isHorizontal="true">
+        <dc:Bounds x="40" y="300" width="570" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_Zarkan_Industries_di" bpmnElement="start_Zarkan_Industries">
+        <dc:Bounds x="172" y="112" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_Zarkan_Industries_di" bpmnElement="end_Zarkan_Industries">
+        <dc:Bounds x="3292" y="112" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="handle_complaint_di" bpmnElement="handle_complaint">
+        <dc:Bounds x="390" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_call_details_di" bpmnElement="record_call_details">
+        <dc:Bounds x="650" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="document_concerns_di" bpmnElement="document_concerns">
+        <dc:Bounds x="910" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="note_receipt_date_di" bpmnElement="note_receipt_date">
+        <dc:Bounds x="1170" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="analyze_complaint_di" bpmnElement="analyze_complaint">
+        <dc:Bounds x="1430" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="consult_departments_di" bpmnElement="consult_departments">
+        <dc:Bounds x="1950" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="resolve_complaint_di" bpmnElement="resolve_complaint">
+        <dc:Bounds x="2470" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="archive_complaint_di" bpmnElement="archive_complaint">
+        <dc:Bounds x="2730" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="close_complaint_di" bpmnElement="close_complaint">
+        <dc:Bounds x="2990" y="90" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="parallel_split_di" bpmnElement="parallel_split" isMarkerVisible="true">
+        <dc:Bounds x="1725" y="105" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="parallel_join_di" bpmnElement="parallel_join" isMarkerVisible="true">
+        <dc:Bounds x="2245" y="105" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_Customer_di" bpmnElement="start_Customer">
+        <dc:Bounds x="172" y="374" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_Customer_di" bpmnElement="end_Customer">
+        <dc:Bounds x="172" y="440" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="208" y="130"/>
+        <di:waypoint x="390" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="510" y="130"/>
+        <di:waypoint x="650" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="770" y="130"/>
+        <di:waypoint x="910" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="1030" y="130"/>
+        <di:waypoint x="1170" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="1290" y="130"/>
+        <di:waypoint x="1430" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="1550" y="130"/>
+        <di:waypoint x="1725" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="1775" y="130"/>
+        <di:waypoint x="1950" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="1750" y="105"/>
+        <di:waypoint x="1750" y="40"/>
+        <di:waypoint x="1490" y="40"/>
+        <di:waypoint x="1490" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="2070" y="130"/>
+        <di:waypoint x="2245" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf10_di" bpmnElement="sf10">
+        <di:waypoint x="1550" y="130"/>
+        <di:waypoint x="2245" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="2295" y="130"/>
+        <di:waypoint x="2470" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf12_di" bpmnElement="sf12">
+        <di:waypoint x="2590" y="130"/>
+        <di:waypoint x="2730" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="2850" y="130"/>
+        <di:waypoint x="2990" y="130"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="3110" y="130"/>
+        <di:waypoint x="3292" y="130"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
