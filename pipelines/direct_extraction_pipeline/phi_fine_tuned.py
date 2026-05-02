@@ -436,11 +436,11 @@ if __name__ == "__main__":
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
     
     CASES_DIR = os.path.join(PROJECT_ROOT, "cases")
-    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "outputs")
+    OUTPUT_DIR = os.path.join(os.getcwd(), "outputs")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_fine_tuned_phi4_seed123.json")
+    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_fine_tuned_phi4_seed42.json")
 
     try:
         if not os.path.exists(input_path):
