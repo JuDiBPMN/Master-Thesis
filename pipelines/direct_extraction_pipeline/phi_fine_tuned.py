@@ -1,41 +1,39 @@
-try:
-    from llama_cpp import Llama
-    _LLAMA_CPP_AVAILABLE = True
-except Exception:
-    Llama = None
-    _LLAMA_CPP_AVAILABLE = False
-
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
 import json
 import sys
 import os
 
 llm = None
 
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+llm = None
+tokenizer = None
+
+from llama_cpp import Llama
+from huggingface_hub import hf_hub_download
+
+llm = None
+
 def load_model():
     global llm
+
     if llm is None:
-        if not _LLAMA_CPP_AVAILABLE:
-            raise RuntimeError("llama-cpp-python is not installed.")
-
-        SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-        PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-        model_path   = os.path.join(PROJECT_ROOT, "_fine_tuned_llm", "bpmn-phi4-finetuned_seed123.gguf")
-
-        if not os.path.exists(model_path):
-            raise FileNotFoundError(
-                f"Fine-tuned model not found at: {model_path}\n"
-                f"Make sure bpmn-mistral-finetuned.gguf is inside the 'fine-tuned-llm/' folder "
-                f"at the project root."
-            )
+        model_path = hf_hub_download(
+            repo_id="JulesNuytten/bpmn-phi4-gguf-collection",
+            filename="bpmn-phi4-seed42.q8_0.gguf"   # exact filename from HF
+        )
 
         llm = Llama(
             model_path=model_path,
             n_ctx=8192,
-            n_gpu_layers=-1,
+            n_gpu_layers=-1,   # uses GPU in Colab
             verbose=False
         )
-    return llm
 
+    return llm
 BPMN_SCHEMA = {
     "type": "object",
     "properties": {
