@@ -430,7 +430,7 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
     return json_result
 
 if __name__ == "__main__":
-    case_name = "case_28" 
+    case_name = "case_21" 
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -449,7 +449,7 @@ if __name__ == "__main__":
         with open(input_path, "r", encoding="utf-8") as f:
             process_text = f.read()
         
-        print(f"🤖 Phi-4 is analyzing '{case_name}'...")
+        print(f"🤖 Phi-4 seed 42 is analyzing '{case_name}'...")
         bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=0)
 
         if bpmn_json:
