@@ -23,7 +23,7 @@ def load_model():
     if llm is None:
         model_path = hf_hub_download(
             repo_id="JulesNuytten/bpmn-phi4-gguf-collection",
-            filename="bpmn-phi4-seed42.q8_0.gguf"   # exact filename from HF
+            filename="bpmn-phi4-seed2024.q8_0.gguf"   # exact filename from HF
         )
 
         llm = Llama(
@@ -430,7 +430,7 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
     return json_result
 
 if __name__ == "__main__":
-    case_name = "case_28" 
+    case_name = "case_21" 
 
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -440,7 +440,7 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_fine_tuned_phi4_seed42.json")
+    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_fine_tuned_phi4_seed2026.json")
 
     try:
         if not os.path.exists(input_path):
