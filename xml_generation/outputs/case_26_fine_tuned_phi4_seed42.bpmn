@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Company" name="Company" processRef="Process_Company"/>
+    <bpmn:messageFlow id="message_1" name="Inform Candidate about Application" sourceRef="inform_candidate" targetRef="Candidate"/>
+    <bpmn:messageFlow id="message_2" name="Candidate for Second Assessment" sourceRef="Candidate" targetRef="second_assessment"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Company" name="Company" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Company">
+      <bpmn:lane id="HR_Manager" name="HR Manager">
+        <bpmn:flowNodeRef>start_interview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_interview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_process</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>introduction_interview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>discuss_with_business_manager</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>inform_candidate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>prepare_contract</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>close_application</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Business_Manager" name="Business Manager">
+        <bpmn:flowNodeRef>successful_assessment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>unsuccessful_assessment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>second_assessment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>decision_assessment</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_interview" name="Start Interview"/>
+    <bpmn:endEvent id="end_interview" name="End Interview"/>
+    <bpmn:endEvent id="successful_assessment" name="Successful Assessment"/>
+    <bpmn:endEvent id="unsuccessful_assessment" name="Unsuccessful Assessment"/>
+    <bpmn:endEvent id="end_process" name="End Process"/>
+    <bpmn:task id="introduction_interview" name="Introduction Interview"/>
+    <bpmn:task id="discuss_with_business_manager" name="Discuss with Business Manager"/>
+    <bpmn:task id="inform_candidate" name="Inform Candidate"/>
+    <bpmn:task id="second_assessment" name="Second Assessment"/>
+    <bpmn:task id="prepare_contract" name="Prepare Contract"/>
+    <bpmn:task id="close_application" name="Close Application"/>
+    <bpmn:exclusiveGateway id="decision_assessment" name="Decision Assessment" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="flow_1" sourceRef="start_interview" targetRef="introduction_interview"/>
+    <bpmn:sequenceFlow id="flow_2" sourceRef="introduction_interview" targetRef="discuss_with_business_manager"/>
+    <bpmn:sequenceFlow id="flow_3" sourceRef="discuss_with_business_manager" targetRef="inform_candidate"/>
+    <bpmn:sequenceFlow id="flow_4" sourceRef="inform_candidate" targetRef="end_interview"/>
+    <bpmn:sequenceFlow id="flow_5" sourceRef="discuss_with_business_manager" targetRef="decision_assessment"/>
+    <bpmn:sequenceFlow id="flow_6" sourceRef="decision_assessment" targetRef="second_assessment" name="successful">
+      <bpmn:conditionExpression>successful</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_7" sourceRef="second_assessment" targetRef="successful_assessment"/>
+    <bpmn:sequenceFlow id="flow_8" sourceRef="decision_assessment" targetRef="unsuccessful_assessment" name="unsuccessful">
+      <bpmn:conditionExpression>unsuccessful</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_9" sourceRef="successful_assessment" targetRef="prepare_contract"/>
+    <bpmn:sequenceFlow id="flow_10" sourceRef="prepare_contract" targetRef="end_process"/>
+    <bpmn:sequenceFlow id="flow_11" sourceRef="unsuccessful_assessment" targetRef="close_application"/>
+    <bpmn:sequenceFlow id="flow_12" sourceRef="close_application" targetRef="end_process"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Company_di" bpmnElement="actor_Company" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="2320" height="500"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="HR_Manager_di" bpmnElement="HR_Manager" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="2290" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Business_Manager_di" bpmnElement="Business_Manager" isHorizontal="true">
+        <dc:Bounds x="40" y="270" width="2290" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_interview_di" bpmnElement="start_interview">
+        <dc:Bounds x="172" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_interview_di" bpmnElement="end_interview">
+        <dc:Bounds x="1212" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_process_di" bpmnElement="end_process">
+        <dc:Bounds x="1992" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="introduction_interview_di" bpmnElement="introduction_interview">
+        <dc:Bounds x="390" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="discuss_with_business_manager_di" bpmnElement="discuss_with_business_manager">
+        <dc:Bounds x="650" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="inform_candidate_di" bpmnElement="inform_candidate">
+        <dc:Bounds x="910" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="prepare_contract_di" bpmnElement="prepare_contract">
+        <dc:Bounds x="1690" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="close_application_di" bpmnElement="close_application">
+        <dc:Bounds x="1430" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="successful_assessment_di" bpmnElement="successful_assessment">
+        <dc:Bounds x="1472" y="377" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="unsuccessful_assessment_di" bpmnElement="unsuccessful_assessment">
+        <dc:Bounds x="1212" y="322" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="second_assessment_di" bpmnElement="second_assessment">
+        <dc:Bounds x="1170" y="388" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="decision_assessment_di" bpmnElement="decision_assessment" isMarkerVisible="true">
+        <dc:Bounds x="945" y="370" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow_1_di" bpmnElement="flow_1">
+        <di:waypoint x="208" y="145"/>
+        <di:waypoint x="390" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_2_di" bpmnElement="flow_2">
+        <di:waypoint x="510" y="145"/>
+        <di:waypoint x="650" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_3_di" bpmnElement="flow_3">
+        <di:waypoint x="770" y="145"/>
+        <di:waypoint x="910" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_4_di" bpmnElement="flow_4">
+        <di:waypoint x="1030" y="145"/>
+        <di:waypoint x="1212" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_5_di" bpmnElement="flow_5">
+        <di:waypoint x="770" y="145"/>
+        <di:waypoint x="857" y="145"/>
+        <di:waypoint x="857" y="395"/>
+        <di:waypoint x="945" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_6_di" bpmnElement="flow_6">
+        <di:waypoint x="995" y="395"/>
+        <di:waypoint x="1082" y="395"/>
+        <di:waypoint x="1082" y="428"/>
+        <di:waypoint x="1170" y="428"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_7_di" bpmnElement="flow_7">
+        <di:waypoint x="1290" y="428"/>
+        <di:waypoint x="1381" y="428"/>
+        <di:waypoint x="1381" y="395"/>
+        <di:waypoint x="1472" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_8_di" bpmnElement="flow_8">
+        <di:waypoint x="995" y="395"/>
+        <di:waypoint x="1103" y="395"/>
+        <di:waypoint x="1103" y="340"/>
+        <di:waypoint x="1212" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_9_di" bpmnElement="flow_9">
+        <di:waypoint x="1508" y="395"/>
+        <di:waypoint x="1599" y="395"/>
+        <di:waypoint x="1599" y="145"/>
+        <di:waypoint x="1690" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_10_di" bpmnElement="flow_10">
+        <di:waypoint x="1810" y="145"/>
+        <di:waypoint x="1992" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_11_di" bpmnElement="flow_11">
+        <di:waypoint x="1248" y="340"/>
+        <di:waypoint x="1339" y="340"/>
+        <di:waypoint x="1339" y="145"/>
+        <di:waypoint x="1430" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_12_di" bpmnElement="flow_12">
+        <di:waypoint x="1550" y="145"/>
+        <di:waypoint x="1992" y="145"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

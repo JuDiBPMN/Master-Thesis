@@ -1,0 +1,278 @@
+{
+  "pools": [
+    {
+      "id": "Bank",
+      "name": "Bank Process Flow for Mortgage Application Assessment"
+    },
+    {
+      "id": "Client",
+      "name": "Client"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Bank",
+      "name": "Bank",
+      "pool": "Bank Process Flow for Mortgage Application Assessment"
+    },
+    {
+      "id": "Client",
+      "name": "Client",
+      "pool": "Client"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "create_mortgage_file",
+      "name": "Create Mortgage File",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "evaluate_financial_stability",
+      "name": "Evaluate Client's Financial Stability",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "gather_income_statements",
+      "name": "Gather Income Statements",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "check_other_credit_applications",
+      "name": "Check for Other Credit Applications",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "perform_risk_analysis",
+      "name": "Perform Risk Analysis",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "grant_line_of_credit",
+      "name": "Grant Line of Credit",
+      "type": "task",
+      "lane": "Bank"
+    },
+    {
+      "id": "decline_mortgage_application",
+      "name": "Decline Mortgage Application",
+      "type": "task",
+      "lane": "Bank"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_mortgage_assessment",
+      "name": "Start Mortgage Assessment",
+      "type": "startEvent",
+      "lane": "Bank",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_mortgage_assessment",
+      "name": "End Mortgage Assessment",
+      "type": "endEvent",
+      "lane": "Bank",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "send_financial_stability",
+      "name": "Send Financial Stability",
+      "type": "intermediateThrowEvent",
+      "lane": "Bank",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "receive_financial_stability",
+      "name": "Receive Financial Stability",
+      "type": "intermediateCatchEvent",
+      "lane": "Client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "send_income_statements",
+      "name": "Send Income Statements",
+      "type": "intermediateThrowEvent",
+      "lane": "Bank",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "receive_income_statements",
+      "name": "Receive Income Statements",
+      "type": "intermediateCatchEvent",
+      "lane": "Client",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "send_credit_check",
+      "name": "Send Credit Check",
+      "type": "intermediateThrowEvent",
+      "lane": "Bank",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "receive_credit_check",
+      "name": "Receive Credit Check",
+      "type": "intermediateCatchEvent",
+      "lane": "Client",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "parallel_gateway_split",
+      "name": "Parallel Gateway Split",
+      "type": "parallelGateway",
+      "lane": "Bank",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "parallel_gateway_join",
+      "name": "Parallel Gateway Join",
+      "type": "parallelGateway",
+      "lane": "Bank",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "exclusive_gateway_split",
+      "name": "Exclusive Gateway Split",
+      "type": "exclusiveGateway",
+      "lane": "Bank",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "exclusive_gateway_join",
+      "name": "Exclusive Gateway Join",
+      "type": "exclusiveGateway",
+      "lane": "Bank",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "start_to_create",
+      "from": "start_mortgage_assessment",
+      "to": "create_mortgage_file"
+    },
+    {
+      "id": "create_to_parallel_split",
+      "from": "create_mortgage_file",
+      "to": "parallel_gateway_split"
+    },
+    {
+      "id": "parallel_split_to_evaluate",
+      "from": "parallel_gateway_split",
+      "to": "evaluate_financial_stability"
+    },
+    {
+      "id": "parallel_split_to_gather",
+      "from": "parallel_gateway_split",
+      "to": "gather_income_statements"
+    },
+    {
+      "id": "parallel_split_to_check",
+      "from": "parallel_gateway_split",
+      "to": "check_other_credit_applications"
+    },
+    {
+      "id": "evaluate_to_send_financial",
+      "from": "evaluate_financial_stability",
+      "to": "send_financial_stability"
+    },
+    {
+      "id": "send_financial_to_receive_financial",
+      "from": "send_financial_stability",
+      "to": "receive_financial_stability"
+    },
+    {
+      "id": "receive_financial_to_gather",
+      "from": "receive_financial_stability",
+      "to": "gather_income_statements"
+    },
+    {
+      "id": "gather_to_send_income",
+      "from": "gather_income_statements",
+      "to": "send_income_statements"
+    },
+    {
+      "id": "send_income_to_receive_income",
+      "from": "send_income_statements",
+      "to": "receive_income_statements"
+    },
+    {
+      "id": "receive_income_to_check",
+      "from": "receive_income_statements",
+      "to": "check_other_credit_applications"
+    },
+    {
+      "id": "check_to_send_credit",
+      "from": "check_other_credit_applications",
+      "to": "send_credit_check"
+    },
+    {
+      "id": "send_credit_to_receive_credit",
+      "from": "send_credit_check",
+      "to": "receive_credit_check"
+    },
+    {
+      "id": "receive_credit_to_parallel_join",
+      "from": "receive_credit_check",
+      "to": "parallel_gateway_join"
+    },
+    {
+      "id": "parallel_join_to_risk_analysis",
+      "from": "parallel_gateway_join",
+      "to": "perform_risk_analysis"
+    },
+    {
+      "id": "risk_analysis_to_exclusive_split",
+      "from": "perform_risk_analysis",
+      "to": "exclusive_gateway_split"
+    },
+    {
+      "id": "exclusive_split_to_grant",
+      "from": "exclusive_gateway_split",
+      "to": "grant_line_of_credit"
+    },
+    {
+      "id": "exclusive_split_to_decline",
+      "from": "exclusive_gateway_split",
+      "to": "decline_mortgage_application"
+    },
+    {
+      "id": "grant_to_end",
+      "from": "grant_line_of_credit",
+      "to": "end_mortgage_assessment"
+    },
+    {
+      "id": "decline_to_end",
+      "from": "decline_mortgage_application",
+      "to": "end_mortgage_assessment"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "financial_stability_message",
+      "from": "send_financial_stability",
+      "to": "receive_financial_stability",
+      "name": "Financial Stability"
+    },
+    {
+      "id": "income_statements_message",
+      "from": "send_income_statements",
+      "to": "receive_income_statements",
+      "name": "Income Statements"
+    },
+    {
+      "id": "credit_check_message",
+      "from": "send_credit_check",
+      "to": "receive_credit_check",
+      "name": "Credit Check"
+    }
+  ]
+}

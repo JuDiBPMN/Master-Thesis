@@ -1,0 +1,177 @@
+{
+  "pools": [
+    {
+      "id": "Library",
+      "name": "Library System"
+    },
+    {
+      "id": "Requester",
+      "name": "Requester"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "Library_Staff",
+      "name": "Library Staff",
+      "pool": "Library"
+    },
+    {
+      "id": "Requester",
+      "name": "Requester",
+      "pool": "Requester"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "Check_Catalog",
+      "name": "Check Catalog for Book Availability",
+      "type": "task",
+      "lane": "Library_Staff"
+    },
+    {
+      "id": "Inform_Requester",
+      "name": "Inform Requester of Unavailability",
+      "type": "task",
+      "lane": "Library_Staff"
+    },
+    {
+      "id": "Log_Book",
+      "name": "Log Book Against Requester's Account",
+      "type": "task",
+      "lane": "Library_Staff"
+    },
+    {
+      "id": "Retrieve_Book",
+      "name": "Retrieve Book Using Automatic System",
+      "type": "task",
+      "lane": "Library_Staff"
+    }
+  ],
+  "events": [
+    {
+      "id": "Start",
+      "name": "Start",
+      "type": "startEvent",
+      "lane": "Library_Staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Book_Request",
+      "name": "Book Request Received",
+      "type": "intermediateCatchEvent",
+      "lane": "Library_Staff",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Book_Available",
+      "name": "Book Available",
+      "type": "intermediateCatchEvent",
+      "lane": "Library_Staff",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Book_Unavailable",
+      "name": "Book Unavailable",
+      "type": "intermediateThrowEvent",
+      "lane": "Library_Staff",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "End",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Library_Staff",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "Requester_Inform",
+      "name": "Inform Requester",
+      "type": "intermediateCatchEvent",
+      "lane": "Requester",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "Requester_End",
+      "name": "End",
+      "type": "endEvent",
+      "lane": "Requester",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "Check_Availability_Decision",
+      "name": "Check Availability Decision",
+      "type": "exclusiveGateway",
+      "lane": "Library_Staff",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "Start_to_Book_Request",
+      "from": "Start",
+      "to": "Book_Request"
+    },
+    {
+      "id": "Book_Request_to_Check_Catalog",
+      "from": "Book_Request",
+      "to": "Check_Catalog"
+    },
+    {
+      "id": "Check_Catalog_to_Check_Availability_Decision",
+      "from": "Check_Catalog",
+      "to": "Check_Availability_Decision"
+    },
+    {
+      "id": "Check_Availability_Decision_to_Book_Available",
+      "from": "Check_Availability_Decision",
+      "to": "Book_Available",
+      "condition": "Book is available"
+    },
+    {
+      "id": "Check_Availability_Decision_to_Book_Unavailable",
+      "from": "Check_Availability_Decision",
+      "to": "Book_Unavailable",
+      "condition": "Book is unavailable"
+    },
+    {
+      "id": "Book_Available_to_Log_Book",
+      "from": "Book_Available",
+      "to": "Log_Book"
+    },
+    {
+      "id": "Book_Available_to_Retrieve_Book",
+      "from": "Book_Available",
+      "to": "Retrieve_Book"
+    },
+    {
+      "id": "Log_Book_to_End",
+      "from": "Log_Book",
+      "to": "End"
+    },
+    {
+      "id": "Retrieve_Book_to_End",
+      "from": "Retrieve_Book",
+      "to": "End"
+    },
+    {
+      "id": "Book_Unavailable_to_Requester_Inform",
+      "from": "Book_Unavailable",
+      "to": "Requester_Inform"
+    },
+    {
+      "id": "Requester_Inform_to_Requester_End",
+      "from": "Requester_Inform",
+      "to": "Requester_End"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "Book_Unavailable_to_Requester_Inform",
+      "from": "Book_Unavailable",
+      "to": "Requester_Inform",
+      "name": "Inform Requester of Unavailability"
+    }
+  ]
+}

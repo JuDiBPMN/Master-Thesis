@@ -1,0 +1,187 @@
+{
+  "pools": [
+    {
+      "id": "Company",
+      "name": "Company"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "HR_Manager",
+      "name": "HR Manager",
+      "pool": "Company"
+    },
+    {
+      "id": "Business_Manager",
+      "name": "Business Manager",
+      "pool": "Company"
+    },
+    {
+      "id": "Candidate",
+      "name": "Candidate",
+      "pool": "Candidate"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "introduction_interview",
+      "name": "Introduction Interview",
+      "type": "task",
+      "lane": "HR_Manager"
+    },
+    {
+      "id": "discuss_with_business_manager",
+      "name": "Discuss with Business Manager",
+      "type": "task",
+      "lane": "HR_Manager"
+    },
+    {
+      "id": "inform_candidate",
+      "name": "Inform Candidate",
+      "type": "task",
+      "lane": "HR_Manager"
+    },
+    {
+      "id": "second_assessment",
+      "name": "Second Assessment",
+      "type": "task",
+      "lane": "Business_Manager"
+    },
+    {
+      "id": "prepare_contract",
+      "name": "Prepare Contract",
+      "type": "task",
+      "lane": "HR_Manager"
+    },
+    {
+      "id": "close_application",
+      "name": "Close Application",
+      "type": "task",
+      "lane": "HR_Manager"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_interview",
+      "name": "Start Interview",
+      "type": "startEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_interview",
+      "name": "End Interview",
+      "type": "endEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "successful_assessment",
+      "name": "Successful Assessment",
+      "type": "endEvent",
+      "lane": "Business_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "unsuccessful_assessment",
+      "name": "Unsuccessful Assessment",
+      "type": "endEvent",
+      "lane": "Business_Manager",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_process",
+      "name": "End Process",
+      "type": "endEvent",
+      "lane": "HR_Manager",
+      "eventDefinition": "none"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "decision_assessment",
+      "name": "Decision Assessment",
+      "type": "exclusiveGateway",
+      "lane": "Business_Manager",
+      "gatewayDirection": "diverging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "flow_1",
+      "from": "start_interview",
+      "to": "introduction_interview"
+    },
+    {
+      "id": "flow_2",
+      "from": "introduction_interview",
+      "to": "discuss_with_business_manager"
+    },
+    {
+      "id": "flow_3",
+      "from": "discuss_with_business_manager",
+      "to": "inform_candidate"
+    },
+    {
+      "id": "flow_4",
+      "from": "inform_candidate",
+      "to": "end_interview"
+    },
+    {
+      "id": "flow_5",
+      "from": "discuss_with_business_manager",
+      "to": "decision_assessment"
+    },
+    {
+      "id": "flow_6",
+      "from": "decision_assessment",
+      "to": "second_assessment",
+      "condition": "successful"
+    },
+    {
+      "id": "flow_7",
+      "from": "second_assessment",
+      "to": "successful_assessment"
+    },
+    {
+      "id": "flow_8",
+      "from": "decision_assessment",
+      "to": "unsuccessful_assessment",
+      "condition": "unsuccessful"
+    },
+    {
+      "id": "flow_9",
+      "from": "successful_assessment",
+      "to": "prepare_contract"
+    },
+    {
+      "id": "flow_10",
+      "from": "prepare_contract",
+      "to": "end_process"
+    },
+    {
+      "id": "flow_11",
+      "from": "unsuccessful_assessment",
+      "to": "close_application"
+    },
+    {
+      "id": "flow_12",
+      "from": "close_application",
+      "to": "end_process"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "message_1",
+      "from": "inform_candidate",
+      "to": "Candidate",
+      "name": "Inform Candidate about Application"
+    },
+    {
+      "id": "message_2",
+      "from": "Candidate",
+      "to": "second_assessment",
+      "name": "Candidate for Second Assessment"
+    }
+  ]
+}

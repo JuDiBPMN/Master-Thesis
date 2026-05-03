@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Government Agency" name="Government Agency" processRef="Process_Government Agency"/>
+    <bpmn:participant id="actor_Applicant Organisation" name="Applicant Organisation" processRef="Process_Applicant Organisation"/>
+    <bpmn:messageFlow id="Submit Application to Application Registered" name="Submit Application" sourceRef="Submit Application" targetRef="Application Registered"/>
+    <bpmn:messageFlow id="Application Registered to Submit Application" name="Application Registered" sourceRef="Application Registered" targetRef="Submit Application"/>
+    <bpmn:messageFlow id="Documents Incomplete to Missing Documents Notified" name="Documents Incomplete" sourceRef="Documents Incomplete" targetRef="Missing Documents Notified"/>
+    <bpmn:messageFlow id="Missing Documents Notified to Documents Incomplete" name="Missing Documents Notified" sourceRef="Missing Documents Notified" targetRef="Documents Incomplete"/>
+    <bpmn:messageFlow id="Documents Resubmitted to Documents Complete" name="Documents Resubmitted" sourceRef="Documents Resubmitted" targetRef="Documents Complete"/>
+    <bpmn:messageFlow id="Technical Verdict Recorded to Review Combined Outcomes" name="Technical Verdict" sourceRef="Technical Verdict Recorded" targetRef="Review Combined Outcomes"/>
+    <bpmn:messageFlow id="Finance Verdict Recorded to Review Combined Outcomes" name="Finance Verdict" sourceRef="Finance Verdict Recorded" targetRef="Review Combined Outcomes"/>
+    <bpmn:messageFlow id="Rejection Notice Sent to Submit Application" name="Rejection Notice" sourceRef="Rejection Notice Sent" targetRef="Submit Application"/>
+    <bpmn:messageFlow id="Grant Approval Issued to Submit Application" name="Grant Approval" sourceRef="Grant Approval Issued" targetRef="Submit Application"/>
+    <bpmn:messageFlow id="MsgFlow_p0" name="" sourceRef="Notify Missing Documents" targetRef="Missing Documents Notified"/>
+    <bpmn:messageFlow id="MsgFlow_p1" name="" sourceRef="Documents Resubmitted" targetRef="Documents Incomplete"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Government Agency" name="Government Agency" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Government Agency">
+      <bpmn:lane id="Grants Office" name="Grants Office">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Application Registered</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Documents Complete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Documents Incomplete</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Technical Verdict Recorded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Finance Verdict Recorded</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Rejection Notice Sent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Grant Approval Issued</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Register Application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Check Documentation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Notify Missing Documents</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Check Documentation Again</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Forward to Technical Review</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Forward to Finance Review</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Assess Project Feasibility</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Record Technical Verdict</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Review Proposed Budget</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Record Finance Verdict</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Review Combined Outcomes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Send Rejection Notice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Issue Grant Approval</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Check Documentation Gateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Review Outcomes Gateway</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Parallel Split</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Parallel Join</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Start"/>
+    <bpmn:intermediateThrowEvent id="Application Registered" name="Application Registered">
+      <bpmn:messageEventDefinition id="Application Registered_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Documents Complete" name="Documents Complete">
+      <bpmn:messageEventDefinition id="Documents Complete_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="Documents Incomplete" name="Documents Incomplete">
+      <bpmn:messageEventDefinition id="Documents Incomplete_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="Technical Verdict Recorded" name="Technical Verdict Recorded">
+      <bpmn:messageEventDefinition id="Technical Verdict Recorded_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="Finance Verdict Recorded" name="Finance Verdict Recorded">
+      <bpmn:messageEventDefinition id="Finance Verdict Recorded_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="Rejection Notice Sent" name="Rejection Notice Sent">
+      <bpmn:messageEventDefinition id="Rejection Notice Sent_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateThrowEvent id="Grant Approval Issued" name="Grant Approval Issued">
+      <bpmn:messageEventDefinition id="Grant Approval Issued_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="End" name="End"/>
+    <bpmn:task id="Register Application" name="Register Application"/>
+    <bpmn:task id="Check Documentation" name="Check Documentation"/>
+    <bpmn:task id="Notify Missing Documents" name="Notify Missing Documents"/>
+    <bpmn:task id="Check Documentation Again" name="Check Documentation Again"/>
+    <bpmn:task id="Forward to Technical Review" name="Forward to Technical Review"/>
+    <bpmn:task id="Forward to Finance Review" name="Forward to Finance Review"/>
+    <bpmn:task id="Assess Project Feasibility" name="Assess Project Feasibility"/>
+    <bpmn:task id="Record Technical Verdict" name="Record Technical Verdict"/>
+    <bpmn:task id="Review Proposed Budget" name="Review Proposed Budget"/>
+    <bpmn:task id="Record Finance Verdict" name="Record Finance Verdict"/>
+    <bpmn:task id="Review Combined Outcomes" name="Review Combined Outcomes"/>
+    <bpmn:task id="Send Rejection Notice" name="Send Rejection Notice"/>
+    <bpmn:task id="Issue Grant Approval" name="Issue Grant Approval"/>
+    <bpmn:exclusiveGateway id="Check Documentation Gateway" name="Check Documentation Gateway" gatewayDirection="diverging"/>
+    <bpmn:exclusiveGateway id="Review Outcomes Gateway" name="Review Outcomes Gateway" gatewayDirection="converging"/>
+    <bpmn:parallelGateway id="Parallel Split" name="Parallel Split" gatewayDirection="diverging"/>
+    <bpmn:parallelGateway id="Parallel Join" name="Parallel Join" gatewayDirection="converging"/>
+    <bpmn:sequenceFlow id="Start to Register Application" sourceRef="Start" targetRef="Register Application"/>
+    <bpmn:sequenceFlow id="Register Application to Check Documentation" sourceRef="Register Application" targetRef="Check Documentation"/>
+    <bpmn:sequenceFlow id="Check Documentation to Check Documentation Gateway" sourceRef="Check Documentation" targetRef="Check Documentation Gateway"/>
+    <bpmn:sequenceFlow id="Check Documentation Gateway to Notify Missing Documents" sourceRef="Check Documentation Gateway" targetRef="Notify Missing Documents" name="documentation is incomplete">
+      <bpmn:conditionExpression>documentation is incomplete</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Check Documentation Gateway to Documents Complete" sourceRef="Check Documentation Gateway" targetRef="Documents Complete" name="documentation is complete">
+      <bpmn:conditionExpression>documentation is complete</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Documents Complete to Forward to Technical Review" sourceRef="Documents Complete" targetRef="Forward to Technical Review"/>
+    <bpmn:sequenceFlow id="Documents Complete to Forward to Finance Review" sourceRef="Documents Complete" targetRef="Forward to Finance Review"/>
+    <bpmn:sequenceFlow id="Forward to Technical Review to Parallel Split" sourceRef="Forward to Technical Review" targetRef="Parallel Split"/>
+    <bpmn:sequenceFlow id="Forward to Finance Review to Parallel Split" sourceRef="Forward to Finance Review" targetRef="Parallel Split"/>
+    <bpmn:sequenceFlow id="Parallel Split to Assess Project Feasibility" sourceRef="Parallel Split" targetRef="Assess Project Feasibility"/>
+    <bpmn:sequenceFlow id="Parallel Split to Review Proposed Budget" sourceRef="Parallel Split" targetRef="Review Proposed Budget"/>
+    <bpmn:sequenceFlow id="Assess Project Feasibility to Record Technical Verdict" sourceRef="Assess Project Feasibility" targetRef="Record Technical Verdict"/>
+    <bpmn:sequenceFlow id="Record Technical Verdict to Technical Verdict Recorded" sourceRef="Record Technical Verdict" targetRef="Technical Verdict Recorded"/>
+    <bpmn:sequenceFlow id="Review Proposed Budget to Record Finance Verdict" sourceRef="Review Proposed Budget" targetRef="Record Finance Verdict"/>
+    <bpmn:sequenceFlow id="Record Finance Verdict to Finance Verdict Recorded" sourceRef="Record Finance Verdict" targetRef="Finance Verdict Recorded"/>
+    <bpmn:sequenceFlow id="Technical Verdict Recorded to Parallel Join" sourceRef="Technical Verdict Recorded" targetRef="Parallel Join"/>
+    <bpmn:sequenceFlow id="Finance Verdict Recorded to Parallel Join" sourceRef="Finance Verdict Recorded" targetRef="Parallel Join"/>
+    <bpmn:sequenceFlow id="Parallel Join to Review Combined Outcomes" sourceRef="Parallel Join" targetRef="Review Combined Outcomes"/>
+    <bpmn:sequenceFlow id="Review Combined Outcomes to Review Outcomes Gateway" sourceRef="Review Combined Outcomes" targetRef="Review Outcomes Gateway"/>
+    <bpmn:sequenceFlow id="Review Outcomes Gateway to Send Rejection Notice" sourceRef="Review Outcomes Gateway" targetRef="Send Rejection Notice" name="either verdict is negative">
+      <bpmn:conditionExpression>either verdict is negative</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Review Outcomes Gateway to Issue Grant Approval" sourceRef="Review Outcomes Gateway" targetRef="Issue Grant Approval" name="both verdicts are positive">
+      <bpmn:conditionExpression>both verdicts are positive</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Send Rejection Notice to Rejection Notice Sent" sourceRef="Send Rejection Notice" targetRef="Rejection Notice Sent"/>
+    <bpmn:sequenceFlow id="Issue Grant Approval to Grant Approval Issued" sourceRef="Issue Grant Approval" targetRef="Grant Approval Issued"/>
+    <bpmn:sequenceFlow id="Rejection Notice Sent to End" sourceRef="Rejection Notice Sent" targetRef="End"/>
+    <bpmn:sequenceFlow id="Grant Approval Issued to End" sourceRef="Grant Approval Issued" targetRef="End"/>
+    <bpmn:sequenceFlow id="Documents Incomplete to Check Documentation Again" sourceRef="Documents Incomplete" targetRef="Check Documentation Again"/>
+    <bpmn:sequenceFlow id="Check Documentation Again to Check Documentation Gateway" sourceRef="Check Documentation Again" targetRef="Check Documentation Gateway"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Applicant Organisation" name="Applicant Organisation" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Applicant Organisation">
+      <bpmn:lane id="Applicant" name="Applicant">
+        <bpmn:flowNodeRef>Submit Application</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Missing Documents Notified</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Documents Resubmitted</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Collect Missing Documents</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Resubmit Documents</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:intermediateCatchEvent id="Submit Application" name="Submit Application">
+      <bpmn:messageEventDefinition id="Submit Application_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Missing Documents Notified" name="Missing Documents Notified">
+      <bpmn:messageEventDefinition id="Missing Documents Notified_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateThrowEvent id="Documents Resubmitted" name="Documents Resubmitted">
+      <bpmn:messageEventDefinition id="Documents Resubmitted_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:task id="Collect Missing Documents" name="Collect Missing Documents"/>
+    <bpmn:task id="Resubmit Documents" name="Resubmit Documents"/>
+    <bpmn:sequenceFlow id="Missing Documents Notified to Collect Missing Documents" sourceRef="Missing Documents Notified" targetRef="Collect Missing Documents"/>
+    <bpmn:sequenceFlow id="Collect Missing Documents to Documents Resubmitted" sourceRef="Collect Missing Documents" targetRef="Documents Resubmitted"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Government Agency_di" bpmnElement="actor_Government Agency" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="4400" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Applicant Organisation_di" bpmnElement="actor_Applicant Organisation" isHorizontal="true">
+        <dc:Bounds x="10" y="440" width="1020" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Grants Office_di" bpmnElement="Grants Office" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="4370" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Applicant_di" bpmnElement="Applicant" isHorizontal="true">
+        <dc:Bounds x="40" y="440" width="990" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_di" bpmnElement="Start">
+        <dc:Bounds x="172" y="116" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Application Registered_di" bpmnElement="Application Registered">
+        <dc:Bounds x="172" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Documents Incomplete_di" bpmnElement="Documents Incomplete">
+        <dc:Bounds x="172" y="248" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Documents Complete_di" bpmnElement="Documents Complete">
+        <dc:Bounds x="1212" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Notify Missing Documents_di" bpmnElement="Notify Missing Documents">
+        <dc:Bounds x="1170" y="193" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Technical Verdict Recorded_di" bpmnElement="Technical Verdict Recorded">
+        <dc:Bounds x="2512" y="149" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Finance Verdict Recorded_di" bpmnElement="Finance Verdict Recorded">
+        <dc:Bounds x="2512" y="215" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Rejection Notice Sent_di" bpmnElement="Rejection Notice Sent">
+        <dc:Bounds x="3812" y="149" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Grant Approval Issued_di" bpmnElement="Grant Approval Issued">
+        <dc:Bounds x="3812" y="215" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_di" bpmnElement="End">
+        <dc:Bounds x="4072" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Register Application_di" bpmnElement="Register Application">
+        <dc:Bounds x="390" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Check Documentation Again_di" bpmnElement="Check Documentation Again">
+        <dc:Bounds x="390" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Check Documentation_di" bpmnElement="Check Documentation">
+        <dc:Bounds x="650" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forward to Technical Review_di" bpmnElement="Forward to Technical Review">
+        <dc:Bounds x="1430" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Forward to Finance Review_di" bpmnElement="Forward to Finance Review">
+        <dc:Bounds x="1430" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Assess Project Feasibility_di" bpmnElement="Assess Project Feasibility">
+        <dc:Bounds x="1950" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Review Proposed Budget_di" bpmnElement="Review Proposed Budget">
+        <dc:Bounds x="1950" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Record Technical Verdict_di" bpmnElement="Record Technical Verdict">
+        <dc:Bounds x="2210" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Record Finance Verdict_di" bpmnElement="Record Finance Verdict">
+        <dc:Bounds x="2210" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Review Combined Outcomes_di" bpmnElement="Review Combined Outcomes">
+        <dc:Bounds x="2990" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Send Rejection Notice_di" bpmnElement="Send Rejection Notice">
+        <dc:Bounds x="3510" y="105" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Issue Grant Approval_di" bpmnElement="Issue Grant Approval">
+        <dc:Bounds x="3510" y="215" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Check Documentation Gateway_di" bpmnElement="Check Documentation Gateway" isMarkerVisible="true">
+        <dc:Bounds x="945" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Review Outcomes Gateway_di" bpmnElement="Review Outcomes Gateway" isMarkerVisible="true">
+        <dc:Bounds x="3285" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Parallel Split_di" bpmnElement="Parallel Split" isMarkerVisible="true">
+        <dc:Bounds x="1725" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Parallel Join_di" bpmnElement="Parallel Join" isMarkerVisible="true">
+        <dc:Bounds x="2765" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Submit Application_di" bpmnElement="Submit Application">
+        <dc:Bounds x="172" y="514" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Missing Documents Notified_di" bpmnElement="Missing Documents Notified">
+        <dc:Bounds x="172" y="580" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Resubmit Documents_di" bpmnElement="Resubmit Documents">
+        <dc:Bounds x="130" y="646" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Documents Resubmitted_di" bpmnElement="Documents Resubmitted">
+        <dc:Bounds x="692" y="602" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Collect Missing Documents_di" bpmnElement="Collect Missing Documents">
+        <dc:Bounds x="390" y="580" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Start to Register Application_di" bpmnElement="Start to Register Application">
+        <di:waypoint x="208" y="134"/>
+        <di:waypoint x="299" y="134"/>
+        <di:waypoint x="299" y="145"/>
+        <di:waypoint x="390" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Register Application to Check Documentation_di" bpmnElement="Register Application to Check Documentation">
+        <di:waypoint x="510" y="145"/>
+        <di:waypoint x="580" y="145"/>
+        <di:waypoint x="580" y="200"/>
+        <di:waypoint x="650" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Check Documentation to Check Documentation Gateway_di" bpmnElement="Check Documentation to Check Documentation Gateway">
+        <di:waypoint x="770" y="200"/>
+        <di:waypoint x="945" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Check Documentation Gateway to Notify Missing Documents_di" bpmnElement="Check Documentation Gateway to Notify Missing Documents">
+        <di:waypoint x="995" y="200"/>
+        <di:waypoint x="1082" y="200"/>
+        <di:waypoint x="1082" y="233"/>
+        <di:waypoint x="1170" y="233"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Check Documentation Gateway to Documents Complete_di" bpmnElement="Check Documentation Gateway to Documents Complete">
+        <di:waypoint x="995" y="200"/>
+        <di:waypoint x="1103" y="200"/>
+        <di:waypoint x="1103" y="145"/>
+        <di:waypoint x="1212" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Documents Complete to Forward to Technical Review_di" bpmnElement="Documents Complete to Forward to Technical Review">
+        <di:waypoint x="1248" y="145"/>
+        <di:waypoint x="1430" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Documents Complete to Forward to Finance Review_di" bpmnElement="Documents Complete to Forward to Finance Review">
+        <di:waypoint x="1248" y="145"/>
+        <di:waypoint x="1339" y="145"/>
+        <di:waypoint x="1339" y="255"/>
+        <di:waypoint x="1430" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Forward to Technical Review to Parallel Split_di" bpmnElement="Forward to Technical Review to Parallel Split">
+        <di:waypoint x="1550" y="145"/>
+        <di:waypoint x="1637" y="145"/>
+        <di:waypoint x="1637" y="200"/>
+        <di:waypoint x="1725" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Forward to Finance Review to Parallel Split_di" bpmnElement="Forward to Finance Review to Parallel Split">
+        <di:waypoint x="1550" y="255"/>
+        <di:waypoint x="1637" y="255"/>
+        <di:waypoint x="1637" y="200"/>
+        <di:waypoint x="1725" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Parallel Split to Assess Project Feasibility_di" bpmnElement="Parallel Split to Assess Project Feasibility">
+        <di:waypoint x="1775" y="200"/>
+        <di:waypoint x="1862" y="200"/>
+        <di:waypoint x="1862" y="145"/>
+        <di:waypoint x="1950" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Parallel Split to Review Proposed Budget_di" bpmnElement="Parallel Split to Review Proposed Budget">
+        <di:waypoint x="1775" y="200"/>
+        <di:waypoint x="1862" y="200"/>
+        <di:waypoint x="1862" y="255"/>
+        <di:waypoint x="1950" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assess Project Feasibility to Record Technical Verdict_di" bpmnElement="Assess Project Feasibility to Record Technical Verdict">
+        <di:waypoint x="2070" y="145"/>
+        <di:waypoint x="2210" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Record Technical Verdict to Technical Verdict Recorded_di" bpmnElement="Record Technical Verdict to Technical Verdict Recorded">
+        <di:waypoint x="2330" y="145"/>
+        <di:waypoint x="2421" y="145"/>
+        <di:waypoint x="2421" y="167"/>
+        <di:waypoint x="2512" y="167"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Review Proposed Budget to Record Finance Verdict_di" bpmnElement="Review Proposed Budget to Record Finance Verdict">
+        <di:waypoint x="2070" y="255"/>
+        <di:waypoint x="2210" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Record Finance Verdict to Finance Verdict Recorded_di" bpmnElement="Record Finance Verdict to Finance Verdict Recorded">
+        <di:waypoint x="2330" y="255"/>
+        <di:waypoint x="2421" y="255"/>
+        <di:waypoint x="2421" y="233"/>
+        <di:waypoint x="2512" y="233"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Technical Verdict Recorded to Parallel Join_di" bpmnElement="Technical Verdict Recorded to Parallel Join">
+        <di:waypoint x="2548" y="167"/>
+        <di:waypoint x="2656" y="167"/>
+        <di:waypoint x="2656" y="200"/>
+        <di:waypoint x="2765" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Finance Verdict Recorded to Parallel Join_di" bpmnElement="Finance Verdict Recorded to Parallel Join">
+        <di:waypoint x="2548" y="233"/>
+        <di:waypoint x="2656" y="233"/>
+        <di:waypoint x="2656" y="200"/>
+        <di:waypoint x="2765" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Parallel Join to Review Combined Outcomes_di" bpmnElement="Parallel Join to Review Combined Outcomes">
+        <di:waypoint x="2815" y="200"/>
+        <di:waypoint x="2990" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Review Combined Outcomes to Review Outcomes Gateway_di" bpmnElement="Review Combined Outcomes to Review Outcomes Gateway">
+        <di:waypoint x="3110" y="200"/>
+        <di:waypoint x="3285" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Review Outcomes Gateway to Send Rejection Notice_di" bpmnElement="Review Outcomes Gateway to Send Rejection Notice">
+        <di:waypoint x="3335" y="200"/>
+        <di:waypoint x="3422" y="200"/>
+        <di:waypoint x="3422" y="145"/>
+        <di:waypoint x="3510" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Review Outcomes Gateway to Issue Grant Approval_di" bpmnElement="Review Outcomes Gateway to Issue Grant Approval">
+        <di:waypoint x="3335" y="200"/>
+        <di:waypoint x="3422" y="200"/>
+        <di:waypoint x="3422" y="255"/>
+        <di:waypoint x="3510" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Send Rejection Notice to Rejection Notice Sent_di" bpmnElement="Send Rejection Notice to Rejection Notice Sent">
+        <di:waypoint x="3630" y="145"/>
+        <di:waypoint x="3721" y="145"/>
+        <di:waypoint x="3721" y="167"/>
+        <di:waypoint x="3812" y="167"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Issue Grant Approval to Grant Approval Issued_di" bpmnElement="Issue Grant Approval to Grant Approval Issued">
+        <di:waypoint x="3630" y="255"/>
+        <di:waypoint x="3721" y="255"/>
+        <di:waypoint x="3721" y="233"/>
+        <di:waypoint x="3812" y="233"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Rejection Notice Sent to End_di" bpmnElement="Rejection Notice Sent to End">
+        <di:waypoint x="3848" y="167"/>
+        <di:waypoint x="3960" y="167"/>
+        <di:waypoint x="3960" y="200"/>
+        <di:waypoint x="4072" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Grant Approval Issued to End_di" bpmnElement="Grant Approval Issued to End">
+        <di:waypoint x="3848" y="233"/>
+        <di:waypoint x="3960" y="233"/>
+        <di:waypoint x="3960" y="200"/>
+        <di:waypoint x="4072" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Missing Documents Notified to Collect Missing Documents_di" bpmnElement="Missing Documents Notified to Collect Missing Documents">
+        <di:waypoint x="208" y="598"/>
+        <di:waypoint x="299" y="598"/>
+        <di:waypoint x="299" y="620"/>
+        <di:waypoint x="390" y="620"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Collect Missing Documents to Documents Resubmitted_di" bpmnElement="Collect Missing Documents to Documents Resubmitted">
+        <di:waypoint x="510" y="620"/>
+        <di:waypoint x="692" y="620"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Documents Incomplete to Check Documentation Again_di" bpmnElement="Documents Incomplete to Check Documentation Again">
+        <di:waypoint x="208" y="266"/>
+        <di:waypoint x="299" y="266"/>
+        <di:waypoint x="299" y="255"/>
+        <di:waypoint x="390" y="255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Check Documentation Again to Check Documentation Gateway_di" bpmnElement="Check Documentation Again to Check Documentation Gateway">
+        <di:waypoint x="510" y="255"/>
+        <di:waypoint x="727" y="255"/>
+        <di:waypoint x="727" y="200"/>
+        <di:waypoint x="945" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Submit Application to Application Registered_di" bpmnElement="Submit Application to Application Registered">
+        <di:waypoint x="190" y="514"/>
+        <di:waypoint x="190" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Application Registered to Submit Application_di" bpmnElement="Application Registered to Submit Application">
+        <di:waypoint x="190" y="218"/>
+        <di:waypoint x="190" y="514"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Documents Incomplete to Missing Documents Notified_di" bpmnElement="Documents Incomplete to Missing Documents Notified">
+        <di:waypoint x="190" y="284"/>
+        <di:waypoint x="190" y="580"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Missing Documents Notified to Documents Incomplete_di" bpmnElement="Missing Documents Notified to Documents Incomplete">
+        <di:waypoint x="190" y="580"/>
+        <di:waypoint x="190" y="284"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Documents Resubmitted to Documents Complete_di" bpmnElement="Documents Resubmitted to Documents Complete">
+        <di:waypoint x="710" y="602"/>
+        <di:waypoint x="1230" y="163"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Technical Verdict Recorded to Review Combined Outcomes_di" bpmnElement="Technical Verdict Recorded to Review Combined Outcomes">
+        <di:waypoint x="2530" y="149"/>
+        <di:waypoint x="3050" y="240"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Finance Verdict Recorded to Review Combined Outcomes_di" bpmnElement="Finance Verdict Recorded to Review Combined Outcomes">
+        <di:waypoint x="2530" y="215"/>
+        <di:waypoint x="3050" y="240"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Rejection Notice Sent to Submit Application_di" bpmnElement="Rejection Notice Sent to Submit Application">
+        <di:waypoint x="3830" y="185"/>
+        <di:waypoint x="190" y="514"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Grant Approval Issued to Submit Application_di" bpmnElement="Grant Approval Issued to Submit Application">
+        <di:waypoint x="3830" y="251"/>
+        <di:waypoint x="190" y="514"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p0_di" bpmnElement="MsgFlow_p0">
+        <di:waypoint x="1230" y="273"/>
+        <di:waypoint x="190" y="580"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="MsgFlow_p1_di" bpmnElement="MsgFlow_p1">
+        <di:waypoint x="710" y="602"/>
+        <di:waypoint x="190" y="284"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -732,9 +732,9 @@ def generate_case_bpmn_xml(
 
 if __name__ == "__main__":
     # ── CONFIGURATION ─────────────────────────────────────────────────────────
-    case_name          = "case_23"
+    case_name          = "case_28"
     pipeline_name      = "direct_extraction_pipeline"
-    prompting_strategy = "fine_tuned_phi4seed123"
+    prompting_strategy = "fine_tuned_phi4_seed2026"
     # ──────────────────────────────────────────────────────────────────────────
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))

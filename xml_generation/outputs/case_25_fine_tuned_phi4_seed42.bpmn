@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_Library" name="Library System" processRef="Process_Library"/>
+    <bpmn:participant id="actor_Requester" name="Requester" processRef="Process_Requester"/>
+    <bpmn:messageFlow id="Request_Book_to_Check_Catalog" name="Request Book" sourceRef="Request_Book" targetRef="Check_Catalog"/>
+    <bpmn:messageFlow id="Book_Unavailable_to_Requester" name="Inform Unavailability" sourceRef="Book_Unavailable" targetRef="Request_Book"/>
+    <bpmn:messageFlow id="Book_Available_to_Requester" name="Proceed with Checkout" sourceRef="Book_Available" targetRef="Request_Book"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Library" name="Library System" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Library">
+      <bpmn:lane id="Library_Staff" name="Library Staff">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Book_Available</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Book_Unavailable</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Check_Catalog</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Inform_Requester</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Log_Book</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Retrieve_Book</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Check_Availability_Decision</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Start"/>
+    <bpmn:intermediateCatchEvent id="Book_Available" name="Book Available">
+      <bpmn:messageEventDefinition id="Book_Available_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Book_Unavailable" name="Book Unavailable">
+      <bpmn:messageEventDefinition id="Book_Unavailable_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="End" name="End"/>
+    <bpmn:task id="Check_Catalog" name="Check Catalog for Book Availability"/>
+    <bpmn:task id="Inform_Requester" name="Inform Requester of Unavailability"/>
+    <bpmn:task id="Log_Book" name="Log Book Against Requester's Account"/>
+    <bpmn:task id="Retrieve_Book" name="Retrieve Book Using Automatic System"/>
+    <bpmn:exclusiveGateway id="Check_Availability_Decision" name="Check Availability Decision" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="Start_to_Check_Catalog" sourceRef="Start" targetRef="Check_Catalog"/>
+    <bpmn:sequenceFlow id="Check_Catalog_to_Check_Availability_Decision" sourceRef="Check_Catalog" targetRef="Check_Availability_Decision"/>
+    <bpmn:sequenceFlow id="Check_Availability_Decision_to_Book_Unavailable" sourceRef="Check_Availability_Decision" targetRef="Book_Unavailable" name="not available">
+      <bpmn:conditionExpression>not available</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Check_Availability_Decision_to_Book_Available" sourceRef="Check_Availability_Decision" targetRef="Book_Available" name="available">
+      <bpmn:conditionExpression>available</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Book_Unavailable_to_Inform_Requester" sourceRef="Book_Unavailable" targetRef="Inform_Requester"/>
+    <bpmn:sequenceFlow id="Inform_Requester_to_End" sourceRef="Inform_Requester" targetRef="End"/>
+    <bpmn:sequenceFlow id="Book_Available_to_Log_Book" sourceRef="Book_Available" targetRef="Log_Book"/>
+    <bpmn:sequenceFlow id="Book_Available_to_Retrieve_Book" sourceRef="Book_Available" targetRef="Retrieve_Book"/>
+    <bpmn:sequenceFlow id="Log_Book_to_End" sourceRef="Log_Book" targetRef="End"/>
+    <bpmn:sequenceFlow id="Retrieve_Book_to_End" sourceRef="Retrieve_Book" targetRef="End"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Requester" name="Requester" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Requester">
+      <bpmn:lane id="Requester" name="Requester"/>
+    </bpmn:laneSet>
+    <bpmn:intermediateThrowEvent id="Request_Book" name="Request Book">
+      <bpmn:messageEventDefinition id="Request_Book_def"/>
+    </bpmn:intermediateThrowEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_Library_di" bpmnElement="actor_Library" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1800" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_Requester_di" bpmnElement="actor_Requester" isHorizontal="true">
+        <dc:Bounds x="10" y="440" width="1280" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Library_Staff_di" bpmnElement="Library_Staff" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1770" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Requester_di" bpmnElement="Requester" isHorizontal="true">
+        <dc:Bounds x="40" y="440" width="1250" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_di" bpmnElement="Start">
+        <dc:Bounds x="172" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Book_Available_di" bpmnElement="Book_Available">
+        <dc:Bounds x="952" y="149" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Book_Unavailable_di" bpmnElement="Book_Unavailable">
+        <dc:Bounds x="952" y="215" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_di" bpmnElement="End">
+        <dc:Bounds x="1472" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Check_Catalog_di" bpmnElement="Check_Catalog">
+        <dc:Bounds x="390" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Inform_Requester_di" bpmnElement="Inform_Requester">
+        <dc:Bounds x="1170" y="50" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Log_Book_di" bpmnElement="Log_Book">
+        <dc:Bounds x="1170" y="160" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Retrieve_Book_di" bpmnElement="Retrieve_Book">
+        <dc:Bounds x="1170" y="270" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Check_Availability_Decision_di" bpmnElement="Check_Availability_Decision" isMarkerVisible="true">
+        <dc:Bounds x="685" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Request_Book_di" bpmnElement="Request_Book">
+        <dc:Bounds x="952" y="532" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Start_to_Check_Catalog_di" bpmnElement="Start_to_Check_Catalog">
+        <di:waypoint x="208" y="200"/>
+        <di:waypoint x="390" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Check_Catalog_to_Check_Availability_Decision_di" bpmnElement="Check_Catalog_to_Check_Availability_Decision">
+        <di:waypoint x="510" y="200"/>
+        <di:waypoint x="685" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Check_Availability_Decision_to_Book_Unavailable_di" bpmnElement="Check_Availability_Decision_to_Book_Unavailable">
+        <di:waypoint x="735" y="200"/>
+        <di:waypoint x="843" y="200"/>
+        <di:waypoint x="843" y="233"/>
+        <di:waypoint x="952" y="233"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Check_Availability_Decision_to_Book_Available_di" bpmnElement="Check_Availability_Decision_to_Book_Available">
+        <di:waypoint x="735" y="200"/>
+        <di:waypoint x="843" y="200"/>
+        <di:waypoint x="843" y="167"/>
+        <di:waypoint x="952" y="167"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Book_Unavailable_to_Inform_Requester_di" bpmnElement="Book_Unavailable_to_Inform_Requester">
+        <di:waypoint x="988" y="233"/>
+        <di:waypoint x="1079" y="233"/>
+        <di:waypoint x="1079" y="90"/>
+        <di:waypoint x="1170" y="90"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Inform_Requester_to_End_di" bpmnElement="Inform_Requester_to_End">
+        <di:waypoint x="1290" y="90"/>
+        <di:waypoint x="1381" y="90"/>
+        <di:waypoint x="1381" y="200"/>
+        <di:waypoint x="1472" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Book_Available_to_Log_Book_di" bpmnElement="Book_Available_to_Log_Book">
+        <di:waypoint x="988" y="167"/>
+        <di:waypoint x="1079" y="167"/>
+        <di:waypoint x="1079" y="200"/>
+        <di:waypoint x="1170" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Book_Available_to_Retrieve_Book_di" bpmnElement="Book_Available_to_Retrieve_Book">
+        <di:waypoint x="988" y="167"/>
+        <di:waypoint x="1079" y="167"/>
+        <di:waypoint x="1079" y="310"/>
+        <di:waypoint x="1170" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Log_Book_to_End_di" bpmnElement="Log_Book_to_End">
+        <di:waypoint x="1290" y="200"/>
+        <di:waypoint x="1472" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Retrieve_Book_to_End_di" bpmnElement="Retrieve_Book_to_End">
+        <di:waypoint x="1290" y="310"/>
+        <di:waypoint x="1381" y="310"/>
+        <di:waypoint x="1381" y="200"/>
+        <di:waypoint x="1472" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Request_Book_to_Check_Catalog_di" bpmnElement="Request_Book_to_Check_Catalog">
+        <di:waypoint x="970" y="532"/>
+        <di:waypoint x="450" y="240"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Book_Unavailable_to_Requester_di" bpmnElement="Book_Unavailable_to_Requester">
+        <di:waypoint x="970" y="251"/>
+        <di:waypoint x="970" y="532"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Book_Available_to_Requester_di" bpmnElement="Book_Available_to_Requester">
+        <di:waypoint x="970" y="185"/>
+        <di:waypoint x="970" y="532"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
