@@ -1,0 +1,266 @@
+{
+  "pools": [
+    {
+      "id": "client_pool",
+      "name": "Client of BrightWave Energy"
+    },
+    {
+      "id": "cs_pool",
+      "name": "Customer Service"
+    },
+    {
+      "id": "invoicing_pool",
+      "name": "Invoicing Department"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "client",
+      "name": "Client",
+      "pool": "client_pool"
+    },
+    {
+      "id": "cs_employee",
+      "name": "CS Employee",
+      "pool": "cs_pool"
+    },
+    {
+      "id": "invoicing_employee",
+      "name": "Invoicing Employee",
+      "pool": "invoicing_pool"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "write_complaint_email",
+      "name": "Write Complaint Email",
+      "type": "task",
+      "lane": "client"
+    },
+    {
+      "id": "review_invoice",
+      "name": "Review Invoice",
+      "type": "task",
+      "lane": "cs_employee"
+    },
+    {
+      "id": "determine_mistake",
+      "name": "Determine Mistake?",
+      "type": "task",
+      "lane": "cs_employee"
+    },
+    {
+      "id": "write_explanation_email",
+      "name": "Write Explanation Email",
+      "type": "task",
+      "lane": "cs_employee"
+    },
+    {
+      "id": "create_ticket",
+      "name": "Create Ticket",
+      "type": "task",
+      "lane": "cs_employee"
+    },
+    {
+      "id": "investigate_mistake",
+      "name": "Investigate Invoicing Mistake",
+      "type": "task",
+      "lane": "invoicing_employee"
+    },
+    {
+      "id": "correct_invoice",
+      "name": "Correct Invoice",
+      "type": "task",
+      "lane": "invoicing_employee"
+    },
+    {
+      "id": "generate_new_invoice",
+      "name": "Generate New Invoice",
+      "type": "task",
+      "lane": "invoicing_employee"
+    }
+  ],
+  "events": [
+    {
+      "id": "start_client",
+      "name": "Receive Monthly Bill",
+      "type": "startEvent",
+      "lane": "client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_client_no_mistake",
+      "name": "Receive Explanation",
+      "type": "endEvent",
+      "lane": "client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_client_mistake",
+      "name": "Receive New Invoice",
+      "type": "endEvent",
+      "lane": "client",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_cs",
+      "name": "Receive Complaint",
+      "type": "startEvent",
+      "lane": "cs_employee",
+      "eventDefinition": "message"
+    },
+    {
+      "id": "end_cs_no_mistake",
+      "name": "Send Explanation",
+      "type": "endEvent",
+      "lane": "cs_employee",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "end_cs_mistake",
+      "name": "Invoice Sent",
+      "type": "endEvent",
+      "lane": "cs_employee",
+      "eventDefinition": "none"
+    },
+    {
+      "id": "start_invoicing",
+      "name": "Receive Ticket",
+      "type": "startEvent",
+      "lane": "invoicing_employee",
+      "eventDefinition": "message"
+    }
+  ],
+  "gateways": [
+    {
+      "id": "gateway_parallel_split",
+      "name": "",
+      "type": "parallelGateway",
+      "lane": "cs_employee",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_parallel_join",
+      "name": "",
+      "type": "parallelGateway",
+      "lane": "cs_employee",
+      "gatewayDirection": "converging"
+    },
+    {
+      "id": "gateway_mistake_split",
+      "name": "Mistake Found?",
+      "type": "exclusiveGateway",
+      "lane": "cs_employee",
+      "gatewayDirection": "diverging"
+    },
+    {
+      "id": "gateway_mistake_join",
+      "name": "",
+      "type": "exclusiveGateway",
+      "lane": "cs_employee",
+      "gatewayDirection": "converging"
+    }
+  ],
+  "sequence_flows": [
+    {
+      "id": "sf1",
+      "from": "start_client",
+      "to": "write_complaint_email"
+    },
+    {
+      "id": "sf2",
+      "from": "write_complaint_email",
+      "to": "start_cs"
+    },
+    {
+      "id": "sf3",
+      "from": "start_cs",
+      "to": "gateway_parallel_split"
+    },
+    {
+      "id": "sf4",
+      "from": "gateway_parallel_split",
+      "to": "review_invoice"
+    },
+    {
+      "id": "sf5",
+      "from": "gateway_parallel_split",
+      "to": "determine_mistake"
+    },
+    {
+      "id": "sf6",
+      "from": "review_invoice",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf7",
+      "from": "determine_mistake",
+      "to": "gateway_parallel_join"
+    },
+    {
+      "id": "sf8",
+      "from": "gateway_parallel_join",
+      "to": "write_explanation_email"
+    },
+    {
+      "id": "sf9",
+      "from": "write_explanation_email",
+      "to": "end_cs_no_mistake"
+    },
+    {
+      "id": "sf10",
+      "from": "gateway_mistake_split",
+      "to": "create_ticket"
+    },
+    {
+      "id": "sf11",
+      "from": "gateway_mistake_split",
+      "to": "investigate_mistake"
+    },
+    {
+      "id": "sf12",
+      "from": "create_ticket",
+      "to": "gateway_mistake_join"
+    },
+    {
+      "id": "sf13",
+      "from": "investigate_mistake",
+      "to": "gateway_mistake_join"
+    },
+    {
+      "id": "sf14",
+      "from": "gateway_mistake_join",
+      "to": "correct_invoice"
+    },
+    {
+      "id": "sf15",
+      "from": "correct_invoice",
+      "to": "generate_new_invoice"
+    },
+    {
+      "id": "sf16",
+      "from": "generate_new_invoice",
+      "to": "end_cs_mistake"
+    }
+  ],
+  "message_flows": [
+    {
+      "id": "mf1",
+      "from": "write_complaint_email",
+      "to": "start_cs",
+      "name": "Complaint Email"
+    },
+    {
+      "id": "mf2",
+      "from": "create_ticket",
+      "to": "start_invoicing",
+      "name": "Ticket"
+    },
+    {
+      "id": "mf3",
+      "from": "generate_new_invoice",
+      "to": "end_cs_mistake",
+      "name": "New Invoice Email"
+    }
+  ]
+}
