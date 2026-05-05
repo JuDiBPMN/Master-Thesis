@@ -2,6 +2,11 @@ import os
 from pathlib import Path
 from typing import Optional
 
+# RUN DEZE COMMAND IN TERMINAL VOOR TOKEN:
+# export HF_TOKEN=your_hf_token_here
+# RUN DEZE COMMAND IN TERMINAL VOOR RUN:
+# python main.py
+
 from pipelines.direct_extraction_pipeline import (
     llama_few_shot,
     llama_fine_tuned,
