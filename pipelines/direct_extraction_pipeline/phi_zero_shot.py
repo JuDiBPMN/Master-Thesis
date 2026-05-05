@@ -9,23 +9,6 @@ import json
 import sys
 import os
 
-llm = None
-
-def load_model():
-    global llm
-    if llm is None:
-        if not _LLAMA_CPP_AVAILABLE:
-            raise RuntimeError("llama-cpp-python is not installed.")
-        
-        llm = Llama.from_pretrained(
-            repo_id="unsloth/phi-4-GGUF",
-            filename="phi-4-Q4_K_M.gguf", 
-            n_ctx=4096,
-            n_gpu_layers=0,
-            verbose=False
-        )
-    return llm
-
 # --- EVERYTHING BELOW REMAINS THE SAME UNTIL __MAIN__ ---
 
 BPMN_SCHEMA = {
@@ -361,7 +344,7 @@ def is_valid_bpmn(obj):
     return {"valid": valid, "errors": errors, "warnings": warnings}
 
 
-def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=0):
+def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=0, model=None):
     prompt = f""" You are a BPMN 2.0 expert. Extract a structured BPMN model from the process description below.
 
 ## STEP 1 — IDENTIFY POOLS (DO THIS FIRST)
@@ -486,10 +469,8 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
 ## Process description
 {process_description}"""
     
-    try:
-        model = load_model()
-    except RuntimeError as e:
-        print(e)
+    if model is None:
+        print("No model provided. Load a model in the main runner and pass it to extract_bpmn(...).")
         return None
 
     result = model.create_chat_completion(

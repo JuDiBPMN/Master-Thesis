@@ -1,39 +1,7 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
 import json
 import sys
 import os
 
-llm = None
-
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
-
-llm = None
-tokenizer = None
-
-from llama_cpp import Llama
-from huggingface_hub import hf_hub_download
-
-llm = None
-
-def load_model():
-    global llm
-
-    if llm is None:
-        model_path = hf_hub_download(
-            repo_id="JulesNuytten/bpmn-phi4-gguf-collection",
-            filename="bpmn-phi4-seed2024.q8_0.gguf"   # exact filename from HF
-        )
-
-        llm = Llama(
-            model_path=model_path,
-            n_ctx=8192,
-            n_gpu_layers=-1,   # uses GPU in Colab
-            verbose=False
-        )
-
-    return llm
 BPMN_SCHEMA = {
     "type": "object",
     "properties": {
@@ -258,7 +226,7 @@ def is_valid_bpmn(obj):
     return len(errors) == 0 and len(warnings) == 0, errors, warnings
 
 
-def extract_bpmn(process_description, prompt_type="fine-tuned", output_file=None, retries=2):
+def extract_bpmn(process_description, prompt_type="fine-tuned", output_file=None, retries=2, model=None):
     # Prompt is left as defined in your original script
     prompt = f""" You are a BPMN 2.0 expert. Extract a structured BPMN model from the process description below.
 
@@ -384,10 +352,8 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
 ## Process description
 {process_description}"""
     
-    try:
-        model = load_model()
-    except RuntimeError as e:
-        print(e)
+    if model is None:
+        print("No model provided. Load a model in the main runner and pass it to extract_bpmn(...).")
         return None
 
     # Phi-4 follows standard chat completion API

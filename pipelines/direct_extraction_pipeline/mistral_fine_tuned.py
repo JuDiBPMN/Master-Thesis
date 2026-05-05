@@ -1,3 +1,21 @@
+import subprocess
+import sys
+
+def _ensure_packages():
+    """Install required packages if they are not already available."""
+    packages = {
+        "llama_cpp":        "llama-cpp-python",
+        "huggingface_hub":  "huggingface_hub",
+    }
+    for import_name, pip_name in packages.items():
+        try:
+            __import__(import_name)
+        except ImportError:
+            print(f"[setup] Installing {pip_name}...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name, "-q"])
+
+_ensure_packages()
+
 try:
     from llama_cpp import Llama
     _LLAMA_CPP_AVAILABLE = True
@@ -5,37 +23,19 @@ except Exception:
     Llama = None
     _LLAMA_CPP_AVAILABLE = False
 
+try:
+    from huggingface_hub import hf_hub_download
+    _HF_AVAILABLE = True
+except Exception:
+    hf_hub_download = None
+    _HF_AVAILABLE = False
+
 import json
 import os
 from pathlib import Path
 from collections import defaultdict
 
-llm = None
-
-def load_model():
-    global llm
-    if llm is None:
-        if not _LLAMA_CPP_AVAILABLE:
-            raise RuntimeError("llama-cpp-python is not installed.")
-
-        SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-        PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-        model_path   = os.path.join(PROJECT_ROOT, "_fine_tuned_llm", "bpmn-mistral-finetuned.gguf")
-
-        if not os.path.exists(model_path):
-            raise FileNotFoundError(
-                f"Fine-tuned model not found at: {model_path}\n"
-                f"Make sure bpmn-mistral-finetuned.gguf is inside the 'fine-tuned-llm/' folder "
-                f"at the project root."
-            )
-
-        llm = Llama(
-            model_path=model_path,
-            n_ctx=16384,
-            n_gpu_layers=-1,
-            verbose=False
-        )
-    return llm
+HF_TOKEN = os.environ.get("HF_TOKEN", None)   # export HF_TOKEN=hf_xxx
 
 
 BPMN_SCHEMA = {
@@ -401,7 +401,7 @@ def _call_model(model, prompt):
 
 # ── Main extraction function ───────────────────────────────────────────────────
 
-def extract_bpmn_fine_tuned(process_description, case_name, output_file=None):
+def extract_bpmn_fine_tuned(process_description, case_name, output_file=None, model=None, model_key="mistral", hf_token=None):
     """ You are a BPMN 2.0 expert. Extract a structured BPMN model from the process description below.
 
 ## STEP 1 — IDENTIFY POOLS (DO THIS FIRST)
@@ -527,10 +527,8 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
 {process_description}"""
     prompt = _build_prompt(process_description)
 
-    try:
-        model = load_model()
-    except (RuntimeError, FileNotFoundError) as e:
-        print(e)
+    if model is None:
+        print("No model provided. Load a model in the main runner and pass it to extract_bpmn_fine_tuned(...).")
         return None
 
     print(f"Running fine-tuned extraction for '{case_name}'...")
@@ -568,7 +566,9 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
 
 if __name__ == "__main__":
     # --- CONFIGURATION ---
-    case_name = "case_23"
+    case_name  = "case_23"
+    model_key  = "mistral"          # "mistral" | "phi4-seed42" | "phi4-seed2026" | "phi4-seed123"
+    hf_token   = HF_TOKEN           # or paste your token directly: "hf_xxxxxxxxxxxx"
     # ---------------------
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
@@ -597,6 +597,8 @@ if __name__ == "__main__":
             process_description=process_text,
             case_name=case_name,
             output_file=out_file,
+            model_key=model_key,
+            hf_token=hf_token,
         )
 
         if bpmn_json:

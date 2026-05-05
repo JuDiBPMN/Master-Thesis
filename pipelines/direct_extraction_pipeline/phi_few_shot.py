@@ -9,23 +9,6 @@ import json
 import sys
 import os
 
-llm = None
-
-def load_model():
-    global llm
-    if llm is None:
-        if not _LLAMA_CPP_AVAILABLE:
-            raise RuntimeError("llama-cpp-python is not installed.")
-        
-        llm = Llama.from_pretrained(
-            repo_id="unsloth/phi-4-GGUF",
-            filename="phi-4-Q4_K_M.gguf", 
-            n_ctx=16384,
-            n_gpu_layers=-1,
-            verbose=False
-        )
-    return llm
-
 # --- EVERYTHING BELOW REMAINS THE SAME UNTIL __MAIN__ ---
 
 BPMN_SCHEMA = {
@@ -461,7 +444,7 @@ def _format_issues(errors, warnings):
 
     return "\n".join(parts)
 
-def extract_bpmn_few_shot(process_description, case_name, few_shot_dir, output_file=None, retries=0, case_ids=None):
+def extract_bpmn_few_shot(process_description, case_name, few_shot_dir, output_file=None, retries=0, case_ids=None, model=None):
     if case_ids is not None:
         cases = load_selected_cases(case_ids, cases_dir=few_shot_dir)
     else:
@@ -591,10 +574,8 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
 ## Process description
 {process_description}"""
 
-    try:
-        model = load_model()
-    except RuntimeError as e:
-        print(e)
+    if model is None:
+        print("No model provided. Load a model in the main runner and pass it to extract_bpmn_few_shot(...).")
         return None
 
     print(f"Running few-shot extraction for '{case_name}' with {len(cases)} example(s)...")

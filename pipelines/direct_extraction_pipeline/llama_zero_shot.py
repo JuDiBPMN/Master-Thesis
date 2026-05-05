@@ -8,23 +8,6 @@ except ImportError:
 import json
 import sys
 
-llm = None
-
-def load_model():
-    global llm
-    if llm is None:
-        if not _LLAMA_CPP_AVAILABLE:
-            raise RuntimeError("llama-cpp-python is not installed.")
-        llm = Llama.from_pretrained(
-            repo_id="TheBloke/Llama-2-7B-Chat-GGUF",
-            filename="llama-2-7b-chat.Q6_K.gguf",
-            n_ctx=4096,
-            n_gpu_layers=0,
-            verbose=False
-        )
-    return llm
-
-
 BPMN_SCHEMA = {
     "type": "object",
     "properties": {
@@ -355,7 +338,7 @@ def is_valid_bpmn(obj):
     return {"valid": valid, "errors": errors, "warnings": warnings}
 
 
-def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=2):
+def extract_bpmn(process_description, prompt_type="zero-shot", output_file=None, retries=2, model=None):
     if prompt_type == "zero-shot":
         prompt = f""" You are a BPMN 2.0 expert. Extract a structured BPMN model from the process description below.
 
@@ -483,10 +466,8 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
     
     print(f"Initial prompt:\n{prompt}\n")
     
-    try:
-        model = load_model()
-    except RuntimeError as e:
-        print(e)
+    if model is None:
+        print("No model provided. Load a model in the main runner and pass it to extract_bpmn(...).")
         return None
 
     result = model.create_chat_completion(

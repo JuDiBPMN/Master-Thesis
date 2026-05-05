@@ -10,34 +10,6 @@ import os
 from pathlib import Path
 from collections import defaultdict
 
-llm = None
-
-def load_model():
-    global llm
-    if llm is None:
-        if not _LLAMA_CPP_AVAILABLE:
-            raise RuntimeError("llama-cpp-python is not installed.")
-
-        SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-        PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-        model_path   = os.path.join(PROJECT_ROOT, "_fine_tuned_llm", "bpmn-finetuned.gguf")
-
-        if not os.path.exists(model_path):
-            raise FileNotFoundError(
-                f"Fine-tuned model not found at: {model_path}\n"
-                f"Make sure bpmn-finetuned.gguf is inside the 'fine-tuned-llm/' folder "
-                f"at the project root."
-            )
-
-        llm = Llama(
-            model_path=model_path,
-            n_ctx=2048,
-            n_gpu_layers=-1,
-            verbose=False
-        )
-    return llm
-
-
 BPMN_SCHEMA = {
     "type": "object",
     "properties": {
@@ -521,7 +493,7 @@ def _call_model(model, prompt):
 
 # ── Main extraction function ───────────────────────────────────────────────────
 
-def extract_bpmn_fine_tuned(process_description, case_name, output_file=None):
+def extract_bpmn_fine_tuned(process_description, case_name, output_file=None, model=None):
     """
     Extract a BPMN JSON from process_description using the fine-tuned model.
     No few-shot examples needed — the schema is baked into the model weights.
@@ -529,10 +501,8 @@ def extract_bpmn_fine_tuned(process_description, case_name, output_file=None):
     """
     prompt = _build_prompt(process_description)
 
-    try:
-        model = load_model()
-    except (RuntimeError, FileNotFoundError) as e:
-        print(e)
+    if model is None:
+        print("No model provided. Load a model in the main runner and pass it to extract_bpmn_fine_tuned(...).")
         return None
 
     print(f"Running fine-tuned extraction for '{case_name}'...")

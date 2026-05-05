@@ -10,23 +10,6 @@ import os
 from pathlib import Path
 from collections import defaultdict
 
-llm = None
-
-def load_model():
-    global llm
-    if llm is None:
-        if not _LLAMA_CPP_AVAILABLE:
-            raise RuntimeError("llama-cpp-python is not installed.")
-        llm = Llama.from_pretrained(
-            repo_id="TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
-            filename="mistral-7b-instruct-v0.2.Q5_K_M.gguf",
-            n_ctx=16384,
-            n_gpu_layers=-1,
-            verbose=False
-        )
-    return llm
-
-
 BPMN_SCHEMA = {
     "type": "object",
     "properties": {
@@ -485,7 +468,7 @@ def _call_model(model, prompt):
 
 # ── Main extraction function ───────────────────────────────────────────────────
 
-def extract_bpmn_few_shot(process_description, case_name, few_shot_dir, output_file=None, retries=0, case_ids=None):
+def extract_bpmn_few_shot(process_description, case_name, few_shot_dir, output_file=None, retries=0, case_ids=None, model=None):
     if case_ids is not None:
         cases = load_selected_cases(case_ids, cases_dir=few_shot_dir)
     else:
@@ -623,10 +606,8 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
     
     
 
-    try:
-        model = load_model()
-    except RuntimeError as e:
-        print(e)
+    if model is None:
+        print("No model provided. Load a model in the main runner and pass it to extract_bpmn_few_shot(...).")
         return None
 
     print(f"Running few-shot extraction for '{case_name}' with {len(cases)} example(s)...")
