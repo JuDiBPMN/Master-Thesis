@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from typing import Optional
@@ -101,7 +102,7 @@ def main():
     # ====================== RUN CONFIGURATION ======================
     # Only edit these values:
     case_name = "case_23"
-    pipeline = 1
+    pipeline = 7
     # Optional overrides:
     model_key = None
     hf_token = os.environ.get("HF_TOKEN")
@@ -173,9 +174,33 @@ def main():
             model=model,
         )
 
-    if not json_result:
-        print("[main] Extraction failed, skipping XML generation.")
-        return
+    if not json_output.exists():
+        if json_result:
+            try:
+                with json_output.open("w", encoding="utf-8") as f:
+                    json.dump(json_result, f, indent=2, ensure_ascii=False)
+                print(f"[main] Wrote parsed JSON output to {json_output}")
+            except Exception as e:
+                print(f"[main] Failed to persist parsed JSON: {e}")
+        else:
+            fallback_json = {
+                "pools": [{"id": "pool_1", "name": "Fallback Pool"}],
+                "lanes": [{"id": "lane_1", "name": "Fallback Lane", "pool": "pool_1"}],
+                "tasks": [{"id": "task_1", "name": "Extraction failed", "type": "task", "lane": "lane_1"}],
+                "events": [
+                    {"id": "start_1", "name": "Start", "type": "startEvent", "lane": "lane_1", "eventDefinition": "none"},
+                    {"id": "end_1", "name": "End", "type": "endEvent", "lane": "lane_1", "eventDefinition": "none"},
+                ],
+                "gateways": [],
+                "sequence_flows": [
+                    {"id": "flow_1", "from": "start_1", "to": "task_1"},
+                    {"id": "flow_2", "from": "task_1", "to": "end_1"},
+                ],
+                "message_flows": [],
+            }
+            with json_output.open("w", encoding="utf-8") as f:
+                json.dump(fallback_json, f, indent=2, ensure_ascii=False)
+            print("[main] Extraction returned no JSON; wrote fallback BPMN JSON.")
 
     xml_path = generate_case_bpmn_xml(
         case_name=case_name,

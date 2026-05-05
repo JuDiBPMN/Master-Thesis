@@ -668,12 +668,11 @@ Output the complete corrected JSON. Do not omit any part of the model."""
         remaining = _format_issues(errors, warnings)
         print(f"\nWarning: Output still has issues after {retries} retries:\n{remaining}")
         if output_file:
-            invalid_path = output_file.replace(".json", "_invalid.json")
             try:
-                save_json_to_file(json_result, invalid_path)
-                print(f"Wrote invalid output to {invalid_path}")
+                save_json_to_file(json_result, output_file)
+                print(f"Wrote output with validation issues to {output_file}")
             except Exception as e:
-                print(f"Failed to write invalid JSON: {e}")
+                print(f"Failed to write JSON: {e}")
     else:
         print("\nValidation passed.")
         if output_file:

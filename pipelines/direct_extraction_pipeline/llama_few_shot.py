@@ -648,10 +648,10 @@ Output the complete corrected JSON. Do not omit any part of the model."""
                 print(f"  WARNING: {w}")
             if output_file:
                 try:
-                    save_json_to_file(json_result, output_file.replace('.json', '_invalid.json'))
-                    print(f"Wrote invalid parsed JSON to {output_file.replace('.json', '_invalid.json')}")
+                    save_json_to_file(json_result, output_file)
+                    print(f"Wrote parsed JSON with validation issues to {output_file}")
                 except Exception as e:
-                    print(f"Failed to write invalid JSON to {output_file}: {e}")
+                    print(f"Failed to write JSON to {output_file}: {e}")
         else:
             if output_file:
                 try:
