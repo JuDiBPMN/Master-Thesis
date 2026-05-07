@@ -118,7 +118,7 @@ BPMN_SCHEMA = {
     "required": ["pools", "lanes", "tasks", "events", "gateways", "sequence_flows", "message_flows"]
 }
 
-# ── Validation ────────────────────────────────────────────────────────────────
+# VALIDATIE
 
 def save_json_to_file(obj, path):
     p = Path(path)
@@ -271,7 +271,7 @@ def is_valid_bpmn(obj):
         if mf["from"] not in valid_refs or mf["to"] not in valid_refs:
             errors.append(f"message_flow references unknown id: {mf}")
 
-    # ── Warnings: structural completeness ─────────────────────────────────────
+    # WARNINGS 
     pool_has_start = defaultdict(bool)
     pool_has_end   = defaultdict(bool)
     for event in events:
@@ -322,9 +322,6 @@ def _format_issues(errors, warnings):
         for w in warnings:
             lines.append(f"  - {w}")
     return "\n".join(lines)
-
-
-# ── Model ─────────────────────────────────────────────────────────────────────
 
 INSTRUCTION = (
     "Extract a structured BPMN model from the following process description. "
@@ -491,7 +488,7 @@ def _call_model(model, prompt):
     return str(result)
 
 
-# ── Main extraction function ───────────────────────────────────────────────────
+# MAIN EXTRACTION FUNCTION 
 
 def extract_bpmn_fine_tuned(process_description, case_name, output_file=None, model=None):
     """
@@ -515,14 +512,14 @@ def extract_bpmn_fine_tuned(process_description, case_name, output_file=None, mo
         print(f"JSON parsing error: {e}")
         json_result = None
 
-    # ── Validate and report issues (no retries) ───────────────────────────────
+    # VALIDEREN, SKIP RETRIES
     if json_result is not None:
         fully_valid, errors, warnings = is_valid_bpmn(json_result)
         if not fully_valid:
             issues_text = _format_issues(errors, warnings)
             print(f"\nValidation issues (no retry — recording as-is):\n{issues_text}")
 
-    # ── Save output ───────────────────────────────────────────────────────────
+    # OUTPUT OPSLAAN
     if json_result is None:
         print("\nError: Failed to parse JSON from model output.")
     else:
@@ -539,9 +536,7 @@ def extract_bpmn_fine_tuned(process_description, case_name, output_file=None, mo
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    # --- CONFIGURATION ---
-    case_name = "case_21"
-    # ---------------------
+    case_name = "case_21" # Kies de case die je wilt runnen
 
     SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))

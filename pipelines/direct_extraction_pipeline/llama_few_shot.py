@@ -119,7 +119,7 @@ BPMN_SCHEMA = {
 }
 
 
-# ── Few-shot case loader ───────────────────────────────────────────────────────
+# FEW SHOT CASE EXAMPLES INLADEN
 
 def load_few_shot_cases(few_shot_dir, exclude_case=None):
     few_shot_dir = Path(few_shot_dir)
@@ -161,7 +161,6 @@ def build_few_shot_block(cases):
         lines.append(case["text"])
         lines.append("")
         lines.append("CORRECT BPMN JSON OUTPUT:")
-        # Compact JSON to save tokens
         lines.append(json.dumps(case["json"], separators=(',', ':')))
         lines.append("")
     return "\n".join(lines)
@@ -187,7 +186,7 @@ def load_selected_cases(case_ids: list[int], cases_dir: str = "few_shot_cases") 
     return [load_case(case_id, cases_dir) for case_id in case_ids]
 
 
-# ── Validation ────────────────────────────────────────────────────────────────
+# VALIDATIE
 
 def save_json_to_file(obj, path):
     p = Path(path)
@@ -222,7 +221,7 @@ def is_valid_bpmn(obj):
     errors   = []
     warnings = []
 
-    # ── 0. Top-level type & required fields ──────────────────────────────────
+    # 0. BASIC STRUCTUUR CHECK
     if not isinstance(obj, dict):
         return {"valid": False, "errors": ["Output is not a JSON object"], "warnings": []}
 
@@ -233,7 +232,7 @@ def is_valid_bpmn(obj):
         elif not isinstance(obj[field], list):
             errors.append(f"Field '{field}' must be an array")
 
-    # If the basic structure is broken, stop early — further checks would crash.
+   # Als de basisstructuur kapot is, crasht het
     if errors:
         return {"valid": False, "errors": errors, "warnings": warnings}
 
@@ -250,7 +249,7 @@ def is_valid_bpmn(obj):
     def is_placeholder(v):
         return v is None or str(v).strip().lower() in PLACEHOLDER
 
-    # ── 1. Build lookup maps ──────────────────────────────────────────────────
+    # 1.
     pool_ids = {}   # id → pool obj
     for p in pools:
         pid = p.get("id", "").strip()
@@ -262,7 +261,7 @@ def is_valid_bpmn(obj):
         pool_ids[pid] = p
 
     lane_ids     = {}   # lane_id → pool_id
-    lane_to_pool = {}   # lane_id → pool_id  (alias for readability)
+    lane_to_pool = {}   # lane_id → pool_id  
     for l in lanes:
         lid  = l.get("id",   "").strip()
         lpool = l.get("pool", "").strip()
@@ -271,7 +270,7 @@ def is_valid_bpmn(obj):
             continue
         if not l.get("name", "").strip():
             warnings.append(f"Lane '{lid}' has an empty or missing 'name'")
-        # ── ERROR category 1: undeclared participant references ──
+       
         if lpool not in pool_ids:
             errors.append(
                 f"[Undeclared participant] Lane '{lid}' references unknown pool '{lpool}'"
@@ -279,8 +278,8 @@ def is_valid_bpmn(obj):
         lane_ids[lid]     = lpool
         lane_to_pool[lid] = lpool
 
-    # All flow nodes: tasks, events, gateways
-    node_ids     = {}   # node_id → pool_id  (resolved via lane)
+    # ALLE FLOW NODES: tasks, events, gateways
+    node_ids     = {}   # node_id → pool_id  
     node_to_lane = {}   # node_id → lane_id
 
     def register_node(element, kind):
@@ -293,7 +292,7 @@ def is_valid_bpmn(obj):
             return
         if is_placeholder(ename):
             warnings.append(f"[Placeholder value] {kind} '{eid}' has empty/placeholder name '{ename}'")
-        # ── ERROR category 1: undeclared participant references ──
+    
         if elane not in lane_ids:
             errors.append(
                 f"[Undeclared participant] {kind} '{eid}' references unknown lane '{elane}'"
@@ -311,8 +310,7 @@ def is_valid_bpmn(obj):
     for g in gateways:
         register_node(g, "gateway")
 
-    # ── 2. Missing start / end events per pool ────────────────────────────────
-    # ── ERROR category 2: missing start or end events ────────────────────────
+    # 2. START/END EVENT CHECK
     pool_has_start = {pid: False for pid in pool_ids}
     pool_has_end   = {pid: False for pid in pool_ids}
 
@@ -337,7 +335,7 @@ def is_valid_bpmn(obj):
                 f"[Missing start/end event] Pool '{pid}' has no endEvent"
             )
 
-    # ── 3. Sequence flow validation ───────────────────────────────────────────
+    # 3. SEQUENCE FLOW CHECK
     task_ids_set = {t.get("id", "") for t in tasks}
 
     for sf in seq_flows:
@@ -345,7 +343,6 @@ def is_valid_bpmn(obj):
         sf_from = sf.get("from", "").strip()
         sf_to   = sf.get("to",   "").strip()
 
-        # ── ERROR category 3: dangling sequence flow references ──
         if sf_from not in node_ids:
             errors.append(
                 f"[Dangling sequence flow] '{sf_id}' references undeclared source '{sf_from}'"
@@ -355,7 +352,6 @@ def is_valid_bpmn(obj):
                 f"[Dangling sequence flow] '{sf_id}' references undeclared target '{sf_to}'"
             )
 
-        # ── ERROR category 4: cross-pool sequence flows ──
         if sf_from in node_ids and sf_to in node_ids:
             pool_from = node_ids[sf_from]
             pool_to   = node_ids[sf_to]
@@ -365,10 +361,7 @@ def is_valid_bpmn(obj):
                     f"to pool '{pool_to}' — use message flows instead"
                 )
 
-    # ── 4. Message flow validation ────────────────────────────────────────────
-    # Message flows may legitimately connect tasks/events across pools.
-    # We only warn if the target is a plain task (not an event), since the
-    # thesis rules require message flows to target catch events.
+    # 4. MESSAGE FLOW CHECK
     for mf in msg_flows:
         mf_id   = mf.get("id",   "?")
         mf_to   = mf.get("to",   "").strip()
@@ -386,7 +379,7 @@ def is_valid_bpmn(obj):
                 f"consider using an intermediateThrowEvent"
             )
 
-    # ── 5. Isolated nodes (no incoming or outgoing sequence flow) ─────────────
+    # 5. ISOLATED NODE CHECK
     nodes_with_incoming = {sf.get("to",   "") for sf in seq_flows}
     nodes_with_outgoing = {sf.get("from", "") for sf in seq_flows}
 
@@ -410,8 +403,6 @@ def is_valid_bpmn(obj):
     valid = (len(errors) == 0 and len(warnings) == 0)
     return {"valid": valid, "errors": errors, "warnings": warnings}
 
-
-# ── Model ─────────────────────────────────────────────────────────────────────
 
 SYSTEM_MSG = (
     "You are a business process modeling expert. "
@@ -439,7 +430,7 @@ def _call_model(model, prompt):
     return str(result)
 
 
-# ── Main extraction function ───────────────────────────────────────────────────
+# MAIN EXTRACTIE FUNCTIE
 
 def extract_bpmn_few_shot(process_description, case_name, few_shot_dir, output_file=None, retries=0, case_ids=None, model=None):
     if case_ids is not None:
@@ -635,7 +626,7 @@ Output the complete corrected JSON. Do not omit any part of the model."""
         errors      = validation["errors"]
         warnings    = validation["warnings"]
 
-    # ── Save output ───────────────────────────────────────────────────────────
+    # OUTPUT OPSLAAN
     if json_result is None:
         print("\nError: Failed to parse JSON from model output")
     else:
@@ -663,10 +654,10 @@ Output the complete corrected JSON. Do not omit any part of the model."""
     return json_result
 
 
-# ── Entry point ───────────────────────────────────────────────────────────────
+# RUNNING CASE KIEZEN
 
 if __name__ == "__main__":
-    case_name = "case_21" # <-- Just change this to run a different case with few-shot examples
+    case_name = "case_21" # Kies de case die je wilt runnen
 
     SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -697,7 +688,7 @@ if __name__ == "__main__":
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
             retries=0,
-            case_ids=[12] # choose cases for few-shot examples
+            case_ids=[12] # kies case examples for few-shot examples
         )
 
         if bpmn_json:

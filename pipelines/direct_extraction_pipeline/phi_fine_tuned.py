@@ -227,7 +227,6 @@ def is_valid_bpmn(obj):
 
 
 def extract_bpmn(process_description, prompt_type="fine-tuned", output_file=None, retries=2, model=None):
-    # Prompt is left as defined in your original script
     prompt = f""" You are a BPMN 2.0 expert. Extract a structured BPMN model from the process description below.
 
 ## STEP 1 — IDENTIFY POOLS (DO THIS FIRST)
@@ -356,7 +355,6 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
         print("No model provided. Load a model in the main runner and pass it to extract_bpmn(...).")
         return None
 
-    # Phi-4 follows standard chat completion API
     result = model.create_chat_completion(
         messages=[
             {"role": "system", "content": "You are a business process modeling expert. "
@@ -389,7 +387,6 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
         print(f"JSON parsing error: {e}")
         json_result = None
 
-    # Validation/Retry logic remains same as original script
     if json_result and output_file:
         save_json_to_file(json_result, output_file)
         

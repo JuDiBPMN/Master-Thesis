@@ -101,7 +101,7 @@ def load_model(model_key: str, hf_token: Optional[str] = None, cache_dir: Option
 def main():
     # ====================== RUN CONFIGURATION ======================
     # Only edit these values:
-    case_name = "case_23"
+    case_name = "case_27"
     pipeline = 7
     # Optional overrides:
     model_key = None
