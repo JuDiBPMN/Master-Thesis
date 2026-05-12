@@ -104,7 +104,7 @@ def main():
     print("Check")
 ###############################################################
     case_name = "case_demo"
-    pipeline = 6
+    pipeline = 7
     # Optional overrides:
     model_key = None
     hf_token = os.environ.get("HF_TOKEN")
