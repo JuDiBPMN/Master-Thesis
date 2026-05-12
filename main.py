@@ -74,7 +74,9 @@ PIPELINE_OPTIONS = [
     (6, "phi_few_shot"),
     (7, "mistral_fine_tuned"),
     (8, "llama_fine_tuned"),
-    (9, "phi_fine_tuned"),
+    (9, "phi_fine_tuned_seed42"),
+    (10, "phi_fine_tuned_seed123"),
+    (11, "phi_fine_tuned_seed2026"),
 ]
 PIPELINE_BY_ID = {idx: name for idx, name in PIPELINE_OPTIONS}
 
@@ -151,7 +153,7 @@ def main():
             case_ids=few_shot_case_ids,
             model=model,
         )
-    elif selected_pipeline_name == "phi_fine_tuned":
+    elif selected_pipeline_name.startswith("phi_fine_tuned_seed"):
         json_result = selected["runner"](
             process_description=process_text,
             prompt_type="fine-tuned",
