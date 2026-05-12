@@ -20,7 +20,7 @@ from pipelines.direct_extraction_pipeline import (
     phi_zero_shot,
 )
 from xml_generation.pipeline import generate_case_bpmn_xml
-
+print("Check llama cpp")
 try:
     from llama_cpp import Llama
 except Exception:
