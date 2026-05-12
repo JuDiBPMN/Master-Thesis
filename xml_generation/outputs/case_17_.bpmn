@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="BPMN Pipeline" exporterVersion="2.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="actor_actor_gp_pool" name="General Practitioner" processRef="Process_actor_gp_pool"/>
+    <bpmn:participant id="actor_actor_hospital_pool" name="Hospital" processRef="Process_actor_hospital_pool"/>
+    <bpmn:participant id="actor_actor_specialist_pool" name="Specialist" processRef="Process_actor_specialist_pool"/>
+    <bpmn:messageFlow id="mf1" name="Send Referral Request" sourceRef="Event_0jmcift" targetRef="start_hospital"/>
+    <bpmn:messageFlow id="Flow_01tqif3" name="Notify GP of No Availability" sourceRef="Event_11e1wvo" targetRef="Event_0lhwnjv"/>
+    <bpmn:messageFlow id="mf3" name="Referral Package" sourceRef="Event_1t7zi4a" targetRef="start_specialist"/>
+    <bpmn:messageFlow id="Flow_197p49v" name="Notify GP of Discharge" sourceRef="Event_191v5lj" targetRef="Event_0a25ufi"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_actor_gp_pool" name="General Practitioner" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_actor_gp_pool">
+      <bpmn:lane id="gp" name="General Practitioner">
+        <bpmn:flowNodeRef>start_gp</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0jmcift</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0lhwnjv</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0a25ufi</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_gp_no_referral</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_gp_no_slot</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_gp_discharged</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>examine_patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>prescribe_treatment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_referral</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_gp" name="Start"/>
+    <bpmn:intermediateThrowEvent id="Event_0jmcift" name="Send Referral Request">
+      <bpmn:messageEventDefinition id="Event_0jmcift_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Event_0lhwnjv" name="Receive notice">
+      <bpmn:messageEventDefinition id="Event_0lhwnjv_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_0a25ufi" name="Receive notification">
+      <bpmn:messageEventDefinition id="Event_0a25ufi_def"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="end_gp_no_referral" name="Treatment Prescribed"/>
+    <bpmn:endEvent id="end_gp_no_slot" name="No Slot Available"/>
+    <bpmn:endEvent id="end_gp_discharged" name="Patient Discharged"/>
+    <bpmn:task id="examine_patient" name="Examine Patient"/>
+    <bpmn:task id="prescribe_treatment" name="Prescribe Treatment Directly"/>
+    <bpmn:exclusiveGateway id="split_referral" name="Referral Needed?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf1" sourceRef="start_gp" targetRef="examine_patient"/>
+    <bpmn:sequenceFlow id="sf2" sourceRef="examine_patient" targetRef="split_referral"/>
+    <bpmn:sequenceFlow id="sf3" sourceRef="split_referral" targetRef="prescribe_treatment" name="No referral needed">
+      <bpmn:conditionExpression>No referral needed</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf4" sourceRef="split_referral" targetRef="Event_0jmcift" name="Referral needed">
+      <bpmn:conditionExpression>Referral needed</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf5" sourceRef="prescribe_treatment" targetRef="end_gp_no_referral"/>
+    <bpmn:sequenceFlow id="Flow_1ol2oj2" sourceRef="Event_0lhwnjv" targetRef="end_gp_no_slot"/>
+    <bpmn:sequenceFlow id="Flow_1jd1h0n" sourceRef="Event_0a25ufi" targetRef="end_gp_discharged"/>
+  </bpmn:process>
+  <bpmn:process id="Process_actor_hospital_pool" name="Hospital" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_actor_hospital_pool">
+      <bpmn:lane id="intake_coord" name="Intake Coordinator">
+        <bpmn:flowNodeRef>start_hospital</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_11e1wvo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_hospital_no_slot</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1t7zi4a</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_hospital_booked</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>review_referral</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>book_appointment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_slot</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_hospital" name="Referral Received">
+      <bpmn:messageEventDefinition id="start_hospital_def"/>
+    </bpmn:startEvent>
+    <bpmn:intermediateThrowEvent id="Event_11e1wvo" name="Notify GP of No Availability">
+      <bpmn:messageEventDefinition id="Event_11e1wvo_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="end_hospital_no_slot" name="GP Notified"/>
+    <bpmn:intermediateThrowEvent id="Event_1t7zi4a" name="Notify GP of Appointment">
+      <bpmn:messageEventDefinition id="Event_1t7zi4a_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="end_hospital_booked" name="Appointment Booked"/>
+    <bpmn:task id="review_referral" name="Review Referral and Check Availability"/>
+    <bpmn:task id="book_appointment" name="Book Appointment"/>
+    <bpmn:exclusiveGateway id="split_slot" name="Slot Available?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf6" sourceRef="start_hospital" targetRef="review_referral"/>
+    <bpmn:sequenceFlow id="sf7" sourceRef="review_referral" targetRef="split_slot"/>
+    <bpmn:sequenceFlow id="sf8" sourceRef="split_slot" targetRef="Event_11e1wvo" name="No slot available">
+      <bpmn:conditionExpression>No slot available</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf9" sourceRef="split_slot" targetRef="book_appointment" name="Slot available">
+      <bpmn:conditionExpression>Slot available</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_06f3abw" sourceRef="Event_11e1wvo" targetRef="end_hospital_no_slot"/>
+    <bpmn:sequenceFlow id="sf11" sourceRef="book_appointment" targetRef="Event_1t7zi4a"/>
+    <bpmn:sequenceFlow id="Flow_17tnxwb" sourceRef="Event_1t7zi4a" targetRef="end_hospital_booked"/>
+  </bpmn:process>
+  <bpmn:process id="Process_actor_specialist_pool" name="Specialist" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_actor_specialist_pool">
+      <bpmn:lane id="specialist" name="Specialist">
+        <bpmn:flowNodeRef>start_specialist</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_191v5lj</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_specialist_treat</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_specialist_disc</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>examine_specialist</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>record_diagnosis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>schedule_treatment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>discharge_patient</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>split_followup</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_specialist" name="Referral Received">
+      <bpmn:messageEventDefinition id="start_specialist_def"/>
+    </bpmn:startEvent>
+    <bpmn:intermediateThrowEvent id="Event_191v5lj" name="Notify GP of Discharge">
+      <bpmn:messageEventDefinition id="Event_191v5lj_def"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="end_specialist_treat" name="Treatment Plan Scheduled"/>
+    <bpmn:endEvent id="end_specialist_disc" name="Patient Discharged"/>
+    <bpmn:task id="examine_specialist" name="Examine Patient"/>
+    <bpmn:task id="record_diagnosis" name="Record Diagnosis"/>
+    <bpmn:task id="schedule_treatment" name="Schedule Treatment Plan"/>
+    <bpmn:task id="discharge_patient" name="Discharge Patient"/>
+    <bpmn:exclusiveGateway id="split_followup" name="Follow-up Treatment Required?" gatewayDirection="diverging"/>
+    <bpmn:sequenceFlow id="sf13" sourceRef="start_specialist" targetRef="examine_specialist"/>
+    <bpmn:sequenceFlow id="sf14" sourceRef="examine_specialist" targetRef="record_diagnosis"/>
+    <bpmn:sequenceFlow id="sf15" sourceRef="record_diagnosis" targetRef="split_followup"/>
+    <bpmn:sequenceFlow id="sf16" sourceRef="split_followup" targetRef="schedule_treatment" name="Follow-up required">
+      <bpmn:conditionExpression>Follow-up required</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf17" sourceRef="split_followup" targetRef="discharge_patient" name="No further treatment">
+      <bpmn:conditionExpression>No further treatment</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="sf18" sourceRef="schedule_treatment" targetRef="end_specialist_treat"/>
+    <bpmn:sequenceFlow id="sf19" sourceRef="discharge_patient" targetRef="Event_191v5lj"/>
+    <bpmn:sequenceFlow id="Flow_0glsne7" sourceRef="Event_191v5lj" targetRef="end_specialist_disc"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="actor_actor_gp_pool_di" bpmnElement="actor_actor_gp_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="20" width="1540" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_actor_hospital_pool_di" bpmnElement="actor_actor_hospital_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="440" width="1800" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="actor_actor_specialist_pool_di" bpmnElement="actor_actor_specialist_pool" isHorizontal="true">
+        <dc:Bounds x="10" y="750" width="2060" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gp_di" bpmnElement="gp" isHorizontal="true">
+        <dc:Bounds x="40" y="20" width="1510" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="intake_coord_di" bpmnElement="intake_coord" isHorizontal="true">
+        <dc:Bounds x="40" y="440" width="1770" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="specialist_di" bpmnElement="specialist" isHorizontal="true">
+        <dc:Bounds x="40" y="750" width="2030" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_gp_di" bpmnElement="start_gp">
+        <dc:Bounds x="172" y="116" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0lhwnjv_di" bpmnElement="Event_0lhwnjv">
+        <dc:Bounds x="172" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0a25ufi_di" bpmnElement="Event_0a25ufi">
+        <dc:Bounds x="172" y="248" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0jmcift_di" bpmnElement="Event_0jmcift">
+        <dc:Bounds x="952" y="127" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="prescribe_treatment_di" bpmnElement="prescribe_treatment">
+        <dc:Bounds x="910" y="193" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_gp_no_referral_di" bpmnElement="end_gp_no_referral">
+        <dc:Bounds x="1212" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_gp_no_slot_di" bpmnElement="end_gp_no_slot">
+        <dc:Bounds x="432" y="94" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_gp_discharged_di" bpmnElement="end_gp_discharged">
+        <dc:Bounds x="432" y="160" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="examine_patient_di" bpmnElement="examine_patient">
+        <dc:Bounds x="390" y="226" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_referral_di" bpmnElement="split_referral" isMarkerVisible="true">
+        <dc:Bounds x="685" y="175" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_hospital_di" bpmnElement="start_hospital">
+        <dc:Bounds x="172" y="547" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_11e1wvo_di" bpmnElement="Event_11e1wvo">
+        <dc:Bounds x="952" y="492" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="book_appointment_di" bpmnElement="book_appointment">
+        <dc:Bounds x="910" y="558" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_hospital_no_slot_di" bpmnElement="end_hospital_no_slot">
+        <dc:Bounds x="1212" y="514" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1t7zi4a_di" bpmnElement="Event_1t7zi4a">
+        <dc:Bounds x="1212" y="580" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_hospital_booked_di" bpmnElement="end_hospital_booked">
+        <dc:Bounds x="1472" y="547" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_referral_di" bpmnElement="review_referral">
+        <dc:Bounds x="390" y="525" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_slot_di" bpmnElement="split_slot" isMarkerVisible="true">
+        <dc:Bounds x="685" y="540" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="start_specialist_di" bpmnElement="start_specialist">
+        <dc:Bounds x="172" y="857" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_191v5lj_di" bpmnElement="Event_191v5lj">
+        <dc:Bounds x="1472" y="824" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_specialist_treat_di" bpmnElement="end_specialist_treat">
+        <dc:Bounds x="1472" y="890" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_specialist_disc_di" bpmnElement="end_specialist_disc">
+        <dc:Bounds x="1732" y="857" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="examine_specialist_di" bpmnElement="examine_specialist">
+        <dc:Bounds x="390" y="835" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="record_diagnosis_di" bpmnElement="record_diagnosis">
+        <dc:Bounds x="650" y="835" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="schedule_treatment_di" bpmnElement="schedule_treatment">
+        <dc:Bounds x="1170" y="780" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="discharge_patient_di" bpmnElement="discharge_patient">
+        <dc:Bounds x="1170" y="890" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="split_followup_di" bpmnElement="split_followup" isMarkerVisible="true">
+        <dc:Bounds x="945" y="850" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="sf1_di" bpmnElement="sf1">
+        <di:waypoint x="208" y="134"/>
+        <di:waypoint x="299" y="134"/>
+        <di:waypoint x="299" y="266"/>
+        <di:waypoint x="390" y="266"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf2_di" bpmnElement="sf2">
+        <di:waypoint x="510" y="266"/>
+        <di:waypoint x="597" y="266"/>
+        <di:waypoint x="597" y="200"/>
+        <di:waypoint x="685" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf3_di" bpmnElement="sf3">
+        <di:waypoint x="735" y="200"/>
+        <di:waypoint x="822" y="200"/>
+        <di:waypoint x="822" y="233"/>
+        <di:waypoint x="910" y="233"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf4_di" bpmnElement="sf4">
+        <di:waypoint x="735" y="200"/>
+        <di:waypoint x="843" y="200"/>
+        <di:waypoint x="843" y="145"/>
+        <di:waypoint x="952" y="145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf5_di" bpmnElement="sf5">
+        <di:waypoint x="1030" y="233"/>
+        <di:waypoint x="1121" y="233"/>
+        <di:waypoint x="1121" y="200"/>
+        <di:waypoint x="1212" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ol2oj2_di" bpmnElement="Flow_1ol2oj2">
+        <di:waypoint x="208" y="200"/>
+        <di:waypoint x="320" y="200"/>
+        <di:waypoint x="320" y="112"/>
+        <di:waypoint x="432" y="112"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jd1h0n_di" bpmnElement="Flow_1jd1h0n">
+        <di:waypoint x="208" y="266"/>
+        <di:waypoint x="320" y="266"/>
+        <di:waypoint x="320" y="178"/>
+        <di:waypoint x="432" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf6_di" bpmnElement="sf6">
+        <di:waypoint x="208" y="565"/>
+        <di:waypoint x="390" y="565"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf7_di" bpmnElement="sf7">
+        <di:waypoint x="510" y="565"/>
+        <di:waypoint x="685" y="565"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf8_di" bpmnElement="sf8">
+        <di:waypoint x="735" y="565"/>
+        <di:waypoint x="843" y="565"/>
+        <di:waypoint x="843" y="510"/>
+        <di:waypoint x="952" y="510"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf9_di" bpmnElement="sf9">
+        <di:waypoint x="735" y="565"/>
+        <di:waypoint x="822" y="565"/>
+        <di:waypoint x="822" y="598"/>
+        <di:waypoint x="910" y="598"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06f3abw_di" bpmnElement="Flow_06f3abw">
+        <di:waypoint x="988" y="510"/>
+        <di:waypoint x="1100" y="510"/>
+        <di:waypoint x="1100" y="532"/>
+        <di:waypoint x="1212" y="532"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf11_di" bpmnElement="sf11">
+        <di:waypoint x="1030" y="598"/>
+        <di:waypoint x="1212" y="598"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17tnxwb_di" bpmnElement="Flow_17tnxwb">
+        <di:waypoint x="1248" y="598"/>
+        <di:waypoint x="1360" y="598"/>
+        <di:waypoint x="1360" y="565"/>
+        <di:waypoint x="1472" y="565"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf13_di" bpmnElement="sf13">
+        <di:waypoint x="208" y="875"/>
+        <di:waypoint x="390" y="875"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf14_di" bpmnElement="sf14">
+        <di:waypoint x="510" y="875"/>
+        <di:waypoint x="650" y="875"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf15_di" bpmnElement="sf15">
+        <di:waypoint x="770" y="875"/>
+        <di:waypoint x="945" y="875"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf16_di" bpmnElement="sf16">
+        <di:waypoint x="995" y="875"/>
+        <di:waypoint x="1082" y="875"/>
+        <di:waypoint x="1082" y="820"/>
+        <di:waypoint x="1170" y="820"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf17_di" bpmnElement="sf17">
+        <di:waypoint x="995" y="875"/>
+        <di:waypoint x="1082" y="875"/>
+        <di:waypoint x="1082" y="930"/>
+        <di:waypoint x="1170" y="930"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf18_di" bpmnElement="sf18">
+        <di:waypoint x="1290" y="820"/>
+        <di:waypoint x="1381" y="820"/>
+        <di:waypoint x="1381" y="908"/>
+        <di:waypoint x="1472" y="908"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="sf19_di" bpmnElement="sf19">
+        <di:waypoint x="1290" y="930"/>
+        <di:waypoint x="1381" y="930"/>
+        <di:waypoint x="1381" y="842"/>
+        <di:waypoint x="1472" y="842"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0glsne7_di" bpmnElement="Flow_0glsne7">
+        <di:waypoint x="1508" y="842"/>
+        <di:waypoint x="1620" y="842"/>
+        <di:waypoint x="1620" y="875"/>
+        <di:waypoint x="1732" y="875"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf1_di" bpmnElement="mf1">
+        <di:waypoint x="970" y="163"/>
+        <di:waypoint x="190" y="547"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01tqif3_di" bpmnElement="Flow_01tqif3">
+        <di:waypoint x="970" y="492"/>
+        <di:waypoint x="190" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="mf3_di" bpmnElement="mf3">
+        <di:waypoint x="1230" y="616"/>
+        <di:waypoint x="190" y="857"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_197p49v_di" bpmnElement="Flow_197p49v">
+        <di:waypoint x="1490" y="824"/>
+        <di:waypoint x="190" y="284"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

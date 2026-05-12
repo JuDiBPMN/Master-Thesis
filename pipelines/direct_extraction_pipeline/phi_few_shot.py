@@ -733,7 +733,7 @@ if __name__ == "__main__":
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
             retries=0,
-            case_ids=[13,19]  # choose your few-shot examples
+            case_ids=[2,20]  # choose your few-shot examples
         )
 
         if bpmn_json:

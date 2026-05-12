@@ -99,16 +99,16 @@ def load_model(model_key: str, hf_token: Optional[str] = None, cache_dir: Option
 
 
 def main():
-    # ====================== RUN CONFIGURATION ======================
+###############################################################
     # Only edit these values:
-    case_name = "case_23"
-    pipeline = 7
+    case_name = "case_demo"
+    pipeline = 6
     # Optional overrides:
     model_key = None
     hf_token = os.environ.get("HF_TOKEN")
     few_shot_dir = None
     few_shot_case_ids = None
-    # ==============================================================
+###############################################################
 
     project_root = Path(__file__).resolve().parent
     cases_dir = project_root / "cases"
