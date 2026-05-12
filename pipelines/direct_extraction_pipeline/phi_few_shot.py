@@ -725,11 +725,8 @@ if __name__ == "__main__":
             few_shot_dir=FEW_SHOT_DIR,
             output_file=out_file,
             retries=0,
-<<<<<<< HEAD
-            case_ids=[2,20]  # choose your few-shot examples
-=======
-            case_ids=[13,19]  # kies case examples for few-shot examples
->>>>>>> d4d31285a484a0039e4fe62e2262142d767a4973
+            case_ids=[2,20]  # kies few-shot examples
+
         )
 
         if bpmn_json:
