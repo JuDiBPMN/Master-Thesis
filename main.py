@@ -99,6 +99,7 @@ def load_model(model_key: str, hf_token: Optional[str] = None, cache_dir: Option
 
 
 def main():
+    print("Check")
 ###############################################################
     case_name = "case_demo"
     pipeline = 6
