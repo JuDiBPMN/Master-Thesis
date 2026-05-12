@@ -60,7 +60,9 @@ PIPELINES = {
     "phi_few_shot": {"kind": "few_shot", "runner": phi_few_shot.extract_bpmn_few_shot, "default_model": "phi4-base"},
     "mistral_fine_tuned": {"kind": "fine_tuned", "runner": mistral_fine_tuned.extract_bpmn_fine_tuned, "default_model": "mistral-finetuned"},
     "llama_fine_tuned": {"kind": "fine_tuned", "runner": llama_fine_tuned.extract_bpmn_fine_tuned, "default_model": "llama-finetuned-local"},
-    "phi_fine_tuned": {"kind": "fine_tuned", "runner": phi_fine_tuned.extract_bpmn, "default_model": "phi4-seed2026"},
+    "phi_fine_tuned_seed2026": {"kind": "fine_tuned", "runner": phi_fine_tuned.extract_bpmn, "default_model": "phi4-seed2026"},
+    "phi_fine_tuned_seed42": {"kind": "fine_tuned", "runner": phi_fine_tuned.extract_bpmn, "default_model": "phi4-seed42"},
+    "phi_fine_tuned_seed123": {"kind": "fine_tuned", "runner": phi_fine_tuned.extract_bpmn, "default_model": "phi4-seed123"},
 }
 
 PIPELINE_OPTIONS = [
