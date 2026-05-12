@@ -106,12 +106,12 @@ def main():
     print("Check")
 ###############################################################
     case_name = "case_demo"
-    pipeline = 7
+    pipeline = 6
     # Optional overrides:
     model_key = None
     hf_token = os.environ.get("HF_TOKEN")
     few_shot_dir = str(Path(__file__).resolve().parent / "few_shot_cases")
-    few_shot_case_ids = None
+    few_shot_case_ids = [2,20]
 ###############################################################
 
     project_root = Path(__file__).resolve().parent
