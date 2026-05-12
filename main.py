@@ -106,10 +106,8 @@ def main():
     # Optional overrides:
     model_key = None
     hf_token = os.environ.get("HF_TOKEN")
-    SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-    few_shot_dir = os.path.join(PROJECT_ROOT, "few_shot_cases")
-    few_shot_case_ids = [1,20]
+    few_shot_dir = str(Path(__file__).resolve().parent / "few_shot_cases")
+    few_shot_case_ids = [2,20]
 ###############################################################
 
     project_root = Path(__file__).resolve().parent
@@ -142,11 +140,10 @@ def main():
     json_output = extraction_output_dir / f"{case_name}_{selected_pipeline_name}_bpmn.json"
 
     if selected["kind"] == "few_shot":
-        resolved_few_shot_dir = few_shot_dir or str(project_root / "few_shot_cases")
         json_result = selected["runner"](
             process_description=process_text,
             case_name=case_name,
-            few_shot_dir=resolved_few_shot_dir,
+            few_shot_dir=few_shot_dir,
             output_file=str(json_output),
             retries=0,
             case_ids=few_shot_case_ids,
