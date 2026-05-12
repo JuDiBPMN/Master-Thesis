@@ -106,6 +106,8 @@ def main():
     # Optional overrides:
     model_key = None
     hf_token = os.environ.get("HF_TOKEN")
+    SCRIPT_DIR    = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
     few_shot_dir = os.path.join(PROJECT_ROOT, "few_shot_cases")
     few_shot_case_ids = [1,20]
 ###############################################################
