@@ -562,47 +562,5 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
     return json_result
 
 
-# CASE KIEZEN DIE JE WIL RUNNEN
-
 if __name__ == "__main__":
-    case_name  = "case_23" # Kies de case die je wilt runnen
-    model_key  = "mistral"        
-    hf_token   = HF_TOKEN           
-
-    SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-    CASES_DIR    = os.path.join(PROJECT_ROOT, "cases")
-    OUTPUT_DIR   = os.path.join(SCRIPT_DIR, "outputs")
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_mistral_finetuned.json")
-
-    print("--- Fine-Tuned Pipeline Started ---")
-    print(f"Case:          {case_name}")
-    print(f"Cases dir:     {CASES_DIR}")
-    print(f"Output:        {out_file}")
-    print("-----------------------------------")
-
-    try:
-        if not os.path.exists(input_path):
-            raise FileNotFoundError(f"Case file not found: {input_path}")
-
-        with open(input_path, "r", encoding="utf-8") as f:
-            process_text = f.read()
-
-        bpmn_json = extract_bpmn_fine_tuned(
-            process_description=process_text,
-            case_name=case_name,
-            output_file=out_file,
-            model_key=model_key,
-            hf_token=hf_token,
-        )
-
-        if bpmn_json:
-            print(f"Output saved to: outputs/{case_name}_fine_tuned_bpmn.json")
-        else:
-            print("Model extraction failed. Check the logs above.")
-
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
+    print("Run this pipeline via main.py. Select case_name there.")

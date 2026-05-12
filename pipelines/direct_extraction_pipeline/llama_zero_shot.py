@@ -562,43 +562,4 @@ import os
 import sys
 
 if __name__ == "__main__":
-    # CONFIGURATION: Hier gewoon case namen invullen 
-    case_name = "case_28" 
-
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-    
-    CASES_DIR = os.path.join(PROJECT_ROOT, "cases")
-    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "outputs")
-    
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    # 2. Construct dynamic paths
-    input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_llama_zero_shot.json")
-
-    print(f"--- Interactive Run Started ---")
-    print(f"Project Root: {PROJECT_ROOT}")
-    print(f"Reading from: {input_path}")
-    print(f"Saving to:    {out_file}")
-    print(f"-------------------------------")
-    
-    try:
-        if not os.path.exists(input_path):
-            raise FileNotFoundError
-
-        with open(input_path, "r", encoding="utf-8") as f:
-            process_text = f.read()
-        
-        # 3. Run extraction
-        print(f"🤖 LLM is analyzing '{case_name}'...")
-        bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=2)
-        
-        if bpmn_json:
-            print(f"Success! View the output in the sidebar under: outputs/{case_name}_model_extracted_bpmn.json")
-        else:
-            print("Model extraction failed. Check the logs above.")
-            
-    except FileNotFoundError:
-        print(f"Error: The file '{case_name}.txt' was not found in {CASES_DIR}")
-        print(f"Check if you have a file named '{case_name}.txt' in that folder.")
+    print("Run this pipeline via main.py. Select case_name there.")

@@ -525,39 +525,4 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
     return json_result
 
 if __name__ == "__main__":
-    case_name = "case_28" # Kies de case die je wilt runnen
-
-    SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-
-    CASES_DIR  = os.path.join(PROJECT_ROOT, "cases")
-    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "outputs")
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file   = os.path.join(OUTPUT_DIR, f"{case_name}_phi4_zero_shot.json")
-
-    print(f"--- Interactive Run Started ---")
-    print(f"Project Root: {PROJECT_ROOT}")
-    print(f"Reading from: {input_path}")
-    print(f"Saving to:    {out_file}")
-    print(f"-------------------------------")
-
-    try:
-        if not os.path.exists(input_path):
-            raise FileNotFoundError
-
-        with open(input_path, "r", encoding="utf-8") as f:
-            process_text = f.read()
-
-        print(f"🤖 Phi-4 is analyzing '{case_name}'...")
-        bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=0)
-
-        if bpmn_json:
-            print(f"Success! View the output in the sidebar under: outputs/{case_name}_phi4_zero_shot.json")
-        else:
-            print("Model extraction failed. Check the logs above.")
-
-    except FileNotFoundError:
-        print(f"Error: The file '{case_name}.txt' was not found in {CASES_DIR}")
-        print(f"Check if you have a file named '{case_name}.txt' in that folder.")
+    print("Run this pipeline via main.py. Select case_name there.")

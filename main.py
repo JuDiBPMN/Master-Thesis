@@ -100,7 +100,6 @@ def load_model(model_key: str, hf_token: Optional[str] = None, cache_dir: Option
 
 def main():
 ###############################################################
-    # Only edit these values:
     case_name = "case_demo"
     pipeline = 6
     # Optional overrides:

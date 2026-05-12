@@ -393,31 +393,4 @@ Return ONLY valid JSON matching the schema. Do not explain anything.
     return json_result
 
 if __name__ == "__main__":
-    case_name = "case_28" 
-
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-    
-    CASES_DIR = os.path.join(PROJECT_ROOT, "cases")
-    OUTPUT_DIR = os.path.join(os.getcwd(), "outputs")
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    input_path = os.path.join(CASES_DIR, f"{case_name}.txt")
-    out_file = os.path.join(OUTPUT_DIR, f"{case_name}_fine_tuned_phi4_seed2026.json")
-
-    try:
-        if not os.path.exists(input_path):
-            raise FileNotFoundError
-
-        with open(input_path, "r", encoding="utf-8") as f:
-            process_text = f.read()
-        
-        print(f"🤖 Phi-4 seed 42 is analyzing '{case_name}'...")
-        bpmn_json = extract_bpmn(process_text, output_file=out_file, retries=0)
-
-        if bpmn_json:
-            print(f"Output saved to: outputs/{case_name}_fine_tuned_phi4_seed42.json")
-        else:
-            print("Model extraction failed. Check the logs above.")
-    except FileNotFoundError:
-        print(f"Error: The file '{case_name}.txt' was not found.")
+    print("Run this pipeline via main.py. Select case_name there.")
