@@ -111,7 +111,7 @@ def main():
     model_key = None
     hf_token = os.environ.get("HF_TOKEN")
     few_shot_dir = str(Path(__file__).resolve().parent / "few_shot_cases")
-    few_shot_case_ids = [2,20]
+    few_shot_case_ids = [2,20] 
 ###############################################################
 
     project_root = Path(__file__).resolve().parent
